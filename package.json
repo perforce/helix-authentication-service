@@ -1,0 +1,27 @@
+{
+  "name": "helix-oidc",
+  "version": "0.1.0",
+  "description": "Helix OpenID Connect integration",
+  "keywords": [
+    "oidc"
+  ],
+  "homepage": "http://www.perforce.com",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Perforce Software",
+    "email": "support@perforce.com"
+  },
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "ejs": "~2.5.7",
+    "express": "~4.16.0",
+    "http-errors": "~1.6.2",
+    "morgan": "~1.9.0"
+  },
+  "private": true
+}
