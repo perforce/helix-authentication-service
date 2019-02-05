@@ -1,3 +1,6 @@
+//
+// Copyright 2018 Perforce Software
+//
 const createError = require('http-errors')
 const express = require('express')
 const path = require('path')
