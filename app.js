@@ -9,6 +9,7 @@ const MemoryStore = require('memorystore')(session)
 const logger = require('morgan')
 
 const indexRouter = require('./routes/index')
+const oidcRouter = require('./routes/oidc')
 
 const app = express()
 
@@ -29,6 +30,7 @@ app.use(session({
 }))
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use('/oidc', oidcRouter)
 app.use('/', indexRouter)
 
 // catch 404 and forward to error handler
