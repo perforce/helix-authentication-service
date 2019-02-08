@@ -19,6 +19,13 @@ services:
         PUB_KEY: http://pkg-ondemand.bnr.perforce.com/perforce/main/perforce.pubkey
     ports:
       - "1666:1666"
+  oidc.doc:
+    build:
+      context: containers/oidc
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3001:3000"
   svc.doc:
     build:
       context: .

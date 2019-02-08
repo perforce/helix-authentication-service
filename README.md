@@ -110,6 +110,13 @@ To install the authentication integration extension, use `node` like so:
 $ node hook.js
 ```
 
+### oidc-provider sample data
+
+The oidc-provider running in a Docker container has a sample user with email
+`johndoe@example.com`, and whose account identifier is literally anything. That
+is, requesting an account by id `12345` will give you Johnny; requesting another
+account by id `67890` will also give you Johnny.
+
 ## Why Node and Passport?
 
 ### Node.js
