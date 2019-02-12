@@ -73,10 +73,10 @@ module.exports.provider = {
 
 module.exports.clients = [
   {
-    client_id: 'docker_client',
-    client_secret: 'docker_secret',
+    client_id: process.env.OIDC_CLIENT_ID,
+    client_secret: process.env.OIDC_CLIENT_SECRET,
     grant_types: ['refresh_token', 'authorization_code'],
-    redirect_uris: ['http://svc.doc:3000/oidc/callback']
+    redirect_uris: [process.env.OIDC_REDIRECT_URI]
   }
 ]
 

@@ -7,6 +7,7 @@ const path = require('path')
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
 const logger = require('morgan')
+require('dotenv').config()
 
 const indexRouter = require('./routes/index')
 const oidcRouter = require('./routes/oidc')

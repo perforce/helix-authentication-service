@@ -24,13 +24,24 @@ services:
       context: containers/oidc
     environment:
       NODE_ENV: development
+      PORT: 3001
+      ISSUER: "http://oidc.doc:3001/"
+      OIDC_CLIENT_ID: client_id
+      OIDC_CLIENT_SECRET: client_secret
+      OIDC_REDIRECT_URI: "http://svc.doc:3000/oidc/callback"
     ports:
-      - "3001:3000"
+      - "3001:3001"
   svc.doc:
     build:
       context: .
       dockerfile: containers/svc/Dockerfile
+    depends_on:
+      - p4d.doc
+      - oidc.doc
     environment:
       NODE_ENV: development
+      OIDC_CLIENT_ID: client_id
+      OIDC_CLIENT_SECRET: client_secret
+      OIDC_ISSUER_URI: "http://oidc.doc:3001/"
     ports:
       - "3000:3000"

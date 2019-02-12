@@ -3,7 +3,11 @@
 This [Node.js](http://nodejs.org) based application implements a simple OpenID
 Connect service provider.
 
-## Getting Started
+## Local Environment
+
+To get the services running on your host, there is some required setup. For a
+different approach, you can use Docker as described below, which may be easier
+depending on your circumstances.
 
 ### Prerequisites
 
@@ -11,15 +15,30 @@ To change the application dependencies and run tests, you will need
 [Node.js](http://nodejs.org) *LTS* installed; the *Current* version may have
 compatibility issues with some modules, and in general can be a bit unstable.
 
-To run the application, you can use the Docker containers as described below.
+### Build and Start
 
-### Local Environment
+First get the oidc-provider application running:
 
-If you plan to run the application in your local environment, first install the
-dependencies, and then start the application (in development mode):
+```shell
+$ cd containers/oidc
+$ npm install
+$ cat << EOF > .env
+OIDC_CLIENT_ID=client_id
+OIDC_CLIENT_SECRET=client_secret
+OIDC_REDIRECT_URI=http://localhost:3000/oidc/callback
+EOF
+$ PORT=3001 npm start
+```
+
+Then start the authentication service application:
 
 ```shell
 $ npm install
+$ cat << EOF > .env
+OIDC_CLIENT_ID=client_id
+OIDC_CLIENT_SECRET=client_secret
+OIDC_ISSUER_URI=http://localhost:3001/
+EOF
 $ npm start
 ```
 
@@ -115,7 +134,8 @@ $ node hook.js
 The oidc-provider running in a Docker container has a sample user with email
 `johndoe@example.com`, and whose account identifier is literally anything. That
 is, requesting an account by id `12345` will give you Johnny; requesting another
-account by id `67890` will also give you Johnny.
+account by id `67890` will also give you Johnny. The account password is
+similarly meaningless as any value is accepted.
 
 ## Why Node and Passport?
 

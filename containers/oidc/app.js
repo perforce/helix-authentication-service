@@ -9,6 +9,7 @@ const express = require('express')
 const helmet = require('helmet')
 
 const Provider = require('oidc-provider')
+require('dotenv').config()
 
 const Account = require('./support/account')
 const { provider: providerConfiguration, clients, keys } = require('./support/configuration')
