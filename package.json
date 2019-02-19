@@ -26,7 +26,8 @@
     "memorystore": "^1.6.0",
     "morgan": "~1.9.0",
     "openid-client": "^2.4.5",
-    "passport": "^0.4.0"
+    "passport": "^0.4.0",
+    "transitory": "^1.2.1"
   },
   "private": true,
   "devDependencies": {

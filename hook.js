@@ -13,7 +13,7 @@ const hookname = 'Auth::loginhook'
 const hookpath = 'loginhook'
 const filename = 'loginhook.p4-extension'
 const confname = 'loginhook-all'
-const loginmsg = 'please open http://svc.doc:3000/oidc/login in your browser'
+const loginmsg = 'Please authenticate using your web browser.'
 
 if (fs.existsSync(filename)) {
   fs.unlinkSync(filename)

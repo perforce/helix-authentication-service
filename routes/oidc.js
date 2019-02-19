@@ -5,6 +5,17 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const { Issuer, Strategy } = require('openid-client')
+const transitory = require('transitory')
+
+// Set up an in-memory cache of the user details; could have used
+// github:isaacs/node-lru-cache but that lacks fine cache control, while
+// github:aholstenson/transitory is a bit more sophisticated.
+const userCache = transitory()
+  .expireAfterWrite(60 * 60 * 1000)
+  .expireAfterRead(5 * 60 * 1000)
+  .build()
+// Nonetheless, still need to prune stale entries occasionally.
+setInterval(() => userCache.cleanUp(), 5 * 60 * 1000)
 
 Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
   // console.info(issuer.issuer)
@@ -28,11 +39,11 @@ Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
   passport.use('openidconnect', new Strategy({
     client
   }, (tokenset, userinfo, done) => {
-    console.log('tokenset', tokenset)
+    // console.log('tokenset', tokenset)
     // console.log('access_token', tokenset.access_token)
     // console.log('id_token', tokenset.id_token)
-    console.log('claims', tokenset.claims)
-    console.log('userinfo', userinfo)
+    // console.log('claims', tokenset.claims)
+    // console.log('userinfo', userinfo)
     return done(null, userinfo)
   }))
 }).catch((err) => {
@@ -61,9 +72,28 @@ router.get('/callback', passport.authenticate('openidconnect', {
   failureRedirect: '/oidc/login'
 }))
 
-router.get('/details', (req, res, next) => {
-  console.log(req.user)
+function checkAuthentication (req, res, next) {
+  if (req.isAuthenticated()) {
+    next()
+  } else {
+    res.redirect('/')
+  }
+}
+
+router.get('/details', checkAuthentication, (req, res, next) => {
+  // using email for the cache key becuase it is the best we have right now
+  userCache.set(req.user.email, req.user)
   res.json(req.user)
+})
+
+router.get('/data/:id', (req, res, next) => {
+  // the params are automatically decoded
+  let user = userCache.get(req.params.id)
+  if (user) {
+    res.json(user)
+  } else {
+    next()
+  }
 })
 
 // Destroy both the local session and

@@ -16,10 +16,11 @@ echo ${P4PASSWD} | p4 login
 #
 # Configure p4d for SAML, populating with test data.
 #
-# p4 configure set auth.sso.args=--idpUrl=http://idp.doc:7000/metadata
 p4 configure set auth.sso.allow.passwd=1
 p4 user -f -i < user_jackson.txt
 yes Passw0rd! | p4 passwd jackson
+p4 user -f -i < user_johndoe.txt
+yes Passw0rd! | p4 passwd johndoe
 
 #
 # create a group with long lived tickets, log in again
