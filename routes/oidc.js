@@ -17,6 +17,8 @@ const userCache = transitory()
 // Nonetheless, still need to prune stale entries occasionally.
 setInterval(() => userCache.cleanUp(), 5 * 60 * 1000)
 
+let client = null
+
 Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
   // console.info(issuer.issuer)
   // console.info(issuer.metadata)
@@ -32,7 +34,7 @@ Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
   //
   // manual client definition
   //
-  const client = new issuer.Client({
+  client = new issuer.Client({
     client_id: process.env.OIDC_CLIENT_ID,
     client_secret: process.env.OIDC_CLIENT_SECRET
   })
@@ -81,7 +83,7 @@ function checkAuthentication (req, res, next) {
 }
 
 router.get('/details', checkAuthentication, (req, res, next) => {
-  // using email for the cache key becuase it is the best we have right now
+  // using email for the cache key because it is the best we have right now
   userCache.set(req.user.email, req.user)
   res.json(req.user)
 })
@@ -96,26 +98,13 @@ router.get('/data/:id', (req, res, next) => {
   }
 })
 
-// Destroy both the local session and
-// revoke the access_token
-router.get('/logout', function (req, res) {
-  // const revoke = process.env.OIDC_TOKEN_REVOKE;
-  // if (!revoke) {
-  //   // can't be done...just redirect to the root
-  //   console.log('No revoke URL defined')
-  //   res.redirect('/')
-  // }
-  // request.post(process.env.OIDC_BASE_URI + process.env.OIDC_TOKEN_REVOKE, {
-  //   'form': {
-  //     'client_id': process.env.OIDC_CLIENT_ID,
-  //     'client_secret': process.env.OIDC_CLIENT_SECRET,
-  //     'token': req.session.accessToken,
-  //     'token_type_hint': 'access_token'
-  //   }
-  // }, function (err, respose, body) {
-  //   console.log('Session Revoked');
-  //   res.redirect('/');
-  // });
+router.get('/logout', checkAuthentication, (req, res) => {
+  userCache.delete(req.user.email)
+  req.logout()
+  const url = client.endSessionUrl({
+    post_logout_redirect_uri: '/'
+  })
+  res.redirect(url || '/')
 })
 
 module.exports = router
