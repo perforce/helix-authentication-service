@@ -14,9 +14,8 @@ p4dctl start -o '-p 0.0.0.0:1666' despot
 echo ${P4PASSWD} | p4 login
 
 #
-# Configure p4d for SAML, populating with test data.
+# Populate p4d with test data.
 #
-p4 configure set auth.sso.allow.passwd=1
 p4 user -f -i < user_jackson.txt
 yes Passw0rd! | p4 passwd jackson
 p4 user -f -i < user_johndoe.txt

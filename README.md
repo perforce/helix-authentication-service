@@ -1,7 +1,8 @@
 # Perforce Authentication Service
 
-This [Node.js](http://nodejs.org) based application implements a simple OpenID
-Connect service provider.
+This [Node.js](http://nodejs.org) based application implements a simple external
+authentication service to be used in concert with the `loginhook` extension.
+Currently it supports OpenID Connect.
 
 ## Local Environment
 
@@ -11,7 +12,7 @@ depending on your circumstances.
 
 ### Prerequisites
 
-To change the application dependencies and run tests, you will need
+To fetch and build the application dependencies and run tests, you will need
 [Node.js](http://nodejs.org) *LTS* installed; the *Current* version may have
 compatibility issues with some modules, and in general can be a bit unstable.
 
@@ -40,6 +41,12 @@ OIDC_CLIENT_SECRET=client_secret
 OIDC_ISSUER_URI=http://localhost:3001/
 EOF
 $ npm start
+```
+
+Lastly, install the authentication integration extension using `node` like so:
+
+```shell
+$ P4USER=super P4PORT=localhost:1666 node hook.js
 ```
 
 ## Docker Environment
@@ -92,6 +99,7 @@ $ p4 -u super -p p4d.doc:1666 login
 
 $ p4 -u super -p p4d.doc:1666 users -a
 jackson <saml.jackson@example.com> (Sam L. Jackson) accessed 2019/02/06
+johndoe <johndoe@example.com> (John Doe) accessed 2019/02/06
 super <super@fcafbbe2216b> (super) accessed 2019/02/06
 ```
 
@@ -123,19 +131,21 @@ Connection: keep-alive
 
 ### Installing the Extension
 
-To install the authentication integration extension, use `node` like so:
+To install the authentication integration extension, use `node` like so (the
+script assumes the Docker environment by default):
 
 ```shell
 $ node hook.js
 ```
 
-### oidc-provider sample data
+## OpenID Connect Sample Data
 
-The oidc-provider running in a Docker container has a sample user with email
-`johndoe@example.com`, and whose account identifier is literally anything. That
-is, requesting an account by id `12345` will give you Johnny; requesting another
-account by id `67890` will also give you Johnny. The account password is
-similarly meaningless as any value is accepted.
+The oidc-provider service has a sample user with email `johndoe@example.com`,
+and whose account identifier is literally anything. That is, requesting an
+account by id `12345` will give you Johnny; requesting another account by id
+`67890` will also give you Johnny. The account password is similarly meaningless
+as any value is accepted. The only constant is the email address, which is what
+the login extension uses to assert a valid user.
 
 ## Why Node and Passport?
 
@@ -143,13 +153,14 @@ similarly meaningless as any value is accepted.
 
 Applications running on Node are sufficiently fast, especially compared to
 Python or Ruby. There are multiple OIDC and SAML libraries for Node to choose
-from.
+from. Deploying to a variety of systems is well supported.
 
 ### Passport
 
-The [passport](http://www.passportjs.org)
-[SAML](https://github.com/bergie/passport-saml) library works and is easy to
-use.
+The [passport](http://www.passportjs.org) library is very popular and easy to
+use. There are [SAML](https://github.com/bergie/passport-saml) and
+[OIDC](https://github.com/panva/node-openid-client) modules, as well as many
+other authentication protocols.
 
 ## Coding Conventions
 

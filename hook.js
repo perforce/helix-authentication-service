@@ -6,14 +6,13 @@
 const { exec, spawn } = require('child_process')
 const fs = require('fs')
 
-const p4user = 'super'
-const p4port = 'p4d.doc:1666'
+const p4user = process.env.P4USER || 'super'
+const p4port = process.env.P4PORT || 'p4d.doc:1666'
 const p4cmd = `p4 -u ${p4user} -p ${p4port}`
 const hookname = 'Auth::loginhook'
 const hookpath = 'loginhook'
 const filename = 'loginhook.p4-extension'
 const confname = 'loginhook-all'
-const loginmsg = 'Please authenticate using your web browser.'
 
 if (fs.existsSync(filename)) {
   fs.unlinkSync(filename)
@@ -76,7 +75,8 @@ new Promise((resolve, reject) => {
   })
 }).then((config) => {
   config = config.replace(/sampleExtensionsUser/g, 'super')
-  config = config.replace(/http:\/\/localhost:3000/, 'http://svc.doc:3000')
+  config = config.replace(/The authentication service base URL\./, 'http://svc.doc:3000')
+  config = config.replace(/Authentication protocol, such as saml or oidc\./, 'oidc')
   return new Promise((resolve, reject) => {
     let child = spawn('p4', ['-u', p4user, '-p', p4port, 'extension', '--configure', hookname, '-i'])
     child.stdout.on('data', (data) => {
@@ -106,7 +106,7 @@ new Promise((resolve, reject) => {
     })
   })
 }).then((config) => {
-  config = config.replace(/message:[^]*\.$/m, 'message:\n\t\t' + loginmsg)
+  config = config.replace(/Those users who will not be using SSO\./, 'super')
   return new Promise((resolve, reject) => {
     let child = spawn('p4', ['-u', p4user, '-p', p4port, 'extension', '--configure', hookname, '-i'])
     child.stdout.on('data', (data) => {
