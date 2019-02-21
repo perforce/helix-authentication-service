@@ -85,7 +85,8 @@ function checkAuthentication (req, res, next) {
 router.get('/details', checkAuthentication, (req, res, next) => {
   // using email for the cache key because it is the best we have right now
   userCache.set(req.user.email, req.user)
-  res.json(req.user)
+  const name = req.user.given_name || req.user.name || req.user.email
+  res.render('details', { name })
 })
 
 router.get('/data/:id', (req, res, next) => {
