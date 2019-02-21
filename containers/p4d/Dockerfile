@@ -19,11 +19,6 @@ RUN rm -f perforce.pubkey
 RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
 RUN apt-get update
 RUN apt-get -q -y install helix-cli helix-p4d
-#
-# $ p4 print -o p4d //depot/main/p4/p4d@=1759312
-#
-# COPY ./p4d /opt/perforce/sbin/p4d.19.1
-# RUN chmod +x /opt/perforce/sbin/p4d.19.1
 
 RUN /opt/perforce/sbin/configure-helix-p4d.sh -n -p ${P4PORT} -u super -P Rebar123 despot
 
