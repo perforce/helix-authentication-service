@@ -12,6 +12,6 @@ RUN rm -f package-lock.json && npm install -q
 
 EXPOSE 3000
 
-HEALTHCHECK CMD curl -f -s -o /dev/null http://localhost:3000/.well-known/openid-configuration || exit 1
+HEALTHCHECK CMD curl -f -s -o /dev/null http://localhost:3001/.well-known/openid-configuration || exit 1
 
 ENTRYPOINT [ "node",  "app.js" ]

@@ -38,8 +38,14 @@ Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
     client_id: process.env.OIDC_CLIENT_ID,
     client_secret: process.env.OIDC_CLIENT_SECRET
   })
+  const params = {
+    // Some services require the absolute URI that is whitelisted in the client
+    // app settings; the test oidc-provider is not one of these.
+    redirect_uri: process.env.OIDC_REDIRECT_URI
+  }
   passport.use('openidconnect', new Strategy({
-    client
+    client,
+    params
   }, (tokenset, userinfo, done) => {
     // console.log('tokenset', tokenset)
     // console.log('access_token', tokenset.access_token)
@@ -71,8 +77,14 @@ router.get('/login', passport.authenticate('openidconnect', {
 router.get('/callback', passport.authenticate('openidconnect', {
   callback: true,
   successReturnToOrRedirect: '/oidc/details',
-  failureRedirect: '/oidc/login'
+  failureRedirect: '/oidc/login_failed'
 }))
+
+router.get('/login_failed', (req, res, next) => {
+  // we need a route that is not the login route lest we end up
+  // in a redirect loop when a failure occurs
+  res.render('login_failed')
+})
 
 function checkAuthentication (req, res, next) {
   if (req.isAuthenticated()) {

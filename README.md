@@ -147,6 +147,30 @@ account by id `12345` will give you Johnny; requesting another account by id
 as any value is accepted. The only constant is the email address, which is what
 the login extension uses to assert a valid user.
 
+## Testing with Okta
+
+Configuring the authentication service with Okta is fairly straightforward.
+
+1. On the Okta admin dashboard, create a new application (helps to use "classic ui").
+1. Select *Web* as the **Platform** and *OpenID Connect* as the **Sign on method**.
+1. Provide a meaningful name on the next screen.
+1. For the **Login redirect URIs** enter the auth service URL; for Docker this would
+   be `http://svc.doc:3000/oidc/callback`; we are not using logout redirect URIs yet.
+1. On the next screen, copy the **Client ID** and **Client secret** values to the
+   `docker-compose.yml` for the `svc.doc` settings under `environment` (namely the
+   `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` keys).
+1. From the *Sign On* tab, copy the **Issuer** value to `OIDC_ISSUER_URI` in the docker
+   environment for `svc.doc`.
+1. Use `docker-compose` to rebuild and start the `svc.doc` container with the new
+   settings (the `build` and `up -d` subcommands are sufficient to rebuild and restart
+   the container).
+
+If you have already logged into Okta, be sure to either a) assign that user to
+the application you just created, or b) log out so you can log in again using
+the credentials for a user that is assigned to the application. Otherwise you
+will immediately go to the "login failed" page, and the only indication of the
+cause is in the Okta system logs.
+
 ## Why Node and Passport?
 
 ### Node.js
