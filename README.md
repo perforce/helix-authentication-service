@@ -49,7 +49,7 @@ $ npm start
 Lastly, install the authentication integration extension using `node` like so:
 
 ```shell
-$ P4USER=super P4PORT=localhost:1666 node hook.js
+$ P4USER=super P4PORT=localhost:1666 AUTH_URL=http://localhost:3000 node hook.js
 ```
 
 ## Docker Environment
@@ -161,32 +161,65 @@ has a user set up with this email address already.
 
 The saml-idp test service has exactly one user whose email is
 `saml.jackson@example.com` and has no password at all -- just click the **Sign
-On** button to log in. The docker container for p4d has a user set up with this
+in** button to log in. The docker container for p4d has a user set up with this
 email address already.
 
 ## Testing with Okta
 
 Configuring the authentication service with Okta is fairly straightforward.
 
+### OpenID Connect
+
 1. On the Okta admin dashboard, create a new application (helps to use "classic ui").
 1. Select *Web* as the **Platform** and *OpenID Connect* as the **Sign on method**.
 1. Provide a meaningful name on the next screen.
-1. For the **Login redirect URIs** enter the auth service URL; for Docker this would
-   be `http://svc.doc:3000/oidc/callback`; we are not using logout redirect URIs yet.
-1. On the next screen, copy the **Client ID** and **Client secret** values to the
-   `docker-compose.yml` for the `svc.doc` settings under `environment` (namely the
-   `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` keys).
-1. From the *Sign On* tab, copy the **Issuer** value to `OIDC_ISSUER_URI` in the docker
-   environment for `svc.doc`.
-1. Use `docker-compose` to rebuild and start the `svc.doc` container with the new
-   settings (the `build` and `up -d` subcommands are sufficient to rebuild and restart
-   the container).
+1. For the **Login redirect URIs** enter the auth service URL; for Docker this
+   would be `http://svc.doc:3000/oidc/callback`; we are not using logout
+   redirect URIs yet.
+1. On the next screen, copy the **Client ID** and **Client secret** values to
+   the `docker-compose.yml` for the `svc.doc` settings under `environment`
+   (namely the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` keys).
+1. From the *Sign On* tab, copy the **Issuer** value to `OIDC_ISSUER_URI` in the
+   docker environment for `svc.doc`.
+1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
+   new settings (the `build` and `up -d` subcommands are sufficient to rebuild
+   and restart the container).
 
 If you have already logged into Okta, be sure to either a) assign that user to
 the application you just created, or b) log out so you can log in again using
 the credentials for a user that is assigned to the application. Otherwise you
 will immediately go to the "login failed" page, and the only indication of the
 cause is in the Okta system logs.
+
+Visit the auth service OIDC [login page](http://svc.doc:3000/oidc/login) to
+test. Note that this URL will be configured into the auth extension, the user
+will never have to enter the value directly.
+
+### SAML 2.0
+
+1. On the Okta admin dashboard, create a new application (helps to use "classic ui").
+1. Select *Web* as the **Platform** and *SAML 2.0* as the **Sign on method**.
+1. For the **Single sign on URL** enter the auth service URL; for Docker this
+   would be `http://svc.doc:3000/saml/sso`
+1. For the **Audience URI** enter `urn:example:sp`, assuming you are using Docker.
+1. For the **Name ID format** the auth extensions expect *EmailAddress*,
+   otherwise it cannot verify the expected user has authenticated.
+1. From the *Sign On* tab, click the **View Setup Instructions** button and copy
+   the values for IdP SSO and SLO URLs to the `SAML_IDP_*` settings in the
+   docker environment for `svc.doc`.
+1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
+   new settings (the `build` and `up -d` subcommands are sufficient to rebuild
+   and restart the container).
+
+If you have already logged into Okta, be sure to either a) assign that user to
+the application you just created, or b) log out so you can log in again using
+the credentials for a user that is assigned to the application. Otherwise you
+will immediately go to the "login failed" page, and the only indication of the
+cause is in the Okta system logs.
+
+Visit the auth service SAML [login page](http://svc.doc:3000/saml/login) to
+test. Note that this URL will be configured into the auth extension, the user
+will never have to enter the value directly.
 
 ## Why Node and Passport?
 
