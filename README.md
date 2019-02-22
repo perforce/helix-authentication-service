@@ -4,6 +4,22 @@ This [Node.js](http://nodejs.org) based application implements a simple external
 authentication service to be used in concert with the `loginhook` extension. It
 supports the OpenID Connect and SAML 2.0 authentication protocols.
 
+## Overview
+
+### Architecture
+
+The service itself is a simple Node.js web application that leverages several
+open source libraries to interact with standards-based authentication providers.
+This can be installed and run anywhere on the network, as long as it is
+reachable from the Helix Server. The other half of the system, albeit a very
+small half, is the Perforce extension installed on the Helix Server, which acts
+as a mediator between the service and the server. When a Perforce user attempts
+to log in to the server, the extension will cause their web browser to open to
+the authenication provider, and meanwhile ping the service to get the
+authentication success status. Once the user has successfully authenticated with
+the provider, the extension will get the results and signal the server to issue
+a ticket (or not, and fail the login).
+
 ## Local Environment
 
 To get the services running on your host, there is some required setup. For a
