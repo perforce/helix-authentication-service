@@ -20,6 +20,12 @@ authentication success status. Once the user has successfully authenticated with
 the provider, the extension will get the results and signal the server to issue
 a ticket (or not, and fail the login).
 
+This design lends itself well to integrating other authentication protocols,
+including custom schemes developed by authentication providers such as
+[Auth0](http://auth0.com/) -- just add `passport-auth0` as a Node dependecy, add
+a new route to the service, and configure the extension to use the new protocol.
+Of course, if they support OIDC or SAML, that's even easier.
+
 ## Local Environment
 
 To get the services running on your host, there is some required setup. For a
@@ -179,6 +185,58 @@ The saml-idp test service has exactly one user whose email is
 `saml.jackson@example.com` and has no password at all -- just click the **Sign
 in** button to log in. The docker container for p4d has a user set up with this
 email address already.
+
+## Testing with Auth0
+
+### OpenID Connect
+
+By default the "regular web application" configured in Auth0 will have OpenID
+Connect support, so all that is needed is to copy the settings to the service
+configuration.
+
+From the Auth0 management screen, select *Applications* from the left sidebar,
+click on your application, and on the *Settings* tab, scroll to the bottom and
+click the **Advanced Settings** link. Find the *Endpoints* tab and select it to
+reveal the various endpoints. Open the **OpenID Configuration** value in a new
+browser tab to get the raw configuration values. Find `issuer` and copy the
+value to `OIDC_ISSUER_URI` in the service config. You can now close the
+configuration tab.
+
+On the application screen, scroll up to the top of *Settings* and copy the
+**Client ID** value to the `OIDC_CLIENT_ID` setting in the service config.
+Likewise for the **Client Secret** value.
+
+The one other change to make in the Auth0 application configuration is the
+addition of the **Allowed Callback URLs** under *Settings*. As with the other
+providers, put the service callback URL, either
+`https://svc.doc:3000/oidc/callback` or `https://svc.doc:3000/saml/sso` as
+appropriate for the protocol
+
+### SAML 2.0
+
+To enable SAML 2.0 in Auth0, you must enable the **SAML 2.0** "addon" from the
+application settings. Put the `https://svc.doc:3000/saml/sso` URL for the
+**Application Callback URL**, and ensure the **Settings** block looks something
+like the following:
+
+```javascript
+{
+  "signatureAlgorithm": "rsa-sha256",
+  "digestAlgorithm": "sha256",
+  "nameIdentifierProbes": [
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+  ],
+  "logout": {
+    "callback": "https://svc.doc:3000/saml/slo"
+  }
+}
+```
+
+On the *Usage* tab of the addon screen, copy the **Identity Provider Login URL**
+to the `SAML_IDP_SSO_URL` setting in the service configuration. To get the SLO
+URL you will need to download the metadata and look for the
+`SingleLogoutService` element, copying the `Location` attribute value to
+`SAML_IDP_SLO_URL` in the config.
 
 ## Testing with Okta
 
