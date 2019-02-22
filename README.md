@@ -1,8 +1,8 @@
 # Perforce Authentication Service
 
 This [Node.js](http://nodejs.org) based application implements a simple external
-authentication service to be used in concert with the `loginhook` extension.
-Currently it supports OpenID Connect.
+authentication service to be used in concert with the `loginhook` extension. It
+supports the OpenID Connect and SAML 2.0 authentication protocols.
 
 ## Local Environment
 
@@ -17,6 +17,9 @@ To fetch and build the application dependencies and run tests, you will need
 compatibility issues with some modules, and in general can be a bit unstable.
 
 ### Build and Start
+
+These instructions assume you will be testing with the OpenID provider, as the
+SAML test IdP is a little more work to set up, and is easier to run in Docker.
 
 First get the oidc-provider application running:
 
@@ -138,6 +141,12 @@ script assumes the Docker environment by default):
 $ node hook.js
 ```
 
+For SAML, the extension must be installed slightly differently:
+
+```shell
+$ PROTOCOL=saml node hook.js
+```
+
 ## OpenID Connect Sample Data
 
 The oidc-provider service has a sample user with email `johndoe@example.com`,
@@ -145,7 +154,15 @@ and whose account identifier is literally anything. That is, requesting an
 account by id `12345` will give you Johnny; requesting another account by id
 `67890` will also give you Johnny. The account password is similarly meaningless
 as any value is accepted. The only constant is the email address, which is what
-the login extension uses to assert a valid user.
+the login extension uses to assert a valid user. The docker container for p4d
+has a user set up with this email address already.
+
+## SAML Sample Data
+
+The saml-idp test service has exactly one user whose email is
+`saml.jackson@example.com` and has no password at all -- just click the **Sign
+On** button to log in. The docker container for p4d has a user set up with this
+email address already.
 
 ## Testing with Okta
 

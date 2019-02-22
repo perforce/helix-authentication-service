@@ -1,9 +1,11 @@
 {
-  "name": "helix-oidc",
+  "name": "helix-auth-svc",
   "version": "0.1.0",
-  "description": "Helix OpenID Connect integration",
+  "description": "Helix Authentication Service",
   "keywords": [
-    "oidc"
+    "authencation",
+    "oidc",
+    "saml"
   ],
   "homepage": "http://www.perforce.com",
   "license": "UNLICENSED",
@@ -17,16 +19,17 @@
     "licenses": "license-checker --production --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT'"
   },
   "dependencies": {
-    "debug": "~2.6.9",
+    "debug": "~4.1.1",
     "dotenv": "^6.2.0",
-    "ejs": "~2.5.7",
+    "ejs": "~2.6.1",
     "express": "~4.16.0",
     "express-session": "^1.15.6",
-    "http-errors": "~1.6.2",
+    "http-errors": "~1.7.2",
     "memorystore": "^1.6.0",
     "morgan": "~1.9.0",
     "openid-client": "^2.4.5",
     "passport": "^0.4.0",
+    "passport-saml": "^1.0.0",
     "transitory": "^1.2.1"
   },
   "private": true,

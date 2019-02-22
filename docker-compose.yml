@@ -19,6 +19,12 @@ services:
         PUB_KEY: http://pkg-ondemand.bnr.perforce.com/perforce/main/perforce.pubkey
     ports:
       - "1666:1666"
+  idp.doc:
+    build: containers/idp
+    environment:
+      NODE_ENV: development
+    ports:
+      - "7000:7000"
   oidc.doc:
     build:
       context: containers/oidc
@@ -44,5 +50,13 @@ services:
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "http://oidc.doc:3001/"
       OIDC_REDIRECT_URI: "http://svc.doc:3000/oidc/callback"
+      SAML_SP_SSO_URL: "http://svc.doc:3000/saml/sso"
+      SAML_SP_SLO_URL: "http://svc.doc:3000/saml/slo"
+      SAML_IDP_SSO_URL: "http://idp.doc:7000/saml/sso"
+      SAML_IDP_SLO_URL: "http://idp.doc:7000/saml/slo"
+      SAML_SP_ISSUER: "urn:example:sp"
+      # SP_AUDIENCE: captive-audience
+      # SP_KEY_FILE: path/to/private.key
+      # SP_KEY_ALGO: sha256
     ports:
       - "3000:3000"

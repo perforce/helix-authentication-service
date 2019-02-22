@@ -6,6 +6,7 @@
 const { exec, spawn } = require('child_process')
 const fs = require('fs')
 
+const protocol = process.env.PROTOCOL || 'oidc'
 const p4user = process.env.P4USER || 'super'
 const p4port = process.env.P4PORT || 'p4d.doc:1666'
 const p4cmd = `p4 -u ${p4user} -p ${p4port}`
@@ -76,7 +77,7 @@ new Promise((resolve, reject) => {
 }).then((config) => {
   config = config.replace(/sampleExtensionsUser/g, 'super')
   config = config.replace(/The authentication service base URL\./, 'http://svc.doc:3000')
-  config = config.replace(/Authentication protocol, such as saml or oidc\./, 'oidc')
+  config = config.replace(/Authentication protocol, such as saml or oidc\./, protocol)
   return new Promise((resolve, reject) => {
     let child = spawn('p4', ['-u', p4user, '-p', p4port, 'extension', '--configure', hookname, '-i'])
     child.stdout.on('data', (data) => {

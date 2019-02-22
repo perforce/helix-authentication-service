@@ -11,6 +11,7 @@ require('dotenv').config()
 
 const indexRouter = require('./routes/index')
 const oidcRouter = require('./routes/oidc')
+const samlRouter = require('./routes/saml')
 
 const app = express()
 
@@ -32,6 +33,7 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/oidc', oidcRouter)
+app.use('/saml', samlRouter)
 app.use('/', indexRouter)
 
 // catch 404 and forward to error handler
