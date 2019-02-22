@@ -8,7 +8,8 @@
  */
 const app = require('../app')
 const debug = require('debug')('oidc:server')
-const http = require('http')
+const fs = require('fs')
+const https = require('https')
 
 /**
  * Get port from environment and store in Express.
@@ -17,9 +18,13 @@ const port = normalizePort(process.env.PORT || '3000')
 app.set('port', port)
 
 /**
- * Create HTTP server.
+ * Create HTTPS server.
  */
-const server = http.createServer(app)
+const options = {
+  key: fs.readFileSync('./certs/sp.key'),
+  cert: fs.readFileSync('./certs/sp.crt')
+}
+const server = https.createServer(options, app)
 
 /**
  * Listen on provided port, on all network interfaces.

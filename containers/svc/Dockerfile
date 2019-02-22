@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 WORKDIR /svc
 COPY app.js .
 COPY bin bin
+COPY certs certs
 COPY package.json .
 COPY public public
 COPY routes routes
