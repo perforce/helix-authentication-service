@@ -49,6 +49,8 @@ services:
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "http://oidc.doc:3001/"
+      DEBUG: "oidc:*"
+      # USE_HTTP: "true"
       OIDC_REDIRECT_URI: "https://svc.doc:3000/oidc/callback"
       SAML_SP_SSO_URL: "https://svc.doc:3000/saml/sso"
       SAML_SP_SLO_URL: "https://svc.doc:3000/saml/slo"

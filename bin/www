@@ -9,6 +9,7 @@
 const app = require('../app')
 const debug = require('debug')('oidc:server')
 const fs = require('fs')
+const http = require('http')
 const https = require('https')
 
 /**
@@ -18,13 +19,9 @@ const port = normalizePort(process.env.PORT || '3000')
 app.set('port', port)
 
 /**
- * Create HTTPS server.
+ * Create HTTP/S server.
  */
-const options = {
-  key: fs.readFileSync('./certs/sp.key'),
-  cert: fs.readFileSync('./certs/sp.crt')
-}
-const server = https.createServer(options, app)
+const server = createServer(app)
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -84,4 +81,21 @@ function onListening () {
     ? 'pipe ' + addr
     : 'port ' + addr.port
   debug('Listening on ' + bind)
+}
+
+/**
+ * Create either an HTTP or HTTPS server based on environment.
+ */
+function createServer (app) {
+  if (process.env.USE_HTTP) {
+    debug('Creating http server')
+    return http.createServer(app)
+  } else {
+    const options = {
+      key: fs.readFileSync('./certs/sp.key'),
+      cert: fs.readFileSync('./certs/sp.crt')
+    }
+    debug('Creating https server')
+    return https.createServer(options, app)
+  }
 }
