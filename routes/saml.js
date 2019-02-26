@@ -8,6 +8,9 @@ const passport = require('passport')
 const SamlStrategy = require('passport-saml').Strategy
 const transitory = require('transitory')
 
+// How long to wait (in ms) for user details before returning 408.
+const requestTimeout = 60 * 1000
+
 // Set up an in-memory cache of the user details; could have used
 // github:isaacs/node-lru-cache but that lacks fine cache control, while
 // github:aholstenson/transitory is a bit more sophisticated.
@@ -100,17 +103,34 @@ router.get('/details', checkAuthentication, (req, res, next) => {
   res.render('details', { name })
 })
 
-router.get('/data/:id', (req, res, next) => {
+router.get('/data/:id', async (req, res, next) => {
   // the params are automatically decoded
-  let user = userCache.get(req.params.id)
-  if (user) {
+  try {
+    let user = await new Promise((resolve, reject) => {
+      if (userCache.has(req.params.id)) {
+        // data is ready, no need to wait
+        resolve(userCache.get(req.params.id))
+      } else {
+        // wait for the data to become available
+        const timeout = setInterval(() => {
+          if (userCache.has(req.params.id)) {
+            clearInterval(timeout)
+            resolve(userCache.get(req.params.id))
+          }
+        }, 1000)
+        // but don't wait too long
+        req.connection.setTimeout(requestTimeout, () => {
+          reject(new Error('timeout'))
+        })
+      }
+    })
     // The SAML idp may not provide email, which the extension is expecting, so
     // repurpose the nameID as the email, since that should be correct.
     res.json(Object.assign({}, user, {
       email: user.nameID
     }))
-  } else {
-    next()
+  } catch (err) {
+    res.status(408).send('Request Timeout')
   }
 })
 
