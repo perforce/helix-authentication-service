@@ -121,6 +121,7 @@ router.get('/data/:id', async (req, res, next) => {
         }, 1000)
         // but don't wait too long
         req.connection.setTimeout(requestTimeout, () => {
+          clearInterval(timeout)
           reject(new Error('timeout'))
         })
       }
