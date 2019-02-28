@@ -26,6 +26,14 @@ including custom schemes developed by authentication providers such as
 a new route to the service, and configure the extension to use the new protocol.
 Of course, if they support OIDC or SAML, that's even easier.
 
+### Provider Support
+
+Using OIDC, this service has been tested with [Okta](https://www.okta.com),
+[OneLogin](https://www.onelogin.com), and [Auth0](https://auth0.com).
+
+Using SAML, this service has been tested with [Okta](https://www.okta.com),
+[OneLogin](https://www.onelogin.com), and [Auth0](https://auth0.com).
+
 ## Local Environment
 
 To get the services running on your host, there is some required setup. For a
@@ -231,6 +239,10 @@ like the following:
   }
 }
 ```
+
+The important part of that configuration is to set the `nameIdentifierProbes`,
+otherwise the NameID returned in the SAML response is the default generated
+value, which is difficult to tie back to the Perforce user account.
 
 On the *Usage* tab of the addon screen, copy the **Identity Provider Login URL**
 to the `SAML_IDP_SSO_URL` setting in the service configuration. To get the SLO
