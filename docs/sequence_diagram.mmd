@@ -1,0 +1,9 @@
+sequenceDiagram
+User->>Server: p4 login
+Server-->>User: open URL
+Server-->>Service: user approved?
+User->>Service: authenticate
+Service->>IdP: login request
+IdP->>Service: auth token
+Service-->>Server: user data
+Server->>User: p4 ticket
