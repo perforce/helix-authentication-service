@@ -20,7 +20,10 @@ services:
     ports:
       - "1666:1666"
   idp.doc:
-    build: containers/idp
+    build:
+      context: containers/idp
+      args:
+        SVC_SCHEME: "https"
     environment:
       NODE_ENV: development
     ports:

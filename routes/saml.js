@@ -5,7 +5,7 @@ const fs = require('fs')
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')
-const SamlStrategy = require('passport-saml').Strategy
+const { Strategy } = require('passport-saml')
 const transitory = require('transitory')
 
 // How long to wait (in ms) for user details before returning 408.
@@ -21,7 +21,7 @@ const userCache = transitory()
 // Nonetheless, still need to prune stale entries occasionally.
 setInterval(() => userCache.cleanUp(), 5 * 60 * 1000)
 
-let strategy = new SamlStrategy({
+const samlOptions = {
   callbackUrl: process.env.SAML_SP_SSO_URL || 'http://localhost:3000/saml/sso',
   logoutCallbackUrl: process.env.SAML_SP_SLO_URL || 'http://localhost:3000/saml/slo',
   entryPoint: process.env.SAML_IDP_SSO_URL || 'http://localhost:7000/saml/sso',
@@ -30,8 +30,8 @@ let strategy = new SamlStrategy({
   audience: process.env.SP_AUDIENCE || undefined,
   privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
   signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256'
-},
-(profile, done) => {
+}
+const strategy = new Strategy(samlOptions, (profile, done) => {
   // profile: {
   //   issuer: {...},
   //   sessionIndex: '_1189d45be2aed1519794',
@@ -133,6 +133,22 @@ router.get('/data/:id', async (req, res, next) => {
   } catch (err) {
     res.status(408).send('Request Timeout')
   }
+})
+
+router.post('/validate', (req, res, next) => {
+  strategy._saml.validatePostResponse(req.body, (err, profile, loggedOut) => {
+    if (err) {
+      res.status(400).send(`error: ${err}`)
+    } else if (loggedOut) {
+      res.status(400).send('error: logged out?')
+    } else {
+      // The SAML idp may not provide email, which the extension is expecting,
+      // so repurpose the nameID as the email, since that should be correct.
+      res.json(Object.assign({}, profile, {
+        email: profile.nameID
+      }))
+    }
+  })
 })
 
 router.get('/logout', (req, res) => {
