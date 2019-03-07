@@ -71,15 +71,12 @@ router.get('/metadata', (req, res) => {
 })
 
 router.get('/login', passport.authenticate('saml', {
-  successReturnToOrRedirect: '/',
-  failureRedirect: '/saml/login_failed',
-  failureFlash: true
+  failureRedirect: '/saml/login_failed'
 }))
 
 router.post('/sso', passport.authenticate('saml', {
-  successReturnToOrRedirect: '/saml/details',
-  failureRedirect: '/saml/login_failed',
-  failureFlash: true
+  successRedirect: '/saml/details',
+  failureRedirect: '/saml/login_failed'
 }))
 
 router.get('/login_failed', (req, res, next) => {
@@ -151,16 +148,17 @@ router.post('/validate', (req, res, next) => {
   })
 })
 
-router.get('/logout', (req, res) => {
+router.get('/logout', (req, res, next) => {
   userCache.delete(req.user.nameID)
+  next()
 }, passport.authenticate('saml', {
-  successReturnToOrRedirect: '/',
   samlFallback: 'logout-request'
 }))
 
 router.post('/slo', passport.authenticate('saml', {
-  successReturnToOrRedirect: '/',
   samlFallback: 'logout-request'
-}))
+}), (req, res) => {
+  res.redirect('/')
+})
 
 module.exports = router
