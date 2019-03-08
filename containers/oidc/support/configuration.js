@@ -76,7 +76,8 @@ module.exports.clients = [
     client_id: process.env.OIDC_CLIENT_ID,
     client_secret: process.env.OIDC_CLIENT_SECRET,
     grant_types: ['refresh_token', 'authorization_code'],
-    redirect_uris: [process.env.OIDC_REDIRECT_URI]
+    redirect_uris: [process.env.OIDC_REDIRECT_URI],
+    post_logout_redirect_uris: [process.env.OIDC_LOGOUT_REDIRECT_URI]
   }
 ]
 

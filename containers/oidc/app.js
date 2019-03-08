@@ -3,7 +3,7 @@
 //
 const path = require('path')
 const url = require('url')
-
+const logger = require('morgan')
 const { set } = require('lodash')
 const express = require('express')
 const helmet = require('helmet')
@@ -23,6 +23,7 @@ app.use(helmet())
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
+app.use(logger('dev'))
 
 const provider = new Provider(ISSUER, providerConfiguration)
 

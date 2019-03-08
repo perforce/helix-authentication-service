@@ -32,12 +32,14 @@ services:
     build:
       context: containers/oidc
     environment:
+      DEBUG: "oidc-provider:*"
       NODE_ENV: development
       PORT: 3001
       ISSUER: "http://oidc.doc:3001/"
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
       OIDC_REDIRECT_URI: "https://svc.doc:3000/oidc/callback"
+      OIDC_LOGOUT_REDIRECT_URI:  "https://svc.doc:3000"
     ports:
       - "3001:3001"
   svc.doc:

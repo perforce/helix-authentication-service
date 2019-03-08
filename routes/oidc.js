@@ -39,7 +39,8 @@ Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
   //
   client = new issuer.Client({
     client_id: process.env.OIDC_CLIENT_ID,
-    client_secret: process.env.OIDC_CLIENT_SECRET
+    client_secret: process.env.OIDC_CLIENT_SECRET,
+    post_logout_redirect_uris: [new URL(process.env.OIDC_REDIRECT_URI).origin]
   })
   const params = {
     // Some services require the absolute URI that is whitelisted in the client
@@ -48,13 +49,10 @@ Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
   }
   passport.use('openidconnect', new Strategy({
     client,
-    params
-  }, (tokenset, userinfo, done) => {
-    // console.log('tokenset', tokenset)
-    // console.log('access_token', tokenset.access_token)
-    // console.log('id_token', tokenset.id_token)
-    // console.log('claims', tokenset.claims)
-    // console.log('userinfo', userinfo)
+    params,
+    passReqToCallback: true
+  }, (req, tokenset, userinfo, done) => {
+    req.session.idToken = tokenset.id_token
     return done(null, userinfo)
   }))
 }).catch((err) => {
@@ -136,7 +134,8 @@ router.get('/logout', checkAuthentication, (req, res) => {
   userCache.delete(req.user.email)
   req.logout()
   const url = client.endSessionUrl({
-    post_logout_redirect_uri: '/'
+    // need the token for the logout redirect to be honored
+    id_token_hint: req.session.idToken
   })
   res.redirect(url || '/')
 })
