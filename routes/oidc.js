@@ -40,12 +40,12 @@ Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
   client = new issuer.Client({
     client_id: process.env.OIDC_CLIENT_ID,
     client_secret: process.env.OIDC_CLIENT_SECRET,
-    post_logout_redirect_uris: [new URL(process.env.OIDC_REDIRECT_URI).origin]
+    post_logout_redirect_uris: [process.env.SVC_BASE_URI]
   })
   const params = {
     // Some services require the absolute URI that is whitelisted in the client
     // app settings; the test oidc-provider is not one of these.
-    redirect_uri: process.env.OIDC_REDIRECT_URI
+    redirect_uri: process.env.SVC_BASE_URI + '/oidc/callback'
   }
   passport.use('openidconnect', new Strategy({
     client,

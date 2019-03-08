@@ -28,11 +28,11 @@ Of course, if they support OIDC or SAML, that's even easier.
 
 ### Provider Support
 
-Using OIDC, this service has been tested with [Okta](https://www.okta.com),
-[OneLogin](https://www.onelogin.com), and [Auth0](https://auth0.com).
+Using OIDC, this service has been tested with [Auth0](https://auth0.com),
+[Okta](https://www.okta.com), and [OneLogin](https://www.onelogin.com).
 
-Using SAML, this service has been tested with [Okta](https://www.okta.com),
-[OneLogin](https://www.onelogin.com), and [Auth0](https://auth0.com).
+Using SAML, this service has been tested with [Auth0](https://auth0.com),
+[Okta](https://www.okta.com), and [OneLogin](https://www.onelogin.com).
 
 ## Local Environment
 
@@ -72,6 +72,9 @@ $ cat << EOF > .env
 OIDC_CLIENT_ID=client_id
 OIDC_CLIENT_SECRET=client_secret
 OIDC_ISSUER_URI=http://localhost:3001/
+SVC_BASE_URI=http://localhost:3000
+SAML_IDP_SSO_URL=http://localhost:7000/saml/sso
+SAML_IDP_SLO_URL=http://localhost:7000/saml/slo
 EOF
 $ npm start
 ```
@@ -193,6 +196,14 @@ The saml-idp test service has exactly one user whose email is
 `saml.jackson@example.com` and has no password at all -- just click the **Sign
 in** button to log in. The docker container for p4d has a user set up with this
 email address already.
+
+## Running Service as HTTP
+
+Assuming you are using the Docker containers:
+
+1. Change `SVC_SCHEME`, `USE_HTTP`, and the service URLs in `docker-compose.yml`
+1. (Re)Build the containers and start them (again)
+1. Deploy the extension with the appropriate `AUTH_URL` (e.g. using `AUTH_URL=... node hook.js`)
 
 ## Testing with Auth0
 

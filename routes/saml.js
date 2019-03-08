@@ -22,10 +22,10 @@ const userCache = transitory()
 setInterval(() => userCache.cleanUp(), 5 * 60 * 1000)
 
 const samlOptions = {
-  callbackUrl: process.env.SAML_SP_SSO_URL || 'http://localhost:3000/saml/sso',
-  logoutCallbackUrl: process.env.SAML_SP_SLO_URL || 'http://localhost:3000/saml/slo',
-  entryPoint: process.env.SAML_IDP_SSO_URL || 'http://localhost:7000/saml/sso',
-  logoutUrl: process.env.SAML_IDP_SLO_URL || 'http://localhost:7000/saml/slo',
+  callbackUrl: process.env.SVC_BASE_URI + '/saml/sso',
+  logoutCallbackUrl: process.env.SVC_BASE_URI + '/saml/slo',
+  entryPoint: process.env.SAML_IDP_SSO_URL,
+  logoutUrl: process.env.SAML_IDP_SLO_URL,
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
   audience: process.env.SP_AUDIENCE || undefined,
   privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
