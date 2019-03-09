@@ -205,6 +205,46 @@ Assuming you are using the Docker containers:
 1. (Re)Build the containers and start them (again)
 1. Deploy the extension with the appropriate `AUTH_URL` (e.g. using `AUTH_URL=... node hook.js`)
 
+## Service Configuration
+
+The authentication service configuration is based on environment variables. The
+application uses [dotenv](https://github.com/motdotla/dotenv) to read a file
+named `.env` in the working directory, which provides values for the various
+settings, described below. You can also simply define the values in the
+environment, which is how it is done with Docker (using the `docker-compose.yml`
+file).
+
+### OIDC settings
+
+| Name                | Description                      |
+| ------------------- | -------------------------------- |
+| `OIDC_CLIENT_ID`    | client identifier                |
+| `OIDC_CLIENT_SECRET`| client secret                    |
+| `OIDC_ISSUER_URI`   | the OIDC provider issuer URL     |
+| `OIDC_REDIRECT_URI` | the redirect uri for the OIDC RP |
+
+OpenID Connect also has a discovery feature in which the identity provider
+advertises various properties. The URI path is
+`/.well-known/openid-configuration`, which is described in the
+[specification](https://openid.net/specs/openid-connect-discovery-1_0.html).
+
+### SAML settings
+
+| Name               | Description                                                          |
+| ------------------ | -------------------------------------------------------------------- |
+| `SVC_BASE_URL`     | service provider base URL                                            |
+| `SAML_IDP_SSO_URL` | URL of IdP Single Sign-On service                                    |
+| `SAML_IDP_SLO_URL` | URL of IdP Single Log-Out service                                    |
+| `SAML_SP_ISSUER`   | service provider issuer identifier                                   |
+| `SAML_SP_AUDIENCE` | service provider audience value for `AudienceRestriction` assertions |
+
+### Other settings
+
+| Name          | Description                         |
+| ------------- | ----------------------------------- |
+| `SP_KEY_FILE` | service provider private key file   |
+| `SP_KEY_ALGO` | algorithm used to sign the requests |
+
 ## Testing with Auth0
 
 ### OpenID Connect
