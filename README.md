@@ -311,8 +311,9 @@ Configuring the authentication service with Okta is fairly straightforward.
 1. Select *Web* as the **Platform** and *OpenID Connect* as the **Sign on method**.
 1. Provide a meaningful name on the next screen.
 1. For the **Login redirect URIs** enter the auth service URL; for Docker this
-   would be `https://svc.doc:3000/oidc/callback`; we are not using logout
-   redirect URIs yet.
+   would be `https://svc.doc:3000/oidc/callback`
+1. For the **Logout redirect URIs** enter the base auth service URL; for Docker this
+   would be `https://svc.doc:3000`
 1. On the next screen, copy the **Client ID** and **Client secret** values to
    the `docker-compose.yml` for the `svc.doc` settings under `environment`
    (namely the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` keys).
@@ -341,6 +342,12 @@ will never have to enter the value directly.
 1. For the **Audience URI** enter `urn:example:sp`, assuming you are using Docker.
 1. For the **Name ID format** the auth extensions expect *EmailAddress*,
    otherwise it cannot verify the expected user has authenticated.
+1. Click the **Show Advanced Settings** link and check the **Enable Single Logout** checkbox.
+1. For the **Single Logout URL** enter the auth service logout URL; for Docker
+   this would be `https://svc.doc:3000/saml/slo`
+1. Enter `urn:example:sp` for the **SP Issuer** value.
+1. For **Signature Certificate**, select and upload the `certs/sp.crt` file,
+   assuming the Docker auth service is being used here.
 1. From the *Sign On* tab, click the **View Setup Instructions** button and copy
    the values for IdP SSO and SLO URLs to the `SAML_IDP_*` settings in the
    docker environment for `svc.doc`.
