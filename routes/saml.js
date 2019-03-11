@@ -158,6 +158,7 @@ router.get('/logout', (req, res, next) => {
 router.post('/slo', passport.authenticate('saml', {
   samlFallback: 'logout-request'
 }), (req, res) => {
+  req.session.destroy()
   res.redirect('/')
 })
 

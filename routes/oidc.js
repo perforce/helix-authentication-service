@@ -137,6 +137,7 @@ router.get('/logout', checkAuthentication, (req, res) => {
     // need the token for the logout redirect to be honored
     id_token_hint: req.session.idToken
   })
+  req.session.destroy()
   res.redirect(url || '/')
 })
 
