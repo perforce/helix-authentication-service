@@ -265,11 +265,13 @@ On the application screen, scroll up to the top of *Settings* and copy the
 **Client ID** value to the `OIDC_CLIENT_ID` setting in the service config.
 Likewise for the **Client Secret** value.
 
-The one other change to make in the Auth0 application configuration is the
-addition of the **Allowed Callback URLs** under *Settings*. As with the other
-providers, put the service callback URL, either
+The first of two additional changes to make in the Auth0 application
+configuration is the addition of the **Allowed Callback URLs** under *Settings*.
+As with the other providers, put the service callback URL, either
 `https://svc.doc:3000/oidc/callback` or `https://svc.doc:3000/saml/sso` as
-appropriate for the protocol
+appropriate for the protocol. The second change is to the **Allowed Logout
+URLs** under *Settings*; put both `https://svc.doc:3000` and
+`https://svc.doc:3000/saml/slo` for OIDC and SAML, respectively.
 
 ### SAML 2.0
 
@@ -379,6 +381,8 @@ will never have to enter the value directly.
 1. From the *SSO* tab, copy the **Client Secret** value to the
    `OIDC_CLIENT_SECRET` setting in the docker environment for `svc.doc` (n.b.
    you may need to "show" the secret first before the copy button will work).
+1. Ensure the **Application Type** is set to _Web_
+1. Ensure the **Token Endpoint** is set to _Basic_
 1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
    new settings (the `build` and `up -d` subcommands are sufficient to rebuild
    and restart the container).

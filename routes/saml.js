@@ -155,11 +155,13 @@ router.get('/logout', (req, res, next) => {
   samlFallback: 'logout-request'
 }))
 
-router.post('/slo', passport.authenticate('saml', {
-  samlFallback: 'logout-request'
-}), (req, res) => {
+function handleSLO (req, res) {
   req.session.destroy()
   res.redirect('/')
-})
+}
+
+// some services use GET and some use POST
+router.get('/slo', passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
+router.post('/slo', passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
 
 module.exports = router

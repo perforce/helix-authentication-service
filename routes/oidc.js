@@ -52,6 +52,7 @@ Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
     params,
     passReqToCallback: true
   }, (req, tokenset, userinfo, done) => {
+    // tokenset.access_token <= useful for API calls
     req.session.idToken = tokenset.id_token
     return done(null, userinfo)
   }))
