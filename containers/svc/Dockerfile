@@ -9,6 +9,7 @@ COPY certs certs
 COPY package.json .
 COPY public public
 COPY routes routes
+COPY store.js .
 COPY views views
 RUN rm -f package-lock.json && npm install -q
 

@@ -5,20 +5,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const { Issuer, Strategy } = require('openid-client')
-const transitory = require('transitory')
-
-// How long to wait (in ms) for user details before returning 408.
-const requestTimeout = 60 * 1000
-
-// Set up an in-memory cache of the user details; could have used
-// github:isaacs/node-lru-cache but that lacks fine cache control, while
-// github:aholstenson/transitory is a bit more sophisticated.
-const userCache = transitory()
-  .expireAfterWrite(60 * 60 * 1000)
-  .expireAfterRead(5 * 60 * 1000)
-  .build()
-// Nonetheless, still need to prune stale entries occasionally.
-setInterval(() => userCache.cleanUp(), 5 * 60 * 1000)
+const { users } = require('../store')
 
 let client = null
 
@@ -97,42 +84,14 @@ function checkAuthentication (req, res, next) {
 }
 
 router.get('/details', checkAuthentication, (req, res, next) => {
-  // using email for the cache key because it is the best we have right now
-  userCache.set(req.user.email, req.user)
+  // Use email for the cache key because it is the best we have right now.
+  users.set(req.user.email, req.user)
   const name = req.user.given_name || req.user.name || req.user.email
   res.render('details', { name })
 })
 
-router.get('/data/:id', async (req, res, next) => {
-  // the params are automatically decoded
-  try {
-    let user = await new Promise((resolve, reject) => {
-      if (userCache.has(req.params.id)) {
-        // data is ready, no need to wait
-        resolve(userCache.get(req.params.id))
-      } else {
-        // wait for the data to become available
-        const timeout = setInterval(() => {
-          if (userCache.has(req.params.id)) {
-            clearInterval(timeout)
-            resolve(userCache.get(req.params.id))
-          }
-        }, 1000)
-        // but don't wait too long
-        req.connection.setTimeout(requestTimeout, () => {
-          clearInterval(timeout)
-          reject(new Error('timeout'))
-        })
-      }
-    })
-    res.json(user)
-  } catch (err) {
-    res.status(408).send('Request Timeout')
-  }
-})
-
 router.get('/logout', checkAuthentication, (req, res) => {
-  userCache.delete(req.user.email)
+  users.delete(req.user.email)
   req.logout()
   const url = client.endSessionUrl({
     // need the token for the logout redirect to be honored

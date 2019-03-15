@@ -30,7 +30,8 @@
     "openid-client": "^2.4.5",
     "passport": "^0.4.0",
     "passport-saml": "^1.0.0",
-    "transitory": "^1.2.1"
+    "transitory": "^1.2.1",
+    "ulid": "^2.3.0"
   },
   "private": true,
   "devDependencies": {
