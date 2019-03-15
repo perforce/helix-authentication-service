@@ -5,7 +5,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const { Issuer, Strategy } = require('openid-client')
-const { users } = require('../store')
+const { users, requests } = require('../store')
 
 let client = null
 
@@ -58,7 +58,11 @@ passport.deserializeUser((obj, done) => {
 router.use(passport.initialize())
 router.use(passport.session())
 
-router.get('/login', passport.authenticate('openidconnect', {
+router.get('/login/:id', (req, res, next) => {
+  // save the request identifier for request/user mapping
+  req.session.requestId = req.params.id
+  next()
+}, passport.authenticate('openidconnect', {
   successReturnToOrRedirect: '/',
   scope: 'openid profile email'
 }))
@@ -84,14 +88,13 @@ function checkAuthentication (req, res, next) {
 }
 
 router.get('/details', checkAuthentication, (req, res, next) => {
-  // Use email for the cache key because it is the best we have right now.
-  users.set(req.user.email, req.user)
+  const userId = requests.get(req.session.requestId)
+  users.set(userId, req.user)
   const name = req.user.given_name || req.user.name || req.user.email
   res.render('details', { name })
 })
 
 router.get('/logout', checkAuthentication, (req, res) => {
-  users.delete(req.user.email)
   req.logout()
   const url = client.endSessionUrl({
     // need the token for the logout redirect to be honored

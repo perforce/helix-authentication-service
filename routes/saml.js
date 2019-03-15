@@ -6,7 +6,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const { Strategy } = require('passport-saml')
-const { users } = require('../store')
+const { users, requests } = require('../store')
 
 const samlOptions = {
   callbackUrl: process.env.SVC_BASE_URI + '/saml/sso',
@@ -57,7 +57,11 @@ router.get('/metadata', (req, res) => {
   res.header('Content-Type', 'text/xml').send(xml)
 })
 
-router.get('/login', passport.authenticate('saml', {
+router.get('/login/:id', (req, res, next) => {
+  // save the request identifier for request/user mapping
+  req.session.requestId = req.params.id
+  next()
+}, passport.authenticate('saml', {
   failureRedirect: '/saml/login_failed'
 }))
 
@@ -81,16 +85,8 @@ function checkAuthentication (req, res, next) {
 }
 
 router.get('/details', checkAuthentication, (req, res, next) => {
-  // The SAML idp may not provide email, which the extension is expecting, so
-  // repurpose the nameID as the email, since that should be correct.
-  //
-  // Use nameID for the cache key because it is the best we have right now;
-  // ideally it should be whatever the extensions are using as the user
-  // identifier.
-  //
-  users.set(req.user.nameID, Object.assign({}, req.user, {
-    email: req.user.nameID
-  }))
+  const userId = requests.get(req.session.requestId)
+  users.set(userId, req.user)
   const name = req.user.nameID
   res.render('details', { name })
 })
@@ -104,19 +100,12 @@ router.post('/validate', (req, res, next) => {
     } else if (loggedOut) {
       res.status(400).send('error: logged out?')
     } else {
-      // The SAML idp may not provide email, which the extension is expecting,
-      // so repurpose the nameID as the email, since that should be correct.
-      res.json(Object.assign({}, profile, {
-        email: profile.nameID
-      }))
+      res.json(profile)
     }
   })
 })
 
-router.get('/logout', (req, res, next) => {
-  users.delete(req.user.nameID)
-  next()
-}, passport.authenticate('saml', {
+router.get('/logout', passport.authenticate('saml', {
   samlFallback: 'logout-request'
 }))
 
