@@ -69,7 +69,7 @@ router.get('/login/:id', (req, res, next) => {
 
 router.get('/callback', passport.authenticate('openidconnect', {
   callback: true,
-  successReturnToOrRedirect: '/oidc/details',
+  successReturnToOrRedirect: '/oidc/success',
   failureRedirect: '/oidc/login_failed'
 }))
 
@@ -87,7 +87,7 @@ function checkAuthentication (req, res, next) {
   }
 }
 
-router.get('/details', checkAuthentication, (req, res, next) => {
+router.get('/success', checkAuthentication, (req, res, next) => {
   const userId = requests.get(req.session.requestId)
   users.set(userId, req.user)
   const name = req.user.given_name || req.user.name || req.user.email

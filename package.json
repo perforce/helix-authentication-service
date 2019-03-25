@@ -25,11 +25,12 @@
     "express": "~4.16.0",
     "express-session": "^1.15.6",
     "http-errors": "~1.7.2",
-    "memorystore": "^1.6.0",
+    "memorystore": "^1.6.1",
     "morgan": "~1.9.0",
     "openid-client": "^2.4.5",
     "passport": "^0.4.0",
     "passport-saml": "^1.0.0",
+    "samlp": "^3.4.0",
     "transitory": "^1.2.1",
     "ulid": "^2.3.0"
   },

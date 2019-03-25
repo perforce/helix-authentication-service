@@ -82,7 +82,7 @@ $ npm start
 Lastly, install the authentication integration extension using `node` like so:
 
 ```shell
-$ P4USER=super P4PORT=localhost:1666 AUTH_URL=http://localhost:3000 node hook.js
+$ P4USER=super P4PORT=localhost:1666 AUTH_URL=https://localhost:3000 node hook.js
 ```
 
 ## Docker Environment
@@ -356,6 +356,8 @@ will never have to enter the value directly.
 1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
    new settings (the `build` and `up -d` subcommands are sufficient to rebuild
    and restart the container).
+1. Configure the extension to use `nameID` as the `name-identifier` value since
+   the SAML response from Okta generally does not have the email field.
 
 If you have already logged into Okta, be sure to either a) assign that user to
 the application you just created, or b) log out so you can log in again using

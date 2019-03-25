@@ -23,8 +23,8 @@ setInterval(() => users.cleanUp(), 5 * 60 * 1000)
 // Set up an in-memory database of pending login requests. The key is a unique
 // request identifier, and the value is the user identifier (e.g. email).
 const requests = transitory()
-  .expireAfterWrite(5 * 60 * 1000)
-  .expireAfterRead(1 * 60 * 1000)
+  .expireAfterWrite(10 * 60 * 1000)
+  .expireAfterRead(5 * 60 * 1000)
   .build()
 setInterval(() => requests.cleanUp(), 5 * 60 * 1000)
 

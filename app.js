@@ -27,6 +27,7 @@ app.use(session({
   store: new MemoryStore({
     checkPeriod: 86400000
   }),
+  name: 'p4authsvc',
   secret: process.env.SESSION_SECRET || 'keyboard cat',
   resave: false,
   saveUninitialized: false
