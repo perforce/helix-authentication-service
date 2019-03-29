@@ -88,10 +88,16 @@ function checkAuthentication (req, res, next) {
 }
 
 router.get('/success', checkAuthentication, (req, res, next) => {
-  const userId = requests.get(req.session.requestId)
-  users.set(userId, req.user)
-  const name = req.user.given_name || req.user.name || req.user.email
-  res.render('details', { name })
+  if (req.session.successRedirect) {
+    let path = req.session.successRedirect
+    req.session.successRedirect = null
+    res.redirect(path)
+  } else {
+    const userId = requests.get(req.session.requestId)
+    users.set(userId, req.user)
+    const name = req.user.given_name || req.user.name || req.user.email
+    res.render('details', { name })
+  }
 })
 
 router.get('/logout', checkAuthentication, (req, res) => {

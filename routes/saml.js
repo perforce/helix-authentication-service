@@ -111,8 +111,10 @@ router.get('/login', (req, res, next) => {
         context: data.requestedAuthnContext
       }
       requests.set(data.id, 'SAML:legacy:placeholder')
+      req.session.successRedirect = '/saml/success'
       // now that everything is set up, go through the normal login path
-      res.redirect('login/' + data.id)
+      const proto = process.env.DEFAULT_PROTOCOL
+      res.redirect(`/${proto}/login/${data.id}`)
     }
   })
 })
@@ -141,6 +143,12 @@ router.get('/success', checkAuthentication, (req, res, next) => {
   if (userId === 'SAML:legacy:placeholder') {
     // This is a SAML legacy hack, in which the best we can do is to assume that
     // the nameID is the user identifier expected by the login extensions.
+    //
+    // However, if a different protocol is configured as the default, then we
+    // must fake the nameID to something, probably the email.
+    if (req.user.email && !req.user.nameID) {
+      req.user.nameID = req.user.email
+    }
     users.set(req.user.nameID, req.user)
     // Generate a new SAML response befitting of the request we received.
     const moreOptions = Object.assign({}, idpOptions, {

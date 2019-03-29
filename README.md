@@ -415,6 +415,66 @@ Visit the auth service SAML [login page](https://svc.doc:3000/saml/login) to
 test. Note that this URL will be configured into the auth extension, the user
 will never have to enter the value directly.
 
+## Configuring for Swarm
+
+Swarm 2018.3 supports the SAML 2.0 authentication protocol, and since the auth
+service can easily act as a SAML identity provider, we can leverage the service
+to act as a mediator to other authentication protocols. In this scenario, Swarm
+would be configured to use SAML authentication with the auth service as the IdP,
+and the auth service would be configured to use some other authentication
+protocol, such as OpenID Connect. Swarm would validate and authenticate the user
+with Perforce as before, with the auth service and login extension handling the
+details behind the scenes.
+
+### Configuring Swarm
+
+Swarm is configured to use SAML authentication by configuring several settings
+in the `data/config.php` file. Below is a simple example:
+
+```php
+'header' => 'saml-response: ',
+'sp' => array(
+    'entityId' => 'urn:example:sp',
+    'assertionConsumerService' => array(
+        'url' => 'http://192.168.1.106',
+    ),
+),
+'idp' => array(
+    'entityId' => 'urn:auth-service:idp',
+    'singleSignOnService' => array(
+        'url' => 'https://192.168.1.66:3000/saml/login',
+    ),
+    'x509cert' => 'MIIDUjCCAjoCCQD72tM...yada..yada..yada..yuSY=',
+),
+```
+
+Just as with any other SAML IdP, the auth service must know a little bit about
+the service provider that will be connecting to it. This is defined by setting
+the `SAML_SP_ISSUER` environment variable. Given the example configuration
+above, this value would be `urn:example:sp`, the `sp.entityId`. Similarly, the
+ACS URL is defined using the `SP_ACS_URL` environment variable. In this example,
+its value would be `http://192.168.1.106`, the URL for the Swarm service.
+
+The IdP settings come from the auth service: the entity identifer is hard-coded
+to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host
+and port on which the service is running. The public key is found in the `certs`
+directory of the auth service.
+
+### How it works
+
+Swarm initiates the SAML login request and directs the browser to the IdP, which
+in this case is our auth service. The auth service receives the request,
+recognizes that this is coming without a request identifier, and concludes that
+this is probably Swarm. At this point the service redirects the browser to the
+"real" identity provider, with the preferred authentication protocol. This could
+be SAML, OIDC, or whatever. Once the user has successfully authenticated with
+the real IdP, the auth service formulates a SAML response and returns an HTML
+form that auto-submits the results back to Swarm. Swarm then identifies the user
+in question, and attempts to log the user into Perforce. The login extension is
+belatedly involved, unlike the usual workflow, but since it can tell the client
+is P4PHP/Swarm, it can act accordingly. As such, it validates the user via the
+SAML response, and indicates success or failure.
+
 ## Why Node and Passport?
 
 ### Node.js
