@@ -57,6 +57,8 @@ services:
       DEBUG: "oidc:*"
       # USE_HTTP: "true"
       SVC_BASE_URI: "https://svc.doc:3000"
+      IDP_CERT_FILE: certs/sp.crt
+      IDP_KEY_FILE: certs/sp.key
       SAML_IDP_SSO_URL: "http://idp.doc:7000/saml/sso"
       SAML_IDP_SLO_URL: "http://idp.doc:7000/saml/slo"
       SAML_SP_ISSUER: "urn:example:sp"
