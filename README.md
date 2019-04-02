@@ -197,7 +197,12 @@ The saml-idp test service has exactly one user whose email is
 in** button to log in. The docker container for p4d has a user set up with this
 email address already.
 
-## Running Service as HTTP
+## Running the Service on HTTP
+
+If for some reason you do not want the auth service to be using HTTPS and its
+self-signed certificate, you can use HTTP instead. This is particularly relevant
+when testing with a browser that refuses to open insecure web sites, such as the
+SAML Desktop Agent with its embedded Chromium browser.
 
 Assuming you are using the Docker containers:
 
