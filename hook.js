@@ -42,7 +42,7 @@ new Promise((resolve, reject) => {
 }).then((installed) => {
   if (installed) {
     return new Promise((resolve, reject) => {
-      exec(`${p4cmd} extension --delete ${hookname} --yes`, (error, stdout, stderr) => {
+      exec(`${p4cmd} extension --delete --yes ${hookname}`, (error, stdout, stderr) => {
         if (error) {
           reject(error)
         } else {
