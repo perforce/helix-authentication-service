@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:lts-stretch
 
 ARG SVC_SCHEME
 
