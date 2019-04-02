@@ -9,8 +9,6 @@
 const app = require('../app')
 const debug = require('debug')('oidc:server')
 const fs = require('fs')
-const http = require('http')
-const https = require('https')
 
 /**
  * Get port from environment and store in Express.
@@ -87,15 +85,15 @@ function onListening () {
  * Create either an HTTP or HTTPS server based on environment.
  */
 function createServer (app) {
-  if (process.env.USE_HTTP) {
+  if (process.env.PROTOCOL === 'http') {
     debug('Creating http server')
-    return http.createServer(app)
+    return require('http').createServer(app)
   } else {
     const options = {
       key: fs.readFileSync('./certs/sp.key'),
       cert: fs.readFileSync('./certs/sp.crt')
     }
     debug('Creating https server')
-    return https.createServer(options, app)
+    return require('https').createServer(options, app)
   }
 }

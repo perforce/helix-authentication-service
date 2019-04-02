@@ -23,7 +23,7 @@ services:
     build:
       context: containers/idp
       args:
-        SVC_SCHEME: "https"
+        SVC_PROTOCOL: "https"
     environment:
       NODE_ENV: development
     ports:
@@ -55,7 +55,7 @@ services:
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "http://oidc.doc:3001/"
       DEBUG: "oidc:*"
-      # USE_HTTP: "true"
+      PROTOCOL: "https"
       SVC_BASE_URI: "https://svc.doc:3000"
       DEFAULT_PROTOCOL: "oidc"
       IDP_CERT_FILE: certs/sp.crt
