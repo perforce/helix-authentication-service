@@ -58,6 +58,7 @@ services:
       PROTOCOL: "https"
       SVC_BASE_URI: "https://svc.doc:3000"
       DEFAULT_PROTOCOL: "oidc"
+      CA_CERT_FILE: certs/sp.crt
       IDP_CERT_FILE: certs/sp.crt
       IDP_KEY_FILE: certs/sp.key
       SAML_IDP_SSO_URL: "http://idp.doc:7000/saml/sso"

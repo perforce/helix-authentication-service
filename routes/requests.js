@@ -22,38 +22,55 @@ router.get('/new/:id', (req, res, next) => {
 
 // :id is the request identifier returned from /new/:id
 router.get('/status/:id', async (req, res, next) => {
-  // Look for the pending request, then check if the user associated with the
-  // request has successfully authenticated. Wait for a while as the user may
-  // still be authenticating with the identity provider.
-  if (requests.has(req.params.id)) {
-    const userId = requests.get(req.params.id)
-    try {
-      let user = await new Promise((resolve, reject) => {
-        if (users.has(userId)) {
-          // data is ready, no need to wait
-          resolve(users.get(userId))
-        } else {
-          // wait for the data to become available
-          const timeout = setInterval(() => {
-            if (users.has(userId)) {
+  //
+  // Check for validate client certificates. This is set up in the options to
+  // https.createServer(), namely the `ca`, `requestCert`, and
+  // `rejectUnauthorized` properties. We then assert that the request is
+  // authorized, and if not we give the client some explanation.
+  //
+  // Another option is to use a passport extension which does essentially the
+  // same thing: https://github.com/ripjar/passport-client-cert
+  //
+  const cert = req.connection.getPeerCertificate()
+  if (req.client.authorized) {
+    // Look for the pending request, then check if the user associated with the
+    // request has successfully authenticated. Wait for a while as the user may
+    // still be authenticating with the identity provider.
+    if (requests.has(req.params.id)) {
+      const userId = requests.get(req.params.id)
+      try {
+        let user = await new Promise((resolve, reject) => {
+          if (users.has(userId)) {
+            // data is ready, no need to wait
+            resolve(users.get(userId))
+          } else {
+            // wait for the data to become available
+            const timeout = setInterval(() => {
+              if (users.has(userId)) {
+                clearInterval(timeout)
+                resolve(users.get(userId))
+              }
+            }, 1000)
+            // but don't wait too long
+            req.connection.setTimeout(requestTimeout, () => {
               clearInterval(timeout)
-              resolve(users.get(userId))
-            }
-          }, 1000)
-          // but don't wait too long
-          req.connection.setTimeout(requestTimeout, () => {
-            clearInterval(timeout)
-            reject(new Error('timeout'))
-          })
-        }
-      })
-      res.json(user)
-    } catch (err) {
-      res.status(408).send('Request Timeout')
+              reject(new Error('timeout'))
+            })
+          }
+        })
+        res.json(user)
+      } catch (err) {
+        res.status(408).send('Request Timeout')
+      }
+    } else {
+      // no such request, move on to the next handler (a likely 404)
+      next()
     }
+  } else if (cert.subject) {
+    const msg = `Sorry ${cert.subject.CN}, certificates from ${cert.issuer.CN} are not supported.`
+    res.status(403).send(msg)
   } else {
-    // no such request, move on to the next handler (a likely 404)
-    next()
+    res.status(401).send(`Sorry, but you need to provide a client certificate to continue.`)
   }
 })
 

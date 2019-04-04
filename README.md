@@ -480,6 +480,31 @@ belatedly involved, unlike the usual workflow, but since it can tell the client
 is P4PHP/Swarm, it can act accordingly. As such, it validates the user via the
 SAML response, and indicates success or failure.
 
+## Certificates
+
+For development we use self-signed certificates, and use the service certificate
+to sign the client signing request to produce a client certificate. In parctice,
+both the service and client would use proper certificates and utilize a trusted
+certificate authority.
+
+```shell
+$ cd certs
+$ openssl req -newkey rsa:4096 -keyout client.key -out client.csr -nodes -days 365 -subj "/CN=LoginExtension"
+$ openssl x509 -req -in client.csr -CA sp.crt -CAkey sp.key -out client.crt -set_serial 01 -days 365
+```
+
+The auth service is hard-coded to read its certificate and key file from the
+`certs/sp.crt` and `certs/sp.key` files, respectively. The path for the
+certificate authority certificate is read from the `CA_CERT_FILE` environment
+variable. Clients accessing the `requests/status/:id` route will require a valid
+client certificate signed by the certificate authority.
+
+### SAML IdP
+
+When the auth service is acting as a SAML identity provider, it uses a public
+key pair contained in the files identified by the `IDP_CERT_FILE` and
+`IDP_KEY_FILE` environment variables.
+
 ## Why Node and Passport?
 
 ### Node.js

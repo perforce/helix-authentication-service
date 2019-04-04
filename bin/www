@@ -91,7 +91,10 @@ function createServer (app) {
   } else {
     const options = {
       key: fs.readFileSync('./certs/sp.key'),
-      cert: fs.readFileSync('./certs/sp.crt')
+      cert: fs.readFileSync('./certs/sp.crt'),
+      requestCert: true,
+      rejectUnauthorized: false,
+      ca: [fs.readFileSync(process.env.CA_CERT_FILE)]
     }
     debug('Creating https server')
     return require('https').createServer(options, app)
