@@ -22,6 +22,7 @@
 1. Get a ticket for `swarm` user and set value in `config.php` as `password`
 1. Set protections for `swarm` user to `admin //...`
 1. Add `saml` configuration values to `config.php`, must match auth service exactly.
+    * `idp.singleSignOnService.url` would look something like `https://192.168.1.66:3000/saml/login`
 1. Ensure `x509cert` for `idp` is set to auth service public cert.
 1. Set `sso_enabled` to `true` in `config.php`
 

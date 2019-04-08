@@ -457,6 +457,41 @@ When the auth service is acting as a SAML identity provider, it uses a public
 key pair contained in the files identified by the `IDP_CERT_FILE` and
 `IDP_KEY_FILE` environment variables.
 
+## Managing the Auth Service
+
+### pm2
+
+The [pm2 runtime](https://pm2.io/runtime/) is useful for running Node.js
+applications in a reliable and manageable fashion. The auth service can be
+started and managed as well, using a startup script like the one shown below.
+
+```javascript
+module.exports = {
+  apps: [{
+    name: 'auth-svc',
+    script: './bin/www',
+    env: {
+      NODE_ENV: 'development',
+      OIDC_CLIENT_ID: 'client_id',
+      OIDC_CLIENT_SECRET: 'client_secret',
+      OIDC_ISSUER_URI: 'http://localhost:3001/',
+      SVC_BASE_URI: 'https://localhost:3000',
+      DEFAULT_PROTOCOL: 'oidc',
+      CA_CERT_FILE: 'certs/sp.crt',
+      IDP_CERT_FILE: 'certs/sp.crt',
+      IDP_KEY_FILE: 'certs/sp.key',
+      SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
+      SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
+      SAML_SP_ISSUER: 'urn:example:sp'
+    }
+  }]
+}
+```
+
+If you plan to run the test OIDC provider, or SAML test IdP, you could add
+entries for those to the `apps` list in the configuration above. Use the
+settings from the `docker-compose.yml` file as examples.
+
 ## Why Node and Passport?
 
 ### Node.js
