@@ -4,11 +4,11 @@
 
 ### Helix Server
 
+1. Start `p4d` with logging to a file: `p4d -d -r p4root -L log`
+1. Enable command logging: `p4 configure set server=2`
 1. Create a `super` user and bestow super privileges.
 1. Add `super` user to group with unlimited password timeout.
 1. Allow non-SSO access: `p4 configure set auth.sso.allow.passwd=1`
-1. Start `p4d` with logging to a file: `p4d -d -r p4root -L log`
-1. Enable command logging: `p4 configure set server=2`
 1. Install the extensions in the server: `P4PORT=localhost:1666 node hook.js`
 1. Ensure extensions service URL is same as what Swarm uses so cookies will work.
 1. Set the `name-identifier` to `nameID` if using Okta IdP.

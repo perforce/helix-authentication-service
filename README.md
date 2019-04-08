@@ -60,7 +60,8 @@ $ npm install
 $ cat << EOF > .env
 OIDC_CLIENT_ID=client_id
 OIDC_CLIENT_SECRET=client_secret
-OIDC_REDIRECT_URI=http://localhost:3000/oidc/callback
+OIDC_REDIRECT_URI=https://localhost:3000/oidc/callback
+OIDC_LOGOUT_REDIRECT_URI=https://svc.doc:3000
 EOF
 $ PORT=3001 npm start
 ```
@@ -73,9 +74,14 @@ $ cat << EOF > .env
 OIDC_CLIENT_ID=client_id
 OIDC_CLIENT_SECRET=client_secret
 OIDC_ISSUER_URI=http://localhost:3001/
-SVC_BASE_URI=http://localhost:3000
-SAML_IDP_SSO_URL=http://localhost:7000/saml/sso
-SAML_IDP_SLO_URL=http://localhost:7000/saml/slo
+SVC_BASE_URI=https://localhost:3000
+DEFAULT_PROTOCOL=oidc
+CA_CERT_FILE=certs/sp.crt
+IDP_CERT_FILE=certs/sp.crt
+IDP_KEY_FILE=certs/sp.key
+SAML_IDP_SSO_URL=http://idp.doc:7000/saml/sso
+SAML_IDP_SLO_URL=http://idp.doc:7000/saml/slo
+SAML_SP_ISSUER=urn:example:sp
 EOF
 $ npm start
 ```
@@ -83,7 +89,7 @@ $ npm start
 Lastly, install the authentication integration extension using `node` like so:
 
 ```shell
-$ P4USER=super P4PORT=localhost:1666 AUTH_URL=https://localhost:3000 node hook.js
+$ P4PORT=localhost:1666 AUTH_URL=https://localhost:3000 node hook.js
 ```
 
 ## Docker Environment
