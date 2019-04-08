@@ -56,7 +56,7 @@ new Promise((resolve, reject) => {
   }
 }).then(() => {
   return new Promise((resolve, reject) => {
-    exec(`${p4cmd} extension --install ${filename}`, (error, stdout, stderr) => {
+    exec(`${p4cmd} extension --install ${filename} -y`, (error, stdout, stderr) => {
       if (error) {
         reject(error)
       } else {
