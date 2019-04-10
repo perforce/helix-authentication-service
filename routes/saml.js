@@ -113,7 +113,7 @@ router.get('/login', (req, res, next) => {
       requests.set(data.id, 'SAML:legacy:placeholder')
       req.session.successRedirect = '/saml/success'
       // now that everything is set up, go through the normal login path
-      const proto = process.env.DEFAULT_PROTOCOL
+      const proto = process.env.DEFAULT_PROTOCOL || 'saml'
       res.redirect(`/${proto}/login/${data.id}`)
     }
   })
