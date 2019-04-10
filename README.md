@@ -15,7 +15,7 @@ reachable from the Helix Server and any clients that will be using this service.
 The other half of the system, albeit a very small half, is the Perforce
 extension installed on the Helix Server, which acts as a mediator between the
 service and the server. When a Perforce user attempts to log in to the server,
-the extension will cause their web browser to open to the authenication
+the extension will cause their web browser to open to the authentication
 provider, and meanwhile ping the service to get the authentication success
 status. Once the user has successfully authenticated with the provider, the
 extension will get the results and signal the server to issue a ticket (or not,
@@ -427,7 +427,7 @@ above, this value would be `urn:example:sp`, the `sp.entityId`. Similarly, the
 ACS URL is defined using the `SP_ACS_URL` environment variable. In this example,
 its value would be `http://192.168.1.106`, the URL for the Swarm service.
 
-The IdP settings come from the auth service: the entity identifer is hard-coded
+The IdP settings come from the auth service: the entity identifier is hard-coded
 to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host
 and port on which the service is running. The public key is found in the `certs`
 directory of the auth service.
@@ -435,7 +435,7 @@ directory of the auth service.
 ## Certificates
 
 For development we use self-signed certificates, and use the service certificate
-to sign the client signing request to produce a client certificate. In parctice,
+to sign the client signing request to produce a client certificate. In practice,
 both the service and client would use proper certificates and utilize a trusted
 certificate authority.
 
@@ -491,6 +491,20 @@ module.exports = {
 If you plan to run the test OIDC provider, or SAML test IdP, you could add
 entries for those to the `apps` list in the configuration above. Use the
 settings from the `docker-compose.yml` file as examples.
+
+## Removing the Extension
+
+Removing the login extension is a two-step process:
+
+1. `p4 extension --delete Auth::loginhook -y`
+1. `p4 admin restart`
+
+The `restart` is necessary since `p4d` prepares its authentication mechanims
+during startup. Without the restart, it will complain about a missing hook:
+
+```
+Command unavailable: external authentication 'auth-check-sso' trigger not found.
+```
 
 ## Why Node and Passport?
 
