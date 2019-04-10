@@ -65,7 +65,8 @@ services:
       SAML_IDP_SLO_URL: "http://idp.doc:7000/saml/slo"
       SAML_SP_ISSUER: "urn:example:sp"
       # SAML_SP_AUDIENCE: captive-audience
-      # SP_KEY_FILE: path/to/private.key
+      SP_CERT_FILE: certs/sp.crt
+      SP_KEY_FILE: certs/sp.key
       # SP_KEY_ALGO: sha256
     ports:
       - "3000:3000"

@@ -32,6 +32,7 @@ const samlOptions = {
   logoutUrl: process.env.SAML_IDP_SLO_URL,
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
   audience: process.env.SAML_SP_AUDIENCE || undefined,
+  signingCert: process.env.SP_CERT_FILE ? fs.readFileSync(process.env.SP_CERT_FILE) : undefined,
   privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
   signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256'
 }

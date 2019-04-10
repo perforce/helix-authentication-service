@@ -90,8 +90,8 @@ function createServer (app) {
     return require('http').createServer(app)
   } else {
     const options = {
-      key: fs.readFileSync('./certs/sp.key'),
-      cert: fs.readFileSync('./certs/sp.crt'),
+      key: fs.readFileSync(process.env.SP_KEY_FILE),
+      cert: fs.readFileSync(process.env.SP_CERT_FILE),
       requestCert: true,
       rejectUnauthorized: false,
       ca: [fs.readFileSync(process.env.CA_CERT_FILE)]

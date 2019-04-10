@@ -84,6 +84,8 @@ IDP_KEY_FILE=certs/sp.key
 SAML_IDP_SSO_URL=http://idp.doc:7000/saml/sso
 SAML_IDP_SLO_URL=http://idp.doc:7000/saml/slo
 SAML_SP_ISSUER=urn:example:sp
+SP_CERT_FILE=certs/sp.crt
+SP_KEY_FILE=certs/sp.key
 EOF
 $ npm start
 ```
@@ -232,6 +234,7 @@ the base directory, and this will be read by the service using the
 | `SAML_IDP_SLO_URL`   | Logout URL for the SAML IdP                  | *none*           |
 | `SAML_SP_ISSUER`     | Entity ID for our SAML service provider      | `urn:example:sp` |
 | `SAML_SP_AUDIENCE`   | SAML service provider audience, if any       | *none*           |
+| `SP_CERT_FILE`       | Path to service provider public certificate  | *none*           |
 | `SP_KEY_FILE`        | Path to service provider private key file    | *none*           |
 | `SP_KEY_ALGO`        | Hashing algorithm for private key            | `sha256`         |
 | `DEFAULT_PROTOCOL`   | Auth protocol to use when acting as SAML IdP | `saml`           |
@@ -465,7 +468,7 @@ its value would be `http://192.168.1.106`, the URL for the Swarm service.
 
 The IdP settings come from the auth service: the entity identifier is hard-coded
 to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host
-and port on which the service is running. The public key is found in the `certs`
+and port on which the service is running. The public key is likely in the `certs`
 directory of the auth service.
 
 ## Certificates
@@ -481,11 +484,11 @@ $ openssl req -newkey rsa:4096 -keyout client.key -out client.csr -nodes -days 3
 $ openssl x509 -req -in client.csr -CA sp.crt -CAkey sp.key -out client.crt -set_serial 01 -days 365
 ```
 
-The auth service is hard-coded to read its certificate and key file from the
-`certs/sp.crt` and `certs/sp.key` files, respectively. The path for the
-certificate authority certificate is read from the `CA_CERT_FILE` environment
-variable. Clients accessing the `requests/status/:id` route will require a valid
-client certificate signed by the certificate authority.
+The auth service reads its certificate and key files using the paths defined in
+`SP_CERT_FILE` and `SP_KEY_FILE`, respectively. The path for the certificate
+authority certificate is read from the `CA_CERT_FILE` environment variable.
+Clients accessing the `requests/status/:id` route will require a valid client
+certificate signed by the certificate authority.
 
 ### SAML IdP
 
@@ -518,7 +521,9 @@ module.exports = {
       IDP_KEY_FILE: 'certs/sp.key',
       SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
       SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
-      SAML_SP_ISSUER: 'urn:example:sp'
+      SAML_SP_ISSUER: 'urn:example:sp',
+      SP_CERT_FILE: 'certs/sp.crt',
+      SP_KEY_FILE: 'certs/sp.key'
     }
   }]
 }
