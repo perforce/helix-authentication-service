@@ -35,19 +35,21 @@ Using OIDC, this service has been tested with [Auth0](https://auth0.com),
 Using SAML, this service has been tested with [Auth0](https://auth0.com),
 [Okta](https://www.okta.com), and [OneLogin](https://www.onelogin.com).
 
-## Local Environment
+## Development Environments
+
+### Local Environment
 
 To get the services running on your host, there is some required setup. For a
 different approach, you can use Docker as described below, which may be easier
 depending on your circumstances.
 
-### Prerequisites
+#### Prerequisites
 
 To fetch and build the application dependencies and run tests, you will need
 [Node.js](http://nodejs.org) *LTS* installed; the *Current* version may have
 compatibility issues with some modules, and in general can be a bit unstable.
 
-### Build and Start
+#### Build and Start
 
 These instructions assume you will be testing with the OpenID provider, as the
 SAML test IdP is a little more work to set up, and is easier to run in Docker.
@@ -92,7 +94,7 @@ Lastly, install the authentication integration extension using `node` like so:
 $ P4PORT=localhost:1666 AUTH_URL=https://localhost:3000 node hook.js
 ```
 
-## Docker Environment
+### Docker Environment
 
 In this code base are configuration files for [Docker](http://docker.com), which
 is used to start the various services needed for testing. To get everything set
@@ -116,7 +118,7 @@ containers need to see each other, which they do using their container names,
 and the host needs to be able to reach the containers using those same names.
 See https://passingcuriosity.com/2013/dnsmasq-dev-osx/ for a helpful guide.
 
-### Testing the p4d connection
+#### Testing the p4d connection
 
 ```shell
 $ p4 -p p4d.doc:1666 info
@@ -146,7 +148,7 @@ johndoe <johndoe@example.com> (John Doe) accessed 2019/02/06
 super <super@fcafbbe2216b> (super) accessed 2019/02/06
 ```
 
-### Testing the service
+#### Testing the service
 
 ```shell
 $ curl -D - https://svc.doc:3000
@@ -172,7 +174,7 @@ Connection: keep-alive
 </html>
 ```
 
-### Installing the Extension
+#### Installing the Extension
 
 To install the authentication integration extension, use `node` like so (the
 script assumes the Docker environment by default):
@@ -187,7 +189,9 @@ For SAML, the extension must be installed slightly differently:
 $ PROTOCOL=saml node hook.js
 ```
 
-## OpenID Connect Sample Data
+## Sample Data
+
+### OpenID Connect Sample Data
 
 The oidc-provider service has a sample user with email `johndoe@example.com`,
 and whose account identifier is literally anything. That is, requesting an
@@ -197,12 +201,44 @@ as any value is accepted. The only constant is the email address, which is what
 the login extension uses to assert a valid user. The docker container for p4d
 has a user set up with this email address already.
 
-## SAML Sample Data
+### SAML Sample Data
 
 The saml-idp test service has exactly one user whose email is
 `saml.jackson@example.com` and has no password at all -- just click the **Sign
 in** button to log in. The docker container for p4d has a user set up with this
 email address already.
+
+## Service Configuration
+
+The authentication service is configured using environment variables. For easy
+declaration of settings, you can create a `.env` file (alluded to earlier) in
+the base directory, and this will be read by the service using the
+[dotenv](https://github.com/motdotla/dotenv) Node.js module.
+
+| Name                 | Description                                  | Default          |
+| -------------------- | -------------------------------------------- | ---------------- |
+| `SESSION_SECRET`     | Key for encrypting the session data          | `keyboard cat`   |
+| `PORT`               | Port on which application binds              | `3000`           |
+| `PROTOCOL`           | Desired protocol, `https` or `http`          | `http`           |
+| `CA_CERT_FILE`       | Path to certificate authority file           | *none*           |
+| `OIDC_ISSUER_URI`    | URI of OIDC identity provider                | *none*           |
+| `OIDC_CLIENT_ID`     | OIDC client identitifier for our service     | *none*           |
+| `OIDC_CLIENT_SECRET` | OIDC client secret for our service           | *none*           |
+| `SVC_BASE_URI`       | URI of the service, used for building URLs   | *none*           |
+| `IDP_CERT_FILE`      | Path of our SAML IdP public certificate      | *none*           |
+| `IDP_KEY_FILE`       | Path of our SAML IdP private key file        | *none*           |
+| `SP_ACS_URL`         | Default SAML SP ACS URL                      | *none*           |
+| `SAML_IDP_SSO_URL`   | Login URL for the SAML IdP                   | *none*           |
+| `SAML_IDP_SLO_URL`   | Logout URL for the SAML IdP                  | *none*           |
+| `SAML_SP_ISSUER`     | Entity ID for our SAML service provider      | `urn:example:sp` |
+| `SAML_SP_AUDIENCE`   | SAML service provider audience, if any       | *none*           |
+| `SP_KEY_FILE`        | Path to service provider private key file    | *none*           |
+| `SP_KEY_ALGO`        | Hashing algorithm for private key            | `sha256`         |
+| `DEFAULT_PROTOCOL`   | Auth protocol to use when acting as SAML IdP | `saml`           |
+
+There are other settings that apply to the test services, found in the
+`containers` directory. Those settings can be see in the `docker-compose.yml`
+file, but otherwise are outside the scope of this authentication service.
 
 ## Running the Service on HTTP
 
