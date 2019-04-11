@@ -212,46 +212,9 @@ email address already.
 
 ## Service Configuration
 
-The authentication service is configured using environment variables. For easy
-declaration of settings, you can create a `.env` file (alluded to earlier) in
-the base directory, and this will be read by the service using the
-[dotenv](https://github.com/motdotla/dotenv) Node.js module.
-
-| Name                 | Description                                  | Default          |
-| -------------------- | -------------------------------------------- | ---------------- |
-| `SESSION_SECRET`     | Key for encrypting the session data          | `keyboard cat`   |
-| `PORT`               | Port on which application binds              | `3000`           |
-| `PROTOCOL`           | Desired protocol, `https` or `http`          | `http`           |
-| `CA_CERT_FILE`       | Path to certificate authority file           | *none*           |
-| `OIDC_ISSUER_URI`    | URI of OIDC identity provider                | *none*           |
-| `OIDC_CLIENT_ID`     | OIDC client identitifier for our service     | *none*           |
-| `OIDC_CLIENT_SECRET` | OIDC client secret for our service           | *none*           |
-| `SVC_BASE_URI`       | URI of the service, used for building URLs   | *none*           |
-| `IDP_CERT_FILE`      | Path of our SAML IdP public certificate      | *none*           |
-| `IDP_KEY_FILE`       | Path of our SAML IdP private key file        | *none*           |
-| `IDP_CONFIG_FILE`    | Path of the SAML IdP configuration file      | See **@1** below |
-| `SAML_IDP_SSO_URL`   | Login URL for the SAML IdP                   | *none*           |
-| `SAML_IDP_SLO_URL`   | Logout URL for the SAML IdP                  | *none*           |
-| `SAML_SP_ISSUER`     | Entity ID for our SAML service provider      | `urn:example:sp` |
-| `SAML_SP_AUDIENCE`   | SAML service provider audience, if any       | *none*           |
-| `SP_CERT_FILE`       | Path to service provider public certificate  | *none*           |
-| `SP_KEY_FILE`        | Path to service provider private key file    | *none*           |
-| `SP_KEY_ALGO`        | Hashing algorithm for private key            | `sha256`         |
-| `DEFAULT_PROTOCOL`   | Auth protocol to use when acting as SAML IdP | `saml`           |
-
-There are other settings that apply to the test services, found in the
-`containers` directory. Those settings can be see in the `docker-compose.yml`
-file, but otherwise are outside the scope of this authentication service.
-
-### IdP Configuration
-
-**@1** When the authentication service is acting as a SAML identity provider, it
-reads some of its settings from a configuration file, identified by the
-`IDP_CONFIG_FILE` environment variable. By default this file is named
-`saml_idp.conf.js` and is located in the `routes` directory. It is evaluated
-using the Node.js `require()` function, so it can be any valid JavaScript or
-JSON. See the default configuration file for comments and explanations of the
-available settings.
+See the Confluence
+[page](https://confluence.perforce.com:8443/display/~nfiedler/Authentication+Integration)
+for documentation.
 
 ## Running the Service on HTTP
 
