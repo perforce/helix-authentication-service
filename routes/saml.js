@@ -15,11 +15,13 @@ const idpOptions = {
   cert: process.env.IDP_CERT_FILE ? fs.readFileSync(process.env.IDP_CERT_FILE) : undefined,
   key: process.env.IDP_KEY_FILE ? fs.readFileSync(process.env.IDP_KEY_FILE) : undefined,
   getPostURL: (audience, samlRequestDom, req, callback) => {
-    const url = idpConfig[req.authnRequest.issuer]['spAcsUrl']
+    // invoking callback() with an error results in a 500 response
+    // invoking callback(null, null) will return a 401 response
+    const url = idpConfig[req.authnRequest.issuer]['acsUrl']
     if (url) {
       callback(null, url)
     } else {
-      callback(new Error(`no mapping for [${req.authnRequest.issuer}]['spAcsUrl'] in ${idpConfFile}`), null)
+      callback(new Error(`no mapping for [${req.authnRequest.issuer}]['acsUrl'] in ${idpConfFile}`), null)
     }
   },
   issuer: 'urn:auth-service:idp',
