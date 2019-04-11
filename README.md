@@ -23,7 +23,7 @@ and fail the login).
 
 This design lends itself well to integrating other authentication protocols,
 including custom schemes developed by authentication providers such as
-[Auth0](http://auth0.com/) -- just add `passport-auth0` as a Node dependecy, add
+[Auth0](http://auth0.com/) -- just add `passport-auth0` as a Node dependency, add
 a new route to the service, and configure the extension to use the new protocol.
 Of course, if they support OIDC or SAML, that's even easier.
 
@@ -434,9 +434,11 @@ in the `data/config.php` file. Below is a simple example:
 
 Just as with any other SAML IdP, the auth service must know a little bit about
 the service provider that will be connecting to it. This is defined in the
-`IDP_CONFIG_FILE` configuration file described above. In this example, the key
-would be `urn:example:sp` and its value would be `http://192.168.1.106/login`
-(Swarm wants the extra `/login` on the URL).
+`IDP_CONFIG_FILE` configuration file described in the documentation. In this
+example, the key would be `urn:example:sp` and its value would be
+`http://192.168.1.106/login` (Swarm wants the extra `/login` on the URL). The
+service can support multiple Swarm installations, just add more entries to the
+`IDP_CONFIG_FILE` configuration as needed (and restart the service).
 
 The IdP settings come from the auth service: the entity identifier is hard-coded
 to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host
@@ -468,13 +470,30 @@ When the auth service is acting as a SAML identity provider, it uses a public
 key pair contained in the files identified by the `IDP_CERT_FILE` and
 `IDP_KEY_FILE` environment variables.
 
-## Managing the Auth Service
+## Removing the Extension
 
-### pm2
+Removing the login extension is a two-step process:
 
-The [pm2 runtime](https://pm2.io/runtime/) is useful for running Node.js
-applications in a reliable and manageable fashion. The auth service can be
-started and managed as well, using a startup script like the one shown below.
+1. `p4 extension --delete Auth::loginhook -y`
+1. `p4 admin restart`
+
+The `restart` is necessary since `p4d` prepares its authentication mechanims
+during startup. Without the restart, it will complain about a missing hook:
+
+```
+Command unavailable: external authentication 'auth-check-sso' trigger not found.
+```
+
+## Deploying the Service
+
+The service is a Node.js application, and has few requirements, so installation
+is relatively easy. With the latest long-term support (LTS) Node, simply get the
+service code and run `npm install`. You can then use a process manager, such as
+[pm2](http://pm2.keymetrics.io),
+[forever](https://github.com/foreverjs/forever), or
+[StrongLoop](http://strong-pm.io), to start and manage the service. pm2 is quite
+popular and has been used for testing this service. An example configuration
+file (typically named `ecosystem.config.js`) is shown below:
 
 ```javascript
 module.exports = {
@@ -501,23 +520,18 @@ module.exports = {
 }
 ```
 
-If you plan to run the test OIDC provider, or SAML test IdP, you could add
-entries for those to the `apps` list in the configuration above. Use the
-settings from the `docker-compose.yml` file as examples.
+The service does not rely on a database, all data is stored temporarily in
+memory. The bulk of the configuration is defined by environment variables. The
+service can serve multiple Helix Server installations, as the client initiates
+the requests and pulls data as needed.
 
-## Removing the Extension
-
-Removing the login extension is a two-step process:
-
-1. `p4 extension --delete Auth::loginhook -y`
-1. `p4 admin restart`
-
-The `restart` is necessary since `p4d` prepares its authentication mechanims
-during startup. Without the restart, it will complain about a missing hook:
-
-```
-Command unavailable: external authentication 'auth-check-sso' trigger not found.
-```
+In terms of availability and load balancing, the service has some state that is
+maintained in memory, keyed to an opaque request identifier. The extension
+begins the process by asking for a request identifier, and the user logs in
+through the service with that request identifier as a parameter. This identifier
+is then used to associate the user data with the user logging in via the
+extension. As such, it will be necessary to direct all traffic to a single
+instance, only switching to a secondary instance when the first has failed.
 
 ## Why Node and Passport?
 
