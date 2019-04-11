@@ -229,7 +229,7 @@ the base directory, and this will be read by the service using the
 | `SVC_BASE_URI`       | URI of the service, used for building URLs   | *none*           |
 | `IDP_CERT_FILE`      | Path of our SAML IdP public certificate      | *none*           |
 | `IDP_KEY_FILE`       | Path of our SAML IdP private key file        | *none*           |
-| `SP_ACS_URL`         | Default SAML SP ACS URL                      | *none*           |
+| `IDP_CONFIG_FILE`    | Path of the SAML IdP configuration file      | See **@1** below |
 | `SAML_IDP_SSO_URL`   | Login URL for the SAML IdP                   | *none*           |
 | `SAML_IDP_SLO_URL`   | Logout URL for the SAML IdP                  | *none*           |
 | `SAML_SP_ISSUER`     | Entity ID for our SAML service provider      | `urn:example:sp` |
@@ -242,6 +242,16 @@ the base directory, and this will be read by the service using the
 There are other settings that apply to the test services, found in the
 `containers` directory. Those settings can be see in the `docker-compose.yml`
 file, but otherwise are outside the scope of this authentication service.
+
+### IdP Configuration
+
+**@1** When the authentication service is acting as a SAML identity provider, it
+reads some of its settings from a configuration file, identified by the
+`IDP_CONFIG_FILE` environment variable. By default this file is named
+`saml_idp.conf.js` and is located in the `routes` directory. It is evaluated
+using the Node.js `require()` function, so it can be any valid JavaScript or
+JSON. See the default configuration file for comments and explanations of the
+available settings.
 
 ## Running the Service on HTTP
 
@@ -460,11 +470,10 @@ in the `data/config.php` file. Below is a simple example:
 ```
 
 Just as with any other SAML IdP, the auth service must know a little bit about
-the service provider that will be connecting to it. This is defined by setting
-the `SAML_SP_ISSUER` environment variable. Given the example configuration
-above, this value would be `urn:example:sp`, the `sp.entityId`. Similarly, the
-ACS URL is defined using the `SP_ACS_URL` environment variable. In this example,
-its value would be `http://192.168.1.106`, the URL for the Swarm service.
+the service provider that will be connecting to it. This is defined in the
+`IDP_CONFIG_FILE` configuration file described above. In this example, the key
+would be `urn:example:sp` and its value would be `http://192.168.1.106/login`
+(Swarm wants the extra `/login` on the URL).
 
 The IdP settings come from the auth service: the entity identifier is hard-coded
 to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host

@@ -9,13 +9,18 @@ const { Strategy } = require('passport-saml')
 const samlp = require('samlp')
 const { users, requests } = require('../store')
 
+const idpConfFile = process.env.IDP_CONFIG_FILE || './saml_idp.conf.js'
+const idpConfig = require(idpConfFile)
 const idpOptions = {
   cert: process.env.IDP_CERT_FILE ? fs.readFileSync(process.env.IDP_CERT_FILE) : undefined,
   key: process.env.IDP_KEY_FILE ? fs.readFileSync(process.env.IDP_KEY_FILE) : undefined,
-  getPostURL: (audience, authnRequestDom, req, callback) => {
-    return callback(null, (req.authnRequest && req.authnRequest.acsUrl)
-      ? req.authnRequest.acsUrl
-      : process.env.SP_ACS_URL)
+  getPostURL: (audience, samlRequestDom, req, callback) => {
+    const url = idpConfig[req.authnRequest.issuer]['spAcsUrl']
+    if (url) {
+      callback(null, url)
+    } else {
+      callback(new Error(`no mapping for [${req.authnRequest.issuer}]['spAcsUrl'] in ${idpConfFile}`), null)
+    }
   },
   issuer: 'urn:auth-service:idp',
   redirectEndpointPath: '/saml/login',
@@ -164,7 +169,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     // make a user object that samlp will work with
     const user = Object.assign({}, req.user, {
       id: req.user.nameID,
-      emails: [ null ],
+      emails: [null],
       displayName: '',
       name: {
         givenName: '',
