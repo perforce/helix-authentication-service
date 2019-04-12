@@ -150,7 +150,7 @@ function checkAuthentication (req, res, next) {
 }
 
 router.get('/success', checkAuthentication, (req, res, next) => {
-  const userId = requests.get(req.session.requestId)
+  const userId = requests.getIfPresent(req.session.requestId)
   if (userId === 'SAML:legacy:placeholder') {
     // This is a SAML legacy hack, in which the best we can do is to assume that
     // the nameID is the user identifier expected by the login extensions.

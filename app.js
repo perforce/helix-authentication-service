@@ -7,8 +7,17 @@ const path = require('path')
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
 const logger = require('morgan')
+const debug = require('debug')('oidc:server')
 const helmet = require('helmet')
-require('dotenv').config()
+const dotResult = require('dotenv').config()
+if (dotResult.error) {
+  if (dotResult.error.code !== 'ENOENT') {
+    console.error(dotResult.error)
+  }
+}
+if (dotResult.parsed) {
+  debug('dotenv results: %o', dotResult.parsed)
+}
 
 const indexRouter = require('./routes/index')
 const oidcRouter = require('./routes/oidc')

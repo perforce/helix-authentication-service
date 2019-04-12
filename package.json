@@ -20,10 +20,10 @@
   },
   "dependencies": {
     "debug": "~4.1.1",
-    "dotenv": "^6.2.0",
+    "dotenv": "^7.0.0",
     "ejs": "~2.6.1",
     "express": "~4.16.0",
-    "express-session": "^1.15.6",
+    "express-session": "^1.16.1",
     "helmet": "^3.16.0",
     "http-errors": "~1.7.2",
     "memorystore": "^1.6.1",
@@ -32,7 +32,7 @@
     "passport": "^0.4.0",
     "passport-saml": "^1.0.0",
     "samlp": "^3.4.0",
-    "transitory": "^1.2.1",
+    "transitory": "^2.1.0",
     "ulid": "^2.3.0"
   },
   "private": true,

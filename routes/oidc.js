@@ -94,7 +94,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     req.session.successRedirect = null
     res.redirect(path)
   } else {
-    const userId = requests.get(req.session.requestId)
+    const userId = requests.getIfPresent(req.session.requestId)
     users.set(userId, req.user)
     const name = req.user.given_name || req.user.name || req.user.email
     res.render('details', { name })

@@ -39,18 +39,18 @@ router.get('/status/:id', async (req, res, next) => {
     // request has successfully authenticated. Wait for a while as the user may
     // still be authenticating with the identity provider.
     if (requests.has(req.params.id)) {
-      const userId = requests.get(req.params.id)
+      const userId = requests.getIfPresent(req.params.id)
       try {
         let user = await new Promise((resolve, reject) => {
           if (users.has(userId)) {
             // data is ready, no need to wait
-            resolve(users.get(userId))
+            resolve(users.getIfPresent(userId))
           } else {
             // wait for the data to become available
             const timeout = setInterval(() => {
               if (users.has(userId)) {
                 clearInterval(timeout)
-                resolve(users.get(userId))
+                resolve(users.getIfPresent(userId))
               }
             }, 1000)
             // but don't wait too long
