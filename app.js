@@ -7,6 +7,7 @@ const path = require('path')
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
 const logger = require('morgan')
+const helmet = require('helmet')
 require('dotenv').config()
 
 const indexRouter = require('./routes/index')
@@ -15,6 +16,7 @@ const requestsRouter = require('./routes/requests')
 const samlRouter = require('./routes/saml')
 
 const app = express()
+app.use(helmet())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
