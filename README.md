@@ -191,6 +191,15 @@ For SAML, the extension must be installed slightly differently:
 $ PROTOCOL=saml node hook.js
 ```
 
+You will almost certainly have to change the `name-identifier` setting to
+`nameID` as well, since typical SAML identity providers do not include an
+`email` property, including the test SAML IdP. Invoke the extension configure
+command to bring up the form:
+
+```shell
+$ p4 extension --configure Auth::loginhook --name loginhook-all
+```
+
 ## Sample Data
 
 ### OpenID Connect Sample Data
