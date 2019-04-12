@@ -7,14 +7,17 @@ const path = require('path')
 const session = require('express-session')
 const MemoryStore = require('memorystore')(session)
 const logger = require('morgan')
-const debug = require('debug')('oidc:server')
 const helmet = require('helmet')
+
+// load .env file, report any unexpected errors
 const dotResult = require('dotenv').config()
 if (dotResult.error) {
   if (dotResult.error.code !== 'ENOENT') {
     console.error(dotResult.error)
   }
 }
+// start the debug logging, show dotenv results if any
+const debug = require('debug')('oidc:server')
 if (dotResult.parsed) {
   debug('dotenv results: %o', dotResult.parsed)
 }
