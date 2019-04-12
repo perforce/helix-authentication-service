@@ -1,6 +1,7 @@
 //
 // Copyright 2019 Perforce Software
 //
+const debug = require('debug')('oidc:server')
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')
@@ -10,8 +11,8 @@ const { users, requests } = require('../store')
 let client = null
 
 Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
-  // console.info(issuer.issuer)
-  // console.info(issuer.metadata)
+  debug('issuer: %o', issuer.issuer)
+  debug('metadata: %o', issuer.metadata)
   //
   // dynamic registration, maybe not permitted with the oidc-provider npm?
   //

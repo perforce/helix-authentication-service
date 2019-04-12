@@ -1,6 +1,7 @@
 //
 // Copyright 2019 Perforce Software
 //
+const debug = require('debug')('oidc:server')
 const fs = require('fs')
 const express = require('express')
 const router = express.Router()
@@ -18,6 +19,7 @@ const idpOptions = {
     // invoking callback() with an error results in a 500 response
     // invoking callback(null, null) will return a 401 response
     const url = idpConfig[req.authnRequest.issuer]['acsUrl']
+    debug('POST URL %s for %s', url, req.authnRequest.issuer)
     if (url) {
       callback(null, url)
     } else {
@@ -102,6 +104,7 @@ router.get('/login', (req, res, next) => {
         error: err
       })
     } else if (data) {
+      debug('parsed SAML request: %o', data)
       // parsed data: { issuer: 'urn:example:sp',
       //   assertionConsumerServiceURL: 'http://192.168.1.106/login',
       //   destination: 'https://192.168.1.66:3000/saml/login',
@@ -157,6 +160,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     if (req.user.email && !req.user.nameID) {
       req.user.nameID = req.user.email
     }
+    debug('legacy mapping %s to result %o', req.user.nameID, req.user)
     users.set(req.user.nameID, req.user)
     // Generate a new SAML response befitting of the request we received.
     const moreOptions = Object.assign({}, idpOptions, {
@@ -193,6 +197,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     })
   } else {
     // "normal" success path, save user data for verification
+    debug('mapping %s to result %o', userId, req.user)
     users.set(userId, req.user)
     const name = req.user.nameID
     res.render('details', { name })

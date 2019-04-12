@@ -1,6 +1,7 @@
 //
 // Copyright 2019 Perforce Software
 //
+const debug = require('debug')('oidc:server')
 const express = require('express')
 const router = express.Router()
 const { ulid } = require('ulid')
@@ -14,6 +15,7 @@ router.get('/new/:id', (req, res, next) => {
   // Always generate a new request every time, and use that request identifer as
   // the key, as the user may be logging in from different client systems.
   const requestId = ulid()
+  debug('new request %s for %s', requestId, req.params.id)
   requests.set(requestId, req.params.id)
   res.json({
     request: requestId
@@ -58,6 +60,7 @@ router.get('/status/:id', async (req, res, next) => {
             })
           }
         })
+        debug('resolved user for %s (%s)', userId, req.params.id)
         res.json(user)
       } catch (err) {
         res.status(408).send('Request Timeout')
