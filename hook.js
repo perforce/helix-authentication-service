@@ -77,8 +77,8 @@ new Promise((resolve, reject) => {
   })
 }).then((config) => {
   config = config.replace(/sampleExtensionsUser/g, 'super')
-  config = config.replace(/The authentication service base URL\./, baseUrl)
-  config = config.replace(/Authentication protocol, such as saml or oidc\./, protocol)
+  config = config.replace(/\.\.\. The authentication service base URL\./, baseUrl)
+  config = config.replace(/\.\.\. Authentication protocol, such as saml or oidc\./, protocol)
   return new Promise((resolve, reject) => {
     let child = spawn('p4', ['-u', p4user, '-p', p4port, 'extension', '--configure', hookname, '-i'])
     child.stdout.on('data', (data) => {
@@ -108,7 +108,7 @@ new Promise((resolve, reject) => {
     })
   })
 }).then((config) => {
-  config = config.replace(/Those users who will not be using SSO\./, 'super')
+  config = config.replace(/\.\.\. Those users who will not be using SSO\./, 'super')
   return new Promise((resolve, reject) => {
     let child = spawn('p4', ['-u', p4user, '-p', p4port, 'extension', '--configure', hookname, '-i'])
     child.stdout.on('data', (data) => {
