@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel='stylesheet' href='/stylesheets/bulma.min.css' />
+</head>
+
+<body>
+  <section class="hero is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Login</h1>
+        <h2 class="subtitle">Enter your credentials using the form</h2>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <form method="get" action="/<%= protocol %>/login_failed" id="failed">
+      </form>
+      <form method="post" action="/<%= protocol %>/validate">
+        <div class="field">
+          <label class="label">Username</label>
+          <div class="control">
+            <input class="input" type="text" name="username">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <div class="control">
+            <input class="input" type="password" name="password">
+          </div>
+        </div>
+        <div class="field is-grouped">
+          <div class="control">
+            <button class="button is-link" type="submit">Login</button>
+          </div>
+          <div class="control">
+            <button class="button is-text" type="submit" form="failed">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</body>
+
+</html>

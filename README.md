@@ -2,7 +2,8 @@
 
 This [Node.js](http://nodejs.org) based application implements a simple external
 authentication service to be used in concert with the `loginhook` extension. It
-supports the OpenID Connect and SAML 2.0 authentication protocols.
+supports the OpenID Connect and SAML 2.0 authentication protocols, as well as
+BIND authentication with an LDAP server.
 
 ## Overview
 
@@ -34,6 +35,8 @@ Using OIDC, this service has been tested with [Auth0](https://auth0.com),
 
 Using SAML, this service has been tested with [Auth0](https://auth0.com),
 [Okta](https://www.okta.com), and [OneLogin](https://www.onelogin.com).
+
+Using LDAP, this service has been tested with OpenLDAP.
 
 ## Development Environments
 
@@ -201,6 +204,11 @@ $ p4 extension --configure Auth::loginhook --name loginhook-all
 ```
 
 ## Sample Data
+
+### LDAP Sample Data
+
+The OpenLDAP server running in Docker has a group named `users` and a single
+user named `george` whose password is `Passw0rd!`.
 
 ### OpenID Connect Sample Data
 

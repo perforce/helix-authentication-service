@@ -1,0 +1,4 @@
+dn: uid=george,ou=users,dc=example,dc=org
+changetype: modify
+add: userPassword
+userPassword: Passw0rd!

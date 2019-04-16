@@ -23,6 +23,7 @@ if (dotResult.parsed) {
 }
 
 const indexRouter = require('./routes/index')
+const ldapRouter = require('./routes/ldap')
 const oidcRouter = require('./routes/oidc')
 const requestsRouter = require('./routes/requests')
 const samlRouter = require('./routes/saml')
@@ -49,6 +50,7 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/requests', requestsRouter)
+app.use('/ldap', ldapRouter)
 app.use('/oidc', oidcRouter)
 app.use('/saml', samlRouter)
 app.use('/', indexRouter)

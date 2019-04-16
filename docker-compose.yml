@@ -19,6 +19,12 @@ services:
         PUB_KEY: http://pkg-ondemand.bnr.perforce.com/perforce/main/perforce.pubkey
     ports:
       - "1666:1666"
+  ldap.doc:
+    build:
+      context: containers/ldap
+    ports:
+      - "389:389"
+      - "636:636"
   idp.doc:
     build:
       context: containers/idp
@@ -68,5 +74,10 @@ services:
       SP_CERT_FILE: certs/sp.crt
       SP_KEY_FILE: certs/sp.key
       # SP_KEY_ALGO: sha256
+      LDAP_URL: "ldap://ldap.doc:389"
+      LDAP_BIND_DN: "cn=admin,dc=example,dc=org"
+      LDAP_BIND_CREDENTIALS: "admin"
+      LDAP_SEARCH_BASE: "ou=users,dc=example,dc=org"
+      LDAP_SEARCH_FILTER: "(uid={{username}})"
     ports:
       - "3000:3000"

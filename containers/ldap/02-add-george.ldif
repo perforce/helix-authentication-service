@@ -1,0 +1,9 @@
+dn: uid=george,ou=users,dc=example,dc=org
+uid: george
+cn: Curious George
+sn: George
+mail: george@example.org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
