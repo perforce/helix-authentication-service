@@ -25,7 +25,7 @@ router.get('/new/:id', (req, res, next) => {
 // :id is the request identifier returned from /new/:id
 router.get('/status/:id', async (req, res, next) => {
   //
-  // Check for validate client certificates. This is set up in the options to
+  // Check for valid client certificates. This is set up in the options to
   // https.createServer(), namely the `ca`, `requestCert`, and
   // `rejectUnauthorized` properties. We then assert that the request is
   // authorized, and if not we give the client some explanation.
