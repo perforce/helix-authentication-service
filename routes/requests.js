@@ -8,7 +8,7 @@ const { ulid } = require('ulid')
 const { users, requests } = require('../store')
 
 // How long to wait (in ms) for user details before returning 408.
-const requestTimeout = 60 * 1000
+const requestTimeout = (parseInt(process.env.LOGIN_TIMEOUT) || 60) * 1000
 
 // :id is the user identifier (e.g. email)
 router.get('/new/:id', (req, res, next) => {
