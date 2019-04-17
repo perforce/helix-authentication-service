@@ -1,7 +1,7 @@
 //
 // Copyright 2019 Perforce Software
 //
-const debug = require('debug')('oidc:server')
+const debug = require('debug')('auth:server')
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')

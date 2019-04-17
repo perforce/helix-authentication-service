@@ -7,7 +7,7 @@
  * Module dependencies.
  */
 const app = require('../app')
-const debug = require('debug')('oidc:server')
+const debug = require('debug')('auth:server')
 const fs = require('fs')
 
 /**

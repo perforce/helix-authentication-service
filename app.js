@@ -17,7 +17,7 @@ if (dotResult.error) {
   }
 }
 // start the debug logging, show dotenv results if any
-const debug = require('debug')('oidc:server')
+const debug = require('debug')('auth:server')
 if (dotResult.parsed) {
   debug('dotenv results: %o', dotResult.parsed)
 }
