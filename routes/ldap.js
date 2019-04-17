@@ -72,6 +72,12 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     //   objectClass: [ 'top', 'person', 'organizationalPerson', 'inetOrgPerson' ],
     //   userPassword: 'seriously?'
     // }
+    if (req.user['password']) {
+      delete req.user['password']
+    }
+    if (req.user['userPassword']) {
+      delete req.user['userPassword']
+    }
     const userId = requests.getIfPresent(req.session.requestId)
     users.set(userId, req.user)
     const name = req.user.given_name || req.user.name || req.user.email
