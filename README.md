@@ -550,21 +550,6 @@ is then used to associate the user data with the user logging in via the
 extension. As such, it will be necessary to direct all traffic to a single
 instance, only switching to a secondary instance when the first has failed.
 
-## Why Node and Passport?
-
-### Node.js
-
-Applications running on Node are sufficiently fast, especially compared to
-Python or Ruby. There are multiple OIDC and SAML libraries for Node to choose
-from. Deploying to a variety of systems is well supported.
-
-### Passport
-
-The [passport](http://www.passportjs.org) library is very popular and easy to
-use. There are [SAML](https://github.com/bergie/passport-saml) and
-[OIDC](https://github.com/panva/node-openid-client) modules, as well as many
-other authentication protocols.
-
 ## Coding Conventions
 
 With respect to the JavaScript code, the formatting follows
