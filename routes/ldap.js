@@ -34,7 +34,11 @@ router.use(passport.session())
 router.get('/login/:id', (req, res, next) => {
   // save the request identifier for request/user mapping
   req.session.requestId = req.params.id
-  res.render('login_form', { protocol: 'ldap' })
+  if (req.isAuthenticated()) {
+    res.redirect('/ldap/success')
+  } else {
+    res.render('login_form', { protocol: 'ldap' })
+  }
 })
 
 router.post('/validate', passport.authenticate('ldapauth', {
