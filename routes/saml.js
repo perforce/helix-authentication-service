@@ -233,7 +233,17 @@ router.post('/validate', (req, res, next) => {
   })
 })
 
-router.get('/logout', passport.authenticate('saml', {
+router.get('/logout', (req, res, next) => {
+  // If there is a default protocol that is _not_ SAML, then redirect the user
+  // there and do not use our SAML strategy.
+  const proto = process.env.DEFAULT_PROTOCOL
+  if (proto && proto !== 'saml') {
+    res.redirect(`/${proto}/logout`)
+  } else {
+    next()
+  }
+},
+passport.authenticate('saml', {
   samlFallback: 'logout-request'
 }))
 

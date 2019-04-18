@@ -108,7 +108,11 @@ router.get('/logout', checkAuthentication, (req, res) => {
     id_token_hint: req.session.idToken
   })
   req.session.destroy()
-  res.redirect(url || '/')
+  if (url) {
+    res.redirect(url)
+  } else {
+    res.render('logout_success')
+  }
 })
 
 module.exports = router
