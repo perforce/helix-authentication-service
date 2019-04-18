@@ -157,8 +157,23 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     //
     // However, if a different protocol is configured as the default, then we
     // must fake the nameID to something, probably the email.
-    if (req.user.email && !req.user.nameID) {
-      req.user.nameID = req.user.email
+    if (!req.user.nameID) {
+      let nameID = '_NONE_'
+      // Different identity providers have different fields that make good
+      // candidates for the fake name identifier.
+      if (req.user.preferred_username) {
+        nameID = req.user.preferred_username
+      } else if (req.user.email) {
+        nameID = req.user.email
+      }
+      req.user.nameID = nameID
+      debug('legacy setting nameID to %s', nameID)
+    }
+    // Same with nameID format, the SAML library requires that it have a value,
+    // so default to something sensible if none.
+    if (!req.user.nameIDFormat) {
+      req.user.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
+      debug('legacy setting nameIDFormat to unspecified')
     }
     debug('legacy mapping %s to result %o', req.user.nameID, req.user)
     users.set(req.user.nameID, req.user)
@@ -224,7 +239,7 @@ router.get('/logout', passport.authenticate('saml', {
 
 function handleSLO (req, res) {
   req.session.destroy()
-  res.redirect('/')
+  res.render('logout_success')
 }
 
 // some services use GET and some use POST

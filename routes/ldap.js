@@ -88,7 +88,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
 router.get('/logout', checkAuthentication, (req, res) => {
   req.logout()
   req.session.destroy()
-  res.redirect('/')
+  res.render('logout_success')
 })
 
 module.exports = router
