@@ -8,6 +8,7 @@ const router = express.Router()
 const passport = require('passport')
 const { Strategy } = require('passport-saml')
 const samlp = require('samlp')
+const { ulid } = require('ulid')
 const { users, requests } = require('../store')
 
 const idpConfFile = process.env.IDP_CONFIG_FILE || './saml_idp.conf.js'
@@ -152,25 +153,32 @@ function checkAuthentication (req, res, next) {
 router.get('/success', checkAuthentication, (req, res, next) => {
   const userId = requests.getIfPresent(req.session.requestId)
   if (userId === 'SAML:legacy:placeholder') {
-    // This is a SAML legacy hack, in which the best we can do is to assume that
-    // the nameID is the user identifier expected by the login extensions.
+    // This is the SAML legacy route, in which we do not have a known user
+    // identifier to associate with the request. Default to using the nameID.
     //
     // However, if a different protocol is configured as the default, then we
-    // must fake the nameID to something, probably the email.
+    // may have to fake the nameID to something, probably the email.
+    //
+    // Note that none of this really matters in the case of the login extension,
+    // which will receive the SAML response, send it here for validation, and
+    // then get the extracted profile data in return.
     if (!req.user.nameID) {
-      let nameID = '_NONE_'
+      let nameID = null
       // Different identity providers have different fields that make good
       // candidates for the fake name identifier.
       if (req.user.preferred_username) {
         nameID = req.user.preferred_username
       } else if (req.user.email) {
         nameID = req.user.email
+      } else {
+        // need to use some unique value if nothing else
+        nameID = ulid()
       }
       req.user.nameID = nameID
       debug('legacy setting nameID to %s', nameID)
     }
-    // Same with nameID format, the SAML library requires that it have a value,
-    // so default to something sensible if none.
+    // Same with nameIDFormat, the SAML library requires that it have a value,
+    // so default to something sensible if no set.
     if (!req.user.nameIDFormat) {
       req.user.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
       debug('legacy setting nameIDFormat to unspecified')
