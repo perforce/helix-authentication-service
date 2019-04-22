@@ -158,15 +158,15 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     //
     // However, if a different protocol is configured as the default, then we
     // may have to fake the nameID to something, probably the email.
-    //
-    // Note that none of this really matters in the case of the login extension,
-    // which will receive the SAML response, send it here for validation, and
-    // then get the extracted profile data in return.
     if (!req.user.nameID) {
       let nameID = null
+      const nameIdField = process.env.SAML_NAMEID_FIELD
       // Different identity providers have different fields that make good
-      // candidates for the fake name identifier.
-      if (req.user.preferred_username) {
+      // candidates for the fake name identifier. Start with whatever the
+      // administrator specified, it anything.
+      if (nameIdField && req.user[nameIdField]) {
+        nameID = req.user[nameIdField]
+      } else if (req.user.preferred_username) {
         nameID = req.user.preferred_username
       } else if (req.user.email) {
         nameID = req.user.email
