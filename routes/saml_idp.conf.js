@@ -18,7 +18,7 @@ module.exports = {
   // These are examples, be sure to replace them with real values.
   //
   'urn:example:sp': {
-    acsUrl: 'http://example.com/saml'
+    acsUrl: 'http://192.168.1.68/login'
   },
   'fancy:swarm:sp': {
     acsUrl: 'http://192.168.1.1:8080'

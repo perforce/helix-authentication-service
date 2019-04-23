@@ -11,27 +11,26 @@ const samlp = require('samlp')
 const { ulid } = require('ulid')
 const { users, requests } = require('../store')
 
-const idpConfFile = process.env.IDP_CONFIG_FILE || './saml_idp.conf.js'
-const idpConfig = require(idpConfFile)
 const idpOptions = {
   cert: process.env.IDP_CERT_FILE ? fs.readFileSync(process.env.IDP_CERT_FILE) : undefined,
   key: process.env.IDP_KEY_FILE ? fs.readFileSync(process.env.IDP_KEY_FILE) : undefined,
-  getPostURL: (audience, samlRequestDom, req, callback) => {
-    // invoking callback() with an error results in a 500 response
-    // invoking callback(null, null) will return a 401 response
-    const url = idpConfig[req.authnRequest.issuer]['acsUrl']
-    debug('POST URL %s for %s', url, req.authnRequest.issuer)
-    if (url) {
-      callback(null, url)
-    } else {
-      callback(new Error(`no mapping for [${req.authnRequest.issuer}]['acsUrl'] in ${idpConfFile}`), null)
-    }
-  },
   issuer: 'urn:auth-service:idp',
   redirectEndpointPath: '/saml/login',
   postEndpointPath: '/saml/login',
   logoutEndpointPaths: {
     'redirect': '/saml/logout'
+  }
+}
+const idpConfFile = process.env.IDP_CONFIG_FILE || './saml_idp.conf.js'
+const idpConfig = require(idpConfFile)
+function getPostURL (req, callback) {
+  const issuer = req.session.authnRequest.issuer
+  const url = idpConfig[issuer]['acsUrl']
+  debug('POST URL %s for %s', url, issuer)
+  if (url) {
+    callback(null, url)
+  } else {
+    callback(new Error(`no mapping for [${issuer}]['acsUrl'] in ${idpConfFile}`), null)
   }
 }
 
@@ -187,8 +186,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     users.set(req.user.nameID, req.user)
     // Generate a new SAML response befitting of the request we received.
     const moreOptions = Object.assign({}, idpOptions, {
-      lifetimeInSeconds: 3600,
-      audiences: req.session.authnRequest.issuer,
+      audience: req.session.authnRequest.issuer,
       recipient: req.session.authnRequest.acsUrl,
       inResponseTo: req.session.authnRequest.id,
       authnContextClassRef: req.session.authnRequest.context.authnContextClassRef,
@@ -205,17 +203,35 @@ router.get('/success', checkAuthentication, (req, res, next) => {
         familyName: ''
       }
     })
-    samlp.getSamlResponse(moreOptions, user, (err, resp) => {
+    getPostURL(req, (err, url) => {
       if (err) {
-        console.error(err)
-        next()
-      } else {
-        // render an HTML form to send the response back to the SP
-        res.render('samlresponse', {
-          AcsUrl: req.session.authnRequest.acsUrl,
-          SAMLResponse: Buffer.from(resp, 'utf8').toString('base64'),
-          RelayState: req.session.authnRequest.relayState
+        res.render('error', {
+          message: 'SAML response error: ' + err.message,
+          error: err
         })
+      } else if (url) {
+        if (moreOptions.recipient !== url) {
+          res.render('error', {
+            message: 'SAML ACS URL does not match recipient: ' + url,
+            error: new Error('SAML ACS URL mismatch')
+          })
+        } else {
+          samlp.getSamlResponse(moreOptions, user, (err, resp) => {
+            if (err) {
+              res.render('error', {
+                message: 'SAML response error: ' + err.message,
+                error: err
+              })
+            } else {
+              // render an HTML form to send the response back to the SP
+              res.render('samlresponse', {
+                AcsUrl: url,
+                SAMLResponse: Buffer.from(resp, 'utf8').toString('base64'),
+                RelayState: req.session.authnRequest.relayState
+              })
+            }
+          })
+        }
       }
     })
   } else {
