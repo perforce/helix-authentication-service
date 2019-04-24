@@ -41,96 +41,13 @@ Using SAML, this service has been tested with [Auth0](https://auth0.com),
 
 Using LDAP, this service has been tested with OpenLDAP.
 
-## Service Configuration
+## Documentation
 
-See the Confluence
-[page](https://confluence.perforce.com:8443/display/~nfiedler/Authentication+Integration)
-for documentation.
+See the files in the `docs` directory, especiallying the `Getting_Started.md`
+guide that gives a detailed overview of setting up everything.
 
-## Certificates
+### Configuration
 
-For development we use self-signed certificates, and use the service certificate
-to sign the client signing request to produce a client certificate. In practice,
-both the service and client would use proper certificates and utilize a trusted
-certificate authority.
-
-```shell
-$ cd certs
-$ openssl req -newkey rsa:4096 -keyout client.key -out client.csr -nodes -days 365 -subj "/CN=LoginExtension"
-$ openssl x509 -req -in client.csr -CA sp.crt -CAkey sp.key -out client.crt -set_serial 01 -days 365
-```
-
-The auth service reads its certificate and key files using the paths defined in
-`SP_CERT_FILE` and `SP_KEY_FILE`, respectively. The path for the certificate
-authority certificate is read from the `CA_CERT_FILE` environment variable.
-Clients accessing the `requests/status/:id` route will require a valid client
-certificate signed by the certificate authority.
-
-### SAML IdP
-
-When the auth service is acting as a SAML identity provider, it uses a public
-key pair contained in the files identified by the `IDP_CERT_FILE` and
-`IDP_KEY_FILE` environment variables.
-
-## Removing the Extension
-
-Removing the login extension is a two-step process:
-
-1. `p4 extension --delete Auth::loginhook -y`
-1. `p4 admin restart`
-
-The `restart` is necessary since `p4d` grooms the authentication mechanims
-during startup. Without the restart, it will complain about a missing hook:
-
-```
-Command unavailable: external authentication 'auth-check-sso' trigger not found.
-```
-
-## Deploying the Service
-
-The service is a Node.js application, and has few requirements, so installation
-is relatively easy. With the latest long-term support (LTS) Node, simply get the
-service code and run `npm install`. You can then use a process manager, such as
-[pm2](http://pm2.keymetrics.io),
-[forever](https://github.com/foreverjs/forever), or
-[StrongLoop](http://strong-pm.io), to start and manage the service. pm2 is quite
-popular and has been used for testing this service. An example configuration
-file (typically named `ecosystem.config.js`) is shown below:
-
-```javascript
-module.exports = {
-  apps: [{
-    name: 'auth-svc',
-    script: './bin/www',
-    env: {
-      NODE_ENV: 'development',
-      OIDC_CLIENT_ID: 'client_id',
-      OIDC_CLIENT_SECRET: 'client_secret',
-      OIDC_ISSUER_URI: 'http://localhost:3001/',
-      SVC_BASE_URI: 'https://localhost:3000',
-      DEFAULT_PROTOCOL: 'oidc',
-      CA_CERT_FILE: 'certs/sp.crt',
-      IDP_CERT_FILE: 'certs/sp.crt',
-      IDP_KEY_FILE: 'certs/sp.key',
-      SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
-      SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
-      SAML_SP_ISSUER: 'urn:example:sp',
-      SP_CERT_FILE: 'certs/sp.crt',
-      SP_KEY_FILE: 'certs/sp.key'
-    }
-  }]
-}
-```
-
-The service does not rely on a database, all data is stored temporarily in
-memory. The bulk of the configuration is defined by environment variables. The
-service can serve multiple Helix Server installations, as the client initiates
-the requests and pulls data as needed.
-
-In terms of availability and load balancing, the service has some state that is
-maintained in memory, keyed to an opaque request identifier. The extension
-begins the process by asking for a request identifier, and the user logs in
-through the service with that request identifier as a parameter. This identifier
-is then used to associate the user data with the user logging in via the
-extension. As such, it will be necessary to direct all traffic to a single
-instance, only switching to a secondary instance when the first has failed.
+Detailed documentation for the configuration of the service and extension are
+found on the Confluence
+[page](https://confluence.perforce.com:8443/display/~nfiedler/Authentication+Integration).
