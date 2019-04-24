@@ -17,7 +17,7 @@ The other half of the system, albeit a very small half, is the Perforce
 extension installed on the Helix Server, which acts as a mediator between the
 service and the server. When a Perforce user attempts to log in to the server,
 the extension will cause their web browser to open to the authentication
-provider, and meanwhile ping the service to get the authentication success
+provider, and meanwhile poll the service to get the authentication success
 status. Once the user has successfully authenticated with the provider, the
 extension will get the results and signal the server to issue a ticket (or not,
 and fail the login).
@@ -416,52 +416,6 @@ Visit the auth service SAML [login page](https://svc.doc:3000/saml/login) to
 test. Note that this URL will be configured into the auth extension, the user
 will never have to enter the value directly.
 
-## Supporting Swarm
-
-Swarm 2018.3 supports the SAML 2.0 authentication protocol, and since the auth
-service can easily act as a SAML identity provider, we can leverage the service
-to act as a mediator to other authentication protocols. In this scenario, Swarm
-would be configured to use SAML authentication with the auth service as the IdP,
-and the auth service would be configured to use some other authentication
-protocol, such as OpenID Connect. Swarm would validate and authenticate the user
-with Perforce as before, with the auth service and login extension handling the
-details behind the scenes.
-
-### Configuring Swarm
-
-Swarm is configured to use SAML authentication by configuring several settings
-in the `data/config.php` file. Below is a simple example:
-
-```php
-'header' => 'saml-response: ',
-'sp' => array(
-    'entityId' => 'urn:example:sp',
-    'assertionConsumerService' => array(
-        'url' => 'http://192.168.1.106',
-    ),
-),
-'idp' => array(
-    'entityId' => 'urn:auth-service:idp',
-    'singleSignOnService' => array(
-        'url' => 'https://192.168.1.66:3000/saml/login',
-    ),
-    'x509cert' => 'MIIDUjCCAjoCCQD72tM...yada..yada..yada..yuSY=',
-),
-```
-
-Just as with any other SAML IdP, the auth service must know a little bit about
-the service provider that will be connecting to it. This is defined in the
-`IDP_CONFIG_FILE` configuration file described in the documentation. In this
-example, the key would be `urn:example:sp` and its value would be
-`http://192.168.1.106/login` (Swarm wants the extra `/login` on the URL). The
-service can support multiple Swarm installations, just add more entries to the
-`IDP_CONFIG_FILE` configuration as needed (and restart the service).
-
-The IdP settings come from the auth service: the entity identifier is hard-coded
-to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host
-and port on which the service is running. The public key is likely in the `certs`
-directory of the auth service.
-
 ## Certificates
 
 For development we use self-signed certificates, and use the service certificate
@@ -494,7 +448,7 @@ Removing the login extension is a two-step process:
 1. `p4 extension --delete Auth::loginhook -y`
 1. `p4 admin restart`
 
-The `restart` is necessary since `p4d` prepares its authentication mechanims
+The `restart` is necessary since `p4d` grooms the authentication mechanims
 during startup. Without the restart, it will complain about a missing hook:
 
 ```

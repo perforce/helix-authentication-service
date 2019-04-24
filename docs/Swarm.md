@@ -1,5 +1,65 @@
 # Swarm
 
+## Overview
+
+Swarm 2018.3 supports the SAML 2.0 authentication protocol, and since the auth
+service can easily act as a SAML identity provider, we can leverage the service
+to act as a mediator to other authentication protocols. In this scenario, Swarm
+would be configured to use SAML authentication with the auth service as the IdP,
+and the auth service would be configured to use some other authentication
+protocol, such as OpenID Connect. Swarm would validate and authenticate the user
+with Perforce as before, with the auth service and login extension handling the
+details behind the scenes.
+
+## Configuration
+
+When specifying the URL for Swarm and for the authentication service, make sure
+to use consistent addresses. That is, the authentication service `SVC_BASE_URI`
+and the address specified in the Swarm configuration should match. Either they
+are both IP addresses or they are both hostnames. Mixing these will cause the
+browser cookies to be inaccessible to the auth service and login will not work
+at all. The same is true for the identity provider configuration: its address
+for the authentication service (Service Provider) must match the leading part of
+the `SVC_BASE_URI` setting.
+
+### Swarm
+
+Swarm is configured to use SAML authentication by configuring several settings
+in the `data/config.php` file. Below is a simple example:
+
+```php
+'header' => 'saml-response: ',
+'sp' => array(
+    'entityId' => 'urn:example:sp',
+    'assertionConsumerService' => array(
+        'url' => 'http://192.168.1.106',
+    ),
+),
+'idp' => array(
+    'entityId' => 'urn:auth-service:idp',
+    'singleSignOnService' => array(
+        'url' => 'https://192.168.1.66:3000/saml/login',
+    ),
+    'x509cert' => 'MIIDUjCCAjoCCQD72tM...yada..yada..yada..yuSY=',
+),
+```
+
+The IdP settings come from the auth service: the entity identifier is hard-coded
+to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host
+and port on which the service is running. The public key is likely in the `certs`
+directory of the auth service.
+
+### Auth Service
+
+Just as with any other SAML IdP, the auth service must know a little bit about
+the service provider that will be connecting to it. This is defined in the
+`IDP_CONFIG_FILE` configuration file described in the documentation on
+Confluence. In this example, the key would be `urn:example:sp` and its value
+would be `http://192.168.1.106/login` (Swarm wants the extra `/login` on the
+URL). The service can support multiple Swarm installations, just add more
+entries to the `IDP_CONFIG_FILE` configuration as needed (and restart the
+service).
+
 ## Development Setup
 
 ### Helix Server
@@ -42,7 +102,7 @@ For example:
 1. Ensure `x509cert` for `idp` is set to auth service public cert.
 1. Set `sso_enabled` to `true` in `config.php`
 
-#### Notes
+### Swarm Notes
 
 Use `ssh` as `swarm` user to connect to VM (no ssh access for root).
 
