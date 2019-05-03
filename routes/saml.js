@@ -25,13 +25,15 @@ const idpConfFile = process.env.IDP_CONFIG_FILE || './saml_idp.conf.js'
 const idpConfig = require(idpConfFile)
 function getPostURL (req, callback) {
   const issuer = req.session.authnRequest.issuer
-  const url = idpConfig[issuer]['acsUrl']
-  debug('POST URL %s for %s', url, issuer)
-  if (url) {
-    callback(null, url)
-  } else {
-    callback(new Error(`no mapping for [${issuer}]['acsUrl'] in ${idpConfFile}`), null)
+  if (issuer in idpConfig && 'acsUrl' in idpConfig[issuer]) {
+    const url = idpConfig[issuer]['acsUrl']
+    debug('POST URL %s for %s', url, issuer)
+    if (url) {
+      callback(null, url)
+      return
+    }
   }
+  callback(new Error(`no mapping for [${issuer}]['acsUrl'] in ${idpConfFile}`), null)
 }
 
 const samlOptions = {
@@ -46,20 +48,8 @@ const samlOptions = {
   signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256'
 }
 const strategy = new Strategy(samlOptions, (profile, done) => {
-  // profile: {
-  //   issuer: {...},
-  //   sessionIndex: '_1189d45be2aed1519794',
-  //   nameID: 'jackson@example.com',
-  //   nameIDFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
-  //   nameQualifier: undefined,
-  //   spNameQualifier: undefined,
-  //   fullname: 'Sam L. Jackson',
-  //   getAssertionXml: [Function]
-  // }
-  //
   // produce a "user" object that contains the information that passport-saml
   // requires for logging out via SAML
-  //
   return done(null, {
     nameID: profile.nameID,
     nameIDFormat: profile.nameIDFormat,
@@ -105,13 +95,6 @@ router.get('/login', (req, res, next) => {
       })
     } else if (data) {
       debug('parsed SAML request: %o', data)
-      // parsed data: { issuer: 'urn:example:sp',
-      //   assertionConsumerServiceURL: 'http://192.168.1.106/login',
-      //   destination: 'https://192.168.1.66:3000/saml/login',
-      //   id: 'ONELOGIN_de5494ef71c18d9f0bf602619c730752c2822adc',
-      //   requestedAuthnContext:
-      //    { authnContextClassRef:
-      //       'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport' } }
       req.session.authnRequest = {
         relayState: req.query.RelayState,
         id: data.id,
@@ -157,52 +140,22 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     //
     // However, if a different protocol is configured as the default, then we
     // may have to fake the nameID to something, probably the email.
-    if (!req.user.nameID) {
-      let nameID = null
-      const nameIdField = process.env.SAML_NAMEID_FIELD
-      // Different identity providers have different fields that make good
-      // candidates for the fake name identifier. Start with whatever the
-      // administrator specified, it anything.
-      if (nameIdField && req.user[nameIdField]) {
-        nameID = req.user[nameIdField]
-      } else if (req.user.preferred_username) {
-        nameID = req.user.preferred_username
-      } else if (req.user.email) {
-        nameID = req.user.email
-      } else {
-        // need to use some unique value if nothing else
-        nameID = ulid()
-      }
-      req.user.nameID = nameID
-      debug('legacy setting nameID to %s', nameID)
-    }
-    // Same with nameIDFormat, the SAML library requires that it have a value,
-    // so default to something sensible if no set.
-    if (!req.user.nameIDFormat) {
-      req.user.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-      debug('legacy setting nameIDFormat to unspecified')
-    }
+    assignNameId(req.user)
     debug('legacy mapping %s to result %o', req.user.nameID, req.user)
     users.set(req.user.nameID, req.user)
     // Generate a new SAML response befitting of the request we received.
     const moreOptions = Object.assign({}, idpOptions, {
       audience: req.session.authnRequest.issuer,
+      destination: req.session.authnRequest.acsUrl,
       recipient: req.session.authnRequest.acsUrl,
       inResponseTo: req.session.authnRequest.id,
-      authnContextClassRef: req.session.authnRequest.context.authnContextClassRef,
+      authnContextClassRef: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
       sessionIndex: undefined,
       includeAttributeNameFormat: true
     })
-    // make a user object that samlp will work with
-    const user = Object.assign({}, req.user, {
-      id: req.user.nameID,
-      emails: [null],
-      displayName: '',
-      name: {
-        givenName: '',
-        familyName: ''
-      }
-    })
+    if (req.session.authnRequest.context && req.session.authnRequest.context.authnContextClassRef) {
+      moreOptions.authnContextClassRef = req.session.authnRequest.context.authnContextClassRef
+    }
     getPostURL(req, (err, url) => {
       if (err) {
         res.render('error', {
@@ -216,6 +169,8 @@ router.get('/success', checkAuthentication, (req, res, next) => {
             error: new Error('SAML ACS URL mismatch')
           })
         } else {
+          // make a user object that samlp will work with
+          const user = buildResponseUser(req.user)
           samlp.getSamlResponse(moreOptions, user, (err, resp) => {
             if (err) {
               res.render('error', {
@@ -242,6 +197,59 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     res.render('details', { name })
   }
 })
+
+// If the `nameID` property is missing, attempt to set it to a reasonable value.
+// If `nameIDFormat` property is missing, sets it to the "unspecified" value.
+function assignNameId (user) {
+  if (!user.nameID) {
+    let nameID = null
+    const nameIdField = process.env.SAML_NAMEID_FIELD
+    // Different identity providers have different fields that make good
+    // candidates for the fake name identifier. Start with whatever the
+    // administrator specified, it anything.
+    if (nameIdField && user[nameIdField]) {
+      nameID = user[nameIdField]
+    } else if (user.preferred_username) {
+      nameID = user.preferred_username
+    } else if (user.email) {
+      nameID = user.email
+    } else {
+      // need to use some unique value if nothing else
+      nameID = ulid()
+    }
+    user.nameID = nameID
+    debug('legacy setting nameID to %s', nameID)
+  }
+  // Same with nameIDFormat, the SAML library requires that it have a value,
+  // so default to something sensible if no set.
+  if (!user.nameIDFormat) {
+    user.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
+    debug('legacy setting nameIDFormat to unspecified')
+  }
+}
+
+// Construct a user object that samlp will accept for building the SAML
+// response, and fill in some properties that the service might expect.
+function buildResponseUser (user) {
+  let email = user.email ? user.email : null
+  let displayName = ''
+  if (user.fullname) {
+    displayName = user.fullname
+  } else if (user.name) {
+    displayName = user.name
+  }
+  let givenName = user.given_name ? user.given_name : ''
+  let familyName = user.family_name ? user.family_name : ''
+  return Object.assign({}, user, {
+    id: user.nameID,
+    emails: [email],
+    displayName,
+    name: {
+      givenName,
+      familyName
+    }
+  })
+}
 
 // Legacy route in which extensions receive a SAML response from the client and
 // need it to be properly validated, which is hard to do without XML parsing.

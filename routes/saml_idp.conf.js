@@ -20,7 +20,7 @@ module.exports = {
   'urn:example:sp': {
     acsUrl: 'http://192.168.1.68/login'
   },
-  'fancy:swarm:sp': {
-    acsUrl: 'http://192.168.1.1:8080'
+  'http://localhost:8080/account/saml/hth/metadata': {
+    acsUrl: 'http://localhost:8080/account/saml/hth/consume'
   }
 }

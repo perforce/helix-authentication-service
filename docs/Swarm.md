@@ -16,7 +16,7 @@ details behind the scenes.
 When specifying the URL for Swarm and for the authentication service, make sure
 to use consistent addresses. That is, the authentication service `SVC_BASE_URI`
 and the address specified in the Swarm configuration should match. Either they
-are both IP addresses or they are both hostnames. Mixing these will cause the
+are both IP addresses or they are both host names. Mixing these will cause the
 browser cookies to be inaccessible to the auth service and login will not work
 at all. The same is true for the identity provider configuration: its address
 for the authentication service (Service Provider) must match the leading part of
@@ -67,6 +67,7 @@ service).
 1. Start `p4d` with logging to a file: `p4d -d -r p4root -L log`
 1. Enable command logging: `p4 configure set server=2`
 1. Create a `super` user and bestow super privileges.
+1. Be sure that `super` has a password and has a ticket.
 1. Allow non-SSO access: `p4 configure set auth.sso.allow.passwd=1`
 1. Install the extensions in the server: `AUTH_URL=https://192.168.1.66:3000 P4PORT=localhost:1666 node hook.js`
 1. Ensure extensions service URL is same as what Swarm uses so cookies will work.

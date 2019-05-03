@@ -189,16 +189,16 @@ p4 extension --configure Auth::loginhook --name loginhook-all -o
 [snip]
 
 ExtConfig:
-	enable-logging:
-		... Extension will write debug messages to a log if 'true'.
-	name-identifier:
-		... Field within IdP response containing unique user identifer.
-	non-sso-groups:
-		... Those groups whose members will not be using SSO.
-	non-sso-users:
-		... Those users who will not be using SSO.
-	user-identifier:
-		... Trigger variable used as unique user identifier.
+    enable-logging:
+        ... Extension will write debug messages to a log if 'true'.
+    name-identifier:
+        ... Field within IdP response containing unique user identifer.
+    non-sso-groups:
+        ... Those groups whose members will not be using SSO.
+    non-sso-users:
+        ... Those users who will not be using SSO.
+    user-identifier:
+        ... Trigger variable used as unique user identifier.
 ```
 
 All of these settings have sensible defaults. However, for the extension to be
