@@ -2,14 +2,14 @@
 
 ## Overview
 
-Swarm 2018.3 supports the SAML 2.0 authentication protocol, and since the auth
-service can easily act as a SAML identity provider, we can leverage the service
-to act as a mediator to other authentication protocols. In this scenario, Swarm
-would be configured to use SAML authentication with the auth service as the IdP,
-and the auth service would be configured to use some other authentication
-protocol, such as OpenID Connect. Swarm would validate and authenticate the user
-with Perforce as before, with the auth service and login extension handling the
-details behind the scenes.
+Swarm **2018.3** supports the SAML 2.0 authentication protocol, and since the
+auth service can easily act as a SAML identity provider, we can leverage the
+service to act as a mediator to other authentication protocols. In this
+scenario, Swarm would be configured to use SAML authentication with the auth
+service as the IdP, and the auth service would be configured to use some other
+authentication protocol, such as OpenID Connect. Swarm would validate and
+authenticate the user with Perforce as before, with the auth service and login
+extension handling the details behind the scenes.
 
 ## Configuration
 
@@ -28,19 +28,21 @@ Swarm is configured to use SAML authentication by configuring several settings
 in the `data/config.php` file. Below is a simple example:
 
 ```php
-'header' => 'saml-response: ',
-'sp' => array(
-    'entityId' => 'urn:example:sp',
-    'assertionConsumerService' => array(
-        'url' => 'http://192.168.1.106',
+'saml' => array(
+    'header' => 'saml-response: ',
+    'sp' => array(
+        'entityId' => 'urn:example:sp',
+        'assertionConsumerService' => array(
+            'url' => 'http://192.168.1.106',
+        ),
     ),
-),
-'idp' => array(
-    'entityId' => 'urn:auth-service:idp',
-    'singleSignOnService' => array(
-        'url' => 'https://192.168.1.66:3000/saml/login',
+    'idp' => array(
+        'entityId' => 'urn:auth-service:idp',
+        'singleSignOnService' => array(
+            'url' => 'https://192.168.1.66:3000/saml/login',
+        ),
+        'x509cert' => 'MIIDUjCCAjoCCQD72tM......yuSY=',
     ),
-    'x509cert' => 'MIIDUjCCAjoCCQD72tM...yada..yada..yada..yuSY=',
 ),
 ```
 
@@ -73,11 +75,10 @@ service).
 1. Ensure extensions service URL is same as what Swarm uses so cookies will work.
 1. Set the `name-identifier` to `nameID` if using Okta IdP.
 1. Create a `swarm` user that the Swarm instance will be using.
+1. Ensure the `swarm` user has admin privileges.
 1. Add `swarm` user to `non-sso-users` in extension configuration.
 1. Create the test user in p4d that is registered with the IdP.
-
-The Swarm configuration script will ensure the `super` and `swarm` users are in
-a group called `admins` that has an unlimited password timeout.
+1. Ensure the test user has a password set in the Helix database.
 
 ### Authentication Service
 
@@ -96,12 +97,11 @@ For example:
 
 ### Swarm Configuration
 
-1. Get a ticket for `swarm` user and set value in `config.php` as `password`
-1. Modify protections to give `swarm` admin privileges: `admin user swarm * //...`
 1. Add `saml` configuration values to `config.php`, must match auth service exactly.
     * `idp.singleSignOnService.url` would look something like `https://192.168.1.66:3000/saml/login`
 1. Ensure `x509cert` for `idp` is set to auth service public cert.
-1. Set `sso_enabled` to `true` in `config.php`
+1. Set `sso_enabled` under `p4` to `true` in `config.php`
+1. Should set `priority` under `log` to `7` to maximize the logging, for debugging.
 
 ### Swarm Notes
 
