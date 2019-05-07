@@ -43,7 +43,7 @@ Using LDAP, this service has been tested with OpenLDAP.
 
 ## Documentation
 
-See the files in the `docs` directory, especiallying the `Getting_Started.md`
+See the files in the `docs` directory, especially in the `Getting_Started.md`
 guide that gives a detailed overview of setting up everything.
 
 ### Configuration

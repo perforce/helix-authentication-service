@@ -146,9 +146,14 @@ SAML Desktop Agent with its embedded Chromium browser.
 
 Assuming you are using the Docker containers:
 
-1. Change `SVC_PROTOCOL`, `PROTOCOL`, and the service URLs in `docker-compose.yml`
+1. Change following in the `docker-compose.yml` file:
+    * `SVC_PROTOCOL` to `http`
+    * `PROTOCOL` to `http`
+    * Service URLs to start with `http://`
 1. (Re)Build the containers and start them (again)
-1. Deploy the extension with the appropriate `AUTH_URL` (e.g. using `AUTH_URL=... node hook.js`)
+1. Configure the login hook extension:
+    * `Service-URL` should start with `http://`
+    * `Auth-Protocol` should be `saml`
 
 ## Coding Conventions
 
