@@ -75,10 +75,11 @@ $ docker-compose build
 $ docker-compose up -d
 ```
 
-The p4d server is reachable by the port identified in the `docker-compose.yml` file
-(i.e. `1666`). If using `docker-machine`, the services are bound to the IP
+The p4d server is reachable by the port identified in the `docker-compose.yml`
+file (i.e. `1666`). If using `docker-machine`, the services are bound to the IP
 address of the virtual machine, so `p4 -p $(docker-machine ip):1666 info` would
-request the server information.
+request the server information. The `super` user password is defined in the
+docker files for the p4d container (tl;dr it's `Rebar123`).
 
 For the host to be able to resolve the container names, it may be necessary to
 install [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) to resolve the
