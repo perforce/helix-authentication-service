@@ -28,7 +28,8 @@ def prepare():
     # generate the default locale to avoid errors
     sudo('locale-gen en_US.UTF-8')
     sudo('apt-get update -q -y')
-    sudo('apt-get upgrade -q -y')
+    with shell_env(DEBIAN_FRONTEND='noninteractive'):
+        sudo('apt-get upgrade -q -y')
     sudo('apt-get clean -q -y')
     sudo('apt-get autoremove -q -y')
     sudo('apt-get install -q -y emacs-nox')
@@ -38,12 +39,15 @@ def prepare():
         sudo('shutdown -h now')
 
 
+@task
 def install_nodejs():
     """Install Node.js via the standard shell script."""
     if run('which node', quiet=True).return_code == 0:
         return
     # install build tools for compiling native modules, if needed
     sudo('apt-get install -q -y build-essential')
+    # minimal systems often lack things any sane person would expect
+    sudo('apt-get install -q -y curl')
     # The node package on ubuntu is stupidly old, so run a shell script from the
     # internet as root to get the LTS version directly from the vendor. This
     # includes npm as well.
@@ -57,6 +61,7 @@ def install_nodejs():
     run('npm version')
 
 
+@task
 def install_pm2():
     """Install pm2 using npm."""
     if run('which pm2', quiet=True).return_code == 0:
@@ -68,8 +73,9 @@ def install_pm2():
 @task
 def provision_service():
     """Install and configure the authentication service from source."""
-    execute(prepare)
     execute(install_pm2)
+    # npm command needs git
+    sudo('apt-get install -q -y git')
     run('wget -q https://swarm.perforce.com/archives/depot/main/p4-auth-integ-svc.zip')
     run('unzip -q p4-auth-integ-svc.zip')
     run('rm p4-auth-integ-svc.zip')
@@ -127,7 +133,6 @@ def configure_apt_get():
 @task
 def provision_p4d():
     """Install and configure the Helix Server with SAML triggers and test setup."""
-    execute(prepare)
     execute(install_p4d)
     execute(configure_p4d)
     execute(install_extension)
@@ -173,6 +178,7 @@ def configure_p4d():
     os.unlink('group.txt')
     run('p4 -u super logout')
     run('echo {0} | p4 -u super login'.format(SUPER_PASSWD))
+    run('p4 set auth.sso.allow.passwd=1')
     #
     # restart p4d so the changes take effect
     #
