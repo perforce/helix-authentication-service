@@ -46,7 +46,7 @@ if (process.env.OIDC_ISSUER_URI) {
       return done(null, userinfo)
     }))
   }).catch((err) => {
-    console.error(err)
+    console.error('OIDC initialization failed:', err)
   })
 }
 

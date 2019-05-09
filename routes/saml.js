@@ -55,7 +55,7 @@ const strategy = new Strategy(samlOptions, (profile, done) => {
     sessionIndex: profile.sessionIndex
   })
 })
-if (process.env.SAML_IDP_SSO_URL) {
+if (process.env.SAML_IDP_SSO_URL && process.env.SAML_IDP_SLO_URL) {
   passport.use(strategy)
 }
 router.use(passport.initialize())
