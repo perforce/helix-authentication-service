@@ -55,7 +55,9 @@ const strategy = new Strategy(samlOptions, (profile, done) => {
     sessionIndex: profile.sessionIndex
   })
 })
-passport.use(strategy)
+if (process.env.SAML_IDP_SSO_URL) {
+  passport.use(strategy)
+}
 router.use(passport.initialize())
 router.use(passport.session())
 
@@ -68,18 +70,30 @@ passport.deserializeUser((user, done) => {
   done(null, user)
 })
 
-router.get('/metadata', (req, res) => {
-  let signingCert = process.env.SP_CERT_FILE ? fs.readFileSync(process.env.SP_CERT_FILE) : undefined
-  if (signingCert) {
-    signingCert = signingCert.toString('utf8')
+function checkStrategy (req, res, next) {
+  if (passport._strategy('openidconnect')) {
+    next()
+  } else {
+    res.render('no_strategy')
   }
-  const xml = strategy.generateServiceProviderMetadata(undefined, signingCert)
-  res.header('Content-Type', 'text/xml').send(xml)
-})
+}
 
-router.get('/idp/metadata', samlp.metadata(idpOptions))
+if (process.env.SP_CERT_FILE) {
+  router.get('/metadata', (req, res) => {
+    let signingCert = fs.readFileSync(process.env.SP_CERT_FILE)
+    if (signingCert) {
+      signingCert = signingCert.toString('utf8')
+    }
+    const xml = strategy.generateServiceProviderMetadata(undefined, signingCert)
+    res.header('Content-Type', 'text/xml').send(xml)
+  })
+}
 
-router.get('/login/:id', (req, res, next) => {
+if (process.env.IDP_CERT_FILE && process.env.IDP_KEY_FILE) {
+  router.get('/idp/metadata', samlp.metadata(idpOptions))
+}
+
+router.get('/login/:id', checkStrategy, (req, res, next) => {
   // save the request identifier for request/user mapping
   req.session.requestId = req.params.id
   next()
@@ -116,7 +130,7 @@ router.get('/login', (req, res, next) => {
   })
 })
 
-router.post('/sso', passport.authenticate('saml', {
+router.post('/sso', checkStrategy, passport.authenticate('saml', {
   successRedirect: '/saml/success',
   failureRedirect: '/saml/login_failed'
 }))
@@ -268,7 +282,7 @@ router.post('/validate', (req, res, next) => {
   })
 })
 
-router.get('/logout', (req, res, next) => {
+router.get('/logout', checkStrategy, (req, res, next) => {
   // If there is a default protocol that is _not_ SAML, then redirect the user
   // there and do not use our SAML strategy.
   const proto = process.env.DEFAULT_PROTOCOL
@@ -277,8 +291,7 @@ router.get('/logout', (req, res, next) => {
   } else {
     next()
   }
-},
-passport.authenticate('saml', {
+}, passport.authenticate('saml', {
   samlFallback: 'logout-request'
 }))
 
@@ -288,7 +301,7 @@ function handleSLO (req, res) {
 }
 
 // some services use GET and some use POST
-router.get('/slo', passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
-router.post('/slo', passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
+router.get('/slo', checkStrategy, passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
+router.post('/slo', checkStrategy, passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
 
 module.exports = router

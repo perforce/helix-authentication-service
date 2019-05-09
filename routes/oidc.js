@@ -10,43 +10,45 @@ const { users, requests } = require('../store')
 
 let client = null
 
-Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
-  debug('issuer: %o', issuer.issuer)
-  debug('metadata: %o', issuer.metadata)
-  //
-  // dynamic registration, maybe not permitted with the oidc-provider npm?
-  //
-  // issuer.Client.fromUri(
-  //   issuer.metadata.registration_endpoint,
-  //   'registration_access_token'
-  // ).then(function (client) {
-  //   console.log('Discovered client %s %O', client.client_id, client.metadata);
-  // })
-  //
-  // manual client definition
-  //
-  client = new issuer.Client({
-    client_id: process.env.OIDC_CLIENT_ID,
-    client_secret: process.env.OIDC_CLIENT_SECRET,
-    post_logout_redirect_uris: [process.env.SVC_BASE_URI]
+if (process.env.OIDC_ISSUER_URI) {
+  Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
+    debug('issuer: %o', issuer.issuer)
+    debug('metadata: %o', issuer.metadata)
+    //
+    // dynamic registration, maybe not permitted with the oidc-provider npm?
+    //
+    // issuer.Client.fromUri(
+    //   issuer.metadata.registration_endpoint,
+    //   'registration_access_token'
+    // ).then(function (client) {
+    //   console.log('Discovered client %s %O', client.client_id, client.metadata);
+    // })
+    //
+    // manual client definition
+    //
+    client = new issuer.Client({
+      client_id: process.env.OIDC_CLIENT_ID,
+      client_secret: process.env.OIDC_CLIENT_SECRET,
+      post_logout_redirect_uris: [process.env.SVC_BASE_URI]
+    })
+    const params = {
+      // Some services require the absolute URI that is whitelisted in the client
+      // app settings; the test oidc-provider is not one of these.
+      redirect_uri: process.env.SVC_BASE_URI + '/oidc/callback'
+    }
+    passport.use('openidconnect', new Strategy({
+      client,
+      params,
+      passReqToCallback: true
+    }, (req, tokenset, userinfo, done) => {
+      // tokenset.access_token <= useful for API calls
+      req.session.idToken = tokenset.id_token
+      return done(null, userinfo)
+    }))
+  }).catch((err) => {
+    console.error(err)
   })
-  const params = {
-    // Some services require the absolute URI that is whitelisted in the client
-    // app settings; the test oidc-provider is not one of these.
-    redirect_uri: process.env.SVC_BASE_URI + '/oidc/callback'
-  }
-  passport.use('openidconnect', new Strategy({
-    client,
-    params,
-    passReqToCallback: true
-  }, (req, tokenset, userinfo, done) => {
-    // tokenset.access_token <= useful for API calls
-    req.session.idToken = tokenset.id_token
-    return done(null, userinfo)
-  }))
-}).catch((err) => {
-  console.error(err)
-})
+}
 
 passport.serializeUser((user, done) => {
   done(null, user)
@@ -59,16 +61,24 @@ passport.deserializeUser((obj, done) => {
 router.use(passport.initialize())
 router.use(passport.session())
 
+function checkStrategy (req, res, next) {
+  if (passport._strategy('openidconnect')) {
+    next()
+  } else {
+    res.render('no_strategy')
+  }
+}
+
 router.get('/login/:id', (req, res, next) => {
   // save the request identifier for request/user mapping
   req.session.requestId = req.params.id
   next()
-}, passport.authenticate('openidconnect', {
+}, checkStrategy, passport.authenticate('openidconnect', {
   successReturnToOrRedirect: '/',
   scope: 'openid profile email'
 }))
 
-router.get('/callback', passport.authenticate('openidconnect', {
+router.get('/callback', checkStrategy, passport.authenticate('openidconnect', {
   callback: true,
   successReturnToOrRedirect: '/oidc/success',
   failureRedirect: '/oidc/login_failed'
