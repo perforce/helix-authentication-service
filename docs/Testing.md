@@ -75,8 +75,37 @@ $ pm2 startOrReload p4-auth-integ-svc/ecosystem.config.js
 
 Ensure the `Auth::loginhook` extension is configured to use the desired authentication protocol (either `oidc` or `saml`). See the `Getting_Started.md` document in this directory for details.
 
+## Creating Test Users
+
+To authenticate using a system such as Okta, you will need to have a Perforce user account whose `Email` matches the user record in the identity provider. At security level 3, all Perforce user's **must** have a password in the database. So after creating the user in Perforce, make sure to set the password using the `super` account:
+
+```shell
+$ yes Sup0rSecr0tPassw0rd | p4 -u super passwd myuser
+```
+
+For added security, try `yes $(uuidgen)` to generate a random password. No one will ever see it, including you.
+
+On Windows systems, there is no `yes` command, so instead use `p4 -u super passwd myuser` and enter the password twice.
+
 ## Troubleshooting
 
 ### Authentication fails
 
 If you attempt to log in and the service page says that authentication failed, chances are either the user does not exist, you typed the wrong password, or the user is not assigned to the application. This is especially true with Okta, which does not assign any users to the application that you created.
+
+### Cannot Set User Password
+
+Because the extension is hooked into the login mechanism, it will be invoked by the server when a user attempts to change their password (as with the `auth-set` trigger). However, we have no means for supporting this feature with OIDC and SAML, so it is not implemented in the extension. When a user attempts to change their password, they may see this message:
+
+```shell
+$ p4 -p1666 -u super passwd
+Command unavailable: external authentication 'auth-set' trigger not found.
+```
+
+That is to be expected for SSO users, but should not be the case for non-SSO users. If you see this message for a non-SSO user, then be sure to add them to the non-sso-users or non-sso-groups extension configuration, and then ensure the `auth.sso.allow.passwd` configurable is set to `1`; without this, you cannot set passwords in the Perforce database:
+
+```shell
+$ p4 configure set auth.sso.allow.passwd=1
+```
+
+Once the user is properly excluded, they will be able to change their password.

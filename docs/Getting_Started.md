@@ -220,12 +220,23 @@ SSO user password to long random values (thus forcing the use of SSO).
 
 ### Password Fallback
 
-To allow for non-SSO passwords, configure the server using the `p4 set` command
-like so: `p4 set auth.sso.allow.passwd=1` -- enabling passwords requires that
-all users have a valid password to authenticate, regardless of the method. That
-is, even SSO users will need a password in the database. That password can be
+To allow for non-SSO passwords, and to allow for the super user to set the
+passwords of SSO users, configure the server using the `p4 configure` command
+like so:
+
+```shell
+$ p4 configure set auth.sso.allow.passwd=1
+``` 
+
+When the server is running at security level 3, all users must have a valid
+password in the database, regardless of the method of authentication. That is,
+even SSO users will need a password in the database. That password can be
 anything, since the SSO user will never use it, and is best set to something
-random.
+random. A handy way to set passwords for users (on Linux) would look like this:
+
+```shell
+$ yes $(uuidgen) | p4 -u super passwd username
+```
 
 ## Removing the Extension
 

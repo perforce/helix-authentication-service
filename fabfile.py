@@ -178,7 +178,7 @@ def configure_p4d():
     os.unlink('group.txt')
     run('p4 -u super logout')
     run('echo {0} | p4 -u super login'.format(SUPER_PASSWD))
-    run('p4 set auth.sso.allow.passwd=1')
+    run('p4 configure set auth.sso.allow.passwd=1')
     #
     # restart p4d so the changes take effect
     #
