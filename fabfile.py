@@ -17,8 +17,9 @@ if not os.path.exists('ssh_config'):
     with open('ssh_config', 'w') as fobj:
         fobj.write(config.replace(pwd, ''))
 
-P4_PUB_KEY = "http://pkg-ondemand.bnr.perforce.com/perforce/main/perforce.pubkey"
-P4_APT_URL = "http://pkg-ondemand.bnr.perforce.com/perforce/main/apt/ubuntu"
+# Use the 2019.1 release of p4d rather than cutting edge main.
+P4_PUB_KEY = "http://pkg-ondemand.bnr.perforce.com/perforce/r19.1/perforce.pubkey"
+P4_APT_URL = "http://pkg-ondemand.bnr.perforce.com/perforce/r19.1/apt/ubuntu"
 SUPER_PASSWD = 'Rebar123'
 
 
