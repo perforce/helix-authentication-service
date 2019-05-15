@@ -3,6 +3,25 @@
 This page describes the details for configuring the authentication service to
 work with several major hosted identity providers, both with OIDC and SAML.
 
+## Settings
+
+In the instructions below, when referring to setting environment variables for
+the auth service, there are several choices.
+
+1. Set them in the environment, such as in the command shell.
+1. Define them in a file called `.env` in the auth service source tree (in the same directory as the `package.json` file).
+1. If you are using Docker Compose, then edit the `docker-compose.yml` file.
+1. If you are using `pm2`, then edit the `ecosystem.config.js` file.
+
+## Restarting the Service
+
+Changing the environment settings requires restarting the service for the changes
+to take effect. How the service is deployed determines how to restart it.
+
+1. If using `npm start`, then Ctrl-c to stop the running process, and run `npm start` again.
+1. If you are using Docker Compose, then `docker-compose build svc.doc` followed by `docker-compose up -d svc.doc`
+1. If using `pm2`, then `pm2 startOrReload ecosystem.config.js`
+
 ## Auth0
 
 ### OpenID Connect
@@ -74,14 +93,10 @@ Configuring the authentication service with Okta is fairly straightforward.
    would be `https://svc.doc:3000/oidc/callback`
 1. For the **Logout redirect URIs** enter the base auth service URL; for Docker this
    would be `https://svc.doc:3000`
-1. On the next screen, copy the **Client ID** and **Client secret** values to
-   the `docker-compose.yml` for the `svc.doc` settings under `environment`
-   (namely the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` keys).
-1. From the *Sign On* tab, copy the **Issuer** value to `OIDC_ISSUER_URI` in the
-   docker environment for `svc.doc`.
-1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
-   new settings (the `build` and `up -d` subcommands are sufficient to rebuild
-   and restart the container).
+1. On the next screen, copy the **Client ID** and **Client secret** values to the
+   `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` environment variables respectively.
+1. From the *Sign On* tab, copy the **Issuer** value to `OIDC_ISSUER_URI`.
+1. Restart the service.
 
 If you have already logged into Okta, be sure to either a) assign that user to
 the application you just created, or b) log out so you can log in again using
@@ -99,21 +114,19 @@ will never have to enter the value directly.
 1. Select *Web* as the **Platform** and *SAML 2.0* as the **Sign on method**.
 1. For the **Single sign on URL** enter the auth service URL; for Docker this
    would be `https://svc.doc:3000/saml/sso`
-1. For the **Audience URI** enter `urn:example:sp`, assuming you are using Docker.
+1. For the **Audience URI** enter a uniquely identifying URI; any value can be used
+   here, but the default in the Docker setup is `urn:example:sp`.
 1. For the **Name ID format** the auth extensions expect *EmailAddress*,
    otherwise it cannot verify the expected user has authenticated.
 1. Click the **Show Advanced Settings** link and check the **Enable Single Logout** checkbox.
 1. For the **Single Logout URL** enter the auth service logout URL; for Docker
    this would be `https://svc.doc:3000/saml/slo`
 1. Enter `urn:example:sp` for the **SP Issuer** value.
-1. For **Signature Certificate**, select and upload the `certs/sp.crt` file,
-   assuming the Docker auth service is being used here.
-1. From the *Sign On* tab, click the **View Setup Instructions** button and copy
-   the values for IdP SSO and SLO URLs to the `SAML_IDP_*` settings in the
-   docker environment for `svc.doc`.
-1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
-   new settings (the `build` and `up -d` subcommands are sufficient to rebuild
-   and restart the container).
+1. For **Signature Certificate**, select and upload the `certs/sp.crt` file.
+1. From the *Sign On* tab, click the **View Setup Instructions** button and copy the
+   values for IdP SSO and SLO URLs to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL`
+   settings in the environment.
+1. Restart the service.
 1. Configure the extension to use `nameID` as the `name-identifier` value since
    the SAML response from Okta generally does not have the email field.
 
@@ -137,15 +150,12 @@ will never have to enter the value directly.
 1. On the same screen, enter `https://svc.doc:3000/oidc/callback` for **Redirect URI's**
 1. Find the **Save** button and click it.
 1. From the *SSO* tab, copy the **Client ID** value to the `OIDC_CLIENT_ID`
-   setting in the docker environment for `svc.doc`.
-1. From the *SSO* tab, copy the **Client Secret** value to the
-   `OIDC_CLIENT_SECRET` setting in the docker environment for `svc.doc` (n.b.
-   you may need to "show" the secret first before the copy button will work).
+   environment variable.
+1. From the *SSO* tab, copy the **Client Secret** value to `OIDC_CLIENT_SECRET`
+   (N.B. you may need to "show" the secret first before the copy button will work).
 1. Ensure the **Application Type** is set to _Web_
 1. Ensure the **Token Endpoint** is set to _Basic_
-1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
-   new settings (the `build` and `up -d` subcommands are sufficient to rebuild
-   and restart the container).
+1. Restart the service.
 
 Visit the auth service OIDC [login page](https://svc.doc:3000/oidc/login) to
 test. Note that this URL will be configured into the auth extension, the user
@@ -162,12 +172,9 @@ will never have to enter the value directly.
 1. For *Single Logout URL*, enter `https://svc.doc:3000/saml/slo`
 1. Find the **Save** button and click it.
 1. From the *SSO* tab, copy the **SAML 2.0 Endpoint** value to the
-   `SAML_IDP_SSO_URL` setting in the docker environment for `svc.doc`.
-1. From the *SSO* tab, copy the **SLO Endpoint** value to the `SAML_IDP_SLO_URL`
-   setting in the docker environment for `svc.doc`.
-1. Use `docker-compose` to rebuild and start the `svc.doc` container with the
-   new settings (the `build` and `up -d` subcommands are sufficient to rebuild
-   and restart the container).
+   `SAML_IDP_SSO_URL` environment variable.
+1. From the *SSO* tab, copy the **SLO Endpoint** value to `SAML_IDP_SLO_URL`.
+1. Restart the service.
 
 Visit the auth service SAML [login page](https://svc.doc:3000/saml/login) to
 test. Note that this URL will be configured into the auth extension, the user
