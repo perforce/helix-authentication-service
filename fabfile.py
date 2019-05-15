@@ -133,7 +133,7 @@ def configure_apt_get():
 
 @task
 def provision_p4d():
-    """Install and configure the Helix Server with SAML triggers and test setup."""
+    """Install and configure the Helix Server with extensions and test setup."""
     execute(install_p4d)
     execute(configure_p4d)
     execute(install_extension)
@@ -154,7 +154,7 @@ def install_p4d():
 
 @task
 def install_extension():
-    """Install and configure the triggers to perform login/logout."""
+    """Install and configure the extensions to perform login/logout."""
     with cd('p4-auth-integ-svc'):
         ip_addr = run('hostname -I').split()[-1]
         with shell_env(P4PORT='{}:1666'.format(ip_addr), AUTH_URL='https://{}:3000'.format(ip_addr)):
