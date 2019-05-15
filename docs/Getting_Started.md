@@ -6,6 +6,29 @@
 
 The latest long-term supported release of [Node](https://nodejs.org/en/).
 
+#### CentOS
+
+CentOS lacks Node.js packages, but there are packages available from
+[nodesource.com](https://nodesource.com) that are easy to install.
+
+```shell
+$ sudo yum -q -y install git gcc-c++ make
+$ curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
+$ sudo yum -q -y install nodejs
+```
+
+#### Ubuntu
+
+CentOS lacks up-to-date Node.js packages, but there are packages available from
+[nodesource.com](https://nodesource.com) that are easy to install.
+
+```shell
+$ sudo apt-get install -q -y build-essential
+$ sudo apt-get install -q -y curl
+$ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+$ sudo apt-get install -q -y nodejs
+```
+
 ### Build
 
 With the authentication service code downloaded, open a terminal window and
@@ -271,3 +294,9 @@ missing hook:
 ```
 Command unavailable: external authentication 'auth-check-sso' trigger not found.
 ```
+
+## SELinux
+
+Both the Helix Server extensions and the Node.js authentication service run on
+Linux systems with SELinux enabled and in **enforcing** mode, without any
+necessary changes.

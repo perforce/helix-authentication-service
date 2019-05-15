@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Fabric 1.x file for configuring authentication service testing."""
+"""Fabric file for configuring authentication service testing.
+
+Note that getting SELinux enabled on Ubuntu is probably impossible.
+To test with SELinux, use CentOS 7 where SELinux is enabled by default.
+
+"""
 
 import os
 import subprocess
