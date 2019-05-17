@@ -123,6 +123,21 @@ module.exports = {{
     run('pm2 save')
 
 
+@task
+def update_service():
+    """Update a running authentication service installation."""
+    run('pm2 stop auth-svc')
+    run('rm -rf p4-auth-integ-svc.old')
+    run('mv p4-auth-integ-svc p4-auth-integ-svc.old')
+    run('wget -q https://swarm.perforce.com/archives/depot/main/p4-auth-integ-svc.zip')
+    run('unzip -q p4-auth-integ-svc.zip')
+    run('rm p4-auth-integ-svc.zip')
+    run('cp p4-auth-integ-svc.old/ecosystem.config.js p4-auth-integ-svc')
+    with cd('p4-auth-integ-svc'):
+        run('npm ci -q')
+        run('pm2 start ecosystem.config.js')
+
+
 def configure_apt_get():
     """Configure apt-get so we can install Perforce packages."""
     SOURCES_LIST = '/etc/apt/sources.list.d/perforce.sources.list'
