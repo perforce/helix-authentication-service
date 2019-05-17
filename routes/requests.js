@@ -43,14 +43,16 @@ router.get('/status/:id', async (req, res, next) => {
       try {
         let user = await new Promise((resolve, reject) => {
           if (users.has(userId)) {
-            // data is ready, no need to wait
-            resolve(users.getIfPresent(userId))
+            // data is ready, no need to wait; remove the user profile data to
+            // prevent replay attack
+            resolve(users.delete(userId))
           } else {
             // wait for the data to become available
             const timeout = setInterval(() => {
               if (users.has(userId)) {
                 clearInterval(timeout)
-                resolve(users.getIfPresent(userId))
+                // prevent replay attack
+                resolve(users.delete(userId))
               }
             }, 1000)
             // but don't wait too long
