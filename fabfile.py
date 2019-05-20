@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Fabric file for configuring authentication service testing.
+"""Fabric file for configuring authentication service for testing.
 
 Note that getting SELinux enabled on Ubuntu is probably impossible.
 To test with SELinux, use CentOS 7 where SELinux is enabled by default.
