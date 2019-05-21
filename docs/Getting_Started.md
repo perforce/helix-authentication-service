@@ -2,6 +2,17 @@
 
 ## Authentication Service
 
+### Installation Script
+
+A bash script named `install.sh` is provided for setting up a Linux-based system
+for running the authentication service. It will install Node, pm2, and build the
+service dependencies. After the installation is complete, it will be necessary
+to modify the service configuration (by editing the `ecosystem.config.js` file),
+install SSL certificates, and then restart the service (using `pm2 startOrReload
+ecosystem.config.js`). The rest of this section describes the steps you can use
+to install the service manually. Subsequent sections describe the configuration
+and installation of SSL certificates.
+
 ### Requirements
 
 The latest long-term supported release of [Node](https://nodejs.org/en/).

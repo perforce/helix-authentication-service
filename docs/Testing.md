@@ -109,3 +109,11 @@ $ p4 configure set auth.sso.allow.passwd=1
 ```
 
 Once the user is properly excluded, they will be able to change their password.
+
+## Installation Script
+
+In the auth service root directory is a bash script called `install.sh` that will install the authentication service and its dependencies on a Linux-based system. The script should work for CentOS 6/7 and Ubuntu 14, 16, and 18. Running it on any other system should report *not supported* or similar.
+
+Running the script twice should have no adverse effect. It may restart the service in the process, but it will not cause the service to stop working, nor install the same software twice.
+
+The results of the installation should be a running Node process, which can be seen with the `pm2 list` command. Likewise, fetching the service home page should display its "welcome" message (e.g. `curl -k https://127.0.0.1:3000`).
