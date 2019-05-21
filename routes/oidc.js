@@ -10,43 +10,50 @@ const { users, requests } = require('../store')
 
 let client = null
 
-if (process.env.OIDC_ISSUER_URI) {
-  Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
-    debug('issuer: %o', issuer.issuer)
-    debug('metadata: %o', issuer.metadata)
-    //
-    // dynamic registration, maybe not permitted with the oidc-provider npm?
-    //
-    // issuer.Client.fromUri(
-    //   issuer.metadata.registration_endpoint,
-    //   'registration_access_token'
-    // ).then(function (client) {
-    //   console.log('Discovered client %s %O', client.client_id, client.metadata);
-    // })
-    //
-    // manual client definition
-    //
-    client = new issuer.Client({
-      client_id: process.env.OIDC_CLIENT_ID,
-      client_secret: process.env.OIDC_CLIENT_SECRET,
-      post_logout_redirect_uris: [process.env.SVC_BASE_URI]
-    })
-    const params = {
-      // Some services require the absolute URI that is whitelisted in the client
-      // app settings; the test oidc-provider is not one of these.
-      redirect_uri: process.env.SVC_BASE_URI + '/oidc/callback'
+function loadStrategy () {
+  return new Promise((resolve, reject) => {
+    if (process.env.OIDC_ISSUER_URI) {
+      Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
+        debug('issuer: %o', issuer.issuer)
+        debug('metadata: %o', issuer.metadata)
+        //
+        // dynamic registration, maybe not permitted with the oidc-provider npm?
+        //
+        // issuer.Client.fromUri(
+        //   issuer.metadata.registration_endpoint,
+        //   'registration_access_token'
+        // ).then(function (client) {
+        //   console.log('Discovered client %s %O', client.client_id, client.metadata);
+        // })
+        //
+        // manual client definition
+        //
+        client = new issuer.Client({
+          client_id: process.env.OIDC_CLIENT_ID,
+          client_secret: process.env.OIDC_CLIENT_SECRET,
+          post_logout_redirect_uris: [process.env.SVC_BASE_URI]
+        })
+        const params = {
+          // Some services require the absolute URI that is whitelisted in the client
+          // app settings; the test oidc-provider is not one of these.
+          redirect_uri: process.env.SVC_BASE_URI + '/oidc/callback'
+        }
+        passport.use('openidconnect', new Strategy({
+          client,
+          params,
+          passReqToCallback: true
+        }, (req, tokenset, userinfo, done) => {
+          // tokenset.access_token <= useful for API calls
+          req.session.idToken = tokenset.id_token
+          return done(null, userinfo)
+        }))
+        resolve()
+      }).catch((err) => {
+        reject(err)
+      })
+    } else {
+      resolve()
     }
-    passport.use('openidconnect', new Strategy({
-      client,
-      params,
-      passReqToCallback: true
-    }, (req, tokenset, userinfo, done) => {
-      // tokenset.access_token <= useful for API calls
-      req.session.idToken = tokenset.id_token
-      return done(null, userinfo)
-    }))
-  }).catch((err) => {
-    console.error('OIDC initialization failed:', err)
   })
 }
 
@@ -62,11 +69,16 @@ router.use(passport.initialize())
 router.use(passport.session())
 
 function checkStrategy (req, res, next) {
-  if (passport._strategy('openidconnect')) {
-    next()
-  } else {
+  loadStrategy().then(() => {
+    if (passport._strategy('openidconnect')) {
+      next()
+    } else {
+      res.render('no_strategy')
+    }
+  }).catch((err) => {
+    console.error('OIDC initialization failed:', err)
     res.render('no_strategy')
-  }
+  })
 }
 
 router.get('/login/:id', (req, res, next) => {
@@ -113,10 +125,10 @@ router.get('/success', checkAuthentication, (req, res, next) => {
 
 router.get('/logout', checkAuthentication, (req, res) => {
   req.logout()
-  const url = client.endSessionUrl({
+  const url = client ? client.endSessionUrl({
     // need the token for the logout redirect to be honored
     id_token_hint: req.session.idToken
-  })
+  }) : null
   req.session.destroy()
   if (url) {
     res.redirect(url)
