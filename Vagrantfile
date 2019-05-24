@@ -7,5 +7,5 @@ Vagrant.configure('2') do |config|
     vb.memory = 4096
   end
   config.vm.hostname = 'authen'
-  config.vm.network :private_network, ip: '192.168.24.2'
+  config.vm.network 'private_network', type: 'dhcp'
 end

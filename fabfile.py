@@ -7,6 +7,8 @@ To test with SELinux, use CentOS 7 where SELinux is enabled by default.
 """
 
 import os
+from socket import AF_INET, inet_pton
+from struct import unpack
 import subprocess
 
 from fabric.api import abort, cd, env, execute, prefix, put, run, settings, shell_env, sudo, task
@@ -85,7 +87,7 @@ def provision_service():
     run('wget -q https://swarm.perforce.com/archives/depot/main/p4-auth-integ-svc.zip')
     run('unzip -q p4-auth-integ-svc.zip')
     run('rm p4-auth-integ-svc.zip')
-    ip_addr = run('hostname -I').split()[-1]
+    ip_addr = get_public_ip()
     ecosystem = """
 // auth-svc configuration for pm2
 module.exports = {{
@@ -113,10 +115,10 @@ module.exports = {{
 """.format(ipaddr=ip_addr)
     with cd('p4-auth-integ-svc'):
         run('npm ci -q')
-        with open('ecosystem.config.js', 'w') as fobj:
+        with open('ecosystem.tmp', 'w') as fobj:
             fobj.write(ecosystem)
-        put('ecosystem.config.js', '.')
-        os.unlink('ecosystem.config.js')
+        put('ecosystem.tmp', 'ecosystem.config.js')
+        os.unlink('ecosystem.tmp')
         run('pm2 start ecosystem.config.js')
     username = run('whoami')
     sudo('pm2 startup systemd -u {0} --hp /home/{0}'.format(username))
@@ -165,7 +167,7 @@ def install_p4d():
     execute(configure_apt_get)
     sudo('apt-get install -q -y helix-cli')
     sudo('apt-get install -q -y helix-p4d')
-    ip_addr = run('hostname -I').split()[-1]
+    ip_addr = get_public_ip()
     p4port = '{host}:1666'.format(host=ip_addr)
     cmd_args_fmt = '-n -p {port} -u {user} -P {passwd} despot'
     cmd_args = cmd_args_fmt.format(port=p4port, user='super', passwd=SUPER_PASSWD)
@@ -176,7 +178,7 @@ def install_p4d():
 def install_extension():
     """Install and configure the extensions to perform login/logout."""
     with cd('p4-auth-integ-svc'):
-        ip_addr = run('hostname -I').split()[-1]
+        ip_addr = get_public_ip()
         with shell_env(P4PORT='{}:1666'.format(ip_addr), AUTH_URL='https://{}:3000'.format(ip_addr)):
             run('node hook.js')
 
@@ -206,3 +208,28 @@ def configure_p4d():
     with settings(sudo_user='perforce'):
         sudo('p4dctl stop despot')
         sudo('p4dctl start despot')
+
+
+def get_public_ip():
+    """Discover the public IP address of the remote host."""
+    ip_addrs = run('hostname -I').split()
+    for ip in ip_addrs:
+        if not is_private_ip(ip):
+            return ip
+    # fall back to using the first address
+    return ip_addrs[0]
+
+
+def is_private_ip(ip):
+    """Return True if the given IP address is private, False otherwise."""
+    f = unpack('!I', inet_pton(AF_INET, ip))[0]
+    private = (
+        [2130706432, 4278190080], # 127.0.0.0,   255.0.0.0   http://tools.ietf.org/html/rfc3330
+        [3232235520, 4294901760], # 192.168.0.0, 255.255.0.0 http://tools.ietf.org/html/rfc1918
+        [2886729728, 4293918720], # 172.16.0.0,  255.240.0.0 http://tools.ietf.org/html/rfc1918
+        [167772160,  4278190080], # 10.0.0.0,    255.0.0.0   http://tools.ietf.org/html/rfc1918
+    )
+    for net in private:
+        if (f & net[1]) == net[0]:
+            return True
+    return False
