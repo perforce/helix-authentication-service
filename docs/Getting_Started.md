@@ -250,6 +250,13 @@ See the Confluence
 [page](https://confluence.perforce.com:8443/display/~nfiedler/Authentication+Integration)
 for additional details.
 
+#### Certificates
+
+As mentioned in the authentication service section, the extension uses
+certificates to connect to the authentication service. For development purposes,
+these are self-signed certificates, which should be replaced when deploying to
+production. See the **Certificates** section above for more information.
+
 ## Helix Server
 
 As mentioned earlier, the loginhook extension requires Helix Server 2019.1 or
