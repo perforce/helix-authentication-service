@@ -186,6 +186,8 @@ def install_extension():
 @task
 def configure_p4d():
     """Configure Helix Server users and groups for testing."""
+    ip_addr = get_public_ip()
+    p4port = '{host}:1666'.format(host=ip_addr)
     #
     # create a group with long lived tickets;
     # login as super again to get the unlimited ticket effect
@@ -196,12 +198,12 @@ def configure_p4d():
         fobj.write('Users:\n')
         fobj.write('\tsuper\n')
     put('group.txt')
-    run('p4 -u super group -i < group.txt')
+    run('p4 -p {0} -u super group -i < group.txt'.format(p4port))
     run('rm -f group.txt')
     os.unlink('group.txt')
-    run('p4 -u super logout')
-    run('echo {0} | p4 -u super login'.format(SUPER_PASSWD))
-    run('p4 configure set auth.sso.allow.passwd=1')
+    run('p4 -p {0} -u super logout'.format(p4port))
+    run('echo {0} | p4 -p {1} -u super login'.format(SUPER_PASSWD, p4port))
+    run('p4 -p {0} -u super configure set auth.sso.allow.passwd=1'.format(p4port))
     #
     # restart p4d so the changes take effect
     #
