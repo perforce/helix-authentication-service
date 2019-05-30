@@ -13,6 +13,11 @@ ecosystem.config.js`). The rest of this section describes the steps you can use
 to install the service manually. Subsequent sections describe the configuration
 and installation of SSL certificates.
 
+In general, configuration will consist of defining the identity provider details
+for either OIDC or SAML, and setting the `SVC_BASE_URI` of the authentication
+service (the service needs to know how the IdP will address the service). For
+better security, the self-signed certificates will need to be replaced as well.
+
 ### Requirements
 
 The latest long-term supported release of [Node](https://nodejs.org/en/).
