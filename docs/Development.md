@@ -16,8 +16,8 @@ compatibility issues with some modules, and in general can be a bit unstable.
 
 #### Build and Start
 
-These instructions assume you will be testing with the OpenID provider, as the
-SAML test IdP is a little more work to set up, and is easier to run in Docker.
+These instructions assume you will be developing with the included OpenID
+provider, as the SAML IdP is a little more work to set up.
 
 First get the oidc-provider application running:
 
@@ -66,9 +66,9 @@ $ P4PORT=localhost:1666 AUTH_URL=https://localhost:3000 node hook.js
 ### Docker Environment
 
 In this code base are configuration files for [Docker](http://docker.com), which
-is used to start the various services needed for testing. To get everything set
-up, install `docker`, `docker-compose`, and possibly `docker-machine` (if you
-are running on macOS, [Homebrew](http://brew.sh) makes this easy).
+is used to start the various services needed for developing. To get everything
+set up, install `docker`, `docker-compose`, and possibly `docker-machine` (if
+you are running on macOS, [Homebrew](http://brew.sh) makes this easy).
 
 ```shell
 $ docker-compose build
@@ -107,8 +107,8 @@ $ PROTOCOL=saml node hook.js
 
 You will almost certainly have to change the `name-identifier` setting to
 `nameID` as well, since typical SAML identity providers do not include an
-`email` property, including the test SAML IdP. To configure the extension run
-the command below:
+`email` property, including the containerized SAML IdP. To configure the
+extension run the command below:
 
 ```shell
 $ p4 extension --configure Auth::loginhook --name loginhook-all
@@ -142,8 +142,8 @@ email address already.
 
 If for some reason you do not want the auth service to be using HTTPS and its
 self-signed certificate, you can use HTTP instead. This is particularly relevant
-when testing with a browser that refuses to open insecure web sites, such as the
-SAML Desktop Agent with its embedded Chromium browser.
+when developing with a browser that refuses to open insecure web sites, such as
+the SAML Desktop Agent with its embedded Chromium browser.
 
 Assuming you are using the Docker containers:
 
