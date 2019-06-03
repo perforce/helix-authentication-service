@@ -55,8 +55,11 @@ const strategy = new Strategy(samlOptions, (profile, done) => {
     sessionIndex: profile.sessionIndex
   })
 })
-if (process.env.SAML_IDP_SSO_URL && process.env.SAML_IDP_SLO_URL) {
+if (process.env.SAML_IDP_SSO_URL) {
+  debug('using SAML passport strategy')
   passport.use(strategy)
+} else {
+  debug('SAML passport strategy not available')
 }
 router.use(passport.initialize())
 router.use(passport.session())
@@ -71,7 +74,7 @@ passport.deserializeUser((user, done) => {
 })
 
 function checkStrategy (req, res, next) {
-  if (passport._strategy('openidconnect')) {
+  if (passport._strategy('saml')) {
     next()
   } else {
     res.render('no_strategy')
