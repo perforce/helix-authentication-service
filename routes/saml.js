@@ -44,7 +44,8 @@ const samlOptions = {
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
   audience: process.env.SAML_SP_AUDIENCE || undefined,
   privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
-  signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256'
+  signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256',
+  forceAuthn: Boolean(process.env.SAML_FORCE_AUTHN)
 }
 const strategy = new Strategy(samlOptions, (profile, done) => {
   // produce a "user" object that contains the information that passport-saml
