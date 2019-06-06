@@ -16,7 +16,13 @@ router.get('/new/:id', (req, res, next) => {
   // the key, as the user may be logging in from different client systems.
   const requestId = ulid()
   debug('new request %s for %s', requestId, req.params.id)
-  requests.set(requestId, req.params.id)
+  // Construct the "user" object which holds the request identifier and any
+  // additional properties that enable certain features.
+  const user = {
+    id: req.params.id,
+    forceAuthn: req.query.forceAuthn || false
+  }
+  requests.set(requestId, user)
   res.json({
     request: requestId
   })
@@ -39,20 +45,20 @@ router.get('/status/:id', async (req, res, next) => {
     // request has successfully authenticated. Wait for a while as the user may
     // still be authenticating with the identity provider.
     if (requests.has(req.params.id)) {
-      const userId = requests.getIfPresent(req.params.id)
+      const userRecord = requests.getIfPresent(req.params.id)
       try {
         let user = await new Promise((resolve, reject) => {
-          if (users.has(userId)) {
+          if (users.has(userRecord.id)) {
             // data is ready, no need to wait; remove the user profile data to
             // prevent replay attack
-            resolve(users.delete(userId))
+            resolve(users.delete(userRecord.id))
           } else {
             // wait for the data to become available
             const timeout = setInterval(() => {
-              if (users.has(userId)) {
+              if (users.has(userRecord.id)) {
                 clearInterval(timeout)
                 // prevent replay attack
-                resolve(users.delete(userId))
+                resolve(users.delete(userRecord.id))
               }
             }, 1000)
             // but don't wait too long
@@ -62,7 +68,7 @@ router.get('/status/:id', async (req, res, next) => {
             })
           }
         })
-        debug('resolved user for %s (%s)', userId, req.params.id)
+        debug('resolved user for %s (%s)', userRecord.id, req.params.id)
         res.json(user)
       } catch (err) {
         res.status(408).send('Request Timeout')

@@ -6,7 +6,7 @@ const fs = require('fs')
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')
-const { Strategy } = require('passport-saml')
+const MultiSamlStrategy = require('passport-saml/multiSamlStrategy')
 const samlp = require('samlp')
 const { ulid } = require('ulid')
 const { users, requests } = require('../store')
@@ -44,18 +44,29 @@ const samlOptions = {
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
   audience: process.env.SAML_SP_AUDIENCE || undefined,
   privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
-  signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256',
-  forceAuthn: Boolean(process.env.SAML_FORCE_AUTHN)
+  signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256'
 }
-const strategy = new Strategy(samlOptions, (profile, done) => {
-  // produce a "user" object that contains the information that passport-saml
-  // requires for logging out via SAML
-  return done(null, {
-    nameID: profile.nameID,
-    nameIDFormat: profile.nameIDFormat,
-    sessionIndex: profile.sessionIndex
-  })
-})
+// Use multi-strategy to enable us to dynamically configure the SAML options.
+const strategy = new MultiSamlStrategy(
+  {
+    getSamlOptions: (req, done) => {
+      // determine if we should force authentication
+      const user = requests.getIfPresent(req.session.requestId)
+      const force = Boolean((user && user.forceAuthn) || process.env.SAML_FORCE_AUTHN || false)
+      debug(`saml forceAuthn: ${force}`)
+      const options = Object.assign({}, samlOptions, { forceAuthn: force })
+      return done(null, options)
+    }
+  }, (profile, done) => {
+    // produce a "user" object that contains the information that passport-saml
+    // requires for logging out via SAML
+    return done(null, {
+      nameID: profile.nameID,
+      nameIDFormat: profile.nameIDFormat,
+      sessionIndex: profile.sessionIndex
+    })
+  }
+)
 if (process.env.SAML_IDP_SSO_URL) {
   debug('using SAML passport strategy')
   passport.use(strategy)
@@ -97,11 +108,11 @@ if (process.env.IDP_CERT_FILE && process.env.IDP_KEY_FILE) {
   router.get('/idp/metadata', samlp.metadata(idpOptions))
 }
 
-router.get('/login/:id', checkStrategy, (req, res, next) => {
+router.get('/login/:id', (req, res, next) => {
   // save the request identifier for request/user mapping
   req.session.requestId = req.params.id
   next()
-}, passport.authenticate('saml', {
+}, checkStrategy, passport.authenticate('saml', {
   failureRedirect: '/saml/login_failed'
 }))
 
@@ -125,7 +136,7 @@ router.get('/login', (req, res, next) => {
         forceAuthn: data.forceAuthn === 'true',
         context: data.requestedAuthnContext
       }
-      requests.set(data.id, 'SAML:legacy:placeholder')
+      requests.set(data.id, { id: 'SAML:legacy:placeholder' })
       req.session.successRedirect = '/saml/success'
       // now that everything is set up, go through the normal login path
       const proto = process.env.DEFAULT_PROTOCOL || 'saml'
@@ -154,8 +165,11 @@ function checkAuthentication (req, res, next) {
 }
 
 router.get('/success', checkAuthentication, (req, res, next) => {
-  const userId = requests.getIfPresent(req.session.requestId)
-  if (userId === 'SAML:legacy:placeholder') {
+  req.session.successRedirect = null
+  const user = requests.getIfPresent(req.session.requestId)
+  // clear the request identifier from the user session
+  req.session.requestId = null
+  if (user.id === 'SAML:legacy:placeholder') {
     // This is the SAML legacy route, in which we do not have a known user
     // identifier to associate with the request. Default to using the nameID.
     //
@@ -212,8 +226,8 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     })
   } else {
     // "normal" success path, save user data for verification
-    debug('mapping %s to result %o', userId, req.user)
-    users.set(userId, req.user)
+    debug('mapping %s to result %o', user.id, req.user)
+    users.set(user.id, req.user)
     const name = req.user.nameID
     res.render('details', { name })
   }
@@ -230,8 +244,6 @@ function assignNameId (user) {
     // administrator specified, it anything.
     if (nameIdField && user[nameIdField]) {
       nameID = user[nameIdField]
-    } else if (user.preferred_username) {
-      nameID = user.preferred_username
     } else if (user.email) {
       nameID = user.email
     } else {
@@ -286,7 +298,7 @@ router.post('/validate', (req, res, next) => {
   })
 })
 
-router.get('/logout', checkStrategy, (req, res, next) => {
+router.get('/logout', (req, res, next) => {
   // If there is a default protocol that is _not_ SAML, then redirect the user
   // there and do not use our SAML strategy.
   const proto = process.env.DEFAULT_PROTOCOL
@@ -295,7 +307,7 @@ router.get('/logout', checkStrategy, (req, res, next) => {
   } else {
     next()
   }
-}, passport.authenticate('saml', {
+}, checkStrategy, passport.authenticate('saml', {
   samlFallback: 'logout-request'
 }))
 

@@ -32,6 +32,7 @@ USER perforce
 # perform the initial setup of the p4d instance
 #
 COPY ./build.sh .
+COPY ./user_george.txt .
 COPY ./user_jackson.txt .
 COPY ./user_johndoe.txt .
 COPY ./group_notimeout.txt .

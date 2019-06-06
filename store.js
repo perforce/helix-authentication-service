@@ -21,7 +21,9 @@ const users = newCache()
 setInterval(() => users.cleanUp(), 5 * 60 * 1000)
 
 // Set up an in-memory database of pending login requests. The key is a unique
-// request identifier, and the value is the user identifier (e.g. email).
+// request identifier, and the value is an object with an 'id' property, the
+// value provided by the client in the /requests/new call. The object may
+// contain additional properties.
 const requests = newCache()
   .expireAfterWrite(10 * 60 * 1000)
   .expireAfterRead(5 * 60 * 1000)

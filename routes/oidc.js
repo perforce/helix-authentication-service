@@ -12,7 +12,7 @@ let client = null
 
 function loadStrategy () {
   return new Promise((resolve, reject) => {
-    if (process.env.OIDC_ISSUER_URI) {
+    if (process.env.OIDC_ISSUER_URI && client === null) {
       Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
         debug('issuer: %o', issuer.issuer)
         debug('metadata: %o', issuer.metadata)
@@ -112,12 +112,12 @@ function checkAuthentication (req, res, next) {
 
 router.get('/success', checkAuthentication, (req, res, next) => {
   if (req.session.successRedirect) {
-    let path = req.session.successRedirect
-    req.session.successRedirect = null
-    res.redirect(path)
+    res.redirect(req.session.successRedirect)
   } else {
-    const userId = requests.getIfPresent(req.session.requestId)
-    users.set(userId, req.user)
+    const user = requests.getIfPresent(req.session.requestId)
+    // clear the request identifier from the user session
+    req.session.requestId = null
+    users.set(user.id, req.user)
     const name = req.user.given_name || req.user.name || req.user.email
     res.render('details', { name })
   }

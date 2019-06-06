@@ -16,6 +16,8 @@ echo ${P4PASSWD} | p4 login
 #
 # Populate p4d with test data.
 #
+p4 user -f -i < user_george.txt
+yes Passw0rd! | p4 passwd george
 p4 user -f -i < user_jackson.txt
 yes Passw0rd! | p4 passwd jackson
 p4 user -f -i < user_johndoe.txt

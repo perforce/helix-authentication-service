@@ -31,17 +31,26 @@ passport.deserializeUser((obj, done) => {
 router.use(passport.initialize())
 router.use(passport.session())
 
-router.get('/login/:id', (req, res, next) => {
+function checkStrategy (req, res, next) {
+  if (passport._strategy('ldapauth')) {
+    next()
+  } else {
+    res.render('no_strategy')
+  }
+}
+
+router.get('/login/:id', checkStrategy, (req, res, next) => {
   // save the request identifier for request/user mapping
   req.session.requestId = req.params.id
-  if (req.isAuthenticated()) {
+  // ensure this user is authenticated for LDAP and not some other protocol
+  if (req.isAuthenticated() && req.user.is_ldap) {
     res.redirect('/ldap/success')
   } else {
     res.render('login_form', { protocol: 'ldap' })
   }
 })
 
-router.post('/validate', passport.authenticate('ldapauth', {
+router.post('/validate', checkStrategy, passport.authenticate('ldapauth', {
   successRedirect: '/ldap/success',
   failureRedirect: '/ldap/login_failed'
 }))
@@ -62,9 +71,7 @@ function checkAuthentication (req, res, next) {
 
 router.get('/success', checkAuthentication, (req, res, next) => {
   if (req.session.successRedirect) {
-    let path = req.session.successRedirect
-    req.session.successRedirect = null
-    res.redirect(path)
+    res.redirect(req.session.successRedirect)
   } else {
     // req.user: {
     //   dn: 'uid=george,ou=users,dc=example,dc=org',
@@ -82,9 +89,12 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     if (req.user['userPassword']) {
       delete req.user['userPassword']
     }
-    const userId = requests.getIfPresent(req.session.requestId)
-    users.set(userId, req.user)
-    const name = req.user.given_name || req.user.name || req.user.email
+    req.user.is_ldap = true
+    const user = requests.getIfPresent(req.session.requestId)
+    // clear the request identifier from the user session
+    req.session.requestId = null
+    users.set(user.id, req.user)
+    const name = req.user.cn || req.user.givenName || req.user.sn || req.user.mail
     res.render('details', { name })
   }
 })
