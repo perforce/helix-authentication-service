@@ -43,7 +43,7 @@ router.get('/login/:id', checkStrategy, (req, res, next) => {
   // save the request identifier for request/user mapping
   req.session.requestId = req.params.id
   const user = requests.getIfPresent(req.session.requestId)
-  const force = Boolean((user && user.forceAuthn) || process.env.SAML_FORCE_AUTHN || false)
+  const force = user && user.forceAuthn
   // ensure this user is authenticated for LDAP and not some other protocol
   if (!force && req.isAuthenticated() && req.user.is_ldap) {
     res.redirect('/ldap/success')

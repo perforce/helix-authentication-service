@@ -52,7 +52,7 @@ const strategy = new MultiSamlStrategy(
     getSamlOptions: (req, done) => {
       // determine if we should force authentication
       const user = requests.getIfPresent(req.session.requestId)
-      const force = Boolean((user && user.forceAuthn) || process.env.SAML_FORCE_AUTHN || false)
+      const force = user && user.forceAuthn
       debug(`saml forceAuthn: ${force}`)
       const options = Object.assign({}, samlOptions, { forceAuthn: force })
       return done(null, options)
@@ -68,7 +68,7 @@ const strategy = new MultiSamlStrategy(
   }
 )
 if (process.env.SAML_IDP_SSO_URL) {
-  debug('using SAML passport strategy')
+  debug('SAML passport strategy enabled')
   passport.use(strategy)
 } else {
   debug('SAML passport strategy not available')

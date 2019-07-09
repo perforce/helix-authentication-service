@@ -18,9 +18,10 @@ router.get('/new/:id', (req, res, next) => {
   debug('new request %s for %s', requestId, req.params.id)
   // Construct the "user" object which holds the request identifier and any
   // additional properties that enable certain features.
+  const forceAuthn = Boolean(req.query.forceAuthn || process.env.FORCE_AUTHN || false)
   const user = {
     id: req.params.id,
-    forceAuthn: req.query.forceAuthn || false
+    forceAuthn
   }
   requests.set(requestId, user)
   res.json({
