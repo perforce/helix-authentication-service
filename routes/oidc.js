@@ -86,26 +86,17 @@ router.get('/login/:id', (req, res, next) => {
   req.session.requestId = req.params.id
   next()
 }, checkStrategy, (req, res, next) => {
-  // make use of express middleware sub-stack for dynamic routing
+  const opts = {
+    successReturnToOrRedirect: '/',
+    scope: 'openid profile email'
+  }
   const user = requests.getIfPresent(req.session.requestId)
   if (user && user.forceAuthn) {
     console.info('forcing OIDC authentication using max_age=0')
-    next('route')
-  } else {
-    next()
+    opts['max_age'] = 0
   }
-}, passport.authenticate('openidconnect', {
-  successReturnToOrRedirect: '/',
-  scope: 'openid profile email'
-}))
-
-// called via next('route') above, normally skipped
-router.get('/login/:id', passport.authenticate('openidconnect', {
-  successReturnToOrRedirect: '/',
-  scope: 'openid profile email',
-  // max_age value must go here
-  max_age: 0
-}))
+  passport.authenticate('openidconnect', opts)(req, res, next)
+})
 
 router.get('/callback', checkStrategy, passport.authenticate('openidconnect', {
   callback: true,
