@@ -153,6 +153,9 @@ will never have to enter the value directly.
    environment variable.
 1. From the *SSO* tab, copy the **Client Secret** value to `OIDC_CLIENT_SECRET`
    (N.B. you may need to "show" the secret first before the copy button will work).
+1. From the *SSO* tab, find the **OpenID Provider Configuration Information** link
+   and open in a new tab. Find the `issuer` and copy the URL value to the
+   `OIDC_ISSUER_URI` environment variable.
 1. Ensure the **Application Type** is set to _Web_
 1. Ensure the **Token Endpoint** is set to _Basic_
 1. Restart the service.
@@ -164,12 +167,14 @@ will never have to enter the value directly.
 ### SAML 2.0
 
 1. From the admin dashboard, create a new app: search for `SAML` and select
-   **SAML Test Connector (IdP w/ NameID Persistent)** from the list.
+   **SAML Test Connector (Advanced)** from the list.
 1. On the *Configuration* screen, enter `urn:example:sp` for **Audience**
 1. On the same screen, enter `https://svc.doc:3000/saml/sso` for **Recipient**
 1. And for *ACS (Consumer) URL Validator*, enter `.*` to match any value
 1. For *ACS (Consumer) URL*, enter `https://svc.doc:3000/saml/sso`
 1. For *Single Logout URL*, enter `https://svc.doc:3000/saml/slo`
+1. For *Login URL*, enter `https://svc.doc:3000/saml/sso`
+1. For *SAML initiator* select **Service Provider**
 1. Find the **Save** button and click it.
 1. From the *SSO* tab, copy the **SAML 2.0 Endpoint** value to the
    `SAML_IDP_SSO_URL` environment variable.
