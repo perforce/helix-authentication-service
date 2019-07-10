@@ -234,7 +234,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
 })
 
 // If the `nameID` property is missing, attempt to set it to a reasonable value.
-// If `nameIDFormat` property is missing, sets it to the "unspecified" value.
+// If `nameIDFormat` property is missing, set it to the "unspecified" value.
 function assignNameId (user) {
   if (!user.nameID) {
     let nameID = null
@@ -246,6 +246,8 @@ function assignNameId (user) {
       nameID = user[nameIdField]
     } else if (user.email) {
       nameID = user.email
+    } else if (user.sub) {
+      nameID = user.sub
     } else {
       // need to use some unique value if nothing else
       nameID = ulid()
