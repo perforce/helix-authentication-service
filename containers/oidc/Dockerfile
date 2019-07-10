@@ -1,4 +1,4 @@
-FROM node:lts-stretch
+FROM node:12-stretch
 
 ENV DEBIAN_FRONTEND noninteractive
 

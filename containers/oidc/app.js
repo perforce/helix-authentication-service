@@ -12,11 +12,11 @@ const Provider = require('oidc-provider')
 require('dotenv').config()
 
 const Account = require('./support/account')
-const { provider: providerConfiguration, clients, keys } = require('./support/configuration')
+const configuration = require('./support/configuration')
 const routes = require('./routes/express')
 
-const { PORT = 3000, ISSUER = `http://localhost:${PORT}`, TIMEOUT } = process.env
-providerConfiguration.findById = Account.findById
+const { PORT = 3000, ISSUER = `http://localhost:${PORT}` } = process.env
+configuration.findAccount = Account.findAccount
 
 const app = express()
 app.use(helmet())
@@ -25,25 +25,21 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.use(logger('dev'))
 
-const provider = new Provider(ISSUER, providerConfiguration)
-
-if (TIMEOUT) {
-  provider.defaultHttpOptions = { timeout: parseInt(TIMEOUT, 10) }
-}
-
 let server;
 (async () => {
-  await provider.initialize({
-    adapter: undefined,
-    clients,
-    keystore: { keys }
-  })
+  let adapter
+  if (process.env.MONGODB_URI) {
+    adapter = require('./adapters/mongodb') // eslint-disable-line global-require
+    await adapter.connect()
+  }
+
+  const provider = new Provider(ISSUER, { adapter, ...configuration })
 
   if (process.env.NODE_ENV === 'production') {
     app.enable('trust proxy')
     provider.proxy = true
-    set(providerConfiguration, 'cookies.short.secure', true)
-    set(providerConfiguration, 'cookies.long.secure', true)
+    set(configuration, 'cookies.short.secure', true)
+    set(configuration, 'cookies.long.secure', true)
 
     app.use((req, res, next) => {
       if (req.secure) {
@@ -66,7 +62,7 @@ let server;
   routes(app, provider)
   app.use(provider.callback)
   server = app.listen(PORT, () => {
-    console.log(`application is listening on port ${PORT}, check it's /.well-known/openid-configuration`)
+    console.log(`application is listening on port ${PORT}, check its /.well-known/openid-configuration`)
   })
 })().catch((err) => {
   if (server && server.listening) server.close()
