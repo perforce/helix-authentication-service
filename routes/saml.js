@@ -256,7 +256,7 @@ function assignNameId (user) {
     debug('legacy setting nameID to %s', nameID)
   }
   // Same with nameIDFormat, the SAML library requires that it have a value,
-  // so default to something sensible if no set.
+  // so default to something sensible if not set.
   if (!user.nameIDFormat) {
     user.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
     debug('legacy setting nameIDFormat to unspecified')
