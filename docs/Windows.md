@@ -4,7 +4,7 @@
 
 ### Initial Setup
 
-1. Install [Node LTS](https://nodejs.org/)
+1. Install [Node 12](https://nodejs.org/)
 1. Install [Visual Studio Code](https://code.visualstudio.com) (git wants an editor)
 1. Install [Git](https://git-scm.com) (npm wants git to fetch dependencies)
 1. Install the Perforce client (`p4.exe` is sufficient)

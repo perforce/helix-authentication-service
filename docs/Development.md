@@ -11,8 +11,7 @@ depending on your circumstances.
 #### Prerequisites
 
 To fetch and build the application dependencies and run tests, you will need
-[Node.js](http://nodejs.org) *LTS* installed; the *Current* version may have
-compatibility issues with some modules, and in general can be a bit unstable.
+[Node.js](http://nodejs.org) *12* or higher due to dependencies.
 
 #### Build and Start
 

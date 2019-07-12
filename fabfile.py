@@ -57,11 +57,11 @@ def install_nodejs():
     # minimal systems often lack things any sane person would expect
     sudo('apt-get install -q -y curl')
     # The node package on ubuntu is stupidly old, so run a shell script from the
-    # internet as root to get the LTS version directly from the vendor. This
+    # internet as root to get the desired version directly from the vendor. This
     # includes npm as well.
     #
     # c.f. https://nodejs.org/en/download/package-manager/
-    run('curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -')
+    run('curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -')
     sudo('apt-get install -q -y nodejs')
     # run npm once as the unprivileged user so it creates the ~/.config
     # directory with the unprivileged user as the owner, rather than as root
@@ -76,6 +76,7 @@ def install_pm2():
         return
     execute(install_nodejs)
     sudo('npm install -q -g pm2')
+    sudo('chown -R {0}:{0} .npm'.format(env.user))
 
 
 @task
