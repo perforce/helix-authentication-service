@@ -1,3 +1,27 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Helix Identity Management Integration Service</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel='stylesheet' href='/stylesheets/bulma.min.css' />
+</head>
+
+<body>
+  <section class="hero is-light">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Helix Identity Management Integration Service</h1>
+        <h2 class="subtitle">Error</h2>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <h1><%= message %></h1>
+      <h2><%= error.status %></h2>
+    </div>
+  </section>
+</body>
+
+</html>
