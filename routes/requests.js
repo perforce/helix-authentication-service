@@ -48,7 +48,7 @@ router.get('/status/:id', async (req, res, next) => {
     if (requests.has(req.params.id)) {
       const userRecord = requests.getIfPresent(req.params.id)
       try {
-        let user = await new Promise((resolve, reject) => {
+        const user = await new Promise((resolve, reject) => {
           if (users.has(userRecord.id)) {
             // data is ready, no need to wait; remove the user profile data to
             // prevent replay attack

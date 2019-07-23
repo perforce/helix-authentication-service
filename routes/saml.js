@@ -18,7 +18,7 @@ const idpOptions = {
   redirectEndpointPath: '/saml/login',
   postEndpointPath: '/saml/login',
   logoutEndpointPaths: {
-    'redirect': '/saml/logout'
+    redirect: '/saml/logout'
   }
 }
 const idpConfFile = process.env.IDP_CONFIG_FILE || './saml_idp.conf.js'
@@ -267,15 +267,15 @@ function assignNameId (user) {
 // Construct a user object that samlp will accept for building the SAML
 // response, and fill in some properties that the service might expect.
 function buildResponseUser (user) {
-  let email = user.email ? user.email : null
+  const email = user.email ? user.email : null
   let displayName = ''
   if (user.fullname) {
     displayName = user.fullname
   } else if (user.name) {
     displayName = user.name
   }
-  let givenName = user.given_name ? user.given_name : ''
-  let familyName = user.family_name ? user.family_name : ''
+  const givenName = user.given_name ? user.given_name : ''
+  const familyName = user.family_name ? user.family_name : ''
   return Object.assign({}, user, {
     id: user.nameID,
     emails: [email],
