@@ -44,7 +44,8 @@ const samlOptions = {
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
   audience: process.env.SAML_SP_AUDIENCE || undefined,
   privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
-  signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256'
+  signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256',
+  identifierFormat: process.env.SAML_NAMEID_FORMAT || undefined
 }
 // Use multi-strategy to enable us to dynamically configure the SAML options.
 const strategy = new MultiSamlStrategy(
