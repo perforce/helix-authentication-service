@@ -80,6 +80,27 @@ URL you will need to download the metadata and look for the
 `SingleLogoutService` element, copying the `Location` attribute value to
 `SAML_IDP_SLO_URL` in the config.
 
+## Azure Active Directory
+
+With Azure Active Directory (AAD) there is a version 1.0 and a 2.0. With v1.0
+there is SAML support, but no support for "personal" accounts, while v2.0
+supports personal accounts but does not support SAML. Version 2.0 is also
+referred to as the Microsoft Identity Platform, and offers OIDC support.
+
+### OpenID Connect
+
+1. Visit the Azure [portal](https://portal.azure.com/)
+1. Register a new application under Azure Active Directory
+1. Enter the auth service URL as the **redirect URL**; for Docker this
+   would be `https://svc.doc:3000/oidc/callback`
+1. Copy the *Application (client) ID* to the `OIDC_CLIENT_ID` environment variable
+1. Open the OIDC metadata URL in the browser (click _Endpoints_ button from app overview page)
+1. Copy the `issuer` URL and enter as the `OIDC_ISSUER_URI` environment variable
+1. Under _Certificates & secrets_, click **New client secret**, copy the secret value
+   to the `OIDC_CLIENT_SECRET` environment variable
+1. Add a user account (*guest* works well) such that it has a defined **email** field;
+   for whatever reason, "personal" accounts do not have the "email" field defined.
+
 ## Okta
 
 Configuring the authentication service with Okta is fairly straightforward.
