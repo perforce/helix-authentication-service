@@ -95,7 +95,9 @@ referred to as the Microsoft Identity Platform, and offers OIDC support.
    would be `https://svc.doc:3000/oidc/callback`
 1. Copy the *Application (client) ID* to the `OIDC_CLIENT_ID` environment variable
 1. Open the OIDC metadata URL in the browser (click _Endpoints_ button from app overview page)
-1. Copy the `issuer` URL and enter as the `OIDC_ISSUER_URI` environment variable
+1. Copy the `issuer` URL and enter as the `OIDC_ISSUER_URI` environment variable;
+   if the issuer URI contains `{tenantid}` then replace it with the Directory (tenant) ID
+   from the application overview page.
 1. Under _Certificates & secrets_, click **New client secret**, copy the secret value
    to the `OIDC_CLIENT_SECRET` environment variable
 1. Add a user account (*guest* works well) such that it has a defined **email** field;
