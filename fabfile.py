@@ -209,8 +209,7 @@ def configure_p4d():
     # restart p4d so the changes take effect
     #
     with settings(sudo_user='perforce'):
-        sudo('p4dctl stop despot')
-        sudo('p4dctl start despot')
+        sudo('p4dctl restart despot')
 
 
 def get_public_ip():
