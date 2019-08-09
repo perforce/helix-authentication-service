@@ -153,7 +153,6 @@ Assuming you are using the Docker containers:
 1. (Re)Build the containers and start them (again)
 1. Configure the login hook extension:
     * `Service-URL` should start with `http://`
-    * `Auth-Protocol` should be `saml`
 
 ## Coding Conventions
 

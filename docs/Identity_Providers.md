@@ -91,6 +91,7 @@ referred to as the Microsoft Identity Platform, and offers OIDC support.
 
 1. Visit the Azure [portal](https://portal.azure.com/)
 1. Register a new application under Azure Active Directory
+    * You can use a single app registration for both OIDC and SAML.
 1. Enter the auth service URL as the **redirect URL**; for Docker this
    would be `https://svc.doc:3000/oidc/callback`
 1. Copy the *Application (client) ID* to the `OIDC_CLIENT_ID` environment variable
@@ -102,6 +103,22 @@ referred to as the Microsoft Identity Platform, and offers OIDC support.
    to the `OIDC_CLIENT_SECRET` environment variable
 1. Add a user account (*guest* works well) such that it has a defined **email** field;
    for whatever reason, "personal" accounts do not have the "email" field defined.
+1. Make sure the Perforce user email address matches the user in Active Directory
+
+### SAML 2.0
+
+1. Visit the Azure [portal](https://portal.azure.com/)
+1. Register a new application under Azure Active Directory
+    * You can use a single app registration for both OIDC and SAML.
+1. Enter the auth service URL as the **redirect URL**; for Docker this
+   would be `https://svc.doc:3000/saml/sso`
+1. Copy the *Application (client) ID* to the `SAML_SP_ISSUER` environment variable
+1. Open the API endpoints page: click the _Endpoints_ button from app overview page
+1. Copy the *SAML-P sign-on endpoint* value to the `SAML_IDP_SSO_URL` environment variable
+1. Copy the *SAML-P sign-out endpoint* value to the `SAML_IDP_SLO_URL` environment variable
+1. Set the `SAML_NAMEID_FORMAT` environment variable to the value
+   `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
+1. Make sure the Perforce user email address matches the user in Active Directory
 
 ## Okta
 
