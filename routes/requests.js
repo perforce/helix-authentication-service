@@ -40,8 +40,19 @@ router.get('/status/:id', async (req, res, next) => {
   // Another option is to use a passport extension which does essentially the
   // same thing: https://github.com/ripjar/passport-client-cert
   //
-  const cert = req.connection.getPeerCertificate()
-  if (req.client.authorized) {
+  let cert
+  let authorized
+  if (process.env.PROTOCOL === 'https') {
+    // These calls only work when the service is using HTTPS, which is likely
+    // not the case when running on test system (e.g. PingFederate with OIDC
+    // rejects self-signed certificates).
+    cert = req.connection.getPeerCertificate()
+    authorized = req.client.authorized
+  } else if (process.env.PROTOCOL === 'http') {
+    // have to assume the client is okay
+    authorized = true
+  }
+  if (authorized) {
     // Look for the pending request, then check if the user associated with the
     // request has successfully authenticated. Wait for a while as the user may
     // still be authenticating with the identity provider.
@@ -78,7 +89,7 @@ router.get('/status/:id', async (req, res, next) => {
       // no such request, move on to the next handler (a likely 404)
       next()
     }
-  } else if (cert.subject) {
+  } else if (cert && cert.subject) {
     const msg = `Sorry ${cert.subject.CN}, certificates from ${cert.issuer.CN} are not supported.`
     res.status(403).send(msg)
   } else {
