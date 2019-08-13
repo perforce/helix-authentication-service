@@ -131,6 +131,7 @@ module.exports = {
       OIDC_CLIENT_SECRET: 'client_secret',
       OIDC_ISSUER_URI: 'http://localhost:3001/',
       SVC_BASE_URI: 'https://localhost:3000',
+      PROTOCOL: 'https',
       DEFAULT_PROTOCOL: 'oidc',
       CA_CERT_FILE: 'certs/sp.crt',
       IDP_CERT_FILE: 'certs/sp.crt',
