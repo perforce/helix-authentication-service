@@ -59,13 +59,7 @@ const strategy = new MultiSamlStrategy(
       return done(null, options)
     }
   }, (profile, done) => {
-    // produce a "user" object that contains the information that passport-saml
-    // requires for logging out via SAML
-    return done(null, {
-      nameID: profile.nameID,
-      nameIDFormat: profile.nameIDFormat,
-      sessionIndex: profile.sessionIndex
-    })
+    return done(null, extractProfile(profile))
   }
 )
 if (process.env.SAML_IDP_SSO_URL) {
@@ -322,5 +316,38 @@ function handleSLO (req, res) {
 // some services use GET and some use POST
 router.get('/slo', checkStrategy, passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
 router.post('/slo', checkStrategy, passport.authenticate('saml', { samlFallback: 'logout-request' }), handleSLO)
+
+//
+// Produce a "user" object that contains the information that passport-saml
+// requires for logging out via SAML, as well as any exposed attributes.
+//
+function extractProfile (profile) {
+  // we need these values to facilitate logout
+  const basics = {
+    nameID: profile.nameID,
+    nameIDFormat: profile.nameIDFormat,
+    sessionIndex: profile.sessionIndex
+  }
+  // peruse the SAML assertion result to find additional attributes
+  const assertion = profile.getAssertion().Assertion
+  const extras = {}
+  if (assertion) {
+    const statements = assertion.AttributeStatement
+    if (statements) {
+      for (const block of statements) {
+        const attributes = block.Attribute
+        if (attributes) {
+          for (const attr of attributes) {
+            // the strange property names and such come from the generic XML
+            // parser which is simply translating the XML into JavaScript
+            // objects in a one-to-one fashion
+            extras[attr.$.Name] = attr.AttributeValue[0]._
+          }
+        }
+      }
+    }
+  }
+  return Object.assign({}, basics, extras)
+}
 
 module.exports = router
