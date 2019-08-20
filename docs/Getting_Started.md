@@ -72,17 +72,16 @@ to sign the client signing request to produce a client certificate. In practice,
 both the service and client would use proper certificates and utilize a trusted
 certificate authority.
 
-```shell
-$ cd certs
-$ openssl req -newkey rsa:4096 -keyout client.key -out client.csr -nodes -days 365 -subj "/CN=LoginExtension"
-$ openssl x509 -req -in client.csr -CA sp.crt -CAkey sp.key -out client.crt -set_serial 01 -days 365
-```
-
 The auth service reads its certificate and key files using the paths defined in
 `SP_CERT_FILE` and `SP_KEY_FILE`, respectively. The path for the certificate
 authority certificate is read from the `CA_CERT_FILE` environment variable.
 Clients accessing the `requests/status/:id` route will require a valid client
 certificate signed by the certificate authority.
+
+The Helix Server extension reads the CA certificate from `loginhook/ca.crt` and
+the client certificates from `loginhook/client.crt` and `loginhook/client.key`.
+These files must be in place at the time the extension is packaged and cannot
+be modified without packaging and installing again.
 
 ##### SAML IdP
 
@@ -133,14 +132,14 @@ module.exports = {
       SVC_BASE_URI: 'https://localhost:3000',
       PROTOCOL: 'https',
       DEFAULT_PROTOCOL: 'oidc',
-      CA_CERT_FILE: 'certs/sp.crt',
-      IDP_CERT_FILE: 'certs/sp.crt',
-      IDP_KEY_FILE: 'certs/sp.key',
+      CA_CERT_FILE: 'certs/ca.crt',
+      IDP_CERT_FILE: 'certs/server.crt',
+      IDP_KEY_FILE: 'certs/server.key',
       SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
       SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
       SAML_SP_ISSUER: 'urn:example:sp',
-      SP_CERT_FILE: 'certs/sp.crt',
-      SP_KEY_FILE: 'certs/sp.key'
+      SP_CERT_FILE: 'certs/server.crt',
+      SP_KEY_FILE: 'certs/server.key'
     }
   }]
 }

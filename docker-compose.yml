@@ -62,15 +62,15 @@ services:
       # FORCE_AUTHN: "true"
       SVC_BASE_URI: "https://svc.doc:3000"
       DEFAULT_PROTOCOL: "oidc"
-      CA_CERT_FILE: certs/sp.crt
-      IDP_CERT_FILE: certs/sp.crt
-      IDP_KEY_FILE: certs/sp.key
+      CA_CERT_FILE: certs/ca.crt
+      IDP_CERT_FILE: certs/server.crt
+      IDP_KEY_FILE: certs/server.key
       SAML_IDP_SSO_URL: "http://idp.doc:7000/saml/sso"
       SAML_IDP_SLO_URL: "http://idp.doc:7000/saml/slo"
       SAML_SP_ISSUER: "urn:example:sp"
       # SAML_SP_AUDIENCE: captive-audience
-      SP_CERT_FILE: certs/sp.crt
-      SP_KEY_FILE: certs/sp.key
+      SP_CERT_FILE: certs/server.crt
+      SP_KEY_FILE: certs/server.key
       # SP_KEY_ALGO: sha256
       LDAP_URL: "ldap://ldap.doc:389"
       LDAP_BIND_DN: "cn=admin,dc=example,dc=org"

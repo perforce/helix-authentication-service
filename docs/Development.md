@@ -43,14 +43,14 @@ OIDC_ISSUER_URI=http://localhost:3001/
 SVC_BASE_URI=https://localhost:3000
 PROTOCOL=https
 DEFAULT_PROTOCOL=oidc
-CA_CERT_FILE=certs/sp.crt
-IDP_CERT_FILE=certs/sp.crt
-IDP_KEY_FILE=certs/sp.key
+CA_CERT_FILE=certs/ca.crt
+IDP_CERT_FILE=certs/server.crt
+IDP_KEY_FILE=certs/server.key
 SAML_IDP_SSO_URL=http://idp.doc:7000/saml/sso
 SAML_IDP_SLO_URL=http://idp.doc:7000/saml/slo
 SAML_SP_ISSUER=urn:example:sp
-SP_CERT_FILE=certs/sp.crt
-SP_KEY_FILE=certs/sp.key
+SP_CERT_FILE=certs/server.crt
+SP_KEY_FILE=certs/server.key
 EOF
 $ npm start
 ```
@@ -154,6 +154,25 @@ Assuming you are using the Docker containers:
 1. (Re)Build the containers and start them (again)
 1. Configure the login hook extension:
     * `Service-URL` should start with `http://`
+
+## Generating the Certificates
+
+For development we create a self-signed certificate for the authentication
+service and use that to sign the client signing request for the server
+extension, thus creating the client certificate for the extension. This works
+fine for the client since our service will accept its own certificate as a
+certificate authority. However, we cannot use this same trick with the service
+since the browsers will not accept our fake certificate authority. For now, we
+only sign the client certificate and leave the service certificate as
+self-signed, since most browsers will tolerate that.
+
+```shell
+$ cd certs
+$ openssl req -newkey rsa:4096 -keyout client.key -out client.csr -nodes -days 365 -subj "/CN=LoginExtension"
+$ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -set_serial 01 -days 365
+$ rm client.csr ; mv client.crt client.key ../loginhook
+$ openssl req -newkey rsa:4096 -keyout server.key -out server.crt -nodes -days 365 -x509 -subj "/CN=AuthService"
+```
 
 ## Coding Conventions
 

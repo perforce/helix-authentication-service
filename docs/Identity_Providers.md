@@ -162,7 +162,7 @@ will never have to enter the value directly.
 1. For the **Single Logout URL** enter the auth service logout URL; for Docker
    this would be `https://svc.doc:3000/saml/slo`
 1. Enter `urn:example:sp` for the **SP Issuer** value.
-1. For **Signature Certificate**, select and upload the `certs/sp.crt` file.
+1. For **Signature Certificate**, select and upload the `certs/server.crt` file.
 1. From the *Sign On* tab, click the **View Setup Instructions** button and copy the
    values for IdP SSO and SLO URLs to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL`
    settings in the environment.

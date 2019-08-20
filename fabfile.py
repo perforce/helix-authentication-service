@@ -103,14 +103,14 @@ module.exports = {{
       SVC_BASE_URI: 'https://{ipaddr}:3000',
       PROTOCOL: 'https',
       DEFAULT_PROTOCOL: 'oidc',
-      CA_CERT_FILE: 'certs/sp.crt',
-      IDP_CERT_FILE: 'certs/sp.crt',
-      IDP_KEY_FILE: 'certs/sp.key',
+      CA_CERT_FILE: 'certs/ca.crt',
+      IDP_CERT_FILE: 'certs/server.crt',
+      IDP_KEY_FILE: 'certs/server.key',
       SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
       SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
       SAML_SP_ISSUER: 'urn:example:sp',
-      SP_CERT_FILE: 'certs/sp.crt',
-      SP_KEY_FILE: 'certs/sp.key'
+      SP_CERT_FILE: 'certs/server.crt',
+      SP_KEY_FILE: 'certs/server.key'
     }}
   }}]
 }}

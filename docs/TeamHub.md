@@ -83,7 +83,7 @@ In particular, get the `SingleSignOnService` URL, which will be used as the
 1. Log in as an administrator to the HTH application (not the admin interface), and find the company settings.
 1. In the "Authentication" section, enable the SAML option.
 1. Paste the `SingleSignOnService` URL from the IdP metadata to the *IdP SSO URL* setting.
-1. Copy the entire contents of the `certs/sp.crt` file into the *IdP Certificate* setting.
+1. Copy the entire contents of the `certs/server.crt` file into the *IdP Certificate* setting.
 1. Click on the **Save** button to commit the changes.
 
 You can now try logging into HTH using the "external authentication" option.
