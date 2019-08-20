@@ -5,6 +5,7 @@ const debug = require('debug')('auth:server')
 const express = require('express')
 const router = express.Router()
 const { ulid } = require('ulid')
+const url = require('url')
 const { users, requests } = require('../store')
 
 // How long to wait (in ms) for user details before returning 408.
@@ -42,13 +43,14 @@ router.get('/status/:id', async (req, res, next) => {
   //
   let cert
   let authorized
-  if (process.env.PROTOCOL === 'https') {
+  const protocol = getProtocol()
+  if (protocol === 'https:') {
     // These calls only work when the service is using HTTPS, which is likely
     // not the case when running on test system (e.g. PingFederate with OIDC
     // rejects self-signed certificates).
     cert = req.connection.getPeerCertificate()
     authorized = req.client.authorized
-  } else if (process.env.PROTOCOL === 'http') {
+  } else if (protocol === 'http:') {
     // have to assume the client is okay
     authorized = true
   }
@@ -96,5 +98,14 @@ router.get('/status/:id', async (req, res, next) => {
     res.status(401).send(`Sorry, but you need to provide a client certificate to continue.`)
   }
 })
+
+function getProtocol () {
+  if (process.env.PROTOCOL) {
+    // change the format to match that of url.URL()
+    return process.env.PROTOCOL + ':'
+  }
+  const u = new url.URL(process.env.SVC_BASE_URI)
+  return u.protocol
+}
 
 module.exports = router

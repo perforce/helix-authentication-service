@@ -58,7 +58,6 @@ services:
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "http://oidc.doc:3001/"
       DEBUG: "auth:*"
-      PROTOCOL: "https"
       # FORCE_AUTHN: "true"
       SVC_BASE_URI: "https://svc.doc:3000"
       DEFAULT_PROTOCOL: "oidc"

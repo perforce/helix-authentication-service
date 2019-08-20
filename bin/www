@@ -9,11 +9,12 @@
 const app = require('../app')
 const debug = require('debug')('auth:server')
 const fs = require('fs')
+const url = require('url')
 
 /**
  * Get port from environment and store in Express.
  */
-const port = normalizePort(process.env.PORT || '3000')
+const port = normalizePort(getPort())
 app.set('port', port)
 
 /**
@@ -27,6 +28,24 @@ const server = createServer(app)
 server.listen(port)
 server.on('error', onError)
 server.on('listening', onListening)
+
+// Use PORT if it is defined, otherwise get the port from the SVC_BASE_URI,
+// defaulting to 80 or 443 depending on the protocol.
+function getPort () {
+  if (process.env.PORT) {
+    return process.env.PORT
+  }
+  const u = new url.URL(process.env.SVC_BASE_URI)
+  if (u.port) {
+    return u.port
+  }
+  if (u.protocol === 'https:') {
+    return '443'
+  } else if (u.protocol === 'http:') {
+    return '80'
+  }
+  throw new Error('protocol must be http: or https:')
+}
 
 /**
  * Normalize a port into a number, string, or false.
@@ -83,11 +102,21 @@ function onListening () {
   debug('Listening on %s', bind)
 }
 
+function getProtocol () {
+  if (process.env.PROTOCOL) {
+    // change the format to match that of url.URL()
+    return process.env.PROTOCOL + ':'
+  }
+  const u = new url.URL(process.env.SVC_BASE_URI)
+  return u.protocol
+}
+
 /**
  * Create either an HTTP or HTTPS server based on environment.
  */
 function createServer (app) {
-  if (process.env.PROTOCOL === 'http') {
+  const protocol = getProtocol()
+  if (protocol === 'http:') {
     debug('Creating http server')
     return require('http').createServer(app)
   } else {
