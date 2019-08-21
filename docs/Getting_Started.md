@@ -29,7 +29,7 @@ CentOS lacks Node.js packages, but there are packages available from
 
 ```shell
 $ sudo yum -q -y install git gcc-c++ make
-$ curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
+$ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo yum -q -y install nodejs
 ```
 
@@ -41,7 +41,7 @@ CentOS lacks up-to-date Node.js packages, but there are packages available from
 ```shell
 $ sudo apt-get install -q -y build-essential
 $ sudo apt-get install -q -y curl
-$ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+$ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo apt-get install -q -y nodejs
 ```
 
