@@ -1,3 +1,0 @@
-User:	jackson
-Email:	saml.jackson@example.com
-FullName:	Sam L. Jackson

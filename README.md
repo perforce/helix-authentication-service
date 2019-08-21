@@ -34,10 +34,12 @@ Of course, if they support OIDC or SAML, that's even easier.
 ### Provider Support
 
 Using OIDC, this service has been tested with [Auth0](https://auth0.com),
-[Okta](https://www.okta.com), and [OneLogin](https://www.onelogin.com).
+[Azure](https://azure.microsoft.com), [Okta](https://www.okta.com), and
+[OneLogin](https://www.onelogin.com).
 
 Using SAML, this service has been tested with [Auth0](https://auth0.com),
-[Okta](https://www.okta.com), and [OneLogin](https://www.onelogin.com).
+[Azure](https://azure.microsoft.com), [Okta](https://www.okta.com), and
+[OneLogin](https://www.onelogin.com).
 
 Using LDAP, this service has been tested with OpenLDAP.
 
