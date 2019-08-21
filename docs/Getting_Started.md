@@ -256,6 +256,37 @@ certificates to connect to the authentication service. For development purposes,
 these are self-signed certificates, which should be replaced when deploying to
 production. See the **Certificates** section above for more information.
 
+#### Mapping User Profiles to Perforce Users
+
+The process of mapping the user profiles from the identity provider to the user
+specs in Helix Server is dependent on the protocol and the identity provider.
+Each combination produces a different set of user profile fields, and that can
+be modified by the administrator as well. As such, this guide will give an
+overview of what to look for and the different options that are available.
+
+Generally, with SAML, the `name-identifier` extension setting should be given
+the value `nameID`, as that field is nearly always present in the user profile
+returned from the SAML IdP. The question will be, what is the format of this
+name identifier? Is it a username or email address? If user name, does it match
+the `User` field in the Perforce user spec? If so, then set `user-identifier` to
+`user` in the extension configuration. If the name identifier is an email address,
+then use `email` instead of `user`.
+
+For OIDC, oftentimes the user profile includes an `email` field and the server
+extension looks for this by default (that is, `name-identifier` defaults to
+`email`). Hopefully this value matches the `Email` field of the Perforce user
+spec, as the server extension will use that for the `user-identifier` by
+default.
+
+If you are unsure of the contents of the user profile returned from the identity
+provider, enable the debug logging in either the authentication service or the
+server extension, and then examine the logs after attempting a login. With the
+server extension, simply set `enable-logging` to `true`, attempt a login, and
+look for the `log.json` file under the `server.extensions.dir` directory of the
+Helix depot. For the authentication service, set `DEBUG` to `auth:*`, restart
+the service, attempt the login, and look at the output from the service (either
+in the console or in a pm2 log file, if you are using pm2).
+
 ## Helix Server
 
 As mentioned earlier, the loginhook extension requires Helix Server 2019.1 or
