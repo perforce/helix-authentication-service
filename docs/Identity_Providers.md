@@ -28,36 +28,33 @@ to take effect. How the service is deployed determines how to restart it.
 
 ### OpenID Connect
 
-By default the "regular web application" configured in Auth0 will have OpenID
-Connect support, so all that is needed is to copy the settings to the service
-configuration.
-
-From the Auth0 management screen, select *Applications* from the left sidebar,
-click on your application, and on the *Settings* tab, scroll to the bottom and
-click the **Advanced Settings** link. Find the *Endpoints* tab and select it to
-reveal the various endpoints. Open the **OpenID Configuration** value in a new
-browser tab to get the raw configuration values. Find `issuer` and copy the
-value to `OIDC_ISSUER_URI` in the service config. You can now close the
-configuration tab.
-
-On the application screen, scroll up to the top of *Settings* and copy the
-**Client ID** value to the `OIDC_CLIENT_ID` setting in the service config.
-Likewise for the **Client Secret** value.
-
-The first of two additional changes to make in the Auth0 application
-configuration is the addition of the **Allowed Callback URLs** under *Settings*.
-As with the other providers, put the service callback URL, either
-`{SVC_BASE_URI}/oidc/callback` or `{SVC_BASE_URI}/saml/sso` as appropriate for
-the protocol. The second change is to the **Allowed Logout URLs** under
-*Settings*; put both `{SVC_BASE_URI}/` and `{SVC_BASE_URI}/saml/slo` for OIDC
-and SAML, respectively.
+1. From the admin dashboard, click the *CREATE APPLICATION* button.
+1. Enter a meaningful name for the application.
+1. Select the *Regular Web Application* button, then click *Create*.
+1. Open the *Settings* tab, copy the **Client ID** and **Client Secret** values to
+   `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` settings in the service configuration.
+1. For **Allowed Callback URLs** add `{SVC_BASE_URI}/oidc/callback`
+1. For **Allowed Logout URLs** add `{SVC_BASE_URI}`
+1. Scroll to the bottom of the *Settings* screen and click the **Advanced Settings** link.
+1. Find the *Endpoints* tab and select it.
+1. Open the **OpenID Configuration** value in a new browser tab to get the raw
+   configuration values. Find `issuer` and copy the value to `OIDC_ISSUER_URI` in
+   the service config. You can now close the configuration tab.
+1. At the bottom of the page, click the *SAVE CHANGES* button.
 
 ### SAML 2.0
 
-To enable SAML 2.0 in Auth0, you must enable the **SAML 2.0** "addon" from the
-application settings. Put the `{SVC_BASE_URI}/saml/sso` URL for the
-**Application Callback URL**, and ensure the **Settings** block looks something
-like the following:
+1. From the admin dashboard, click the *CREATE APPLICATION* button.
+1. Enter a meaningful name for the application.
+1. Select the *Regular Web Application* button, then click *Create*.
+1. On the application *Settings* screen, add `{SVC_BASE_URI}/saml/sso` to the
+   **Allowed Callback URLs** field.
+1. For **Allowed Logout URLs** add `{SVC_BASE_URI}/saml/slo`
+1. At the bottom of the page, click the *SAVE CHANGES* button.
+1. Click the *Addons* tab near the top of the application page.
+1. Click the *SAML2 WEB APP* button to enable SAML 2.0.
+1. Enter `{SVC_BASE_URI}/saml/sso` for the **Application Callback URL**
+1. Ensure the **Settings** block looks something like the following:
 
 ```javascript
 {
@@ -72,22 +69,14 @@ like the following:
 }
 ```
 
-The important part of that configuration is to set the `nameIdentifierProbes`,
-otherwise the NameID returned in the SAML response is the default generated
-value, which is difficult to tie back to the Perforce user account.
-
-On the *Usage* tab of the addon screen, copy the **Identity Provider Login URL**
-to the `SAML_IDP_SSO_URL` setting in the service configuration. To get the SLO
-URL you will need to download the metadata and look for the
-`SingleLogoutService` element, copying the `Location` attribute value to
-`SAML_IDP_SLO_URL` in the config.
+1. Click the *ENABLE* button at the bottom of the page.
+1. On the *Usage* tab of the addon screen, copy the **Identity Provider Login URL**
+   to the `SAML_IDP_SSO_URL` setting in the service configuration.
+1. To get the SLO URL you will need to download the metadata and look for the
+   `SingleLogoutService` element, copying the `Location` attribute value to
+   `SAML_IDP_SLO_URL` in the config.
 
 ## Azure Active Directory
-
-With Azure Active Directory (AAD) there is a version 1.0 and a 2.0. With v1.0
-there is SAML support, but no support for "personal" accounts, while v2.0
-supports personal accounts but does not support SAML. Version 2.0 is also
-referred to as the Microsoft Identity Platform, and offers OIDC support.
 
 ### OpenID Connect
 
@@ -119,24 +108,24 @@ referred to as the Microsoft Identity Platform, and offers OIDC support.
 1. Set the `SAML_NAMEID_FORMAT` environment variable to the value
    `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
 1. Make sure the Perforce user email address matches the user in Active Directory
+1. Configure the extension to use `nameID` as the `name-identifier` value.
 
 ## Okta
 
-Configuring the authentication service with Okta is fairly straightforward.
-
 ### OpenID Connect
 
-1. On the Okta admin dashboard, create a new application (helps to use "classic ui").
+1. On the Okta admin dashboard, click the **Create a New** application button
+   (helps to use "classic ui").
 1. Select *Web* as the **Platform** and *OpenID Connect* as the **Sign on method**.
 1. Provide a meaningful name on the next screen.
 1. For the **Login redirect URIs** enter `{SVC_BASE_URI}/oidc/callback`
 1. For the **Logout redirect URIs** enter `{SVC_BASE_URI}`
-1. On the next screen, copy the **Client ID** and **Client secret** values to the
-   `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` environment variables respectively.
+1. On the next screen, find the **Client ID** and **Client secret** values and
+   copy to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` service settings.
 1. From the *Sign On* tab, copy the **Issuer** value to `OIDC_ISSUER_URI`.
-1. Restart the service.
+1. After changing the service settings, restart the process.
 
-If you have already logged into Okta, be sure to either a) assign that user to
+If you are already logged into Okta, be sure to either a) assign that user to
 the application you just created, or b) log out so you can log in again using
 the credentials for a user that is assigned to the application. Otherwise you
 will immediately go to the "login failed" page, and the only indication of the
@@ -144,24 +133,27 @@ cause is in the Okta system logs.
 
 ### SAML 2.0
 
-1. On the Okta admin dashboard, create a new application (helps to use "classic ui").
+1. On the Okta admin dashboard, click the **Create a New** application button
+   (helps to use "classic ui").
 1. Select *Web* as the **Platform** and *SAML 2.0* as the **Sign on method**.
+1. Provide a meaningful name on the next screen.
+1. Click *Save* to go to the next screen.
 1. For the **Single sign on URL** enter `{SVC_BASE_URI}/saml/sso`
 1. For the **Audience URI** enter `urn:example:sp`
-1. For the **Name ID format** the auth extensions expect *EmailAddress*,
-   otherwise it cannot verify the expected user has authenticated.
 1. Click the **Show Advanced Settings** link and check the **Enable Single Logout** checkbox.
 1. For the **Single Logout URL** enter `{SVC_BASE_URI}/saml/slo`
 1. For the **SP Issuer** enter `urn:example:sp`
 1. For **Signature Certificate**, select and upload the `certs/server.crt` file.
+1. Click the *Next* button to save the changes.
+1. There may be an additional screen to click through.
 1. From the *Sign On* tab, click the **View Setup Instructions** button and copy the
    values for IdP SSO and SLO URLs to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL`
    settings in the environment.
-1. Restart the service.
-1. Configure the extension to use `nameID` as the `name-identifier` value since
-   the SAML response from Okta generally does not have the email field.
+1. After changing the service settings, restart the process.
+1. Configure the extension to use `nameID` as the `name-identifier` value.
+1. Configure the extension to use `user` as the `user-identifier` value.
 
-If you have already logged into Okta, be sure to either a) assign that user to
+If you are already logged into Okta, be sure to either a) assign that user to
 the application you just created, or b) log out so you can log in again using
 the credentials for a user that is assigned to the application. Otherwise you
 will immediately go to the "login failed" page, and the only indication of the
@@ -185,7 +177,7 @@ cause is in the Okta system logs.
    `OIDC_ISSUER_URI` environment variable.
 1. Ensure the **Application Type** is set to _Web_
 1. Ensure the **Token Endpoint** is set to _Basic_
-1. Restart the service.
+1. After changing the service settings, restart the process.
 
 ### SAML 2.0
 
@@ -202,4 +194,5 @@ cause is in the Okta system logs.
 1. From the *SSO* tab, copy the **SAML 2.0 Endpoint** value to the
    `SAML_IDP_SSO_URL` environment variable.
 1. From the *SSO* tab, copy the **SLO Endpoint** value to `SAML_IDP_SLO_URL`.
-1. Restart the service.
+1. After changing the service settings, restart the process.
+1. Configure the extension to use `nameID` as the `name-identifier` value.
