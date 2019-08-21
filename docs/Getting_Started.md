@@ -283,6 +283,15 @@ random. A handy way to set passwords for users (on Linux) would look like this:
 $ yes $(uuidgen) | p4 -u super passwd username
 ```
 
+### Allowing for non-SSO Users
+
+Once the password fallback has been enabled, indicating which users and/or
+groups are _not_ to participate in SSO authentication is configured in the
+server extension. Namely the `non-sso-groups` and `non-sso-users` settings
+described above; individual users named in `non-sso-users` will not authenticate
+using SSO, and likewise with any users who are members of any of the groups
+named in `non-sso-groups`.
+
 ## Removing the Extension
 
 Removing the login extension involves a few commands. Start by finding the
