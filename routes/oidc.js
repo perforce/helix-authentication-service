@@ -5,8 +5,13 @@ const debug = require('debug')('auth:server')
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')
-const { Issuer, Strategy } = require('openid-client')
+const { custom, Issuer, Strategy } = require('openid-client')
 const { users, requests } = require('../store')
+
+custom.setHttpOptionsDefaults({
+  // default timeout of 2500ms is just a little too short some times
+  timeout: 5000
+})
 
 let client = null
 
@@ -31,12 +36,7 @@ function loadStrategy () {
         client = new issuer.Client({
           client_id: process.env.OIDC_CLIENT_ID,
           client_secret: process.env.OIDC_CLIENT_SECRET,
-          post_logout_redirect_uris: [process.env.SVC_BASE_URI],
-          http_options: {
-            // default timeout is 2500ms, but that is just a little too short
-            // for Azure Active Directory
-            timeout: 5000
-          }
+          post_logout_redirect_uris: [process.env.SVC_BASE_URI]
         })
         const params = {
           // Some services require the absolute URI that is whitelisted in the client
