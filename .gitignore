@@ -1,8 +1,3 @@
-# Fabric, Vagrant, and Python junk
-.vagrant/
-*.pyc
-ssh_config
-
 # Logs
 logs
 *.log
