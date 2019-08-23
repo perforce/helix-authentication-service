@@ -12,8 +12,8 @@ const { ulid } = require('ulid')
 const { users, requests } = require('../store')
 
 const idpOptions = {
-  cert: process.env.IDP_CERT_FILE ? fs.readFileSync(process.env.IDP_CERT_FILE) : undefined,
-  key: process.env.IDP_KEY_FILE ? fs.readFileSync(process.env.IDP_KEY_FILE) : undefined,
+  cert: process.env.SP_CERT_FILE ? fs.readFileSync(process.env.SP_CERT_FILE) : undefined,
+  key: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
   issuer: 'urn:auth-service:idp',
   redirectEndpointPath: '/saml/login',
   postEndpointPath: '/saml/login',
@@ -88,20 +88,16 @@ function checkStrategy (req, res, next) {
   }
 }
 
-if (process.env.SP_CERT_FILE) {
-  router.get('/metadata', (req, res) => {
-    let signingCert = fs.readFileSync(process.env.SP_CERT_FILE)
-    if (signingCert) {
-      signingCert = signingCert.toString('utf8')
-    }
-    const xml = strategy.generateServiceProviderMetadata(undefined, signingCert)
-    res.header('Content-Type', 'text/xml').send(xml)
-  })
-}
+router.get('/metadata', (req, res) => {
+  let signingCert = fs.readFileSync(process.env.SP_CERT_FILE)
+  if (signingCert) {
+    signingCert = signingCert.toString('utf8')
+  }
+  const xml = strategy.generateServiceProviderMetadata(undefined, signingCert)
+  res.header('Content-Type', 'text/xml').send(xml)
+})
 
-if (process.env.IDP_CERT_FILE && process.env.IDP_KEY_FILE) {
-  router.get('/idp/metadata', samlp.metadata(idpOptions))
-}
+router.get('/idp/metadata', samlp.metadata(idpOptions))
 
 router.get('/login/:id', (req, res, next) => {
   // save the request identifier for request/user mapping

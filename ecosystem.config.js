@@ -22,8 +22,6 @@ module.exports = {
       SVC_BASE_URI: 'https://localhost:3000',
       DEFAULT_PROTOCOL: 'oidc',
       CA_CERT_FILE: 'certs/ca.crt',
-      IDP_CERT_FILE: 'certs/server.crt',
-      IDP_KEY_FILE: 'certs/server.key',
       SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
       SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
       SAML_SP_ISSUER: 'urn:example:sp',

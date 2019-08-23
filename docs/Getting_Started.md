@@ -87,8 +87,6 @@ several popular identity providers.
 | `SAML_IDP_SLO_URL`   | URL of IdP Single Log-Out service. | _none_  |
 | `SAML_SP_ISSUER`     | The service provider identity provider that will be using the auth service as a SAML IdP. | `urn:example:sp` |
 | `IDP_CONFIG_FILE`    | Path of the configuration file that defines SAML service providers that will be connecting to the authentication service. | _See note below_ |
-| `IDP_CERT_FILE`      | Path of certificate advertised in SAML IdP metadata. | _none_ |
-| `IDP_KEY_FILE`       | Private half of the public key pair, the public part being `IDP_CERT_FILE`. | _none_ |
 | `SAML_SP_AUDIENCE`   | Service provider audience value for `AudienceRestriction` assertions. | _none_ |
 | `SAML_NAMEID_FIELD`  | Name of the property in the user profile to be used if nameID is missing, as is likely the case when using another authentication protocol (e.g. OIDC) with the real identity provider (e.g. Okta). | _See note below_ |
 | `SAML_NAMEID_FORMAT` | The desired NameID format expected from the SAML identity provider. Defaults to `urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified`, and can be set to any of the formats defined in the SAML specifications. | _See description_ |
@@ -143,12 +141,6 @@ only necessary if the CA is not one of the root authorities whose certificates
 are already installed on the system. Clients accessing the `requests/status/:id`
 route will require a valid client certificate signed by the certificate
 authority.
-
-##### SAML IdP
-
-When the auth service is acting as a SAML identity provider, it uses a public
-key pair contained in the files identified by the `IDP_CERT_FILE` and
-`IDP_KEY_FILE` environment variables.
 
 ### Deploy
 
