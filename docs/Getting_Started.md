@@ -138,9 +138,11 @@ certificate authority (CA).
 
 The auth service reads its certificate and key files using the paths defined in
 `SP_CERT_FILE` and `SP_KEY_FILE`, respectively. The path for the CA certificate
-is read from the `CA_CERT_FILE` environment variable. Clients accessing the
-`requests/status/:id` route will require a valid client certificate signed by
-the certificate authority.
+is read from the `CA_CERT_FILE` environment variable. Providing a CA file is
+only necessary if the CA is not one of the root authorities whose certificates
+are already installed on the system. Clients accessing the `requests/status/:id`
+route will require a valid client certificate signed by the certificate
+authority.
 
 ##### SAML IdP
 
