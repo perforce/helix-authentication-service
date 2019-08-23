@@ -17,6 +17,9 @@ pids
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
+# other build artifacts
+docs/licenses
+
 # Dependency directories
 node_modules/
 jspm_packages/

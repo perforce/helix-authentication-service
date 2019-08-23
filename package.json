@@ -16,7 +16,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node ./bin/www",
-    "licenses": "license-checker --production --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT'"
+    "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {
     "debug": "~4.1.1",
