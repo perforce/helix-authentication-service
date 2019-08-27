@@ -26,7 +26,7 @@ const idpConfig = require(idpConfFile)
 function getPostURL (req, callback) {
   const issuer = req.session.authnRequest.issuer
   if (issuer in idpConfig && 'acsUrl' in idpConfig[issuer]) {
-    const url = idpConfig[issuer]['acsUrl']
+    const url = idpConfig[issuer].acsUrl
     debug('POST URL %s for %s', url, issuer)
     if (url) {
       callback(null, url)

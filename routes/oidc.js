@@ -98,7 +98,7 @@ router.get('/login/:id', (req, res, next) => {
   const user = requests.getIfPresent(req.session.requestId)
   if (user && user.forceAuthn) {
     debug('forcing OIDC authentication using max_age=0')
-    opts['max_age'] = 0
+    opts.max_age = 0
   }
   passport.authenticate('openidconnect', opts)(req, res, next)
 })

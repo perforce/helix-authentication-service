@@ -101,7 +101,7 @@ router.get('/status/:id', async (req, res, next) => {
     const msg = `Sorry ${cert.subject.CN}, certificates from ${cert.issuer.CN} are not supported.`
     res.status(403).send(msg)
   } else {
-    res.status(401).send(`Sorry, but you need to provide a client certificate to continue.`)
+    res.status(401).send('Sorry, but you need to provide a client certificate to continue.')
   }
 })
 
