@@ -6,7 +6,7 @@
 const { exec, spawn } = require('child_process')
 const fs = require('fs')
 
-const protocol = process.env.PROTOCOL || 'oidc'
+const protocol = process.env.PROTOCOL
 const p4user = process.env.P4USER || 'super'
 const p4port = process.env.P4PORT || 'localhost:1666'
 const baseUrl = process.env.AUTH_URL || 'https://localhost:3000'
@@ -78,7 +78,9 @@ new Promise((resolve, reject) => {
 }).then((config) => {
   config = config.replace(/sampleExtensionsUser/g, 'super')
   config = config.replace(/\.\.\. The authentication service base URL\./, baseUrl)
-  config = config.replace(/\.\.\. Authentication protocol, such as saml or oidc\./, protocol)
+  if (protocol) {
+    config = config.replace(/\.\.\. Authentication protocol, such as saml or oidc\./, protocol)
+  }
   return new Promise((resolve, reject) => {
     const child = spawn('p4', ['-u', p4user, '-p', p4port, 'extension', '--configure', hookname, '-i'])
     child.stdout.on('data', (data) => {

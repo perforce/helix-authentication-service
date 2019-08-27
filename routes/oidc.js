@@ -130,6 +130,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     const user = requests.getIfPresent(req.session.requestId)
     // clear the request identifier from the user session
     req.session.requestId = null
+    debug('mapping %s to result %o', user.id, req.user)
     users.set(user.id, req.user)
     const name = req.user.given_name || req.user.name || req.user.email
     res.render('details', { name })

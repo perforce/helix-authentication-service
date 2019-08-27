@@ -24,9 +24,15 @@ router.get('/new/:id', (req, res, next) => {
     id: req.params.id,
     forceAuthn
   }
+  // Assemble a default login URL as a convenience for the client.
+  const protocol = process.env.DEFAULT_PROTOCOL || 'saml'
+  const baseUrl = process.env.SVC_BASE_URI
+  const loginUrl = `${baseUrl}/${protocol}/login/${requestId}`
   requests.set(requestId, user)
   res.json({
-    request: requestId
+    request: requestId,
+    loginUrl,
+    baseUrl
   })
 })
 
