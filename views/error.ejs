@@ -2,12 +2,13 @@
 <html>
 <%- include('title') %>
 <body>
-  <%- include('hero', {subtitle: 'Error'}) %>
+  <%- include('header', {subtitle: 'Error'}) %>
   <section class="section">
     <div class="container">
       <h1><%= message %></h1>
       <h2><%= error.status %></h2>
     </div>
   </section>
+  <%- include('footer') %>
 </body>
 </html>

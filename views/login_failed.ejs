@@ -2,7 +2,7 @@
 <html>
 <%- include('title') %>
 <body>
-  <%- include('hero', {subtitle: 'Login Error'}) %>
+  <%- include('header', {subtitle: 'Login Error'}) %>
   <section class="section">
     <div class="container">
       <h1>Login failed</h1>
@@ -10,5 +10,6 @@
       <p>Administrators can check the identity provider system logs for details.</p>
     </div>
   </section>
+  <%- include('footer') %>
 </body>
 </html>

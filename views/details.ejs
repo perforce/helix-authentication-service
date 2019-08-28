@@ -2,12 +2,13 @@
 <html>
 <%- include('title') %>
 <body>
-  <%- include('hero', {subtitle: 'Login Successful'}) %>
+  <%- include('header', {subtitle: 'Login Successful'}) %>
   <section class="section">
     <div class="container">
       <h1>Thank you, <%= name %></h1>
       <p>You are now authenticated and may close this browser tab.</p>
     </div>
   </section>
+  <%- include('footer') %>
 </body>
 </html>

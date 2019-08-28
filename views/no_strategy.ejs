@@ -1,17 +1,8 @@
 <!DOCTYPE html>
 <html>
-
 <%- include('title') %>
-
 <body>
-  <section class="hero is-light">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title"><%= title %></h1>
-        <h2 class="subtitle">Configuration Error</h2>
-      </div>
-    </div>
-  </section>
+  <%- include('header', {subtitle: 'Configuration Error'}) %>
   <section class="section">
     <div class="container">
       <h1>Missing authentication strategy</h1>
@@ -19,6 +10,6 @@
       the given authentication protocol.</p>
     </div>
   </section>
+  <%- include('footer') %>
 </body>
-
 </html>
