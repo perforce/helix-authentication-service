@@ -1,29 +1,15 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <title>Helix Authentication Service</title>
-  <link rel="shortcut icon" href="/images/favicon-32x32.png" type="image/png" />
-  <link rel='stylesheet' href='/stylesheets/style.css' />
-  <link rel='stylesheet' href='/stylesheets/bulma.min.css' />
-</head>
-
+<%- include('title') %>
 <body>
-  <section class="hero is-light">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Helix Authentication Service</h1>
-      </div>
-    </div>
-  </section>
+  <%- include('hero', {subtitle: 'Welcome'}) %>
   <section class="section">
     <div class="container">
-      <p>This service is used in concert with other Helix products, is not
+      <p>This service is used in concert with other Perforce products, is not
       normally accessed directly. To authenticate using this service, simply
       begin by accessing those products and performing a <code>login</code> or
       similar authentication step.</p>
     </div>
   </section>
 </body>
-
 </html>

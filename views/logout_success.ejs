@@ -1,21 +1,8 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <title>Helix Authentication Service</title>
-  <link rel='stylesheet' href='/stylesheets/style.css' />
-  <link rel='stylesheet' href='/stylesheets/bulma.min.css' />
-</head>
-
+<%- include('title') %>
 <body>
-  <section class="hero is-light">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Helix Authentication Service</h1>
-        <h2 class="subtitle">Logout</h2>
-      </div>
-    </div>
-  </section>
+  <%- include('hero', {subtitle: 'Logout'}) %>
   <section class="section">
     <div class="container">
       <h1>Logout successful</h1>
@@ -23,5 +10,4 @@
     </div>
   </section>
 </body>
-
 </html>

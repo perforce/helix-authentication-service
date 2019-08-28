@@ -33,6 +33,7 @@ app.use(helmet())
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
+app.locals.title = 'Helix Authentication Service'
 
 app.use(logger('dev'))
 app.use(express.json())
