@@ -47,9 +47,9 @@ in the `data/config.php` file. Below is a simple example:
 ```
 
 The IdP settings come from the auth service: the entity identifier is hard-coded
-to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the host
-and port on which the service is running. The public key is likely in the `certs`
-directory of the auth service.
+to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the
+address defined by `SVC_BASE_URI` in the auth service configuration. The public
+key is likely in the `certs` directory of the auth service.
 
 ### Auth Service
 
