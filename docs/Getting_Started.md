@@ -13,10 +13,10 @@ ecosystem.config.js`). The rest of this section describes the steps you can use
 to install the service manually. Subsequent sections describe the configuration
 and installation of SSL certificates.
 
-In general, configuration will consist of defining the identity provider details
-for either OIDC or SAML, and setting the `SVC_BASE_URI` of the authentication
-service (the service needs to know how the user will address the service). For
-better security, the self-signed certificates will need to be replaced as well.
+In general, configuration will consist of defining the identity provider (IdP)
+details for either OIDC or SAML, and setting the `SVC_BASE_URI` of the
+authentication service. For better security, the self-signed certificates will
+need to be replaced with ones signed by a trusted certificate authority.
 
 ### Requirements
 
@@ -119,12 +119,12 @@ log output.
 | `DEBUG`            | Set to `auth:*` to enable debug logging in the service (writes to standard error). | _none_ |
 | `FORCE_AUTHN`      | If set to any non-empty value, will cause the service to require the user to authenticate, even if they already authenticated. For SAML this means setting the `forceAuthn` field set to true, while for OIDC it will set the `max_age` parameter to `0`. This is not supported by all identity providers, especially for OIDC. | _none_ |
 | `SESSION_SECRET`   | Password used for encrypting the in-memory session data. | `keyboard cat` |
-| `SVC_BASE_URI`     | The authentication service base URL. Needs to match the `Service-URL` value in the extension configuration. | _none_ |
+| `SVC_BASE_URI`     | The authentication service base URL visible to end users. Needs to match the application settings defined in IdP configuration. | _none_ |
 | `SP_CERT_FILE`     | The service provider public certificate file, needed with SAML. | _none_ |
 | `SP_KEY_FILE`      | The service provider private key file, typically needed with SAML. | _none_ |
 | `SP_KEY_ALGO`      | The algorithm used to sign the requests. | `sha256` |
 | `CA_CERT_FILE`     | Path of certificate authority file for service to use when verifying client certificates. | _none_ |
-| `DEFAULT_PROTOCOL` | The authentication protocol to use when acting as a SAML IdP. | `saml` |
+| `DEFAULT_PROTOCOL` | The default authentication protocol to use. Can be `oidc` or `saml`. | `saml` |
 | `LOGIN_TIMEOUT`    | How long in seconds to wait for user to successfully authenticate. | `60` |
 
 #### Certificates
@@ -253,17 +253,13 @@ ExtConfig:
 The first field to change is `ExtP4USER` which should be the Perforce user that
 will own this extension, typically a "super" or administrative user.
 
-You will need to change both fields, `Auth-Protocol` and `Service-URL`, as there
-are no defaults for either of them. The `Auth-Protocol` can be any value
-supported by the authentication service, which at this time is `oidc`, and
-`saml`. This determines the authentication protocol that SSO users will be using
-to authenticate. The configuration of the identity provider is in the
-authentication service itself.
+The `Service-URL` field must be changed to the address of the authentication
+service by which the Helix Server can make a connection.
 
-The `Service-URL` field should be changed to the user-visible address of the
-authentication service. Note that this should match the value of `SVC_BASE_URI`
-in the service configuration. This address must be resolvable and reachable from
-both the Helix Server and the desktop clients.
+The `Auth-Protocol` can be any value supported by the authentication service.
+This determines the authentication protocol that SSO users will be using to
+authenticate. This setting is optional, as the authentication service will use
+its own settings to determine the protocol.
 
 #### Instance
 

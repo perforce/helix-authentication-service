@@ -2,7 +2,8 @@
 // Example configuration file for use with pm2.
 // See http://pm2.keymetrics.io for documentation on pm2.
 //
-// 1. Change SVC_BASE_URI to the host:port of this service.
+// 1. Change SVC_BASE_URI to the user-visible address of this service.
+//    This must match the application settings in the identity provider.
 // 2. Change the OIDC settings to suit your IdP, if using OIDC.
 // 3. Change the SAML_IDP settings to suit your IdP, if using SAML.
 // 4. Install SSL certificates, then update cert/key settings as necessary.
@@ -20,7 +21,6 @@ module.exports = {
       OIDC_CLIENT_SECRET: 'client_secret',
       OIDC_ISSUER_URI: 'http://localhost:3001/',
       SVC_BASE_URI: 'https://localhost:3000',
-      DEFAULT_PROTOCOL: 'oidc',
       CA_CERT_FILE: 'certs/ca.crt',
       SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
       SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',

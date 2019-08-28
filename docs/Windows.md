@@ -11,14 +11,6 @@
 1. Get the auth service code (`//depot/main/p4-auth-integ-svc/...`)
 1. Build the service code (`npm i`)
 
-### OIDC test provider
-
-1. Open a new PowerShell window
-1. Switch to `containers/oidc` directory
-1. Create a `.env` file as described in the `README.md`
-1. Add the `PORT=3001` to the `.env` file for convenience
-1. Start the OIDC provider: `npm start`
-
 ### Auth service
 
 1. Open a new PowerShell window
@@ -38,14 +30,15 @@
 
 ### Login extensions
 
-1. It is easiest to use VS Code to edit `hook.js` to change these settings:
-    * `P4PORT` to `localhost:1666`
-    * `AUTH_URL` to `https://localhost:3000`
-1. Install the extensions in the server: `node hook.js`
+Install the extensions in the server:
+
+```shell
+$ node hook.js
+```
 
 ## Testing
 
 In yet another PowerShell window, run `p4 -u johndoe -p localhost:1666 login`,
 and you should see the default browser appear and ask you to authenticate with
-the test OIDC provider. If successful, the p4 user should be validated and a
-ticket issued.
+the configured SAML identity provider. If successful, the p4 user should be
+validated and a ticket issued.

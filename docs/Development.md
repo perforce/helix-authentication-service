@@ -9,40 +9,11 @@ To fetch and build the application dependencies and run tests, you will need
 
 ### Build and Start
 
-These instructions assume you will be developing with the included OpenID
-provider, as the SAML IdP is a little more work to set up.
-
-First get the oidc-provider application running:
-
-```shell
-$ cd containers/oidc
-$ npm install
-$ cat << EOF > .env
-OIDC_CLIENT_ID=client_id
-OIDC_CLIENT_SECRET=client_secret
-OIDC_REDIRECT_URI=https://localhost:3000/oidc/callback
-OIDC_LOGOUT_REDIRECT_URI=https://localhost:3000
-EOF
-$ PORT=3001 npm start
-```
-
-Then start the authentication service application:
+Configure the authentication service as described in the `Getting_Started.md`
+file, then build and start the authentication service application:
 
 ```shell
 $ npm install
-$ cat << EOF > .env
-OIDC_CLIENT_ID=client_id
-OIDC_CLIENT_SECRET=client_secret
-OIDC_ISSUER_URI=http://localhost:3001/
-SVC_BASE_URI=https://localhost:3000
-DEFAULT_PROTOCOL=oidc
-CA_CERT_FILE=certs/ca.crt
-SAML_IDP_SSO_URL=http://localhost:7000/saml/sso
-SAML_IDP_SLO_URL=http://localhost:7000/saml/slo
-SAML_SP_ISSUER=urn:example:sp
-SP_CERT_FILE=certs/server.crt
-SP_KEY_FILE=certs/server.key
-EOF
 $ npm start
 ```
 
@@ -64,8 +35,7 @@ $ PROTOCOL=saml node hook.js
 
 You will almost certainly have to change the `name-identifier` setting to
 `nameID` as well, since typical SAML identity providers do not include an
-`email` property, including the containerized SAML IdP. To configure the
-extension run the command below:
+`email` property. To configure the extension run the command below:
 
 ```shell
 $ p4 extension --configure Auth::loginhook --name loginhook-all
