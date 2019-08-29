@@ -22,6 +22,11 @@ at all. The same is true for the identity provider configuration: its address
 for the authentication service (Service Provider) must match the leading part of
 the `SVC_BASE_URI` setting.
 
+### Addresses
+
+In the examples below, the `192.168.1.106` address is the Swarm installation,
+while `192.168.1.66` is that of the authentication service.
+
 ### Swarm
 
 Swarm is configured to use SAML authentication by configuring several settings
@@ -46,10 +51,11 @@ in the `data/config.php` file. Below is a simple example:
 ),
 ```
 
-The IdP settings come from the auth service: the entity identifier is hard-coded
-to `urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the
-address defined by `SVC_BASE_URI` in the auth service configuration. The public
-key is likely in the `certs` directory of the auth service.
+The IdP settings come from the auth service: the `entityId` is hard-coded to
+`urn:auth-service:idp`, the SSO URL is `/saml/login` and relative to the address
+defined by `SVC_BASE_URI` in the auth service configuration. The value of
+`x509cert` should be the contents of the public key, which is the file named in
+the `SP_CERT_FILE` setting of the auth service.
 
 ### Auth Service
 
@@ -72,7 +78,7 @@ service can support multiple Swarm installations, just add more entries to the
 1. Allow non-SSO access: `p4 configure set auth.sso.allow.passwd=1`
 1. Install the extensions in the server: `AUTH_URL=https://192.168.1.66:3000 P4PORT=localhost:1666 node hook.js`
 1. Ensure extensions service URL is same as what Swarm uses so cookies will work.
-1. Set the `name-identifier` to `nameID` if using Okta IdP.
+1. Set the `name-identifier` to `nameID` if the service is using SAML as the `DEFAULT_PROTOCOL`.
 1. Create a `swarm` user that the Swarm instance will be using.
 1. Ensure the `swarm` user has admin privileges.
 1. Add `swarm` user to `non-sso-users` in extension configuration.
@@ -110,4 +116,4 @@ Use `ssh` as `swarm` user to connect to VM (no ssh access for root).
 
 Make sure address of auth service matches what Swarm is using. Must not mix IP
 address and host names, cookies/session will be mixed up. Use specific address
-(`192.168.1.66:3000`) for both Swarm and Okta.
+(`192.168.1.66:3000`) for both Swarm and the configured identity provider.

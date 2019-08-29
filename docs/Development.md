@@ -22,7 +22,7 @@ $ npm start
 To install the authentication integration extension, use `node` like so:
 
 ```shell
-$ P4PORT=localhost:1666 AUTH_URL=https://localhost:3000 node hook.js
+$ node hook.js
 ```
 
 ## Using SAML

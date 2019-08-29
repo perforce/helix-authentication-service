@@ -138,7 +138,7 @@ The auth service reads its certificate and key files using the paths defined in
 `SP_CERT_FILE` and `SP_KEY_FILE`, respectively. The path for the CA certificate
 is read from the `CA_CERT_FILE` environment variable. Providing a CA file is
 only necessary if the CA is not one of the root authorities whose certificates
-are already installed on the system. Clients accessing the `requests/status/:id`
+are already installed on the system. Clients accessing the `/requests/status/:id`
 route will require a valid client certificate signed by the certificate
 authority.
 
@@ -295,17 +295,22 @@ users that are not participating in the SSO authentication integration.
 | `enable-logging`  | Extension will write debug messages to a log if '`true`'. | `false` |
 | `non-sso-users`   | Those users who will not be using SSO. | _none_ |
 | `non-sso-groups`  | Those groups whose members will not be using SSO. | _none_ |
-| `user-identifier` | Trigger variable used as unique user identifier. For example, `fullname`, `email`, or `user`. | `email` |
+| `user-identifier` | Trigger variable used as unique user identifier, one of: `fullname`, `email`, or `user`. | `email` |
 | `name-identifier` | Field within identity provider user profile containing unique user identifer. | `email` |
 
 ##### Debug logging
 
 When enabled, the extension will write debugging logs using the `Perforce.log()`
-API. The JSON formatted file will appear under a directory of the form
-`<path-to-server>/root/server.extensions.dir/<extension-uuid>/1-data` with the
-name `log.json`. You can find the `<extension-uuid>` value by searching the
-installed extensions using `p4 extension --list --type=extensions` as a
-privileged user.
+API. The JSON formatted file will appear in the directory identified by the
+`data-dir` extension attribute. You can find the value for `data-dir` by
+searching the installed extensions using `p4 extension` as a privileged user.
+
+```shell
+$ p4 extension --list --type=extensions
+... extension Auth::loginhook
+... [snip]
+... data-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-data
+```
 
 ##### Non-SSO Users
 
@@ -383,7 +388,8 @@ When the server is running at security level 3, all users must have a valid
 password in the database, regardless of the method of authentication. That is,
 even SSO users will need a password in the database. That password can be
 anything, since the SSO user will never use it, and is best set to something
-random. A handy way to set passwords for users (on Linux) would look like this:
+random. An easy way to set random passwords for users (on Linux) would look like
+this:
 
 ```shell
 $ yes $(uuidgen) | p4 -u super passwd username

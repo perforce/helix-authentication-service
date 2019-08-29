@@ -5,9 +5,13 @@ work with several major hosted identity providers, both with OIDC and SAML.
 
 For every occurrence of `SVC_BASE_URI` in the instructions below, be sure to
 substitute the actual protocol, host, and port for the authentication service
-(e.g. `https://localhost:3000` for development environments).
+(e.g. `https://localhost:3000` for development environments). This address must
+match the URL that the identity provider is configured to recognize as the "SSO"
+or "callback" URL for the application.
 
-## Settings
+## Configuration
+
+### Environment Variables
 
 In the instructions below, when referring to setting environment variables for
 the auth service, there are several choices.
@@ -15,6 +19,15 @@ the auth service, there are several choices.
 1. Set them in the environment, such as in the command shell.
 1. Define them in a file called `.env` in the auth service source tree (in the same directory as the `package.json` file).
 1. If you are using `pm2`, then edit the `ecosystem.config.js` file.
+
+### SAML entity identifiers
+
+When configuring the service as a "service provider" within a SAML identity
+provider, you must provide an _entityID_ that is unique within your set of
+registered applications. By default the service uses the value `urn:example:sp`,
+which can be changed by setting the `SAML_SP_ISSUER` environment variable.
+Anywhere that `urn:example:sp` appears in the following instructions, you should
+replace it with the value you defined in the identity provider.
 
 ## Restarting the Service
 
@@ -87,7 +100,7 @@ to take effect. How the service is deployed determines how to restart it.
 1. Copy the *Application (client) ID* to the `OIDC_CLIENT_ID` environment variable
 1. Open the OIDC metadata URL in the browser (click _Endpoints_ button from app overview page)
 1. Copy the `issuer` URL and enter as the `OIDC_ISSUER_URI` environment variable;
-   if the issuer URI contains `{tenantid}` then replace it with the Directory (tenant) ID
+   if the issuer URI contains `{tenantid}` then replace it with the _Directory (tenant) ID_
    from the application overview page.
 1. Under _Certificates & secrets_, click **New client secret**, copy the secret value
    to the `OIDC_CLIENT_SECRET` environment variable
@@ -123,7 +136,6 @@ to take effect. How the service is deployed determines how to restart it.
 1. On the next screen, find the **Client ID** and **Client secret** values and
    copy to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` service settings.
 1. From the *Sign On* tab, copy the **Issuer** value to `OIDC_ISSUER_URI`.
-1. After changing the service settings, restart the process.
 
 If you are already logged into Okta, be sure to either a) assign that user to
 the application you just created, or b) log out so you can log in again using
@@ -149,7 +161,6 @@ cause is in the Okta system logs.
 1. From the *Sign On* tab, click the **View Setup Instructions** button and copy the
    values for IdP SSO and SLO URLs to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL`
    settings in the environment.
-1. After changing the service settings, restart the process.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 1. Configure the extension to use `user` as the `user-identifier` value.
 
@@ -171,13 +182,12 @@ cause is in the Okta system logs.
 1. From the *SSO* tab, copy the **Client ID** value to the `OIDC_CLIENT_ID`
    environment variable.
 1. From the *SSO* tab, copy the **Client Secret** value to `OIDC_CLIENT_SECRET`
-   (N.B. you may need to "show" the secret first before the copy button will work).
+   (you may need to "show" the secret first before the copy button will work).
 1. From the *SSO* tab, find the **OpenID Provider Configuration Information** link
    and open in a new tab. Find the `issuer` and copy the URL value to the
    `OIDC_ISSUER_URI` environment variable.
 1. Ensure the **Application Type** is set to _Web_
 1. Ensure the **Token Endpoint** is set to _Basic_
-1. After changing the service settings, restart the process.
 
 ### SAML 2.0
 
@@ -194,5 +204,4 @@ cause is in the Okta system logs.
 1. From the *SSO* tab, copy the **SAML 2.0 Endpoint** value to the
    `SAML_IDP_SSO_URL` environment variable.
 1. From the *SSO* tab, copy the **SLO Endpoint** value to `SAML_IDP_SLO_URL`.
-1. After changing the service settings, restart the process.
 1. Configure the extension to use `nameID` as the `name-identifier` value.

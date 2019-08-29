@@ -20,9 +20,9 @@ The other half of the system, albeit a very small half, is the server extension
 installed on Helix Server, which acts as a mediator between the service and the
 server. When a Perforce user attempts to log in to the server, the extension
 will cause their web browser to open to the authentication provider, and
-meanwhile poll the service to get the authentication success status. Once the
-user has successfully authenticated with the provider, the extension will get
-the results and signal the server to issue a ticket.
+meanwhile poll the service to get the authentication status. Once the user has
+successfully authenticated with the provider, the extension will get the results
+and signal the server to issue a ticket.
 
 This design lends itself well to integrating other authentication protocols,
 including custom schemes developed by authentication providers such as
@@ -31,15 +31,17 @@ a new route to the service, and configure the extension to use the new protocol.
 
 ### Provider Support
 
-Using OIDC, this service has been tested with [Auth0](https://auth0.com),
-[Azure](https://azure.microsoft.com), [Okta](https://www.okta.com),
-[OneLogin](https://www.onelogin.com), and [Ping](https://www.pingidentity.com/).
+The authentication service has been tested with the following identity providers:
 
-Using SAML, this service has been tested with [Auth0](https://auth0.com),
-[Azure](https://azure.microsoft.com), [Okta](https://www.okta.com),
-[OneLogin](https://www.onelogin.com), and [Ping](https://www.pingidentity.com/).
+| Provider                              | OIDC | SAML |
+| ------------------------------------- | ---- | ---- |
+| [Auth0](https://auth0.com)            | OK   | OK   |
+| [Azure](https://azure.microsoft.com)  | OK   | OK   |
+| [Okta](https://www.okta.com)          | OK   | OK   |
+| [OneLogin](https://www.onelogin.com)  | OK   | OK   |
+| [Ping](https://www.pingidentity.com/) | OK   | OK   |
 
 ## Documentation
 
-See the files in the `docs` directory, especially in the `Getting_Started.md`
-guide that gives a detailed overview of setting up everything.
+See the files in the `docs` directory, especially the `Getting_Started.md` guide
+that gives a detailed overview of setting up everything.
