@@ -142,6 +142,9 @@ are already installed on the system. Clients accessing the `/requests/status/:id
 route will require a valid client certificate signed by the certificate
 authority.
 
+If the certificate files are changed, the service will need to be restarted, as
+it only reads the files at startup.
+
 ### Deploy
 
 #### Overview
@@ -191,10 +194,19 @@ Included with the authentication service files are self-signed certificates used
 during development. For production systems, these files should be replaced with
 certificates signed by a valid certificate authority (CA).
 
-The Helix Server extension reads the CA certificate from `loginhook/ca.crt` and
-the client certificates from `loginhook/client.crt` and `loginhook/client.key`.
-These files must be in place at the time the extension is packaged and cannot be
-modified without packaging and installing again.
+The Helix Server extension reads the CA certificate from `ca.crt` and the client
+certificates from `client.crt` and `client.key` within the directory named by
+the `arch-dir` attribute of the installed extension. To update these files,
+simply replace them with new content, keeping the names the same. To find the
+`arch-dir` directory, use the `p4 extension` command:
+
+```shell
+$ p4 extension --list --type=extensions
+... extension Auth::loginhook
+... [snip]
+... arch-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-arch
+... data-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-data
+```
 
 ### Build
 
