@@ -73,6 +73,13 @@ $ rm client.csr ; mv client.crt client.key ../loginhook
 $ openssl req -newkey rsa:4096 -keyout server.key -out server.crt -nodes -days 365 -x509 -subj "/CN=AuthService"
 ```
 
+## Tips and Tricks
+
+### Controlling URL open
+
+By setting `P4USEBROWSER` to `false` you can prevent the browser from opening
+when you invoke `p4 login`. Not all that useful, but good to know.
+
 ## Coding Conventions
 
 With respect to the JavaScript code, the formatting follows
