@@ -10,7 +10,8 @@
 //   $ P4USER=bruno P4PORT=p4test:1666 node hook.js
 //
 // Note:
-//   This will overwrite any existing installation without confirmation.
+//   * This will overwrite any existing installation without confirmation.
+//   * This will restart the Helix Server to enable the authentication changes.
 //
 // Settings are taken from environment variables, with defaults suitable for the
 // development environment. See the "process.env" references below for the set of
