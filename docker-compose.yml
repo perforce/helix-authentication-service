@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  auth-svc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      OIDC_CLIENT_ID: client_id
+      OIDC_CLIENT_SECRET: client_secret
+      OIDC_ISSUER_URI: "http://oidc.idp:3001/"
+      DEBUG: "auth:*"
+      SVC_BASE_URI: "https://auth-svc:3000"
+      DEFAULT_PROTOCOL: "oidc"
+      CA_CERT_FILE: certs/ca.crt
+      IDP_CERT_FILE: certs/server.crt
+      IDP_KEY_FILE: certs/server.key
+      SAML_IDP_SSO_URL: "http://saml.idp:7000/saml/sso"
+      SAML_IDP_SLO_URL: "http://saml.idp:7000/saml/slo"
+      SAML_SP_ISSUER: "urn:example:sp"
+      SP_CERT_FILE: certs/server.crt
+      SP_KEY_FILE: certs/server.key
+    ports:
+      - "3000:3000"
