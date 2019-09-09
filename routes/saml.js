@@ -158,69 +158,73 @@ function checkAuthentication (req, res, next) {
 router.get('/success', checkAuthentication, (req, res, next) => {
   req.session.successRedirect = null
   const user = requests.getIfPresent(req.session.requestId)
-  // clear the request identifier from the user session
-  req.session.requestId = null
-  if (user.id === 'SAML:legacy:placeholder') {
-    // This is the SAML legacy route, in which we do not have a known user
-    // identifier to associate with the request. Default to using the nameID.
-    //
-    // However, if a different protocol is configured as the default, then we
-    // may have to fake the nameID to something, probably the email.
-    assignNameId(req.user)
-    debug('legacy mapping %s to result %o', req.user.nameID, req.user)
-    users.set(req.user.nameID, req.user)
-    // Generate a new SAML response befitting of the request we received.
-    const moreOptions = Object.assign({}, idpOptions, {
-      audience: req.session.authnRequest.issuer,
-      destination: req.session.authnRequest.acsUrl,
-      recipient: req.session.authnRequest.acsUrl,
-      inResponseTo: req.session.authnRequest.id,
-      authnContextClassRef: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
-      sessionIndex: undefined,
-      includeAttributeNameFormat: true
-    })
-    if (req.session.authnRequest.context && req.session.authnRequest.context.authnContextClassRef) {
-      moreOptions.authnContextClassRef = req.session.authnRequest.context.authnContextClassRef
-    }
-    getPostURL(req, (err, url) => {
-      if (err) {
-        res.render('error', {
-          message: 'SAML response error: ' + err.message,
-          error: err
-        })
-      } else if (url) {
-        if (moreOptions.recipient !== url) {
-          res.render('error', {
-            message: 'SAML ACS URL does not match recipient: ' + url,
-            error: new Error('SAML ACS URL mismatch')
-          })
-        } else {
-          // make a user object that samlp will work with
-          const user = buildResponseUser(req.user)
-          samlp.getSamlResponse(moreOptions, user, (err, resp) => {
-            if (err) {
-              res.render('error', {
-                message: 'SAML response error: ' + err.message,
-                error: err
-              })
-            } else {
-              // render an HTML form to send the response back to the SP
-              res.render('samlresponse', {
-                AcsUrl: url,
-                SAMLResponse: Buffer.from(resp, 'utf8').toString('base64'),
-                RelayState: req.session.authnRequest.relayState
-              })
-            }
-          })
-        }
+  if (user) {
+    // clear the request identifier from the user session
+    req.session.requestId = null
+    if (user.id === 'SAML:legacy:placeholder') {
+      // This is the SAML legacy route, in which we do not have a known user
+      // identifier to associate with the request. Default to using the nameID.
+      //
+      // However, if a different protocol is configured as the default, then we
+      // may have to fake the nameID to something, probably the email.
+      assignNameId(req.user)
+      debug('legacy mapping %s to result %o', req.user.nameID, req.user)
+      users.set(req.user.nameID, req.user)
+      // Generate a new SAML response befitting of the request we received.
+      const moreOptions = Object.assign({}, idpOptions, {
+        audience: req.session.authnRequest.issuer,
+        destination: req.session.authnRequest.acsUrl,
+        recipient: req.session.authnRequest.acsUrl,
+        inResponseTo: req.session.authnRequest.id,
+        authnContextClassRef: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+        sessionIndex: undefined,
+        includeAttributeNameFormat: true
+      })
+      if (req.session.authnRequest.context && req.session.authnRequest.context.authnContextClassRef) {
+        moreOptions.authnContextClassRef = req.session.authnRequest.context.authnContextClassRef
       }
-    })
+      getPostURL(req, (err, url) => {
+        if (err) {
+          res.render('error', {
+            message: 'SAML response error: ' + err.message,
+            error: err
+          })
+        } else if (url) {
+          if (moreOptions.recipient !== url) {
+            res.render('error', {
+              message: 'SAML ACS URL does not match recipient: ' + url,
+              error: new Error('SAML ACS URL mismatch')
+            })
+          } else {
+            // make a user object that samlp will work with
+            const user = buildResponseUser(req.user)
+            samlp.getSamlResponse(moreOptions, user, (err, resp) => {
+              if (err) {
+                res.render('error', {
+                  message: 'SAML response error: ' + err.message,
+                  error: err
+                })
+              } else {
+                // render an HTML form to send the response back to the SP
+                res.render('samlresponse', {
+                  AcsUrl: url,
+                  SAMLResponse: Buffer.from(resp, 'utf8').toString('base64'),
+                  RelayState: req.session.authnRequest.relayState
+                })
+              }
+            })
+          }
+        }
+      })
+    } else {
+      // "normal" success path, save user data for verification
+      debug('mapping %s to result %o', user.id, req.user)
+      users.set(user.id, req.user)
+      const name = req.user.nameID
+      res.render('details', { name })
+    }
   } else {
-    // "normal" success path, save user data for verification
-    debug('mapping %s to result %o', user.id, req.user)
-    users.set(user.id, req.user)
-    const name = req.user.nameID
-    res.render('details', { name })
+    res.redirect('/')
   }
 })
 
@@ -298,7 +302,12 @@ router.get('/logout', (req, res, next) => {
   if (proto && proto !== 'saml') {
     res.redirect(`/${proto}/logout`)
   } else {
-    next()
+    // passport-saml cannot do logout without a user session
+    if (req.user) {
+      next()
+    } else {
+      res.redirect('/')
+    }
   }
 }, checkStrategy, passport.authenticate('saml', {
   samlFallback: 'logout-request'
