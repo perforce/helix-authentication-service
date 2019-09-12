@@ -17,30 +17,6 @@ $ npm install
 $ npm start
 ```
 
-### Installing the Extension
-
-To install the authentication integration extension, use `node` like so:
-
-```shell
-$ node hook.js
-```
-
-## Using SAML
-
-For SAML, the extension must be installed slightly differently:
-
-```shell
-$ PROTOCOL=saml node hook.js
-```
-
-You will almost certainly have to change the `name-identifier` setting to
-`nameID` as well, since typical SAML identity providers do not include an
-`email` property. To configure the extension run the command below:
-
-```shell
-$ p4 extension --configure Auth::loginhook --name loginhook-all
-```
-
 ## Running the Service on HTTP
 
 If for some reason you do not want the auth service to be using HTTPS and its
@@ -51,7 +27,7 @@ the SAML Desktop Agent with its embedded Chromium browser.
 To switch from `http:` to `https:` you will need to change at least three settings:
 
 1. Set `SVC_BASE_URI` appropriately in the auth service configuration.
-1. Set `Service-URL` in the Helix server extension.
+1. Set service URL in the client system (e.g. Perforce server).
 1. Set the callback URL in the identity provider.
 
 ## Generating the Certificates
@@ -72,13 +48,6 @@ $ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -set
 $ rm client.csr ; mv client.crt client.key ../loginhook
 $ openssl req -newkey rsa:4096 -keyout server.key -out server.crt -nodes -days 365 -x509 -subj "/CN=AuthService"
 ```
-
-## Tips and Tricks
-
-### Controlling URL open
-
-By setting `P4USEBROWSER` to `false` you can prevent the browser from opening
-when you invoke `p4 login`. Not all that useful, but good to know.
 
 ## Coding Conventions
 
