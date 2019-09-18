@@ -1,9 +1,9 @@
 sequenceDiagram
-User->>Server: p4 login
-Server-->>User: open URL
-Server-->>Service: user approved?
-User->>Service: authenticate
-Service->>IdP: login request
+User->>Server: login request
+Server-->>User: InvokeURL
+Server-->>Service: request user data
+User->>Service: login via OIDC/SAML
+Service->>IdP: OIDC/SAML login request
 IdP->>Service: auth token
 Service-->>Server: user data
 Server->>User: p4 ticket

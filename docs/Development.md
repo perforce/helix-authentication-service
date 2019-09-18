@@ -67,5 +67,5 @@ produce the diagram of the authentication workflow.
 To generate the diagram, invoke `mmdc` like so:
 
 ```shell
-$ mmdc -i docs/sequence_diagram.mmd -t neutral -o flow.png
+$ npx mmdc -i docs/sequence_diagram.mmd -t neutral -o flow.png
 ```
