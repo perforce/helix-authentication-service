@@ -41,7 +41,7 @@ The authentication service has been tested with the following identity providers
 
 ## Documentation
 
-See the corresponding product documentation for details.
+See the product documentation in the [docs](./docs) directory.
 
 ## REST API
 
