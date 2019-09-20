@@ -1,25 +1,42 @@
 version: '3.7'
 
+#
+# Container names have a domain-like naming scheme to facilitate dnsmasq usage.
+# By ending in .doc, which is not a valid TLD, we can easily configure dnsmasq
+# to resolve these names to the docker machine. This allows the containers to
+# use the same names to refer to each other as the host does when resolving the
+# container names.
+#
+
 services:
-  auth-svc:
+  auth-svc.doc:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: containers/auth-svc/Dockerfile
     environment:
       NODE_ENV: development
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
-      OIDC_ISSUER_URI: "http://oidc.idp:3001/"
+      OIDC_ISSUER_URI: "http://oidc.doc:3001/"
       DEBUG: "auth:*"
-      SVC_BASE_URI: "https://auth-svc:3000"
-      DEFAULT_PROTOCOL: "oidc"
+      SVC_BASE_URI: "https://auth-svc.doc:3000"
+      DEFAULT_PROTOCOL: "saml"
       CA_CERT_FILE: certs/ca.crt
       IDP_CERT_FILE: certs/server.crt
       IDP_KEY_FILE: certs/server.key
-      SAML_IDP_SSO_URL: "http://saml.idp:7000/saml/sso"
-      SAML_IDP_SLO_URL: "http://saml.idp:7000/saml/slo"
+      SAML_IDP_SSO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SSO"
+      SAML_IDP_SLO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SLO"
       SAML_SP_ISSUER: "urn:example:sp"
       SP_CERT_FILE: certs/server.crt
       SP_KEY_FILE: certs/server.key
     ports:
       - "3000:3000"
+  shibboleth.doc:
+    build:
+      context: containers/shibboleth
+    environment:
+      JETTY_BROWSER_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
+      JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
+    ports:
+      - "443:4443"
+  
