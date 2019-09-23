@@ -93,8 +93,16 @@ router.get('/metadata', (req, res) => {
   if (signingCert) {
     signingCert = signingCert.toString('utf8')
   }
-  const xml = strategy.generateServiceProviderMetadata(undefined, signingCert)
-  res.header('Content-Type', 'text/xml').send(xml)
+  strategy.generateServiceProviderMetadata(req, undefined, signingCert, (err, data) => {
+    if (err) {
+      res.render('error', {
+        message: 'SAML metadata generation error: ' + err.message,
+        error: err
+      })
+    } else if (data) {
+      res.header('Content-Type', 'text/xml').send(data)
+    }
+  })
 })
 
 router.get('/idp/metadata', samlp.metadata(idpOptions))
