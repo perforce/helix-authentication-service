@@ -31,12 +31,20 @@ services:
       SP_KEY_FILE: certs/server.key
     ports:
       - "3000:3000"
+  ldap.doc:
+      build:
+        context: containers/ldap
+      ports:
+        - "389:389"
+        - "636:636"
   shibboleth.doc:
     build:
       context: containers/shibboleth
+    depends_on:
+      - ldap.doc
+      - auth-svc.doc
     environment:
       JETTY_BROWSER_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
       JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
     ports:
       - "443:4443"
-  

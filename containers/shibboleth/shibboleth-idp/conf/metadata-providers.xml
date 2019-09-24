@@ -48,7 +48,20 @@
             <RetainedRole>md:SPSSODescriptor</RetainedRole>
         </MetadataFilter>
     </MetadataProvider>
-    -->   
+    -->
+    <MetadataProvider id="HTTPMetadata"
+                      xsi:type="FileBackedHTTPMetadataProvider"
+                      backingFile="%{idp.home}/metadata/auth-svc.xml"
+                      disregardTLSCertificate="true"
+                      metadataURL="https://auth-svc.doc:3000/saml/metadata">
+
+        <MetadataFilter xsi:type="SignatureValidation"
+                        requireSignedRoot="false"
+                        certificateFile="%{idp.home}/credentials/metaroot.pem" />
+        <MetadataFilter xsi:type="EntityRoleWhiteList">
+            <RetainedRole>md:SPSSODescriptor</RetainedRole>
+        </MetadataFilter>
+    </MetadataProvider>
 
     <!--
     Example file metadata provider.  Use this if you want to load metadata
@@ -62,7 +75,6 @@
     <!--
     <MetadataProvider id="LocalMetadata"  xsi:type="FilesystemMetadataProvider" metadataFile="PATH_TO_YOUR_METADATA"/>
     -->
-
 
     <!--
     Example CAS metadata source.
