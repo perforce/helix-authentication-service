@@ -43,6 +43,7 @@ const samlOptions = {
   logoutUrl: process.env.SAML_IDP_SLO_URL,
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
   audience: process.env.SAML_SP_AUDIENCE || undefined,
+  decryptionPvk: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
   privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
   signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256',
   identifierFormat: process.env.SAML_NAMEID_FORMAT || 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
@@ -89,11 +90,8 @@ function checkStrategy (req, res, next) {
 }
 
 router.get('/metadata', (req, res) => {
-  let signingCert = fs.readFileSync(process.env.SP_CERT_FILE)
-  if (signingCert) {
-    signingCert = signingCert.toString('utf8')
-  }
-  strategy.generateServiceProviderMetadata(req, undefined, signingCert, (err, data) => {
+  const signingCert = fs.readFileSync(process.env.SP_CERT_FILE, 'utf-8')
+  strategy.generateServiceProviderMetadata(req, signingCert, signingCert, (err, data) => {
     if (err) {
       res.render('error', {
         message: 'SAML metadata generation error: ' + err.message,
