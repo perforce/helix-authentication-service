@@ -26,6 +26,7 @@ services:
       IDP_KEY_FILE: certs/server.key
       SAML_IDP_SSO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SSO"
       SAML_IDP_SLO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SLO"
+      SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
       SAML_SP_ISSUER: "urn:example:sp"
       SP_CERT_FILE: certs/server.crt
       SP_KEY_FILE: certs/server.key

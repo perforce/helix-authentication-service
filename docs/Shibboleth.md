@@ -32,6 +32,7 @@ $ docker run -it -v $(pwd):/ext-mount --rm unicon/shibboleth-idp init-idp.sh
 $ chmod 755 .
 $ sudo chmod -R u+rw,g+rw customized-shibboleth-idp
 $ mv customized-shibboleth-idp shibboleth-idp
+$ mv shibboleth-idp/conf/attribute-resolver-ldap.xml shibboleth-idp/conf/attribute-resolver.xml
 $ openssl req -newkey rsa:2048 -keyout key.pem -x509 -out certificate.pem -nodes -days 365 -subj "/CN=Shibboleth"
 $ openssl pkcs12 -inkey key.pem -in certificate.pem -export -out shibboleth-idp/credentials/idp-browser.p12
 $ rm key.pem certificate.pem
@@ -56,7 +57,7 @@ idp.authn.LDAP.ldapURL                         = ldap://ldap.doc:389
 idp.authn.LDAP.useStartTLS                     = false
 idp.authn.LDAP.useSSL                          = false
 
-idp.authn.LDAP.returnAttributes                 = passwordExpirationTime,loginGraceRemaining
+idp.authn.LDAP.returnAttributes                 = *
 
 idp.authn.LDAP.baseDN                           = ou=people,dc=example,dc=org
 idp.authn.LDAP.userFilter                       = (uid={user})
@@ -71,6 +72,7 @@ idp.attribute.resolver.LDAP.baseDN              = %{idp.authn.LDAP.baseDN:undefi
 idp.attribute.resolver.LDAP.bindDN              = %{idp.authn.LDAP.bindDN:undefined}
 idp.attribute.resolver.LDAP.bindDNCredential    = %{idp.authn.LDAP.bindDNCredential:undefined}
 idp.attribute.resolver.LDAP.searchFilter        = (uid=$resolutionContext.principal)
+idp.attribute.resolver.LDAP.useStartTLS         = false
 ```
 
 #### Metadata
@@ -96,29 +98,15 @@ This directs Shibboleth to fetch the service provider SAML metadata directly
 from our service instance, verifying it using the certificate we copied in
 earlier (i.e. `shibboleth-idp/credentials/metaroot.pem`).
 
-#### Disable encrypted SSO
-
-Edit the `shibboleth-idp/conf/relying-party.xml` file, adding the following:
-
-```xml
-<util:list id="shibboleth.RelyingPartyOverrides">
-    <bean parent="RelyingPartyByName" c:relyingPartyIds="urn:example:sp">
-        <property name="profileConfigurations">
-            <list>
-                <bean parent="SAML2.SSO" p:encryptAssertions="false" />
-            </list>
-        </property>
-    </bean>
-</util:list>
-```
-
-This instructs Shibboleth to allow SAML assertion requests without encryption.
-
 #### SAML NameID
 
-Edit the `shibboleth-idp/conf/saml-nameid.xml` file, enabling the block that
-defines `SAML2AttributeSourcedGenerator`, which instructs Shibboleth to use the
-`mail` attribute from LDAP as the SAML `NameID` field.
+Edit the `shibboleth-idp/conf/saml-nameid.xml` file as follows:
+
+1. Uncomment the `<ref bean="shibboleth.SAML2TransientGenerator" />` in the
+   `<util:list id="shibboleth.SAML2NameIDGenerators">` block.
+1. Uncomment the block that defines `SAML2AttributeSourcedGenerator`,
+   and add the attribute `p:useUnfilteredAttributes="true"` (because trying
+   to get the attribute filter set correctly is tricky).
 
 ## Build and Start
 
@@ -128,6 +116,8 @@ $ docker-compose up -d
 ```
 
 ### Testing Shibboleth
+
+The SAML IdP metadata URL will be: https://shibboleth.doc/idp/shibboleth
 
 Use `docker-compose logs shibboleth.doc` to see the logs of the Shibboleth
 server. It takes around 10 seconds on a fast machine to complete its startup. If
