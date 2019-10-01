@@ -1,4 +1,4 @@
-# Perforce Authentication Service
+# Helix Authentication Service
 
 This [Node.js](http://nodejs.org) based application implements a simple
 authentication protocol integration service that may be used in concert with
