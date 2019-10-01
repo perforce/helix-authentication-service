@@ -14,7 +14,7 @@ authentication service.
 To use the Docker containers defined in this project, you will need a
 [Docker](https://www.docker.com) installation, which should include Docker
 Compose (`docker-compose`) to build and manage the containers. Host systems that
-are not Linux will likely need Docker Machine as well.
+are not Linux will likely need Docker Desktop as well.
 
 ## Initial Setup
 
@@ -125,12 +125,7 @@ there are any Java exceptions in the log, then there is trouble. Otherwise, it
 is working.
 
 To open the Shibboleth landing page, open the `https://hostname/idp` URL in your
-browser. If you are using Docker Machine, the following command should open the
-default browser to the correct page.
-
-```shell
-$ open "https://$(docker-machine ip)/idp"
-```
+browser. If you are using Docker Desktop, then `hostname` will be `localhost`.
 
 ## Auth Service Configuration
 
