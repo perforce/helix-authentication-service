@@ -15,6 +15,6 @@ RUN rm -f package-lock.json && npm install -q
 
 EXPOSE 3000
 
-HEALTHCHECK CMD curl -f -s -o /dev/null http://localhost:3000/ || exit 1
+HEALTHCHECK CMD curl -k -f -s -o /dev/null https://localhost:3000/ || exit 1
 
 ENTRYPOINT [ "node",  "bin/www" ]
