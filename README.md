@@ -108,16 +108,16 @@ accounts is entirely application and protocol dependent
 The **:requestId** _route parameter_ is replaced with the identifier given in
 the `request` field of the JSON response from the `/requests/new` endpoint. The
 request will take as long as necessary for the user to authenticate with the
-identity provider. By default the service will timeout after 1 minute; this can
+identity provider. By default the service will time out after 1 minute; this can
 be configured using the `LOGIN_TIMEOUT` setting.
 
 The user profile data returned by the service depends on whatever the identity
 provider returns. The service knows nothing about the user or the clients
-initiating a login. It does, however, attempt to massage commonly available
+initiating a login. It does, however, attempt to combine commonly available
 fields into a canonical form to make it easier for the client to get the
 relevant information. For instance, with the SAML protocol, the service will
 attempt to set a property called `nameID` to something sensible, if the property
-has not already been defined by the IdP (c.f. the `SAML_NAMEID_FIELD` setting).
+has not already been defined by the IdP (see the `SAML_NAMEID_FIELD` setting).
 
 #### Possible Error Responses
 
