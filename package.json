@@ -28,7 +28,7 @@
     "http-errors": "~1.7.3",
     "memorystore": "^1.6.1",
     "morgan": "~1.9.1",
-    "openid-client": "^3.7.2",
+    "openid-client": "^3.7.3",
     "passport": "^0.4.0",
     "passport-saml": "^1.2.0",
     "samlp": "^3.4.1",
