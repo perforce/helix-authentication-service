@@ -30,14 +30,18 @@ services:
       SAML_SP_ISSUER: "urn:example:sp"
       SP_CERT_FILE: certs/server.crt
       SP_KEY_FILE: certs/server.key
+    networks:
+      - authen
     ports:
       - "3000:3000"
   ldap.doc:
-      build:
-        context: containers/ldap
-      ports:
-        - "389:389"
-        - "636:636"
+    build:
+      context: containers/ldap
+    networks:
+      - authen
+    ports:
+      - "389:389"
+      - "636:636"
   shibboleth.doc:
     build:
       context: containers/shibboleth
@@ -47,5 +51,11 @@ services:
     environment:
       JETTY_BROWSER_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
       JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
+    networks:
+      - authen
     ports:
       - "443:4443"
+
+networks:
+  authen:
+    name: auth-service
