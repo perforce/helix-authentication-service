@@ -55,6 +55,22 @@ while [[ -n "$1" ]]; do
     esac
 done
 
+#
+# This prevents a particular kind of error caused by npm trying to reduce its
+# privileges when running the pre/post install scripts of certain Node modules,
+# and subsequently running into a file permissions error. Technically if the
+# files are owned by root and root runs this script, it _should_ work.
+#
+if [[ $EUID -eq 0 ]]; then
+    die 'This script must be run as a non-root user.'
+fi
+
+# Test file permissions to ensure a successful install.
+mkdir node_modules > /dev/null 2>&1
+if [ $? != 0 ]; then
+    die 'You do not have permission to write to this directory.'
+fi
+
 if [ -e "/etc/redhat-release" ]; then
     PLATFORM=redhat
     if [ -e "/etc/os-release" ]; then
