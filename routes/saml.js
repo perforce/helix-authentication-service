@@ -48,6 +48,11 @@ const samlOptions = {
   signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256',
   identifierFormat: process.env.SAML_NAMEID_FORMAT || 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
 }
+if (process.env.IDP_CERT_FILE) {
+  // cannot specify an undefined 'cert' so must do this conditionally
+  samlOptions.cert = readIdentityCert(process.env.IDP_CERT_FILE)
+}
+
 // Use multi-strategy to enable us to dynamically configure the SAML options.
 const strategy = new MultiSamlStrategy(
   {
@@ -359,6 +364,15 @@ function extractProfile (profile) {
     }
   }
   return Object.assign({}, basics, extras)
+}
+
+// Process the PEM-encoded certificate into the string that passport-saml expects.
+function readIdentityCert (fpath) {
+  const text = fs.readFileSync(fpath, { encoding: 'utf8' })
+  const lines = text.split('\n').map(l => l.trim()).filter(l =>
+    l !== '-----BEGIN CERTIFICATE-----' && l !== '-----END CERTIFICATE-----' && l.length > 0
+  )
+  return lines.join('')
 }
 
 module.exports = router
