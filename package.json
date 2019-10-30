@@ -38,7 +38,6 @@
   },
   "private": true,
   "devDependencies": {
-    "license-checker": "^25.0.1",
-    "mermaid.cli": "^0.5.1"
+    "license-checker": "^25.0.1"
   }
 }

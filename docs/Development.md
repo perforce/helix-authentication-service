@@ -67,5 +67,6 @@ produce the diagram of the authentication workflow.
 To generate the diagram, invoke `mmdc` like so:
 
 ```shell
-$ npx mmdc -i docs/sequence_diagram.mmd -t neutral -o flow.png
+$ npm install -g mermaid.cli
+$ mmdc -i docs/sequence_diagram.mmd -t neutral -o flow.png
 ```
