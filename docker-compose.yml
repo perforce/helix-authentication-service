@@ -22,8 +22,6 @@ services:
       SVC_BASE_URI: "https://auth-svc.doc:3000"
       DEFAULT_PROTOCOL: "saml"
       CA_CERT_FILE: certs/ca.crt
-      IDP_CERT_FILE: certs/server.crt
-      IDP_KEY_FILE: certs/server.key
       SAML_IDP_SSO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SSO"
       SAML_IDP_SLO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SLO"
       SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
