@@ -1,3 +1,5 @@
+[![Support](https://img.shields.io/badge/Support-Official-green.svg)](mailto:support@perforce.com)
+
 # Helix Authentication Service
 
 This [Node.js](http://nodejs.org) based application implements a simple
