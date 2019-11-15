@@ -61,8 +61,8 @@ the `SP_CERT_FILE` setting of the auth service.
 
 Just as with any other SAML IdP, the auth service must know a little bit about
 the service provider that will be connecting to it. This is defined in the
-`IDP_CONFIG_FILE` configuration file described in the `Getting_Started.md` file.
-In this example, the key would be `urn:example:sp` and its value would be
+`IDP_CONFIG_FILE` configuration file described in the documentation. In this
+example, the key would be `urn:example:sp` and its value would be
 `http://192.168.1.106/login` (Swarm wants the extra `/login` on the URL). The
 service can support multiple Swarm installations, just add more entries to the
 `IDP_CONFIG_FILE` configuration as needed (and restart the service).

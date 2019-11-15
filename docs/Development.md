@@ -9,8 +9,8 @@ To fetch and build the application dependencies and run tests, you will need
 
 ### Build and Start
 
-Configure the authentication service as described in the `Getting_Started.md`
-file, then build and start the authentication service application:
+Configure the authentication service as described in the documentation, then
+build and start the authentication service application:
 
 ```shell
 $ npm install
