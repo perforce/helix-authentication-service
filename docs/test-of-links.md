@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Helix Authentication Service is designed to enable certain Perforce products to integrate with your organization's Identity Provider (IdP), such as Okta (identity management), Ping Identity, OneLogin, or Cisco Duo Security.
+The Helix Authentication Service is designed to enable certain Perforce products to integrate with your organization's [Identity Provider (IdP)](https://en.wikipedia.org/wiki/Identity_provider), such as Okta (identity management), Ping Identity, OneLogin, or Cisco Duo Security.
 
 This feature supports:
 
