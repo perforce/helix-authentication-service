@@ -58,7 +58,7 @@ Contents are:
 #### Helix Authentication Service
 
 - Administrative expertise with the software of your Identity Provider.
-- Node.js, version 12 or later. (The installation script installs Node.js, version 12)
+- [Node.js](https://nodejs.org/), version 12 or later. (The installation script installs Node.js, version 12)
 - (recommended) A process manager for the Node.js runtime, such as [pm2](https://pm2.keymetrics.io/), [forever](https://github.com/foreversd/foreve), or [StrongLoop](http://strong-pm.io/).
 (The installation script installs pm2)
 - A web browser. Any client using the authentication service requires a web browser.
@@ -81,8 +81,14 @@ Contents are:
 
 The configuration of the Helix Authentication Service to work with both the Identity Provider (IdP) and the Perforce server product requires an experienced security administrator. This effort might require [assistance from Perforce Support](https://www.perforce.com/support/request-support).
 
-
 ## Installing Helix Authentication Service
+
+### Prerequisites
+
+In addition to [Node.js](https://nodejs.org/), building the application will
+require the [Git](https://git-scm.com) command-line client to be installed, in
+order for `npm` to collect the application dependencies.
+
 ### Installation Script
 
 1. Run the `bash` script named `install.sh`, which is provided to set up a Linux-based system for running the authentication service. This script installs Node and the pm2 process manager (you can change this recommended default), and then builds the service dependencies.
@@ -110,6 +116,11 @@ $ sudo apt-get install -q -y curl
 $ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo apt-get install -q -y nodejs
 ```
+
+### Windows
+
+Download and run the Windows-based installers for [Git](https://git-scm.com) and
+[Node.js](https://nodejs.org/), then run `npm install` as described below.
 
 ### Build
 
