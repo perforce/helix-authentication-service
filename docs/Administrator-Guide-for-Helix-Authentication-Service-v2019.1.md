@@ -267,7 +267,7 @@ Changing the environment settings requires restarting the service for the change
 1. You can use a single app registration for both OIDC and SAML.
 1. Enter the auth service URL as the redirect URL
 1. Copy the _Application (client) ID_ to the `OIDC_CLIENT_ID` environment variable
-1. Open the OIDC metadata URL in the browser (click Endpoints button from app overview page)
+1. Open the _OpenID Connect metadata document_ URL in the browser (click Endpoints button from app overview page)
 1. Copy the _issuer_ URL and enter as the `OIDC_ISSUER_URI` environment variable; if the issuer URI contains `{tenantid}` then replace it with the _Directory (tenant) ID_ from the application overview page.
 1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET` environment variable
 1. Add a user account (guest works well) such that it has a defined email field; for whatever reason, "personal" accounts do not have the "email" field defined.
