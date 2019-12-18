@@ -9,6 +9,7 @@
 const app = require('../app')
 const debug = require('debug')('auth:server')
 const fs = require('fs')
+const path = require('path')
 const url = require('url')
 const glob = require('glob')
 
@@ -116,11 +117,21 @@ function getProtocol () {
   return u.protocol
 }
 
-// Use node-glob to optionally load multiple CA certificate files.
-// c.f. https://github.com/isaacs/node-glob
 function loadAuthorityCerts () {
+  let files = []
+  // Use node-glob to optionally load multiple CA certificate files.
+  // c.f. https://github.com/isaacs/node-glob
   if (process.env.CA_CERT_FILE) {
-    const files = glob.sync(process.env.CA_CERT_FILE)
+    files = files.concat(glob.sync(process.env.CA_CERT_FILE))
+  }
+  if (process.env.CA_CERT_PATH) {
+    const names = fs.readdirSync(process.env.CA_CERT_PATH)
+    const paths = names.map(f => {
+      return path.join(process.env.CA_CERT_PATH, f)
+    })
+    files = files.concat(paths)
+  }
+  if (files.length > 0) {
     const results = files.map(f => {
       debug('reading CA file %s', f)
       return fs.readFileSync(f)

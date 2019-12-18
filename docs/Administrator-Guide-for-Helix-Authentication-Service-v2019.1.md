@@ -172,6 +172,7 @@ SAML identity providers advertise some of this information through their metadat
 | `SP_KEY_FILE` | The service provider private key file, typically needed with SAML. | _none_ |
 | `SP_KEY_ALGO` | The algorithm used to sign the requests. | `sha256` |
 | `CA_CERT_FILE` | Path of certificate authority file for service to use when verifying client certificates. | _none_ |
+| `CA_CERT_PATH` | Path of directory containing certificate authority files for service to use when verifying client certificates. All files in the named directory will be processed. | _none_ |
 | `DEFAULT_PROTOCOL` | The default authentication protocol to use. Can be oidc or saml. | `saml` |
 | `LOGIN_TIMEOUT` | How long in seconds to wait for user to successfully authenticate. | `60` |
 

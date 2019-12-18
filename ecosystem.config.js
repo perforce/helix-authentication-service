@@ -31,6 +31,7 @@ module.exports = {
       // Below are additional optional settings and their default values.
       //
       // BIND_ADDRESS: '0.0.0.0',
+      // CA_CERT_PATH: undefined,
       // DEFAULT_PROTOCOL: 'saml',
       // FORCE_AUTHN: false,
       // IDP_CERT_FILE: undefined,
