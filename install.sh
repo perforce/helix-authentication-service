@@ -66,7 +66,7 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 # Test file permissions to ensure a successful install.
-mkdir node_modules > /dev/null 2>&1
+mkdir -p node_modules > /dev/null 2>&1
 if [ $? != 0 ]; then
     die 'You do not have permission to write to this directory.'
 fi
