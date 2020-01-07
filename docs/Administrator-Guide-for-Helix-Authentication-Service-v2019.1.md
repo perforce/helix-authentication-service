@@ -8,7 +8,7 @@ The Helix Authentication Service is designed to enable certain Perforce products
 
 This feature supports:
 
-- [Security Assertion Markup Language (SAML)](https://en.wikipedia.org/wiki/Security_Assertion_Markup_Language) and [OpenID Connect standards](https://en.wikipedia.org/wiki/OpenID_Connect)
+- [Security Assertion Markup Language (SAML)](https://en.wikipedia.org/wiki/Security_Assertion_Markup_Language) and [OpenID Connect (OIDC)](https://en.wikipedia.org/wiki/OpenID_Connect) standards
 - [Security-Enhanced Linux (SELinux)](https://en.wikipedia.org/wiki/Security-Enhanced_Linux) enabled in enforcing mode
 
 After reading this document, if you want to use this integration with the Perforce Helix Core Server command-line client (P4) and the Perforce Helix Core GUI client, P4V, see [Next Steps](#next-steps).
@@ -91,36 +91,61 @@ order for `npm` to collect the application dependencies.
 
 ### Installation Script
 
+The installation script will run on CentOS 7, 8, RHEL 7 and 8, and Ubuntu 14, 16, and 18. This method is preferred as it will install all of the prerequisites as well as the preferred process manager (pm2).
+
 1. Run the `bash` script named `install.sh`, which is provided to set up a Linux-based system for running the authentication service. This script installs Node and the pm2 process manager (you can change this recommended default), and then builds the service dependencies.
 1. Modify the service configuration by editing the `ecosystem.config.js` file. Configuration consists of defining the identity provider (IdP) details for either OIDC or SAML, and setting the `SVC_BASE_URI` of the authentication service.
 1. (Recommended) For better security, replace the example self-signed SSL certificates with ones signed by a trusted certificate authority.
 1. Restart the service by using `pm2 startOrReload ecosystem.config.js`
 
+Once the installation script has finished, continue with the configuration steps in the [Configure](#configure) section.
+
+Alternatively, the installation of Node.js can be done manually, as described below.
+
 ### CentOS and Ubuntu
 
-CentOS and Ubuntu lack Node.js packages, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
+CentOS, RedHat Enterprise Linux, and Ubuntu lack Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
 
-#### CentOS
+#### CentOS 6 and RHEL 6
+
+The Node.js v12 binaries will not run on CentOS 6 and RHEL 6, nor will the source code build, due to outdated or missing dependencies. For now, this service will not run on these systems.
+
+#### CentOS 7 and RHEL 7
 
 ```shell
-$ sudo yum -q -y install git gcc-c++ make
+$ sudo yum install git gcc-c++ make
 $ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
-$ sudo yum -q -y install nodejs
+$ sudo yum install nodejs
 ```
 
-#### Ubuntu
+#### CentOS 8 and RHEL 8
+
+The package for Python changed names in this OS release, and the NodeSource package dependencies for v12 still refer to the original name of `python` (c.f. [issue 990](https://github.com/nodesource/distributions/issues/990)). In the mean time it is possible to force the package to install via the `rpm` command.
 
 ```shell
-$ sudo apt-get install -q -y build-essential
-$ sudo apt-get install -q -y curl
-$ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-$ sudo apt-get install -q -y nodejs
+$ sudo yum install git gcc-c++ make
+$ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
+$ dnf --repo=nodesource download nodejs
+$ sudo rpm -i --nodeps nodejs-12.*.rpm
+$ rm -f nodejs-12.*.rpm
 ```
 
-### Windows
+#### Ubuntu 14, 16, 18
 
-Download and run the Windows-based installers for [Git](https://git-scm.com) and
-[Node.js](https://nodejs.org/), then run `npm install` as described below.
+```shell
+$ sudo apt-get install build-essential
+$ sudo apt-get install curl
+$ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+$ sudo apt-get install nodejs
+```
+
+### Other Linux distributions
+
+[Download](https://nodejs.org/en/download/) and install the **Linux Binaries** for Node.js, making sure that the `bin` folder is added to the `PATH` environment variable when installing and starting the service.
+
+### Windows 10 Pro and Windows Server 2019
+
+Download and run the Windows-based installers for [Git](https://git-scm.com) and [Node.js](https://nodejs.org/) LTS, then run `npm install` as described below. Note that the native toolchain, available via [chocolatey](https://chocolatey.org), is _not_ required for the authentication service.
 
 ### Build
 
