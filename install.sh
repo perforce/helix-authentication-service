@@ -154,7 +154,16 @@ if ! which node >/dev/null 2>&1; then
         #
         # c.f. https://nodejs.org/en/download/package-manager/
         curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
-        sudo yum -q -y install nodejs
+        if [ $(rpm --eval %{rhel}) == '8' ]; then
+            # NodeSource dependencies are broken for the time being on the
+            # latest CentOS/RHEL release. It expects a 'python' package but it
+            # has been renamed to 'python2' (and additionally 'python3') now.
+            dnf --repo=nodesource download nodejs
+            sudo rpm -i --nodeps nodejs-12.*.rpm
+            rm -f nodejs-12.*.rpm
+        else
+            sudo yum -q -y install nodejs
+        fi
     fi
 fi
 
