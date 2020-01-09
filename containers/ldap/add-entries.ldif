@@ -12,3 +12,25 @@ sn: George
 cn: Curious George
 userPassword: Passw0rd!
 uid: george
+
+dn: uid=jackson,ou=people,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+mail: saml.jackson@example.com
+sn: Jackson
+cn: Sam L. Jackson
+userPassword: Passw0rd!
+uid: jackson
+
+dn: uid=johndoe,ou=people,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+mail: johndoe@example.com
+sn: Doe
+cn: John Doe
+userPassword: Passw0rd!
+uid: johndoe

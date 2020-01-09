@@ -40,6 +40,20 @@ services:
     ports:
       - "389:389"
       - "636:636"
+  p4d.doc:
+    build:
+      context: containers/p4d
+      args:
+        # binding to the container IP address causes p4d to exit 255
+        P4PORT: "0.0.0.0:1666"
+        APT_URL: http://package.perforce.com/apt/ubuntu
+        PUB_KEY: http://package.perforce.com/perforce.pubkey
+    depends_on:
+      - ldap.doc
+    networks:
+      - authen
+    ports:
+      - "1666:1666"
   shibboleth.doc:
     build:
       context: containers/shibboleth
