@@ -45,6 +45,18 @@ The authentication service has been tested with the following identity providers
 
 See the product documentation in the [docs](./docs) directory.
 
+## How to Get Help
+
+Configuring the extension, the authentication service, and the identity provider
+is a non-trivial task. Some expertise in a security systems is helpful. In the
+event that you need assistance with configuring these systems, please contact
+[Perforce Support](https://www.perforce.com/support/request-support).
+
+## Development
+
+See the [development](./docs/Development.md) page for additional information
+regarding building and testing the service.
+
 ## REST API
 
 In the descriptions below, the `${baseUrl}` is the URL configured in the

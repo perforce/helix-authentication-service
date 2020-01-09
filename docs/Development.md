@@ -21,27 +21,21 @@ $ npm start
 
 Several containers are defined for use with [Docker](https://www.docker.com) and
 [Docker Compose](https://docs.docker.com/compose/), including an LDAP server,
-Shibboleth Identity Provider, Helix Server, and the authentication service. To
-build and start the containers, use `docker-compose` like so:
+Shibboleth Identity Provider, and the authentication service. To build and start
+the containers, use `docker-compose` like so:
 
 ```shell
 $ docker-compose build
 $ docker-compose up -d
 ```
 
-### Extensions
+### Authenticatin Extension
 
-The Helix Server extensions for integrating the authentication service are in a
-separate [repository](https://github.com/perforce/helix-authentication-extension)
-and can be installed using the `hook.js` script, like so:
-
-```shell
-$ P4PORT=p4d.doc:1666 AUTH_URL=https://auth-svc.doc:3000 node hook.js
-```
-
-You will need to change the `name-identifier` to `nameID` for the extension to
-successfully match the user profile data with the Perforce user spec, as the
-default value of `email` will not present in the SAML response from Shibboleth.
+The containers for the extension for integrating the authentication service are
+in a separate
+[repository](https://github.com/perforce/helix-authentication-extension) and can
+be installed using `docker-compose` as described in the documentation for that
+project.
 
 ## Running the Service on HTTP
 
