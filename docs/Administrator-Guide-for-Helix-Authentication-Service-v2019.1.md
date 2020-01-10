@@ -188,7 +188,8 @@ SAML identity providers advertise some of this information through their metadat
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |
-| `DEBUG` |  Set to auth:* to enable debug logging in the service (writes to standard error). | _none_ |
+| `BIND_ADDRESS` | Define the IP address upon which the service will listen for requests. Setting this to `127.0.0.1` (i.e. `localhsot`) means that only processes on the same host can connect, while a value of `0.0.0.0` means requests made against any address assigned to the machine will work. | `0.0.0.0` |
+| `DEBUG` |  Set to `auth:*` to enable debug logging in the service (writes to standard error). | _none_ |
 | `FORCE_AUTHN` | If set to any non-empty value, will cause the service to require the user to authenticate, even if the user is already authenticated. For SAML, this means setting the `forceAuthn` field set to true, while for OIDC it will set the `max_age` parameter to `0`. This is not supported by all identity providers, especially for OIDC. | _none_ |
 | `SESSION_SECRET` | Password used for encrypting the in-memory session data. | `keyboard cat` |
 | `SVC_BASE_URI` | The authentication service base URL visible to end users. Needs to match the application settings defined in IdP configuration. | _none_ |
@@ -220,7 +221,7 @@ The simplest way to run the Helix Authentication Service is using `npm start` fr
 
 #### pm2
 
-The pm2 process manager has been used for testing this service. See the example configuration file, `ecosystem.config.js`, in the top-level of the service installation directory .
+The pm2 process manager is recommended for deploying this service. Aside from it offering many convenient functions for managing Node.js processes, it also aggregates and rotates log files that capture the output from the service: use the `pm2 logs` command to list the files, and `pm2 info` to get the location of the log files. See the example configuration file, `ecosystem.config.js`, in the top-level of the service installation directory.
 
 ## Configuring your IdP for Helix Authentication Service Identity Providers
 
