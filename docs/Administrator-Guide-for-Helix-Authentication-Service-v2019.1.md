@@ -403,3 +403,24 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 If you want to configure Helix Authentication Service for Helix Core Server (P4) and the Helix Core visual client (P4V), see the Administrator's Guide for Helix Authentication Extension, which is available in the "docs" for the [Helix Authentication Extension](https://github.com/perforce/helix-authentication-extension).
 
 If you want to use the Helix Authentication Service to authenticate from Helix ALM or Surround SCM, see the [Helix ALM License Server Admin Guide](https://help.perforce.com/alm/help.php?product=licenseserver&type=lsadmin).
+
+## Troubleshooting
+
+### "Missing authentication strategy" displayed in browser
+
+Check authentication service log files for possible errors. During the initial setup, it is likely that the settings for the protocol (e.g. SAML or OIDC) simply have not been defined as yet. Without the necessary protocol settings, the service cannot initialize the authentication "strategy" (the appropriate [passport](http://www.passportjs.org) module).
+
+### Redirect URI error displayed in browser
+
+In the case of certain identity providers, you may see an error message indicating a "bad request" related to a redirect URI. For instance:
+
+```
+Error Code: invalid_request
+Description: The 'redirect_uri' parameter must be an absolute URI that is whitelisted in the client app settings.
+```
+
+This occurs when the authentication service base URI (`SVC_BASE_URI`) does not match what the identity provider has configured for the application. For example, when using an OIDC configuration in Okta, the **Login redirect URIs** must have a host and port that match those found in the `SVC_BASE_URI` environment variable in the service configuration. You may use an IP address or a host name, but you cannot mix them; either both have an IP address or both have a host name.
+
+### Environment settings and unexpected behavior
+
+If the authentication service is not behaving as expected based on the configuration, it may be that it is picking up environment variables from an unexpected location. All of the environment variables will be dumped to the console when debug logging is enabled, so if those do not match expectations, then verify that you are using exactly one of a `.env` file _or_ an `ecosystem.config.js` file. While you can have both, the order of precedence is not defined, and you will likely get unexpected results. In practice, it appears that the `.env` file takes precedence over the `env` section in the `ecosystem.config.js` file, but that is not a safe assumption.
