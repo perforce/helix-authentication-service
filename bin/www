@@ -133,8 +133,11 @@ function loadAuthorityCerts () {
   }
   if (files.length > 0) {
     const results = files.map(f => {
-      debug('reading CA file %s', f)
-      return fs.readFileSync(f)
+      const stats = fs.statSync(f)
+      if (stats.isFile()) {
+        debug('reading CA file %s', f)
+        return fs.readFileSync(f)
+      }
     })
     return results
   }
