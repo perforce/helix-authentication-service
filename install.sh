@@ -73,21 +73,8 @@ fi
 
 if [ -e "/etc/redhat-release" ]; then
     PLATFORM=redhat
-    if [ -e "/etc/os-release" ]; then
-        STARTUP='systemd'
-    else
-        STARTUP='systemv'
-    fi
 elif [ -e "/etc/debian_version" ]; then
     PLATFORM=debian
-    RELEASE=$(lsb_release -sr)
-    if [[ $RELEASE == "18.04" ]] || [[ $RELEASE == "16.04" ]]; then
-        STARTUP='systemd'
-    elif [[ $RELEASE == "14.04" ]]; then
-        STARTUP='upstart'
-    else
-        die "Not a supported version of Ubuntu"
-    fi
 else
     # Exit now if this is not a supported Linux distribution
     die "Could not determine OS distribution"
@@ -191,7 +178,7 @@ pm2 start ecosystem.config.js
 
 # install pm2 startup script
 echo "Installing pm2 startup script..."
-sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
+sudo pm2 startup -u ${USER} --hp ${HOME}
 pm2 save
 
 echo ""
