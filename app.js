@@ -19,7 +19,8 @@ if (dotResult.error) {
 // start the debug logging, show dotenv results if any
 const debug = require('debug')('auth:server')
 if (dotResult.parsed) {
-  debug('dotenv results: %o', dotResult.parsed)
+  const scrubbed = scrubSecrets(dotResult.parsed)
+  debug('dotenv results: %o', scrubbed)
 }
 
 const indexRouter = require('./routes/index')
@@ -70,5 +71,18 @@ app.use((err, req, res, next) => {
   console.error(err)
   res.render('error')
 })
+
+function scrubSecrets (env) {
+  const keys = Object.keys(env)
+  const obj = {}
+  for (const name of keys) {
+    if (name.match(/secret/i)) {
+      obj[name] = 'REDACTED'
+    } else {
+      obj[name] = env[name]
+    }
+  }
+  return obj
+}
 
 module.exports = app
