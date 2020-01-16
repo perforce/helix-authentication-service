@@ -8,10 +8,16 @@ const passport = require('passport')
 const { custom, Issuer, Strategy } = require('openid-client')
 const { users, requests } = require('../store')
 
-custom.setHttpOptionsDefaults({
-  // default timeout of 2500ms is just a little too short some times
-  timeout: 5000
-})
+// In order to support both Node.js v10 and v12, detect if this version of
+// openid-client provides the custom functionality before attempting its use.
+// The timeout is a nice-to-have that we can live without for the sake of
+// backward compatibility.
+if (custom) {
+  custom.setHttpOptionsDefaults({
+    // default timeout of 2500ms is just a little too short some times
+    timeout: 5000
+  })
+}
 
 let client = null
 
