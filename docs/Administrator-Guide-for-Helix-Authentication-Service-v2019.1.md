@@ -102,15 +102,15 @@ Once the installation script has finished, continue with the configuration steps
 
 Alternatively, the installation of Node.js can be done manually, as described in the following sections.
 
-### CentOS and Ubuntu
+### Manual Installation
 
-CentOS, RedHat Enterprise Linux, and Ubuntu lack Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
-
-#### CentOS 6 and RHEL 6
+#### CentOS/RHEL 6
 
 The Node.js v12 binaries will not run on CentOS 6 and RHEL 6, nor will the source code build, due to outdated or missing dependencies. For now, this service will not run on these systems.
 
-#### CentOS 7 and RHEL 7
+#### CentOS/RHEL 7
+
+CentOS and RedHat Enterprise Linux lack Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
 
 ```shell
 $ sudo yum install git gcc-c++ make
@@ -118,7 +118,7 @@ $ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo yum install nodejs
 ```
 
-#### CentOS 8 and RHEL 8
+#### CentOS/RHEL 8
 
 The package for Python changed names in this OS release, and the NodeSource package dependencies for v12 still refer to the original name of `python` (c.f. [issue 990](https://github.com/nodesource/distributions/issues/990)). In the mean time it is possible to force the package to install via the `rpm` command.
 
@@ -140,13 +140,15 @@ $ sudo dnf install nodejs
 
 #### Ubuntu 14, 16, 18
 
+Ubuntu Linux lacks Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
+
 ```shell
 $ sudo apt-get install build-essential curl
 $ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo apt-get install nodejs
 ```
 
-### Other Linux distributions
+#### Other Linux distributions
 
 [Download](https://nodejs.org/en/download/) and install the **Linux Binaries** for Node.js, making sure that the `bin` folder is added to the `PATH` environment variable when installing and starting the service.
 
@@ -154,9 +156,9 @@ $ sudo apt-get install nodejs
 
 Download and run the Windows-based installers for [Git](https://git-scm.com) and [Node.js](https://nodejs.org/) LTS, then run `npm install` as described below. Note that the native toolchain, available via [chocolatey](https://chocolatey.org), is _not_ required for the authentication service.
 
-### Build
+### Installing Module Dependencies
 
-With the authentication service code downloaded, open a terminal window and change to the directory containing the service code. Then download and build the dependencies using the npm command:
+If not using the `install.sh` installation script, then it is necessary to run `npm install` to download the module dependencies for the authentication service. Open a terminal window and change to the directory containing the service code, then run the following `npm` command:
 
 ```shell
 $ npm install
