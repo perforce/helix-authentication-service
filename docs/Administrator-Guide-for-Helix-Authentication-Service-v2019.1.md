@@ -413,6 +413,18 @@ If you want to configure Helix Authentication Service for Helix Core Server (P4)
 
 If you want to use the Helix Authentication Service to authenticate from Helix ALM or Surround SCM, see the [Helix ALM License Server Admin Guide](https://help.perforce.com/alm/help.php?product=licenseserver&type=lsadmin).
 
+## Upgrading Helix Authentication Service
+
+The upgrade process for the authentication service is essentially the same as installing for the first time, with the addition of copying the configuration and certificate files.
+
+Start by stopping the currently installed and running authentication service. This will make the desired port (the default is `3000`) available and prevent any confusion when starting the upgraded application within a process manager. You may also want to rename the directory containing the service code to indicate it is no longer in use.
+
+Next, download the updated release of the service to a new file location. Do _not_ attempt to upgrade the service "in-place" as that may cause subtle issues, such as unintentionally loading old versions of dependencies. Use the desired installation process as described in the [Installing Helix Authentication Service](#installing-helix-authentication-service) section to prepare the service. If using the `install.sh` installation script, it will detect the previously installed prerequisites (e.g. Node.js) and not install them again. If performing a manual install, be sure to run `npm install` in the authentication service directory to install the module dependencies.
+
+Next, copy the SSL certificates from the old install location to the new one.
+
+Finally, copy the configuration file from the old install location to the new one. This may be the `.env` file, or if using the pm2 process manager, it would be the `ecosystem.config.js` file. In either case, if the upgraded service has already been started, you will need to restart it for the configuration changes to take effect.
+
 ## Troubleshooting
 
 ### "Missing authentication strategy" displayed in browser
