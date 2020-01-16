@@ -91,16 +91,16 @@ order for `npm` to collect the application dependencies.
 
 ### Installation Script
 
-The installation script will run on CentOS 7, 8, Fedora 31, RHEL 7 and 8, and Ubuntu 14, 16, and 18. This method is preferred as it will install all of the prerequisites as well as the preferred process manager (pm2).
+The installation script will run on CentOS 7, 8, Debian 8, 9, 10, Fedora 31, RHEL 7 and 8, and Ubuntu 14, 16, and 18. This method is preferred as it will install all of the prerequisites as well as the recommended process manager (pm2).
 
-1. Run the `bash` script named `install.sh`, which is provided to set up a Linux-based system for running the authentication service. This script installs Node and the pm2 process manager (you can change this recommended default), and then builds the service dependencies.
+1. Run the `bash` script named `install.sh`, which is provided to set up a Linux-based system for running the authentication service. This script installs Node and the pm2 process manager, and then builds the service dependencies.
 1. Modify the service configuration by editing the `ecosystem.config.js` file. Configuration consists of defining the identity provider (IdP) details for either OIDC or SAML, and setting the `SVC_BASE_URI` of the authentication service.
 1. (Recommended) For better security, replace the example self-signed SSL certificates with ones signed by a trusted certificate authority.
 1. Restart the service by using `pm2 startOrReload ecosystem.config.js`
 
-Once the installation script has finished, continue with the configuration steps in the [Configure](#configure) section.
+Once the installation script has finished, continue with the configuration steps in the [Configuring Helix Authentication Service](#configuring-helix-authentication-service) section.
 
-Alternatively, the installation of Node.js can be done manually, as described below.
+Alternatively, the installation of Node.js can be done manually, as described in the following sections.
 
 ### CentOS and Ubuntu
 
@@ -141,8 +141,7 @@ $ sudo dnf install nodejs
 #### Ubuntu 14, 16, 18
 
 ```shell
-$ sudo apt-get install build-essential
-$ sudo apt-get install curl
+$ sudo apt-get install build-essential curl
 $ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo apt-get install nodejs
 ```
@@ -163,24 +162,37 @@ With the authentication service code downloaded, open a terminal window and chan
 $ npm install
 ```
 
-### Configure
+## Configuring Helix Authentication Service
 
-The authentication service is configured using environment variables. Because there are numerous settings, it is easiest to create a file called `.env` that contains all of the settings. If you change the `.env` file while the service is running, the service must be restarted for the changes to take effect. See the [Deploy](#deploy) section below because the choice of process manager affects how environment variables are defined.
+The authentication service is configured using environment variables. Because there are numerous settings, it is easiest to create a file called `.env` that contains all of the settings. If you change the `.env` file while the service is running, the service must be restarted for the changes to take effect. See the [Deploy](#deploy) section below because the choice of process manager affects how environment variables are defined. As an example, environment variables can be defined in the `ecosystem.config.js` file when using the pm2 process manager.
 
-#### OpenID Connect settings
+If using a `.env` file, it should be located in the current working directory when the service is started. Typically this is the same directory as the `package.json` file of the service code.
+
+### Restarting the Service
+
+Changing the environment settings will require restarting the service for the changes to take effect:
+
+- If using `npm start`, use `Ctrl-c` to stop the running process, and run `npm start` again.
+- If using pm2, use the `pm2 startOrReload ecosystem.config.js` command to gracefully restart.
+
+### OpenID Connect settings
 
 | Name | Description |
 | ---- | ----------- |
-| `OIDC_CLIENT_ID` | The client identifier as provided by the OIDC identity provider |
-| `OIDC_CLIENT_SECRET` | The client secret as provided by the OIDC identity provider |
-| `OIDC_ISSUER_URI` | The OIDC provider issuer URL |
+| `OIDC_CLIENT_ID` | The **client identifier** as provided by the OIDC identity provider. |
+| `OIDC_CLIENT_SECRET` | The **client secret** as provided by the OIDC identity provider. |
+| `OIDC_ISSUER_URI` | The OIDC provider **issuer** URL. |
 
-OpenID Connect also has a discovery feature in which the identity provider advertises various properties. The URI path is /.well-known/openid-configuration, which is described in the [OpenID Connect (OIDC) specification](https://openid.net/specs/openid-connect-discovery-1_0.html). For guidance with several popular identity provider, see Configuring your IdP for Helix Authentication Service Identity Providers.
+OpenID Connect has a discovery feature in which the identity provider advertises various properties via a "discovery document". The URI path will be `/.well-known/openid-configuration` at the IdP base URL, which is described in the [OpenID Connect (OIDC) specification](https://openid.net/specs/openid-connect-discovery-1_0.html). This information makes the process of configuring an OIDC client easier.
 
-#### SAML settings
+The OIDC client identifier and secret are generally provided by the identity provider during the setup and configuration of the application, and this is very particular to each identity provider. For guidance with several popular identity providers, see [Example Identity Provider Configurations](#example-identity-provider-configurations).
 
-| Name   |      Description      |  Default |
-|----------| ------------- |------ |
+As for the OIDC issuer URI, that value is advertised in the discovery document mentioned above, and will be a property named `issuer`. Copy this value to the `OIDC_ISSUER_URI` service setting. Be sure _not_ to use one of the "endpoint" URL values, as those are not the same as the issuer URI.
+
+### SAML settings
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
 | `SAML_IDP_SSO_URL` | URL of IdP Single Sign-On service. | _none_ |
 | `SAML_IDP_SLO_URL` | URL of IdP Single Log-Out service. | _none_ |
 | `SAML_SP_ISSUER` | The service provider identity provider that will be using the Helix Authentication Service as a SAML IdP. | `urn:example:sp` |
@@ -190,9 +202,11 @@ OpenID Connect also has a discovery feature in which the identity provider adver
 | `SAML_NAMEID_FIELD` | Name of the property in the user profile to be used if nameID is missing, which is likely to be the case when using another authentication protocol (such as OIDC) with the identity provider (such as Okta). | **Note:** Changing the configuration file requires restarting the service because Node caches the file contents in memory.
 | `SAML_NAMEID_FORMAT` | The desired NameID format expected from the SAML identity provider. Defaults to `urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified`, and can be set to any of the formats defined in the SAML specifications.	| **Note:** If not specified, the service will try email and sub, and if those fail, the service will generate a unique identifier. The value is used as a unique key for the user data. To see the raw user profile returned by the identity provider, enable the debug logging (see the `DEBUG` entry below) and watch for "legacy setting nameID" in the log output. |
 
-SAML identity providers advertise some of this information through their metadata URL. The URL is different for each provider, unlike OIDC. See Configuring your IdP for Helix Authentication Service Identity Providers.
+SAML identity providers advertise some of this information through their metadata URL. The URL is different for each provider, unlike OIDC. See [Example Identity Provider Configurations](#example-identity-provider-configurations).
 
-#### Other Settings
+When configuring the service as a "service provider" within a SAML identity provider, provide an `entityID` that is unique within your set of registered applications. By default, the service uses the value `urn:example:sp`, which can be changed by setting the `SAML_SP_ISSUER` environment variable. Anywhere that `urn:example:sp` appears in this documentation, be sure to replace it with the value you defined in the identity provider.
+
+### Other Settings
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |
@@ -209,7 +223,7 @@ SAML identity providers advertise some of this information through their metadat
 | `DEFAULT_PROTOCOL` | The default authentication protocol to use. Can be oidc or saml. | `saml` |
 | `LOGIN_TIMEOUT` | How long in seconds to wait for user to successfully authenticate. | `60` |
 
-#### Certificates
+### Certificates
 
 Although it is possible to use a self-signed certificate, we recommend that you use proper certificates and a trusted certificate authority (CA).
 
@@ -217,44 +231,29 @@ The Helix Authentication Service reads its certificate and key files using the p
 
 If the certificate files are changed, the service will need to be restarted because the service only reads the files at startup.
 
-### Deploy
+## Deploy
 
-#### Overview
+### Overview
 
 Helix Authentication Service does not rely on a database because all data is stored temporarily in memory. The configuration is defined by environment variables. The service can serve multiple Helix Server installations because the client application that interacts with Helix Authentication Service initiates the requests and pulls data as needed. The Helix Core Server Extension asks the service for a request identifier, and the user logs in through the Helix Authentication Service with that request identifier.
 
-#### npm
+### npm
 
-The simplest way to run the Helix Authentication Service is using `npm start` from a terminal window. However, that is not robust because if the service fails, it must be restarted. Therefore, we recommend that you use a Node.js process manager to start and manage the service. We recommend the [pm2](https://pm2.keymetrics.io/) process manager, but [forever](https://github.com/foreversd/foreve) or [StrongLoop](http://strong-pm.io/) are among the valid alternatives. These Node.js process managers typically hook into the system process manager (e.g. `systemd`) and thus will only go down if the entire system goes down.
+The simplest way to run the Helix Authentication Service is using `npm start` from a terminal window. However, that is not robust because if the service fails, it must be restarted. Therefore, we recommend that you use a Node.js process manager to start and manage the service. 
 
-#### pm2
+### Process Managers
 
-The pm2 process manager is recommended for deploying this service. Aside from it offering many convenient functions for managing Node.js processes, it also aggregates and rotates log files that capture the output from the service: use the `pm2 logs` command to list the files, and `pm2 info` to get the location of the log files. See the example configuration file, `ecosystem.config.js`, in the top-level of the service installation directory.
+Node.js process managers generally offer many advantages over using just `npm` to run a Node.js application. Such managers include [pm2](https://pm2.keymetrics.io/), [forever](https://github.com/foreversd/foreve), and [StrongLoop](http://strong-pm.io/). These Node.js process managers typically hook into the system process manager (e.g. `systemd`) and thus will only go down if the entire system goes down.
 
-## Configuring your IdP for Helix Authentication Service Identity Providers
+### pm2
+
+The [pm2](https://pm2.keymetrics.io/) process manager is recommended for deploying this service. Aside from it offering many convenient functions for managing Node.js processes, it also aggregates and rotates log files that capture the output from the service: use the `pm2 logs` command to list the files, and `pm2 info` to get the location of the log files. See the example configuration file, `ecosystem.config.js`, in the top-level of the service installation directory.
+
+## Example Identity Provider Configurations
+
+This section provides details for several hosted identity providers, but is by no means an exhaustive list of supported identity providers.
 
 For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the actual protocol, host, and port for the authentication service (e.g. https://localhost:3000 for development environments). This address must match the URL that the identity provider is configured to recognize as the "SSO" or "callback" URL for the application.
-
-### Configuration
-
-#### Environment Variables
-
-In the instructions below, when referring to setting environment variables for Helix Authentication Service, there are several choices.
-
-1. Set them in the environment, such as in the command shell.
-2. Define them in a file called `.env` in the auth service source tree (in the same directory as the `package.json` file).
-3. If you are using pm2, edit the `ecosystem.config.js` file.
-
-#### SAML entity identifiers
-
-When configuring the service as a "service provider" within a SAML identity provider, provide an entityID that is unique within your set of registered applications. By default, the service uses the value `urn:example:sp`, which can be changed by setting the `SAML_SP_ISSUER` environment variable. Anywhere that `urn:example:sp` appears in the following instructions, replace it with the value you defined in the identity provider.
-
-### Restarting the Service
-
-Changing the environment settings requires restarting the service for the changes to take effect:
-
-- If using `npm start`, use `Ctrl-c` to stop the running process, and run `npm start` again.
-- If using pm2, use `pm2 startOrReload ecosystem.config.js`
 
 ### Auth0
 
