@@ -113,7 +113,7 @@ The Node.js v12 binaries will not run on CentOS 6, Oracle Linux 6, or RHEL 6, no
 CentOS, Oracle Linux, and RedHat Enterprise Linux lack Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
 
 ```shell
-$ sudo yum install git gcc-c++ make
+$ sudo yum install curl git
 $ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo yum install nodejs
 ```
@@ -123,7 +123,7 @@ $ sudo yum install nodejs
 The package for Python changed names in this OS release, and the NodeSource package dependencies for v12 still refer to the original name of `python` (c.f. [issue 990](https://github.com/nodesource/distributions/issues/990)). In the mean time it is possible to force the package to install via the `rpm` command.
 
 ```shell
-$ sudo yum install git gcc-c++ make
+$ sudo yum install curl git
 $ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
 $ dnf --repo=nodesource download nodejs
 $ sudo rpm -i --nodeps nodejs-12.*.rpm
@@ -143,7 +143,7 @@ $ sudo dnf install nodejs
 Ubuntu Linux lacks Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
 
 ```shell
-$ sudo apt-get install build-essential curl
+$ sudo apt-get install curl git
 $ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo apt-get install nodejs
 ```
