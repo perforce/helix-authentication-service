@@ -135,7 +135,8 @@ if ! which node >/dev/null 2>&1; then
         curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
         sudo apt-get -q -y install nodejs
     elif [ $PLATFORM == "redhat" ]; then
-        sudo yum -q -y install gcc-c++ git make
+        # Add --skip-broken for Oracle Linux and its redundant packages
+        sudo yum -q -y install --skip-broken gcc-c++ git make
         # Run a shell script from the internet as root to get version 12
         # directly from the vendor. This includes npm as well.
         #
