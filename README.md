@@ -41,6 +41,16 @@ The authentication service has been tested with the following identity providers
 | [OneLogin](https://www.onelogin.com)  | OK   | OK   |
 | [Ping](https://www.pingidentity.com/) | OK   | OK   |
 
+### Node.js Version Support
+
+The `master` branch of this repository requires Node.js v12, the Long Term
+Support release. To use the service with Node.js v10 requires checking out the
+`node10` branch. That branch is provided for those situations where Node v12 is
+not available, as with CentOS/RHEL 6, and upgrading the OS is not feasible. The
+drawback is that the version of the `openid-client` module that supports Node
+v10 does not have the features and bug fixes of the more recent releases.
+Support for Node v10 is temporary and will likely be removed in the future.
+
 ## Documentation
 
 See the product documentation in the [docs](./docs) directory.
@@ -48,7 +58,7 @@ See the product documentation in the [docs](./docs) directory.
 ## How to Get Help
 
 Configuring the extension, the authentication service, and the identity provider
-is a non-trivial task. Some expertise in a security systems is helpful. In the
+is a non-trivial task. Some expertise with security systems is helpful. In the
 event that you need assistance with configuring these systems, please contact
 [Perforce Support](https://www.perforce.com/support/request-support).
 
