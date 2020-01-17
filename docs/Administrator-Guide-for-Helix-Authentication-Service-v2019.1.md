@@ -106,11 +106,11 @@ Alternatively, the installation of Node.js can be done manually, as described in
 
 #### CentOS/RHEL 6
 
-The Node.js v12 binaries will not run on CentOS 6 and RHEL 6, nor will the source code build, due to outdated or missing dependencies. For now, this service will not run on these systems.
+The Node.js v12 binaries will not run on CentOS 6, Oracle Linux 6, or RHEL 6, nor will the source code build, due to outdated or missing dependencies. For now, this service will not run on these systems.
 
 #### CentOS/RHEL 7
 
-CentOS and RedHat Enterprise Linux lack Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
+CentOS, Oracle Linux, and RedHat Enterprise Linux lack Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
 
 ```shell
 $ sudo yum install git gcc-c++ make
