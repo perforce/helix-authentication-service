@@ -69,6 +69,11 @@ regarding building and testing the service.
 
 ## REST API
 
+The REST API of the authentication service is intented only for application use,
+it is _not_ meant for end-users to interact with the service. Users should be
+authenticating with the application (e.g. Perforce Server or Helix ALM) which
+will in turn utilize this API.
+
 In the descriptions below, the `${baseUrl}` is the URL configured in the
 `SVC_BASE_URI` setting in the authentication service.
 
