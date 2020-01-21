@@ -42,6 +42,7 @@ const samlOptions = {
   entryPoint: process.env.SAML_IDP_SSO_URL,
   logoutUrl: process.env.SAML_IDP_SLO_URL,
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
+  idpIssuer: process.env.SAML_IDP_ISSUER || undefined,
   audience: process.env.SAML_SP_AUDIENCE || undefined,
   authnContext: process.env.SAML_AUTHN_CONTEXT || undefined,
   decryptionPvk: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,

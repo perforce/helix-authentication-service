@@ -35,6 +35,7 @@ module.exports = {
       // DEFAULT_PROTOCOL: 'saml',
       // FORCE_AUTHN: false,
       // IDP_CERT_FILE: undefined,
+      // SAML_IDP_ISSUER: undefined,
       // IDP_CONFIG_FILE: './saml_idp.conf.js',
       // LOGIN_TIMEOUT: 60,
       // SAML_AUTHN_CONTEXT: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
