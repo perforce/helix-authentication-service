@@ -1,6 +1,7 @@
 //
-// Copyright 2019 Perforce Software
+// Copyright 2020 Perforce Software
 //
+const fs = require('fs')
 const debug = require('debug')('auth:server')
 const express = require('express')
 const router = express.Router()
@@ -41,7 +42,7 @@ function loadStrategy () {
         //
         client = new issuer.Client({
           client_id: process.env.OIDC_CLIENT_ID,
-          client_secret: process.env.OIDC_CLIENT_SECRET,
+          client_secret: loadClientSecret(),
           post_logout_redirect_uris: [process.env.SVC_BASE_URI]
         })
         const params = {
@@ -66,6 +67,13 @@ function loadStrategy () {
       resolve()
     }
   })
+}
+
+function loadClientSecret () {
+  if (process.env.OIDC_CLIENT_SECRET_FILE) {
+    return fs.readFileSync(process.env.OIDC_CLIENT_SECRET_FILE, 'utf8').trim()
+  }
+  return process.env.OIDC_CLIENT_SECRET
 }
 
 passport.serializeUser((user, done) => {

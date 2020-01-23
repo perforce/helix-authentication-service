@@ -76,7 +76,11 @@ function scrubSecrets (env) {
   const keys = Object.keys(env)
   const obj = {}
   for (const name of keys) {
-    if (name.match(/secret/i)) {
+    if (name.match(/secret_file/i)) {
+      // the "secret_file" entries are safe
+      obj[name] = env[name]
+    } else if (name.match(/secret/i)) {
+      // but the other "secret" settings are not safe
       obj[name] = 'REDACTED'
     } else {
       obj[name] = env[name]

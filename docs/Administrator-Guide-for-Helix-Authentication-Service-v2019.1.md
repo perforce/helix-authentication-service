@@ -183,6 +183,7 @@ Changing the environment settings will require restarting the service for the ch
 | ---- | ----------- |
 | `OIDC_CLIENT_ID` | The **client identifier** as provided by the OIDC identity provider. |
 | `OIDC_CLIENT_SECRET` | The **client secret** as provided by the OIDC identity provider. |
+| `OIDC_CLIENT_SECRET_FILE` | Path of the file containing the **client secret** as provided by the OIDC identity provider. _This setting should be preferred over `OIDC_CLIENT_SECRET` to prevent accidental exposure of the client secret._ |
 | `OIDC_ISSUER_URI` | The OIDC provider **issuer** URL. |
 
 OpenID Connect has a discovery feature in which the identity provider advertises various properties via a "discovery document". The URI path will be `/.well-known/openid-configuration` at the IdP base URL, which is described in the [OpenID Connect (OIDC) specification](https://openid.net/specs/openid-connect-discovery-1_0.html). This information makes the process of configuring an OIDC client easier.
