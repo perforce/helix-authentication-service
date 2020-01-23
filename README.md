@@ -40,6 +40,7 @@ The authentication service has been tested with the following identity providers
 | [Okta](https://www.okta.com)          | OK   | OK   |
 | [OneLogin](https://www.onelogin.com)  | OK   | OK   |
 | [Ping](https://www.pingidentity.com/) | OK   | OK   |
+| [Shibboleth](https://www.shibboleth.net) | N/A | OK |
 
 ### Node.js Version Support
 
