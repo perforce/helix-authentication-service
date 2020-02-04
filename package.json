@@ -13,17 +13,17 @@
     "name": "Perforce Software",
     "email": "support@perforce.com"
   },
-  "main": "app.js",
+  "main": "lib/app.js",
   "scripts": {
     "start": "node ./bin/www",
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {
-    "debug": "~4.1.1",
     "dotenv": "^8.2.0",
     "ejs": "^2.7.4",
     "express": "~4.17.1",
     "express-session": "^1.17.0",
+    "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
     "helmet": "^3.21.2",
     "http-errors": "~1.7.3",
@@ -34,7 +34,9 @@
     "passport-saml": "^1.2.0",
     "samlp": "^3.4.1",
     "transitory": "^2.1.1",
-    "ulid": "^2.3.0"
+    "ulid": "^2.3.0",
+    "winston": "^3.2.1",
+    "winston-syslog": "^2.4.0"
   },
   "private": true,
   "devDependencies": {

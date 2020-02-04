@@ -1,12 +1,12 @@
 //
-// Copyright 2019 Perforce Software
+// Copyright 2020 Perforce Software
 //
-const debug = require('debug')('auth:server')
+const logger = require('../lib/logging')
 const express = require('express')
 const router = express.Router()
 const { ulid } = require('ulid')
 const url = require('url')
-const { users, requests } = require('../store')
+const { users, requests } = require('../lib/store')
 
 // How long to wait (in ms) for user details before returning 408.
 const requestTimeout = (parseInt(process.env.LOGIN_TIMEOUT) || 60) * 1000
@@ -16,7 +16,7 @@ router.get('/new/:id', (req, res, next) => {
   // Always generate a new request every time, and use that request identifer as
   // the key, as the user may be logging in from different client systems.
   const requestId = ulid()
-  debug('new request %s for %s', requestId, req.params.id)
+  logger.debug('new request %s for %s', requestId, req.params.id)
   // Construct the "user" object which holds the request identifier and any
   // additional properties that enable certain features.
   const forceAuthn = Boolean(req.query.forceAuthn || process.env.FORCE_AUTHN || false)
@@ -88,7 +88,7 @@ router.get('/status/:id', async (req, res, next) => {
             })
           }
         })
-        debug('resolved user for %s (%s)', userRecord.id, req.params.id)
+        logger.debug('resolved user for %s (%s)', userRecord.id, req.params.id)
         res.json(user)
       } catch (err) {
         res.status(408).send('Request Timeout')

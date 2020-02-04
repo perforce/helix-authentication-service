@@ -32,9 +32,11 @@ module.exports = {
       //
       // BIND_ADDRESS: '0.0.0.0',
       // CA_CERT_PATH: undefined,
+      // DEBUG: undefined,
       // DEFAULT_PROTOCOL: 'saml',
       // FORCE_AUTHN: false,
       // IDP_CERT_FILE: undefined,
+      // LOGGING: undefined,
       // SAML_IDP_ISSUER: undefined,
       // IDP_CONFIG_FILE: './saml_idp.conf.js',
       // LOGIN_TIMEOUT: 60,

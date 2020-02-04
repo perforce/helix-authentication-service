@@ -2,12 +2,12 @@
 // Copyright 2020 Perforce Software
 //
 const fs = require('fs')
-const debug = require('debug')('auth:server')
+const logger = require('../lib/logging')
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const { custom, Issuer, Strategy } = require('openid-client')
-const { users, requests } = require('../store')
+const { users, requests } = require('../lib/store')
 
 // In order to support both Node.js v10 and v12, detect if this version of
 // openid-client provides the custom functionality before attempting its use.
@@ -26,8 +26,8 @@ function loadStrategy () {
   return new Promise((resolve, reject) => {
     if (process.env.OIDC_ISSUER_URI && client === null) {
       Issuer.discover(process.env.OIDC_ISSUER_URI).then((issuer) => {
-        debug('issuer: %o', issuer.issuer)
-        debug('metadata: %o', issuer.metadata)
+        logger.debug('oidc: issuer: %o', issuer.issuer)
+        logger.debug('oidc: metadata: %o', issuer.metadata)
         //
         // dynamic registration, maybe not permitted with the oidc-provider npm?
         //
@@ -35,7 +35,7 @@ function loadStrategy () {
         //   issuer.metadata.registration_endpoint,
         //   'registration_access_token'
         // ).then(function (client) {
-        //   console.log('Discovered client %s %O', client.client_id, client.metadata);
+        //   log('Discovered client %s %O', client.client_id, client.metadata);
         // })
         //
         // manual client definition
@@ -95,7 +95,7 @@ function checkStrategy (req, res, next) {
       res.render('no_strategy')
     }
   }).catch((err) => {
-    console.error('OIDC initialization failed:', err)
+    logger.error('oidc: initialization failed:', err)
     res.render('no_strategy')
   })
 }
@@ -111,7 +111,7 @@ router.get('/login/:id', (req, res, next) => {
   }
   const user = requests.getIfPresent(req.session.requestId)
   if (user && user.forceAuthn) {
-    debug('forcing OIDC authentication using max_age=0')
+    logger.debug('oidc: forcing authentication using max_age=0')
     opts.max_age = 0
   }
   passport.authenticate('openidconnect', opts)(req, res, next)
@@ -145,7 +145,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
     if (user) {
       // clear the request identifier from the user session
       req.session.requestId = null
-      debug('mapping %s to result %o', user.id, req.user)
+      logger.debug('oidc: mapping %s to result %o', user.id, req.user)
       users.set(user.id, req.user)
       const name = req.user.given_name || req.user.name || req.user.email
       res.render('details', { name })

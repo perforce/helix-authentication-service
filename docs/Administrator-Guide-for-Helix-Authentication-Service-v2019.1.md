@@ -113,7 +113,7 @@ The Node.js v12 binaries will not run on CentOS 6, Oracle Linux 6, or RHEL 6, no
 CentOS, Oracle Linux, and RedHat Enterprise Linux lack Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
 
 ```shell
-$ sudo yum install curl git
+$ sudo yum install curl git gcc-c++ make
 $ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo yum install nodejs
 ```
@@ -123,7 +123,7 @@ $ sudo yum install nodejs
 The package for Python changed names in this OS release, and the NodeSource package dependencies for v12 still refer to the original name of `python` (c.f. [issue 990](https://github.com/nodesource/distributions/issues/990)). In the mean time it is possible to force the package to install via the `rpm` command.
 
 ```shell
-$ sudo yum install curl git
+$ sudo yum install curl git gcc-c++ make
 $ curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
 $ dnf --repo=nodesource download nodejs
 $ sudo rpm -i --nodeps nodejs-12.*.rpm
@@ -143,7 +143,7 @@ $ sudo dnf install nodejs
 Ubuntu Linux lacks Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
 
 ```shell
-$ sudo apt-get install curl git
+$ sudo apt-get install build-essential curl git
 $ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 $ sudo apt-get install nodejs
 ```
@@ -216,7 +216,8 @@ When configuring the service as a "service provider" within a SAML identity prov
 | Name | Description | Default |
 | ---- | ----------- | ------- |
 | `BIND_ADDRESS` | Define the IP address upon which the service will listen for requests. Setting this to `127.0.0.1` (i.e. `localhsot`) means that only processes on the same host can connect, while a value of `0.0.0.0` means requests made against any address assigned to the machine will work. | `0.0.0.0` |
-| `DEBUG` |  Set to `auth:*` to enable debug logging in the service (writes to standard error). | _none_ |
+| `DEBUG` | Set to any value to enable debug logging in the service (writes to the console). | _none_ |
+| `LOGGING` | Path of a logging configuration file. See the [Logging](#logging) section below. Setting this will override the `DEBUG` setting. | _none_ |
 | `FORCE_AUTHN` | If set to any non-empty value, will cause the service to require the user to authenticate, even if the user is already authenticated. For SAML, this means setting the `forceAuthn` field set to true, while for OIDC it will set the `max_age` parameter to `0`. This is not supported by all identity providers, especially for OIDC. | _none_ |
 | `SESSION_SECRET` | Password used for encrypting the in-memory session data. | `keyboard cat` |
 | `SVC_BASE_URI` | The authentication service base URL visible to end users. Needs to match the application settings defined in IdP configuration. | _none_ |
@@ -227,6 +228,69 @@ When configuring the service as a "service provider" within a SAML identity prov
 | `CA_CERT_PATH` | Path of directory containing certificate authority files for service to use when verifying client certificates. All files in the named directory will be processed. | _none_ |
 | `DEFAULT_PROTOCOL` | The default authentication protocol to use. Can be oidc or saml. | `saml` |
 | `LOGIN_TIMEOUT` | How long in seconds to wait for user to successfully authenticate. | `60` |
+
+### Logging
+
+The authentication service will, by default, write only HTTP request logs to the console. With the `DEBUG` environment variable set to any value, additional logging will be written to the console. For more precise control, the `LOGGING` environment variable can be used to specify a logging configuration file. The format of the logging configuration file can be either JSON or JavaScript (like the `ecosystem.config.js` file, use an extension of `.json` for a JSON file, and `.js` for a JavaScript file). The top-level properties are listed in the table below.
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| `level` | Messages at this log level and above will be written to the named transport; follows syslog levels per [RFC5424](https://tools.ietf.org/html/rfc5424), section 6.2.1. Levels in order of priority: `emerg`, `alert`, `crit`, `error`, `warning`, `notice`, `info`, `debug` | _none_ |
+| `transport` | Either `console`, `file`, or `syslog` | _none_ |
+
+An example of logging all messages at levels from `debug` up to `emerg`, to the console, is shown below.
+
+```javascript
+module.exports = {
+  level: 'debug',
+  transport: 'console'
+}
+```
+
+Logging to a named file can be achieved by setting the `transport` to `file`. Additional properties can then be defined within a property named `file`, as described in the table below.
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| `filename` | Path for the log file. | `auth-svc.log` |
+| `maxsize` | Size in bytes before rotating the file. | _none_ |
+| `maxfiles` | Number of rotated files to retain. | _none_ |
+
+An example of logging all messages at levels from `warning` up to `emerg`, to a named file, is shown below. This example also demonstrates log rotation by defining a maximum file size and a maximum number of files to retain.
+
+```javascript
+module.exports = {
+  level: 'warning',
+  transport: 'file',
+  file: {
+    filename: '/var/log/auth-svc.log',
+    maxsize: 1048576,
+    maxfiles: 10
+  }
+}
+```
+
+Logging to the system logger (i.e. `syslog`) is configured by setting the `transport` to `syslog`. Additional properties can then be defined within a property named `syslog`, as described in the table below. Note that the syslog _program name_ will be `helix-auth-svc` for messages emitted by the authentication service.
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| `facility` | Syslog facility, such as `auth`, `cron`, `daemon`, `kern`, `mail`, etc. | `local0` |
+| `path` | Path of the syslog unix domain socket (e.g. `/dev/log`). | _none_ |
+| `host` | Host name of the syslog daemon. | _none_ |
+| `port` | Port number on which the syslog daemon is listening. | _none_ |
+| `protocol` | Communication protocol, e.g. `tcp4`, `udp4`, `unix`, etc. | _none_ |
+
+An example of logging all messages at levels from `info` up to `emerg`, to the system log, is shown below. This example demonstrates logging to `syslog` on Ubuntu 18, in which the default installation uses a unix domain socket named `/dev/log`.
+
+```javascript
+module.exports = {
+  level: 'info',
+  transport: 'syslog',
+  syslog: {
+    path: '/dev/log',
+    protocol: 'unix'
+  }
+}
+```
 
 ### Certificates
 
@@ -440,7 +504,8 @@ In the case of certain identity providers, you may see an error message indicati
 
 ```
 Error Code: invalid_request
-Description: The 'redirect_uri' parameter must be an absolute URI that is whitelisted in the client app settings.
+Description: The 'redirect_uri' parameter must be an absolute URI that
+             is whitelisted in the client app settings.
 ```
 
 This occurs when the authentication service base URI (`SVC_BASE_URI`) does not match what the identity provider has configured for the application. For example, when using an OIDC configuration in Okta, the **Login redirect URIs** must have a host and port that match those found in the `SVC_BASE_URI` environment variable in the service configuration. You may use an IP address or a host name, but you cannot mix them; either both have an IP address or both have a host name.

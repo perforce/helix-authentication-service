@@ -1,7 +1,7 @@
 //
-// Copyright 2019 Perforce Software
+// Copyright 2020 Perforce Software
 //
-const debug = require('debug')('auth:server')
+const logger = require('../lib/logging')
 const fs = require('fs')
 const express = require('express')
 const router = express.Router()
@@ -9,7 +9,7 @@ const passport = require('passport')
 const MultiSamlStrategy = require('passport-saml/multiSamlStrategy')
 const samlp = require('samlp')
 const { ulid } = require('ulid')
-const { users, requests } = require('../store')
+const { users, requests } = require('../lib/store')
 
 const idpOptions = {
   cert: process.env.SP_CERT_FILE ? fs.readFileSync(process.env.SP_CERT_FILE) : undefined,
@@ -27,7 +27,7 @@ function getPostURL (req, callback) {
   const issuer = req.session.authnRequest.issuer
   if (issuer in idpConfig && 'acsUrl' in idpConfig[issuer]) {
     const url = idpConfig[issuer].acsUrl
-    debug('POST URL %s for %s', url, issuer)
+    logger.debug('saml: POST URL %s for %s', url, issuer)
     if (url) {
       callback(null, url)
       return
@@ -62,7 +62,7 @@ const strategy = new MultiSamlStrategy(
       // determine if we should force authentication
       const user = requests.getIfPresent(req.session.requestId)
       const force = user && user.forceAuthn
-      debug(`saml forceAuthn: ${force}`)
+      logger.debug(`saml: forceAuthn set to ${force}`)
       const options = Object.assign({}, samlOptions, { forceAuthn: force })
       return done(null, options)
     }
@@ -71,10 +71,10 @@ const strategy = new MultiSamlStrategy(
   }
 )
 if (process.env.SAML_IDP_SSO_URL) {
-  debug('SAML passport strategy enabled')
+  logger.debug('saml: passport strategy enabled')
   passport.use(strategy)
 } else {
-  debug('SAML passport strategy not available')
+  logger.debug('saml: passport strategy not available')
 }
 router.use(passport.initialize())
 router.use(passport.session())
@@ -130,7 +130,7 @@ router.get('/login', (req, res, next) => {
         error: err
       })
     } else if (data) {
-      debug('parsed SAML request: %o', data)
+      logger.debug('saml: parsed request: %o', data)
       req.session.authnRequest = {
         relayState: req.query.RelayState,
         id: data.id,
@@ -181,7 +181,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
       // However, if a different protocol is configured as the default, then we
       // may have to fake the nameID to something, probably the email.
       assignNameId(req.user)
-      debug('legacy mapping %s to result %o', req.user.nameID, req.user)
+      logger.debug('saml: legacy mapping %s to result %o', req.user.nameID, req.user)
       users.set(req.user.nameID, req.user)
       // Generate a new SAML response befitting of the request we received.
       const moreOptions = Object.assign({}, idpOptions, {
@@ -231,7 +231,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
       })
     } else {
       // "normal" success path, save user data for verification
-      debug('mapping %s to result %o', user.id, req.user)
+      logger.debug('saml: mapping %s to result %o', user.id, req.user)
       users.set(user.id, req.user)
       const name = req.user.nameID
       res.render('details', { name })
@@ -261,13 +261,13 @@ function assignNameId (user) {
       nameID = ulid()
     }
     user.nameID = nameID
-    debug('legacy setting nameID to %s', nameID)
+    logger.debug('saml: legacy setting nameID to %s', nameID)
   }
   // Same with nameIDFormat, the SAML library requires that it have a value,
   // so default to something sensible if not set.
   if (!user.nameIDFormat) {
     user.nameIDFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-    debug('legacy setting nameIDFormat to unspecified')
+    logger.debug('saml: legacy setting nameIDFormat to unspecified')
   }
 }
 

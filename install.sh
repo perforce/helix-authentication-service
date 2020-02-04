@@ -127,7 +127,7 @@ if ! which node >/dev/null 2>&1; then
         fi
         set -e  # now go back to exiting if a command returns non-zero
         sudo apt-get -q update
-        sudo apt-get -q -y install curl git
+        sudo apt-get -q -y install build-essential curl git
         # Run a shell script from the internet as root to get version 12
         # directly from the vendor. This includes npm as well.
         #
@@ -136,7 +136,7 @@ if ! which node >/dev/null 2>&1; then
         sudo apt-get -q -y install nodejs
     elif [ $PLATFORM == "redhat" ]; then
         # Add --skip-broken for Oracle Linux and its redundant packages
-        sudo yum -q -y install --skip-broken curl git
+        sudo yum -q -y install --skip-broken curl gcc-c++ git make
         # Run a shell script from the internet as root to get version 12
         # directly from the vendor. This includes npm as well.
         #

@@ -3,13 +3,12 @@ FROM node:12-stretch
 ENV DEBIAN_FRONTEND noninteractive
 
 WORKDIR /svc
-COPY app.js .
 COPY bin bin
 COPY certs certs
+COPY lib lib
 COPY package.json .
 COPY public public
 COPY routes routes
-COPY store.js .
 COPY views views
 RUN rm -f package-lock.json && npm install -q
 

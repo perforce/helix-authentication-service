@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 //
-// Copyright 2019 Perforce Software
+// Copyright 2020 Perforce Software
 //
 
 /**
  * Module dependencies.
  */
-const app = require('../app')
-const debug = require('debug')('auth:server')
+const app = require('../lib/app')
+const logger = require('../lib/logging')
 const fs = require('fs')
 const path = require('path')
 const url = require('url')
@@ -87,10 +87,10 @@ function onError (error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges')
+      logger.error('%s requires elevated privileges', bind)
       process.exit(1)
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use')
+      logger.error('%s is already in use', bind)
       process.exit(1)
     default:
       throw error
@@ -105,7 +105,7 @@ function onListening () {
   const bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port
-  debug('Listening on %s', bind)
+  logger.debug('Listening on %s', bind)
 }
 
 function getProtocol () {
@@ -135,7 +135,7 @@ function loadAuthorityCerts () {
     const results = files.map(f => {
       const stats = fs.statSync(f)
       if (stats.isFile()) {
-        debug('reading CA file %s', f)
+        logger.debug('reading CA file %s', f)
         return fs.readFileSync(f)
       }
     })
@@ -150,7 +150,7 @@ function loadAuthorityCerts () {
 function createServer (app) {
   const protocol = getProtocol()
   if (protocol === 'http:') {
-    debug('Creating http server')
+    logger.debug('creating http server')
     return require('http').createServer(app)
   } else {
     if (process.env.SP_KEY_FILE && process.env.SP_CERT_FILE) {
@@ -163,10 +163,10 @@ function createServer (app) {
         rejectUnauthorized: false,
         ca
       }
-      debug('Creating https server')
+      logger.debug('creating https server')
       return require('https').createServer(options, app)
     } else {
-      console.error('Missing required environment variables: SP_KEY_FILE, SP_CERT_FILE')
+      logger.error('missing required environment variables: SP_KEY_FILE, SP_CERT_FILE')
       process.exit()
     }
   }
