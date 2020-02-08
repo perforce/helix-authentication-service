@@ -197,6 +197,7 @@ As for the OIDC issuer URI, that value is advertised in the discovery document m
 | Name | Description | Default |
 | ---- | ----------- | ------- |
 | `IDP_CERT_FILE` | Path of the file containing the public certificate of the identity provider, used to validate signatures of incoming SAML responses. This is not required, but it does serve as an additional layer of security. | _none_ |
+| `SAML_IDP_METADATA_URL` | URL of the IdP metadata configuration in XML format. | _none_ |
 | `SAML_IDP_SSO_URL` | URL of IdP Single Sign-On service. | _none_ |
 | `SAML_IDP_SLO_URL` | URL of IdP Single Log-Out service. | _none_ |
 | `SAML_SP_ISSUER` | The service provider identity provider that will be using the Helix Authentication Service as a SAML IdP. | `urn:example:sp` |
@@ -210,6 +211,8 @@ As for the OIDC issuer URI, that value is advertised in the discovery document m
 SAML identity providers advertise some of this information through their metadata URL. The URL is different for each provider, unlike OIDC. See [Example Identity Provider Configurations](#example-identity-provider-configurations).
 
 When configuring the service as a "service provider" within a SAML identity provider, provide an `entityID` that is unique within your set of registered applications. By default, the service uses the value `urn:example:sp`, which can be changed by setting the `SAML_SP_ISSUER` environment variable. Anywhere that `urn:example:sp` appears in this documentation, be sure to replace it with the value you defined in the identity provider.
+
+You may elect to fetch the IdP metadata by setting `SAML_IDP_METADATA_URL`, in which case several other settings _may_ be configured automatically by the service. Exactly which settings are configured automatically depends on what information the IdP advertises via the metadata. These settings include `SAML_IDP_SSO_URL`, `SAML_IDP_SLO_URL`, `SAML_NAMEID_FORMAT`, and the IdP certificate that would be loaded from the file named in `IDP_CERT_FILE`. In the unlikely scenario that the IdP returns data that needs to be modified, that can be achieved by setting the correct value in the appropriate environment variable (e.g. `SAML_NAMEID_FORMAT`).
 
 ### Other Settings
 
@@ -351,7 +354,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. At the bottom of the page, click the **SAVE CHANGES** button.
 1. Click the _Addons_ tab near the top of the application page.
 1. Click the **SAML2 WEB APP** button to enable SAML 2.0.
-1. Enter `{SVC_BASE_URI}/saml/sso` for the _Application Callback URL_
+1. Enter `{SVC_BASE_URI}/saml/sso` for the _Application Callback URL_.
 1. Ensure the _Settings_ block looks something like the following:
 
 ```javascript
@@ -368,36 +371,40 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 ```
 
 1. Click the **ENABLE** button at the bottom of the page.
-1. On the _Usage_ tab of the addon screen, copy the _Identity Provider Login URL_ to the `SAML_IDP_SSO_URL` setting in the service configuration.
-1. To get the SLO URL you will need to download the metadata and look for the `SingleLogoutService` element, copying the _Location_ attribute value to `SAML_IDP_SLO_URL` in the config.
+1. On the _Usage_ tab of the addon screen, copy the _Identity Provider Metadata: Download_ link and save the value to the `SAML_IDP_METADATA_URL` setting in the service configuration.
+1. If you need to set the login and logout URLs directly rather than use the metadata:
+    1. On the _Usage_ tab of the addon screen, copy the _Identity Provider Login URL_ to the `SAML_IDP_SSO_URL` setting in the service configuration.
+    1. To get the SLO URL you will need to download the metadata and look for the `SingleLogoutService` element, copying the _Location_ attribute value to `SAML_IDP_SLO_URL` in the config.
 
 ### Azure Active Directory
 
 #### OpenID Connect
 
-1. Visit the Microsoft Azure portal
-1. Register a new application under Azure Active Directory
+1. Visit the Microsoft Azure portal.
+1. Register a new application under Azure Active Directory.
 1. You can use a single app registration for both OIDC and SAML.
-1. Enter the auth service URL as the redirect URL
-1. Copy the _Application (client) ID_ to the `OIDC_CLIENT_ID` environment variable
-1. Open the _OpenID Connect metadata document_ URL in the browser (click Endpoints button from app overview page)
+1. Enter the auth service URL as the redirect URL.
+1. Copy the _Application (client) ID_ to the `OIDC_CLIENT_ID` environment variable.
+1. Open the _OpenID Connect metadata document_ URL in the browser (click Endpoints button from app overview page).
 1. Copy the _issuer_ URL and enter as the `OIDC_ISSUER_URI` environment variable; if the issuer URI contains `{tenantid}` then replace it with the _Directory (tenant) ID_ from the application overview page.
-1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET` environment variable
+1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET` environment variable.
 1. Add a user account (guest works well) such that it has a defined email field; for whatever reason, "personal" accounts do not have the "email" field defined.
-1. Make sure the user email address matches the user in Active Directory
+1. Make sure the user email address matches the user in Active Directory.
 
 #### SAML 2.0
 
-1. Visit the Microsoft Azure portal
-1. Register a new application under Azure Active Directory
+1. Visit the Microsoft Azure portal.
+1. Register a new application under Azure Active Directory.
 1. You can use a single app registration for both OIDC and SAML.
-1. Enter the auth service URL as the redirect URL
-1. Copy the _Application (client) ID_ to the `SAML_SP_ISSUER` environment variable
-1. Open the API endpoints page: click the **Endpoints** button from app overview page
-1. Copy the _SAML-P sign-on_ endpoint value to the `SAML_IDP_SSO_URL` environment variable
-1. Copy the _SAML-P sign-out_ endpoint value to the `SAML_IDP_SLO_URL` environment variable
-1. Set the `SAML_NAMEID_FORMAT` environment variable to the value `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
-1. Make sure the user email address matches the user in Active Directory
+1. Enter the auth service URL as the redirect URL.
+1. Copy the _Application (client) ID_ to the `SAML_SP_ISSUER` environment variable.
+1. Open the API endpoints page: click the **Endpoints** button from app overview page.
+1. Copy the _Federation metadata document_ value to the `SAML_IDP_METADATA_URL` environment variable.
+1. If you need to set the login and logout URLs and name identifier directly rather than use the metadata:
+    1. Copy the _SAML-P sign-on_ endpoint value to the `SAML_IDP_SSO_URL` environment variable.
+    1. Copy the _SAML-P sign-out_ endpoint value to the `SAML_IDP_SLO_URL` environment variable.
+    1. Set the `SAML_NAMEID_FORMAT` environment variable to the value `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
+1. Make sure the user email address matches the user in Active Directory.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 
 ### Okta
@@ -410,7 +417,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. For the _Login_ redirect URIs enter `{SVC_BASE_URI}/oidc/callback`
 1. For the _Logout_ redirect URIs enter `{SVC_BASE_URI}`
 1. On the next screen, find the _Client ID_ and _Client secret_ values and copy to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` service settings.
-1. From the _Sign On_ tab, copy the _Issuer_ value to `OIDC_ISSUER_URI`.
+1. From the _Sign On_ tab, copy the _Issuer_ value to `OIDC_ISSUER_URI`
 
 If you are already logged into Okta, do _one_ of the following:
 
@@ -433,7 +440,9 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 1. For _Signature Certificate_, select and upload the `certs/server.crt` file.
 1. Click the **Next** button to save the changes.
 1. There may be an additional screen to click through.
-1. From the _Sign On_ tab, click the **View Setup Instructions** button and copy the values for _IdP SSO_ and _SLO URLs_ to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL` settings in the environment.
+1. From the _Sign On_ tab, copy the _Identity Provider metadata_ link to the `SAML_IDP_METADATA_URL` environment variable.
+1. If you need to set the login and logout URLs directly rather than use the metadata:
+    1. From the _Sign On_ tab, click the **View Setup Instructions** button and copy the values for _IdP SSO_ and _SLO URLs_ to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL` settings in the environment.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 1. Configure the extension to use `user` as the `user-identifier` value.
 
@@ -449,29 +458,31 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 #### OpenID Connect
 
 1. From the admin dashboard, create a new app: search for "OIDC" and select _OpenId Connect (OIDC)_ from the list.
-1. On the _Configuration_ screen, enter `{SVC_BASE_URI}/oidc/login` for _Login Url_
-1. On the same screen, enter `{SVC_BASE_URI}/oidc/callback` for _Redirect URI's_
+1. On the _Configuration_ screen, enter `{SVC_BASE_URI}/oidc/login` for _Login Url_.
+1. On the same screen, enter `{SVC_BASE_URI}/oidc/callback` for _Redirect URI's_.
 1. Find the **Save** button and click it.
 1. From the _SSO_ tab, copy the _Client ID_ value to the `OIDC_CLIENT_ID` environment variable.
 1. From the _SSO_ tab, copy the _Client Secret_ value to `OIDC_CLIENT_SECRET` (you may need to "show" the secret first before the copy button will work).
 1. From the _SSO_ tab, find the **OpenID Provider Configuration Information** link and open in a new tab.
 1. Find the _issuer_ and copy the URL value to the `OIDC_ISSUER_URI` environment variable.
-1. Ensure the _Application Type_ is set to _Web_
-1. Ensure the _Token Endpoint_ is set to _Basic_
+1. Ensure the _Application Type_ is set to _Web_.
+1. Ensure the _Token Endpoint_ is set to _Basic_.
 
 #### SAML 2.0
 
 1. From the admin dashboard, create a new app: search for "SAML" and select _SAML Test Connector (Advanced)_ from the list.
-1. On the _Configuration_ screen, enter `urn:example:sp` for _Audience_
-1. On the same screen, enter `{SVC_BASE_URI}/saml/sso` for _Recipient_
-1. And for _ACS (Consumer) URL Validator_, enter `.*` to match any value
+1. On the _Configuration_ screen, enter `urn:example:sp` for _Audience_.
+1. On the same screen, enter `{SVC_BASE_URI}/saml/sso` for _Recipient_.
+1. And for _ACS (Consumer) URL Validator_, enter `.*` to match any value.
 1. For _ACS (Consumer) URL_, enter `{SVC_BASE_URI}/saml/sso`
 1. For _Single Logout URL_, enter `{SVC_BASE_URI}/saml/slo`
 1. For _Login URL_, enter `{SVC_BASE_URI}/saml/sso`
-1. For _SAML initiator_ select _Service Provider_
+1. For _SAML initiator_ select _Service Provider_.
 1. Find the *Save* button and click it.
-1. From the _SSO_ tab, copy the _SAML 2.0 Endpoint_ value to the `SAML_IDP_SSO_URL` environment variable.
-1. From the _SSO_ tab, copy the _SLO Endpoint_ value to `SAML_IDP_SLO_URL`.
+1. From the _SSO_ tab, copy the _Issuer URL_ value to the `SAML_IDP_METADATA_URL` environment variable.
+1. If you need to set the login and logout URLs directly rather than use the metadata:
+    1. From the _SSO_ tab, copy the _SAML 2.0 Endpoint_ value to the `SAML_IDP_SSO_URL` environment variable.
+    1. From the _SSO_ tab, copy the _SLO Endpoint_ value to `SAML_IDP_SLO_URL`.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 
 ## Next Steps

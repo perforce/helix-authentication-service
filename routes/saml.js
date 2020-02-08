@@ -7,6 +7,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const MultiSamlStrategy = require('passport-saml/multiSamlStrategy')
+const { fetch, toPassportConfig } = require('passport-saml-metadata')
 const samlp = require('samlp')
 const { ulid } = require('ulid')
 const { users, requests } = require('../lib/store')
@@ -39,8 +40,8 @@ function getPostURL (req, callback) {
 const samlOptions = {
   callbackUrl: process.env.SVC_BASE_URI + '/saml/sso',
   logoutCallbackUrl: process.env.SVC_BASE_URI + '/saml/slo',
-  entryPoint: process.env.SAML_IDP_SSO_URL,
-  logoutUrl: process.env.SAML_IDP_SLO_URL,
+  entryPoint: process.env.SAML_IDP_SSO_URL || undefined,
+  logoutUrl: process.env.SAML_IDP_SLO_URL || undefined,
   issuer: process.env.SAML_SP_ISSUER || 'urn:example:sp',
   idpIssuer: process.env.SAML_IDP_ISSUER || undefined,
   audience: process.env.SAML_SP_AUDIENCE || undefined,
@@ -63,14 +64,17 @@ const strategy = new MultiSamlStrategy(
       const user = requests.getIfPresent(req.session.requestId)
       const force = user && user.forceAuthn
       logger.debug(`saml: forceAuthn set to ${force}`)
-      const options = Object.assign({}, samlOptions, { forceAuthn: force })
-      return done(null, options)
+      fetchIdpMetadata().then((config) => {
+        const options = Object.assign({}, config, { forceAuthn: force })
+        logger.debug('saml: passport SAML configuration: %o', options)
+        return done(null, options)
+      })
     }
   }, (profile, done) => {
     return done(null, extractProfile(profile))
   }
 )
-if (process.env.SAML_IDP_SSO_URL) {
+if (process.env.SAML_IDP_METADATA_URL || process.env.SAML_IDP_SSO_URL) {
   logger.debug('saml: passport strategy enabled')
   passport.use(strategy)
 } else {
@@ -375,6 +379,35 @@ function readIdentityCert (fpath) {
     l !== '-----BEGIN CERTIFICATE-----' && l !== '-----END CERTIFICATE-----' && l.length > 0
   )
   return lines.join('')
+}
+
+const cachedIdpMetadata = new Map()
+
+function fetchIdpMetadata () {
+  return new Promise((resolve, reject) => {
+    if (process.env.SAML_IDP_METADATA_URL) {
+      fetch({
+        url: process.env.SAML_IDP_METADATA_URL,
+        backupStore: cachedIdpMetadata
+      }).then((reader) => {
+        // Some services (azure) will advertise multiple certs but the last one
+        // is not necessarily valid, so pass everything every time.
+        const config = toPassportConfig(reader, { multipleCerts: true })
+        // merge idp metadata with configured and default settings
+        for (const propName in samlOptions) {
+          if (!config[propName]) {
+            config[propName] = samlOptions[propName]
+          }
+        }
+        resolve(config)
+      }).catch(err => {
+        logger.error('saml: error fetching IdP metadata: %s', err)
+        resolve(samlOptions)
+      })
+    } else {
+      resolve(samlOptions)
+    }
+  })
 }
 
 module.exports = router

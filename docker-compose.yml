@@ -15,13 +15,12 @@ services:
       dockerfile: containers/auth-svc/Dockerfile
     environment:
       NODE_ENV: development
-      OIDC_CLIENT_ID: client_id
-      OIDC_CLIENT_SECRET: client_secret
-      OIDC_ISSUER_URI: "http://oidc.doc:3001/"
-      DEBUG: "auth:*"
+      DEBUG: "1"
       SVC_BASE_URI: "https://auth-svc.doc:3000"
       DEFAULT_PROTOCOL: "saml"
       CA_CERT_FILE: certs/ca.crt
+      # would use the metadata URL but the self-signed certs are rejected
+      # SAML_IDP_METADATA_URL: "https://shibboleth.doc/idp/shibboleth"
       SAML_IDP_SSO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SSO"
       SAML_IDP_SLO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SLO"
       SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"

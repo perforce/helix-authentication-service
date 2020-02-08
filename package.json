@@ -32,6 +32,7 @@
     "openid-client": "^3.11.0",
     "passport": "^0.4.1",
     "passport-saml": "^1.2.0",
+    "passport-saml-metadata": "^2.2.0",
     "samlp": "^3.4.1",
     "transitory": "^2.1.1",
     "ulid": "^2.3.0",
