@@ -29,7 +29,7 @@ $ docker-compose build
 $ docker-compose up -d
 ```
 
-### Authenticatin Extension
+### Authentication Extension
 
 The containers for the extension for integrating the authentication service are
 in a separate
