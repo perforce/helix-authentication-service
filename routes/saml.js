@@ -46,8 +46,8 @@ const samlOptions = {
   idpIssuer: process.env.SAML_IDP_ISSUER || undefined,
   audience: process.env.SAML_SP_AUDIENCE || undefined,
   authnContext: process.env.SAML_AUTHN_CONTEXT || undefined,
-  decryptionPvk: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
-  privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE) : undefined,
+  decryptionPvk: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE, 'utf-8') : undefined,
+  privateCert: process.env.SP_KEY_FILE ? fs.readFileSync(process.env.SP_KEY_FILE, 'utf-8') : undefined,
   signatureAlgorithm: process.env.SP_KEY_ALGO || 'sha256',
   identifierFormat: process.env.SAML_NAMEID_FORMAT || 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
 }
@@ -225,7 +225,7 @@ router.get('/success', checkAuthentication, (req, res, next) => {
                 // render an HTML form to send the response back to the SP
                 res.render('samlresponse', {
                   AcsUrl: url,
-                  SAMLResponse: Buffer.from(resp, 'utf8').toString('base64'),
+                  SAMLResponse: Buffer.from(resp, 'utf-8').toString('base64'),
                   RelayState: req.session.authnRequest.relayState
                 })
               }
@@ -374,7 +374,7 @@ function extractProfile (profile) {
 
 // Process the PEM-encoded certificate into the string that passport-saml expects.
 function readIdentityCert (fpath) {
-  const text = fs.readFileSync(fpath, { encoding: 'utf8' })
+  const text = fs.readFileSync(fpath, { encoding: 'utf-8' })
   const lines = text.split('\n').map(l => l.trim()).filter(l =>
     l !== '-----BEGIN CERTIFICATE-----' && l !== '-----END CERTIFICATE-----' && l.length > 0
   )
