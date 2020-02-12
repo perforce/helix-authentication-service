@@ -36,6 +36,20 @@ router.get('/new/:id', (req, res, next) => {
   })
 })
 
+// **ONLY** expose this when running in a test environment.
+if (process.env.NODE_ENV === 'test') {
+  // For testing only, inserts a user profile into the cache.
+  router.post('/insert/:id', async (req, res, next) => {
+    const user = requests.getIfPresent(req.params.id)
+    if (user) {
+      users.set(user.id, req.body)
+      res.json({ status: 'ok' })
+    } else {
+      res.json({ status: 'error' })
+    }
+  })
+}
+
 // :id is the request identifier returned from /new/:id
 router.get('/status/:id', async (req, res, next) => {
   //
@@ -50,7 +64,7 @@ router.get('/status/:id', async (req, res, next) => {
   let cert
   let authorized
   const protocol = getProtocol()
-  if (protocol === 'https:') {
+  if (protocol === 'https:' && req.connection.getPeerCertificate) {
     // These calls only work when the service is using HTTPS, which is likely
     // not the case when running on test system (e.g. PingFederate with OIDC
     // rejects self-signed certificates).
