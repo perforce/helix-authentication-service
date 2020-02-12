@@ -16,7 +16,7 @@
   "main": "lib/app.js",
   "scripts": {
     "start": "node ./bin/www",
-    "test": "NODE_ENV=test LOGGING=none mocha --delay --exit",
+    "test": "mocha --delay --exit",
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {

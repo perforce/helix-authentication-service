@@ -15,6 +15,9 @@ const request = require('supertest')
 // those functions come from. Wasted a lot of time only to find out that all of
 // their documentation was out of date.
 
+// Override any existing .env file by loading our test configuration.
+require('dotenv').config({ path: 'test/dot.env' })
+
 // start the server
 const app = require('../lib/app')
 const { createServer } = require('../lib/server')
