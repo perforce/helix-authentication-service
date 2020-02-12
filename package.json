@@ -29,6 +29,7 @@
     "helmet": "^3.21.2",
     "http-errors": "~1.7.3",
     "memorystore": "^1.6.1",
+    "minimatch": "^3.0.4",
     "morgan": "~1.9.1",
     "openid-client": "^3.12.2",
     "passport": "^0.4.1",

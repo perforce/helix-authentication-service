@@ -5,6 +5,7 @@ const fs = require('fs')
 const { assert } = require('chai')
 const { describe, it, run } = require('mocha')
 const request = require('supertest')
+const minimatch = require('minimatch')
 
 // Tests must be run with `mocha --delay --exit` otherwise we do not give the
 // server enough time to start up, and the server hangs indefinitely because
@@ -30,8 +31,6 @@ const agent = request.agent(server)
 // const ca = fs.readFileSync('certs/ca.crt')
 // const agent = request.agent(server).ca(ca)
 // const agent = request.agent(server, { ca })
-const cert = fs.readFileSync('test/client.crt')
-const key = fs.readFileSync('test/client.key')
 
 //
 // Give the server a chance to start up asynchronously. This works in concert
@@ -39,6 +38,29 @@ const key = fs.readFileSync('test/client.key')
 // sufficient, so this timing is somewhat fragile.
 //
 setTimeout(function () {
+  describe('Client certificates', function () {
+    describe('common name matching', function () {
+      // easier to test the underlying function than to have dozens of certs
+      it('should reject non-matching names', function () {
+        assert.isFalse(minimatch('LoginExtension', 'TrustedExtension'))
+        assert.isFalse(minimatch('LoginExtension', '*Trusted'))
+        assert.isFalse(minimatch('LoginExtension', 'Trusted*'))
+        assert.isFalse(minimatch('www.example.com', '*.trusted.com'))
+        assert.isFalse(minimatch('www.example.com', 'example.*'))
+      })
+
+      it('should accept matching names', function () {
+        assert.isTrue(minimatch('LoginExtension', 'LoginExtension'))
+        assert.isTrue(minimatch('LoginExtension', '*Extension'))
+        assert.isTrue(minimatch('LoginExtension', 'Login*'))
+        assert.isTrue(minimatch('LoginExtension', 'Login*Extension'))
+        assert.isTrue(minimatch('www.example.com', '*.example.com'))
+        assert.isTrue(minimatch('www.example.com', 'www.example.*'))
+        assert.isTrue(minimatch('www.example.com', 'www.*.com'))
+      })
+    })
+  })
+
   describe('Login requests', function () {
     let requestId
 
@@ -100,7 +122,26 @@ setTimeout(function () {
     })
 
     describe('request with client certificate', function () {
-      it('should return user profile', function (done) {
+      it('should reject non-matching common name', function (done) {
+        const cert2 = fs.readFileSync('test/client2.crt')
+        const key2 = fs.readFileSync('test/client2.key')
+        agent
+          .get('/requests/status/' + requestId)
+          .trustLocalhost(true)
+          .key(key2)
+          .cert(cert2)
+          .expect(403)
+          .end(function (err, res) {
+            if (err) {
+              return done(err)
+            }
+            done()
+          })
+      })
+
+      it('should accept matching common name', function (done) {
+        const cert = fs.readFileSync('test/client.crt')
+        const key = fs.readFileSync('test/client.key')
         agent
           .get('/requests/status/' + requestId)
           .trustLocalhost(true)

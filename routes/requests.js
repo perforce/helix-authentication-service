@@ -4,6 +4,7 @@
 const logger = require('../lib/logging')
 const express = require('express')
 const router = express.Router()
+const minimatch = require('minimatch')
 const { ulid } = require('ulid')
 const url = require('url')
 const { users, requests } = require('../lib/store')
@@ -58,9 +59,6 @@ router.get('/status/:id', async (req, res, next) => {
   // `rejectUnauthorized` properties. We then assert that the request is
   // authorized, and if not we give the client some explanation.
   //
-  // Another option is to use a passport extension which does essentially the
-  // same thing: https://github.com/ripjar/passport-client-cert
-  //
   let cert
   let authorized
   const protocol = getProtocol()
@@ -70,6 +68,9 @@ router.get('/status/:id', async (req, res, next) => {
     // rejects self-signed certificates).
     cert = req.connection.getPeerCertificate()
     authorized = req.client.authorized
+    if (process.env.CLIENT_CERT_CN) {
+      authorized = cert && cert.subject && minimatch(cert.subject.CN, process.env.CLIENT_CERT_CN)
+    }
   } else if (protocol === 'http:') {
     // have to assume the client is okay
     authorized = true
