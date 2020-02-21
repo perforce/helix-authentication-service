@@ -5,12 +5,12 @@
 ### Prerequisites
 
 To fetch and build the application dependencies and run tests, you will need
-[Node.js](http://nodejs.org) *12* or higher due to dependencies.
+[Node.js](http://nodejs.org) *LTS* or higher.
 
 ### Build and Start
 
 Configure the authentication service as described in the documentation, then
-build and start the authentication service application:
+build and start the authentication service:
 
 ```shell
 $ npm install
@@ -29,13 +29,43 @@ $ docker-compose build
 $ docker-compose up -d
 ```
 
+The docker containers have names that are used internally to find each other. In
+order for the development system to resolve these names, it is helpful to
+install [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html). The easiest
+way to run dnsmasq is via Docker. If using a macOS system, the commands below
+will get dnsmasq and the host configured appropriately:
+
+```shell
+$ echo "address=/.doc/127.0.0.1" | sudo tee - /etc/dnsmasq.conf
+$ sudo mkdir /etc/resolver
+$ echo 'nameserver 127.0.0.1' | sudo tee /etc/resolver/doc
+$ docker run --name dnsmasq -d -p 53:53/udp -p 5380:8080 -v /etc/dnsmasq.conf:/etc/dnsmasq.conf \
+  --log-opt 'max-size=1m'  -e 'HTTP_USER=admin' -e 'HTTP_PASS=admin' --restart always jpillora/dnsmasq
+```
+
 ### Authentication Extension
 
-The containers for the extension for integrating the authentication service are
-in a separate
+The containers for the extension for integrating the authentication service with
+Helix Core are in a separate
 [repository](https://github.com/perforce/helix-authentication-extension) and can
 be installed using `docker-compose` as described in the documentation for that
 project.
+
+## Automated Testing
+
+Some automated tests are provided for ensuring basic operational soundness (e.g.
+user can authenticate via IdP, application can retrieve user profile data). The
+login tests utilize the [Selenium](https://www.selenium.dev) webdriver to start
+Firefox in headless mode. As such, a recent release of
+[Firefox](https://www.mozilla.org/en-US/firefox/) must be installed on the test
+system. Additionally, the [Docker](#docker) containers defined in
+`docker-compose.yml` must be built and running.
+
+```shell
+$ docker-compose build
+$ docker-compose up -d
+$ npm test
+```
 
 ## Running the Service on HTTP
 

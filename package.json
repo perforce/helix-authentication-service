@@ -44,8 +44,10 @@
   "private": true,
   "devDependencies": {
     "chai": "^4.2.0",
+    "geckodriver": "^1.19.1",
     "license-checker": "^25.0.1",
     "mocha": "^7.0.1",
+    "selenium-webdriver": "^4.0.0-alpha.5",
     "supertest": "4.0.0"
   }
 }

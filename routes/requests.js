@@ -38,7 +38,7 @@ router.get('/new/:id', (req, res, next) => {
 })
 
 // **ONLY** expose this when running in a test environment.
-if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'automated_tests') {
   // For testing only, inserts a user profile into the cache.
   router.post('/insert/:id', async (req, res, next) => {
     const user = requests.getIfPresent(req.params.id)

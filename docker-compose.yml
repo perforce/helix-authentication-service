@@ -45,7 +45,6 @@ services:
       context: containers/shibboleth
     depends_on:
       - ldap.doc
-      - auth-svc.doc
     environment:
       JETTY_BROWSER_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
       JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD: "Passw0rd!"

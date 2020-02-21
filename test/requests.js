@@ -102,7 +102,7 @@ setTimeout(function () {
     })
 
     describe('insert fake user profile', function () {
-      // this uses test-only API enabled by setting NODE_ENV to 'test'
+      // this uses test-only API enabled by setting NODE_ENV to 'automated_tests'
       it('should return success', function (done) {
         agent
           .post('/requests/insert/' + requestId)
