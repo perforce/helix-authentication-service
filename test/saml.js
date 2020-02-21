@@ -25,6 +25,7 @@ describe('Login', function () {
   })
 
   after(async function () {
+    this.timeout(10000)
     await driver.quit()
   })
 
