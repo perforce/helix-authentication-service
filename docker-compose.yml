@@ -19,6 +19,9 @@ services:
       SVC_BASE_URI: "https://auth-svc.doc:3000"
       DEFAULT_PROTOCOL: "saml"
       CA_CERT_FILE: certs/ca.crt
+      OIDC_CLIENT_ID: client_id
+      OIDC_CLIENT_SECRET: client_secret
+      OIDC_ISSUER_URI: "http://oidc.doc"
       # would use the metadata URL but the self-signed certs are rejected
       # SAML_IDP_METADATA_URL: "https://shibboleth.doc/idp/shibboleth"
       SAML_IDP_SSO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SSO"
@@ -39,6 +42,51 @@ services:
     ports:
       - "389:389"
       - "636:636"
+  oidc.doc:
+    image: soluto/oidc-server-mock
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      API_RESOURCES_INLINE: |
+        []
+      USERS_CONFIGURATION_INLINE: |
+        [
+          {
+            "SubjectId": "408727",
+            "Username": "johndoe",
+            "Password": "passw0Rd?",
+            "Claims": [
+              { "Type": "name", "Value": "John Doe" },
+              { "Type": "given_name", "Value": "John" },
+              { "Type": "family_name", "Value": "Doe" },
+              { "Type": "email", "Value": "johndoe@example.com" },
+              { "Type": "email_verified", "Value": "true" }
+            ]
+          }
+        ]
+      CLIENTS_CONFIGURATION_INLINE: |
+        [
+          {
+            "ClientId": "client_id",
+            "ClientSecrets": [ "client_secret" ],
+            "Description": "Client for client credentials flow",
+            "AllowedGrantTypes": [ "authorization_code" ],
+            "AllowAccessTokensViaBrowser": true,
+            "RedirectUris": [
+              "https://auth-svc.doc:3000/oidc/callback",
+              "https://auth-svc.doc:3000"
+            ],
+            "AllowedScopes": [ "openid", "profile", "email" ],
+            "IdentityTokenLifetime": 3600,
+            "AccessTokenLifetime": 3600
+          }
+        ]
+    networks:
+      - authen
+    ports:
+      # The mock OIDC server is bound to port 80, and our service and our system
+      # both need to agree on the port value, so we are stuck with using port 80
+      # on the host.
+      - "80:80"
   # p4d.doc is in the extension repository
   shibboleth.doc:
     build:
