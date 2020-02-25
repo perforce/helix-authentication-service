@@ -17,7 +17,7 @@ router.get('/new/:id', (req, res, next) => {
   // Always generate a new request every time, and use that request identifer as
   // the key, as the user may be logging in from different client systems.
   const requestId = ulid()
-  logger.debug('new request %s for %s', requestId, req.params.id)
+  logger.debug('requests: new request %s for %s', requestId, req.params.id)
   // Construct the "user" object which holds the request identifier and any
   // additional properties that enable certain features.
   const forceAuthn = Boolean(req.query.forceAuthn || process.env.FORCE_AUTHN || false)
@@ -40,7 +40,7 @@ router.get('/new/:id', (req, res, next) => {
 // **ONLY** expose this when running in a test environment.
 if (process.env.NODE_ENV === 'automated_tests') {
   // For testing only, inserts a user profile into the cache.
-  router.post('/insert/:id', async (req, res, next) => {
+  router.post('/insert/:id', (req, res, next) => {
     const user = requests.getIfPresent(req.params.id)
     if (user) {
       users.set(user.id, req.body)
@@ -103,7 +103,7 @@ router.get('/status/:id', async (req, res, next) => {
             })
           }
         })
-        logger.debug('resolved user for %s (%s)', userRecord.id, req.params.id)
+        logger.debug('requests: resolved user for %s (%s)', userRecord.id, req.params.id)
         res.json(user)
       } catch (err) {
         res.status(408).send('Request Timeout')
