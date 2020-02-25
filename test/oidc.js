@@ -7,8 +7,9 @@ const { assert } = require('chai')
 const { after, before, describe, it } = require('mocha')
 const { Builder, By, Capabilities, until } = require('selenium-webdriver')
 const { Options } = require('selenium-webdriver/firefox')
+const { getRequestId } = require('./helpers')
 
-describe('Login', function () {
+describe('OIDC Login', function () {
   let driver
 
   before(function () {
@@ -33,43 +34,21 @@ describe('Login', function () {
     let requestId
     let loginUrl
 
-    it('should return a request identifier', function (done) {
-      https.get({
-        hostname: 'auth-svc.doc',
-        port: 3000,
-        path: '/requests/new/jackson',
-        rejectUnauthorized: false,
-        requestCert: false,
-        agent: false
-      }, (res) => {
-        assert.equal(res.statusCode, 200)
-        assert.match(res.headers['content-type'], /^application\/json/)
-        res.setEncoding('utf-8')
-        let data = ''
-        res.on('data', (chunk) => { data += chunk })
-        res.on('end', () => {
-          const json = JSON.parse(data)
-          requestId = json.request
-          // The docker container for the auth service is configured for saml by
-          // default, need to switch to oidc for this test.
-          loginUrl = json.loginUrl.replace('/saml/', '/oidc/')
-          done()
-        })
-      }).on('error', (err) => {
-        done(err)
-      })
+    it('should return an OIDC request identifier', async function () {
+      requestId = await getRequestId('auth-svc.doc', 3000)
+      loginUrl = 'https://auth-svc.doc:3000/oidc/login/' + requestId
     })
 
-    it('should reject invalid user credentials', async function () {
+    it('should reject invalid OIDC user credentials', async function () {
       // opening the browser (especially headless) can take a long time
       this.timeout(20000)
       await driver.get(loginUrl)
-      const searchForm = await driver.findElement(By.tagName('form'))
-      const usernameBox = await searchForm.findElement(By.name('Username'))
+      const loginForm = await driver.wait(until.elementLocated(By.css('form')))
+      const usernameBox = await loginForm.findElement(By.name('Username'))
       usernameBox.sendKeys('johndoe')
-      const passwordBox = await searchForm.findElement(By.name('Password'))
+      const passwordBox = await loginForm.findElement(By.name('Password'))
       passwordBox.sendKeys('password123')
-      const loginButton = await searchForm.findElement(By.xpath('//button[@value="login"]'))
+      const loginButton = await loginForm.findElement(By.xpath('//button[@value="login"]'))
       await loginButton.click()
       const errorElem = await driver.wait(until.elementLocated(
         By.xpath('//div[contains(@class, "validation-summary-errors")]/ul/li[1]')), 10000)
@@ -77,7 +56,7 @@ describe('Login', function () {
       assert.include(errorText, 'Invalid username or password')
     })
 
-    it('should not return login status yet', function (done) {
+    it('should not return OIDC login status yet', function (done) {
       this.timeout(5000)
       // This request requires client certificates for security purposes. The
       // supertest module does not allow setting rejectUnauthorized, and as such
@@ -107,27 +86,46 @@ describe('Login', function () {
       })
     })
 
-    it('should authenticate via identity provider', async function () {
-      this.timeout(10000)
+    it('should return a new OIDC request identifier', async function () {
+      // Start a fresh request because the earlier one is still pending on the
+      // server and the data is deleted from the cache in a race condition.
+      requestId = await getRequestId('auth-svc.doc', 3000)
+      loginUrl = 'https://auth-svc.doc:3000/oidc/login/' + requestId
+    })
+
+    it('should authenticate via OIDC identity provider', async function () {
+      this.timeout(30000)
       await driver.get(loginUrl)
-      const searchForm = await driver.findElement(By.tagName('form'))
-      const usernameBox = await searchForm.findElement(By.name('Username'))
+      const loginForm = await driver.wait(until.elementLocated(By.css('form')))
+      const usernameBox = await loginForm.findElement(By.name('Username'))
       usernameBox.sendKeys('johndoe')
-      const passwordBox = await searchForm.findElement(By.name('Password'))
+      const passwordBox = await loginForm.findElement(By.name('Password'))
       passwordBox.sendKeys('passw0Rd?')
-      const loginButton = await searchForm.findElement(By.xpath('//button[@value="login"]'))
+      const loginButton = await loginForm.findElement(By.xpath('//button[@value="login"]'))
       await loginButton.click()
-      await driver.wait(until.urlContains('oidc.doc/consent'), 10000)
-      const allowButton = await driver.findElement(
-        By.xpath('//div[@class="consent-buttons"]/button[@value="yes"]'))
-      await allowButton.click()
-      await driver.wait(until.urlContains('auth-svc.doc:3000'), 10000)
+      try {
+        await driver.wait(until.urlContains('oidc.doc/consent'), 5000)
+        const allowButton = await driver.findElement(
+          By.xpath('//div[@class="consent-buttons"]/button[@value="yes"]'))
+        await allowButton.click()
+        await driver.wait(until.urlContains('auth-svc.doc:3000'), 5000)
+      } catch (err) {
+        if (err.name === 'TimeoutError') {
+          const currentUrl = await driver.getCurrentUrl()
+          if (!currentUrl.match(/auth-svc/)) {
+            throw err
+          }
+        } else {
+          throw err
+        }
+      }
       const subtitleH2 = await driver.findElement(By.className('subtitle'))
       const subtitleText = await subtitleH2.getText()
       assert.equal(subtitleText, 'Login Successful')
     })
 
-    it('should return login status of user', function (done) {
+    it('should return OIDC login status of user', function (done) {
+      this.timeout(5000)
       const cert = fs.readFileSync('test/client.crt')
       const key = fs.readFileSync('test/client.key')
       https.get({
@@ -155,6 +153,17 @@ describe('Login', function () {
       }).on('error', (err) => {
         done(err)
       })
+    })
+
+    it('should log out of OIDC identity provider', async function () {
+      this.timeout(10000)
+      await driver.get('https://auth-svc.doc:3000/oidc/logout')
+      const logoutForm = await driver.wait(until.elementLocated(By.css('form')))
+      const logoutButton = await logoutForm.findElement(By.css('button'))
+      await logoutButton.click()
+      const smallElem = await driver.wait(until.elementLocated(By.xpath('//h1/small')))
+      const smallText = await smallElem.getText()
+      assert.include(smallText, 'You are now logged out')
     })
   })
 })
