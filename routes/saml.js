@@ -66,7 +66,7 @@ const strategy = new MultiSamlStrategy(
       logger.debug(`saml: forceAuthn set to ${force}`)
       fetchIdpMetadata().then((config) => {
         const options = Object.assign({}, config, { forceAuthn: force })
-        logger.debug('saml: passport SAML configuration: %o', options)
+        logger.debug('saml: passport SAML configuration: %o', scrubConfiguration(options))
         return done(null, options)
       })
     }
@@ -408,6 +408,21 @@ function fetchIdpMetadata () {
       resolve(samlOptions)
     }
   })
+}
+
+// Remove secret, long, or boring entries from the configuration.
+function scrubConfiguration (config) {
+  return Object.fromEntries(Object.entries(config).filter(([key, value]) => {
+    if (key === 'cert' || key === 'decryptionPvk' || key === 'privateCert') {
+      // elide long and/or secret values
+      return false
+    }
+    if (value === null || value === undefined) {
+      // elide anything that is not interesting
+      return false
+    }
+    return true
+  }))
 }
 
 module.exports = router
