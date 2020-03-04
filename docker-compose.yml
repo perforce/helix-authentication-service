@@ -13,6 +13,7 @@ services:
     build:
       context: .
       dockerfile: containers/auth-svc/Dockerfile
+    container_name: auth-svc.doc
     environment:
       NODE_ENV: development
       DEBUG: "1"
@@ -37,6 +38,7 @@ services:
   ldap.doc:
     build:
       context: containers/ldap
+    container_name: ldap.doc
     networks:
       - authen
     ports:
@@ -44,6 +46,7 @@ services:
       - "636:636"
   oidc.doc:
     image: soluto/oidc-server-mock
+    container_name: oidc.doc
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       API_RESOURCES_INLINE: |
@@ -91,6 +94,7 @@ services:
   shibboleth.doc:
     build:
       context: containers/shibboleth
+    container_name: shibboleth.doc
     depends_on:
       - ldap.doc
     environment:
