@@ -171,7 +171,7 @@ if ! test -f package.json; then
     die 'Missing package.json file for authentication service'
 fi
 echo "Building dependencies for auth service..."
-npm ci -q
+npm ci -q --only=production
 
 # start the service using pm2
 echo "Starting the auth service with default configuration..."
