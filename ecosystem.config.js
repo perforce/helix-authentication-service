@@ -43,6 +43,7 @@ module.exports = {
       // LOGIN_TIMEOUT: 60,
       // OIDC_CLIENT_SECRET: undefined,
       // SAML_AUTHN_CONTEXT: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      // SAML_IDP_METADATA_URL: undefined,
       // SAML_NAMEID_FIELD: undefined,
       // SAML_NAMEID_FORMAT: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
       // SAML_SP_AUDIENCE: undefined,
