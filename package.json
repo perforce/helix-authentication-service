@@ -46,7 +46,7 @@
     "transitory": "^2.1.1",
     "ulid": "^2.3.0",
     "winston": "^3.2.1",
-    "winston-syslog": "^2.4.0"
+    "winston-syslog": "^2.4.4"
   },
   "private": true,
   "devDependencies": {
