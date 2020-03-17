@@ -16,4 +16,4 @@ EXPOSE 3000
 
 HEALTHCHECK CMD curl -k -f -s -o /dev/null https://localhost:3000/ || exit 1
 
-ENTRYPOINT [ "node",  "bin/www" ]
+ENTRYPOINT [ "node", "-r", "module-alias/register", "bin/www" ]

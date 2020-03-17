@@ -66,7 +66,8 @@ event that you need assistance with configuring these systems, please contact
 ## Development
 
 See the [development](./docs/Development.md) page for additional information
-regarding building and testing the service.
+regarding building and testing the service. For a description of the overall
+design of the application, see the [Design.md](./docs/Design.md) page.
 
 ## REST API
 

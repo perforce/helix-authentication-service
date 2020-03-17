@@ -6,9 +6,10 @@
 /**
  * Module dependencies.
  */
-const app = require('../lib/app')
-const logger = require('../lib/logging')
-const { createServer } = require('../lib/server')
+const app = require('@lib/app')
+const container = require('@lib/container')
+const logger = container.resolve('logger')
+const { createServer } = require('@lib/server')
 const url = require('url')
 
 /**

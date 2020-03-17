@@ -20,8 +20,8 @@ const minimatch = require('minimatch')
 require('dotenv').config({ path: 'test/dot.env' })
 
 // start the server
-const app = require('../lib/app')
-const { createServer } = require('../lib/server')
+const app = require('@lib/app')
+const { createServer } = require('@lib/server')
 const server = createServer(app)
 const agent = request.agent(server)
 //
