@@ -117,7 +117,7 @@ $ docker-compose up -d
 
 ### Testing Shibboleth
 
-The SAML IdP metadata URL will be: https://shibboleth.doc/idp/shibboleth
+The SAML IdP metadata URL will be: https://shibboleth.doc:4443/idp/shibboleth
 
 Use `docker-compose logs shibboleth.doc` to see the logs of the Shibboleth
 server. It takes around 10 seconds on a fast machine to complete its startup. If

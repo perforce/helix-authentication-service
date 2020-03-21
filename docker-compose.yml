@@ -24,9 +24,9 @@ services:
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "http://oidc.doc"
       # would use the metadata URL but the self-signed certs are rejected
-      # SAML_IDP_METADATA_URL: "https://shibboleth.doc/idp/shibboleth"
-      SAML_IDP_SSO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SSO"
-      SAML_IDP_SLO_URL: "https://shibboleth.doc/idp/profile/SAML2/Redirect/SLO"
+      # SAML_IDP_METADATA_URL: "https://shibboleth.doc:4443/idp/shibboleth"
+      SAML_IDP_SSO_URL: "https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO"
+      SAML_IDP_SLO_URL: "https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SLO"
       SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
       SAML_SP_ISSUER: "urn:example:sp"
       SP_CERT_FILE: certs/server.crt
@@ -103,7 +103,7 @@ services:
     networks:
       - authen
     ports:
-      - "443:4443"
+      - "4443:4443"
 
 networks:
   authen:
