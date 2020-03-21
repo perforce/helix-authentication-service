@@ -12,8 +12,10 @@ COPY routes routes
 COPY views views
 RUN rm -f package-lock.json && npm install -q
 
+COPY containers/auth-svc/saml_idp.conf.js routes
+
 EXPOSE 3000
 
-HEALTHCHECK CMD curl -k -f -s -o /dev/null https://localhost:3000/ || exit 1
+HEALTHCHECK CMD curl -k -f -s -I https://localhost:3000/ || exit 1
 
 ENTRYPOINT [ "node", "-r", "module-alias/register", "bin/www" ]
