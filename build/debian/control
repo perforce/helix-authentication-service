@@ -1,0 +1,15 @@
+Source: helix-auth-svc
+Section: misc
+Priority: optional
+Maintainer: Perforce Software, Inc. <support+packaging@perforce.com>
+Build-Depends: debhelper (>= 8.0)
+Standards-Version: 4.1.3
+Homepage: https://www.perforce.com/
+
+Package: helix-auth-svc
+Architecture: any
+Depends:
+ nodejs (>= 12.16),
+ ${misc:Depends}
+Description: Helix Authentication Service
+ Authentication protocol (OIDC, SAML) integration service.

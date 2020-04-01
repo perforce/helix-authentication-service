@@ -1,0 +1,12 @@
+ecosystem.config.js    	opt/perforce/helix-auth-svc
+package.json    	opt/perforce/helix-auth-svc
+package-lock.json	opt/perforce/helix-auth-svc
+README.md	    	opt/perforce/helix-auth-svc
+bin/		        opt/perforce/helix-auth-svc
+certs/		        opt/perforce/helix-auth-svc
+docs/    		opt/perforce/helix-auth-svc
+lib/		        opt/perforce/helix-auth-svc
+node_modules/	        opt/perforce/helix-auth-svc
+public/		        opt/perforce/helix-auth-svc
+routes/		        opt/perforce/helix-auth-svc
+views/		        opt/perforce/helix-auth-svc
