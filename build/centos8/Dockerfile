@@ -1,0 +1,54 @@
+FROM centos:8
+#
+# $ docker build -f build/centos8/Dockerfile --tag auth-svc:centos8 .
+# $ docker run --rm --entrypoint cat auth-svc:centos8 /root/rpmbuild/RPMS/../*.rpm > package.rpm
+#
+# Should set ID_REL_BASE and ID_PATCH build args.
+#
+
+ARG ID_REL_BASE=2020.1.9999999
+ARG ID_PATCH=1
+ENV PKGNAME helix-auth-svc
+ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
+
+#
+# install build and packaging prerequisites
+#
+RUN yum -q -y install curl gcc-c++ git make python2 rpm-build rpmdevtools
+ADD https://rpm.nodesource.com/setup_12.x setup_12.x
+RUN bash setup_12.x
+RUN yum install -y nodejs
+
+WORKDIR /build/${DIRNAME}
+
+#
+# copy over only what is needed for the package
+#
+COPY bin bin
+COPY certs certs
+COPY docs docs
+COPY lib lib
+COPY public public
+COPY routes routes
+COPY views views
+COPY ecosystem.config.js ecosystem.config.js
+COPY logging.config.js logging.config.js
+COPY package-lock.json package-lock.json
+COPY package.json package.json
+COPY README.md README.md
+
+#
+# build only what is needed for deployment
+#
+RUN npm ci -q --only=production
+
+#
+# build the rpm package
+#
+ENV ID_REL_BASE ${ID_REL_BASE}
+ENV ID_PATCH ${ID_PATCH}
+RUN rpmdev-setuptree
+RUN tar -C .. -z -c -f /root/rpmbuild/SOURCES/${PKGNAME}.tar.gz ${DIRNAME}
+COPY build/rpm /root/rpmbuild/SPECS
+RUN rpmbuild -bb /root/rpmbuild/SPECS/helix-auth-svc.spec
+# >>> /root/rpmbuild/RPMS/x86_64/helix-auth-svc-2020.1.9999999-1.x86_64.rpm

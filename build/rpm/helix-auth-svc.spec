@@ -15,6 +15,9 @@ Requires:       nodejs >= 12.16
 %description
 Authentication protocol (OIDC, SAML) integration service.
 
+# empty files that rpm creates and then complains about
+%global debug_package %{nil}
+
 %prep
 %setup -q
 # no setup
@@ -36,6 +39,8 @@ install -m 0755 bin/www %{buildroot}%{installprefix}/bin/www
 cp -pr certs/* %{buildroot}%{installprefix}/certs
 cp -pr docs/* %{buildroot}%{installprefix}/docs
 cp -pr lib/* %{buildroot}%{installprefix}/lib
+# remove this problematic, seemingly duplicate, file
+rm -f node_modules/unix-dgram/build/Release/obj.target/unix_dgram.node
 cp -pr node_modules/* %{buildroot}%{installprefix}/node_modules
 cp -pr public/* %{buildroot}%{installprefix}/public
 cp -pr routes/* %{buildroot}%{installprefix}/routes
