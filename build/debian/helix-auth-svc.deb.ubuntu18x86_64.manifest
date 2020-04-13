@@ -1,0 +1,4 @@
+---
+distro: bionic
+product-files:
+  - apt/ubuntu/bionic/incoming/helix-auth-svc_<LONGREL>-<CHANGE><*>_amd64.deb
