@@ -6,8 +6,8 @@ FROM ubuntu:18.04
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
 
-ARG ID_REL_BASE=2020.1.9999999
-ARG ID_PATCH=1
+ARG ID_REL_BASE=2020.1
+ARG ID_PATCH=9999999
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
 ENV DEBEMAIL 'support+packaging@perforce.com'
@@ -41,7 +41,7 @@ COPY ecosystem.config.js ecosystem.config.js
 COPY logging.config.js logging.config.js
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
-RUN sed -e "s/\"2020.1.9999999\"/\"${ID_REL_BASE}\"/" package.json.in > package.json && \
+RUN sed -e "s/\"2020.1.9999999\"/\"${ID_REL_BASE}.${ID_PATCH}\"/" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md
 

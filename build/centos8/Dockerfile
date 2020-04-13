@@ -6,8 +6,8 @@ FROM centos:8
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
 
-ARG ID_REL_BASE=2020.1.9999999
-ARG ID_PATCH=1
+ARG ID_REL_BASE=2020.1
+ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 
@@ -51,4 +51,3 @@ RUN rpmdev-setuptree
 RUN tar -C .. -z -c -f /root/rpmbuild/SOURCES/${PKGNAME}.tar.gz ${DIRNAME}
 COPY build/rpm /root/rpmbuild/SPECS
 RUN rpmbuild -bb /root/rpmbuild/SPECS/helix-auth-svc.spec
-# >>> /root/rpmbuild/RPMS/x86_64/helix-auth-svc-2020.1.9999999-1.x86_64.rpm
