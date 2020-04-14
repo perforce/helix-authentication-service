@@ -1,3 +1,0 @@
----
-product-files:
-  - yum/rhel/6/x86_64/helix-auth-svc-<LONGREL>-<CHANGE>.x86_64.rpm
