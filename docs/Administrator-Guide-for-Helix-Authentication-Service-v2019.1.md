@@ -383,7 +383,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Visit the Microsoft Azure portal.
 1. Register a new application under Azure Active Directory.
 1. You can use a single app registration for both OIDC and SAML.
-1. Enter the auth service URL as the redirect URL.
+1. For the redirect URL enter `{SVC_BASE_URI}/oidc/callback`.
 1. Copy the _Application (client) ID_ to the `OIDC_CLIENT_ID` environment variable.
 1. Open the _OpenID Connect metadata document_ URL in the browser (click Endpoints button from app overview page).
 1. Copy the _issuer_ URL and enter as the `OIDC_ISSUER_URI` environment variable; if the issuer URI contains `{tenantid}` then replace it with the _Directory (tenant) ID_ from the application overview page.
