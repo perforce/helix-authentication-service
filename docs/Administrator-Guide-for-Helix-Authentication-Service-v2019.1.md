@@ -182,7 +182,7 @@ Changing the environment settings will require restarting the service for the ch
 | Name | Description |
 | ---- | ----------- |
 | `OIDC_CLIENT_ID` | The **client identifier** as provided by the OIDC identity provider. |
-| `OIDC_CLIENT_SECRET` | The **client secret** as provided by the OIDC identity provider. |
+| `OIDC_CLIENT_SECRET` | The **client secret** as provided by the OIDC identity provider. _The `OIDC_CLIENT_SECRET_FILE` setting is preferred over this setting._ |
 | `OIDC_CLIENT_SECRET_FILE` | Path of the file containing the **client secret** as provided by the OIDC identity provider. _This setting should be preferred over `OIDC_CLIENT_SECRET` to prevent accidental exposure of the client secret._ |
 | `OIDC_ISSUER_URI` | The OIDC provider **issuer** URL. |
 
@@ -334,7 +334,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. From the admin dashboard, click the **CREATE APPLICATION** button.
 2. Enter a meaningful name for the application.
 3. Select the **Regular Web Application** button, then click **Create**.
-4. Open the _Settings_ tab, copy the _Client ID_ and _Client Secret_ values to `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` settings in the service configuration.
+4. Open the _Settings_ tab, copy the _Client ID_ and _Client Secret_ values to `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET_FILE` settings in the service configuration.
 5. For _Allowed Callback URLs_ add `{SVC_BASE_URI}/oidc/callback`
 6. For _Allowed Logout URLs_ add `{SVC_BASE_URI}`
 6. Scroll to the bottom of the _Settings_ screen and click the **Advanced Settings** link.
@@ -387,7 +387,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Copy the _Application (client) ID_ to the `OIDC_CLIENT_ID` environment variable.
 1. Open the _OpenID Connect metadata document_ URL in the browser (click Endpoints button from app overview page).
 1. Copy the _issuer_ URL and enter as the `OIDC_ISSUER_URI` environment variable; if the issuer URI contains `{tenantid}` then replace it with the _Directory (tenant) ID_ from the application overview page.
-1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET` environment variable.
+1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET_FILE` environment variable.
 1. Add a user account (guest works well) such that it has a defined email field; for whatever reason, "personal" accounts do not have the "email" field defined.
 1. Make sure the user email address matches the user in Active Directory.
 
@@ -416,7 +416,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Provide a meaningful name on the next screen.
 1. For the _Login_ redirect URIs enter `{SVC_BASE_URI}/oidc/callback`
 1. For the _Logout_ redirect URIs enter `{SVC_BASE_URI}`
-1. On the next screen, find the _Client ID_ and _Client secret_ values and copy to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` service settings.
+1. On the next screen, find the _Client ID_ and _Client secret_ values and copy to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET_FILE` service settings.
 1. From the _Sign On_ tab, copy the _Issuer_ value to `OIDC_ISSUER_URI`
 
 If you are already logged into Okta, do _one_ of the following:
@@ -462,7 +462,7 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 1. On the same screen, enter `{SVC_BASE_URI}/oidc/callback` for _Redirect URI's_.
 1. Find the **Save** button and click it.
 1. From the _SSO_ tab, copy the _Client ID_ value to the `OIDC_CLIENT_ID` environment variable.
-1. From the _SSO_ tab, copy the _Client Secret_ value to `OIDC_CLIENT_SECRET` (you may need to "show" the secret first before the copy button will work).
+1. From the _SSO_ tab, copy the _Client Secret_ value to `OIDC_CLIENT_SECRET_FILE` (you may need to "show" the secret first before the copy button will work).
 1. From the _SSO_ tab, find the **OpenID Provider Configuration Information** link and open in a new tab.
 1. Find the _issuer_ and copy the URL value to the `OIDC_ISSUER_URI` environment variable.
 1. Ensure the _Application Type_ is set to _Web_.
