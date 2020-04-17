@@ -524,3 +524,7 @@ This occurs when the authentication service base URI (`SVC_BASE_URI`) does not m
 ### Environment settings and unexpected behavior
 
 If the authentication service is not behaving as expected based on the configuration, it may be that it is picking up environment variables from an unexpected location. All of the environment variables will be dumped to the console when debug logging is enabled, so if those do not match expectations, then verify that you are using exactly one of a `.env` file _or_ an `ecosystem.config.js` file. While you can have both, the order of precedence is not defined, and you will likely get unexpected results. In practice, it appears that the `.env` file takes precedence over the `env` section in the `ecosystem.config.js` file, but that is not a safe assumption.
+
+### pm2 caching environment variables
+
+If you remove an environment variable (for instance, by removing it from the `env` section of the `ecosystem.config.js` file) and restart the service, it may be that the pm2 daemon will cache the old value for that variable. This is especially true when pm2 is running in production or cluster mode. To clear the cached values, it is necessary to terminate the pm2 daemon (`pm2 kill`) and then start the service again (`pm2 start auth-svc`).
