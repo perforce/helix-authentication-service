@@ -10,6 +10,7 @@ ARG ID_REL_BASE=2020.1
 ARG ID_PATCH=9999999
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
+ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~xenial_amd64.deb
 ENV DEBEMAIL 'support+packaging@perforce.com'
 ENV DEBFULLNAME 'Perforce Software, Inc.'
 ENV DEBIAN_FRONTEND noninteractive
@@ -60,3 +61,12 @@ RUN sed -e "s/ID_REL_BASE_REPLACE/${ID_REL_BASE}/" \
         -e "s/DATE_STRING_REPLACE/`date +'%a, %d %b %Y %H:%M:%S %z'`/" \
 		debian/changelog.in > debian/changelog
 RUN dpkg-buildpackage -b -rfakeroot -us -uc
+#
+# Work around issue with older aptly that does not recognize the new default
+# compression format (xz) by rebuilding the package using gzip compression.
+# Would prefer to get this from dpkg-buildpackage but that seems impossible.
+#
+RUN dpkg-deb -R ../${PACKAGE_FILENAME} tmp
+RUN rm ../${PACKAGE_FILENAME}
+RUN fakeroot dpkg-deb -Zgzip --build tmp ../${PACKAGE_FILENAME}
+RUN rm -rf tmp
