@@ -54,9 +54,12 @@ RUN tar zcf ../${PKGNAME}.orig.tar.gz .
 #
 # build the debian package
 #
+# Use -Z gz to compress the package parts with gzip for compatibility with
+# the build tools on the packaging system.
+#
 COPY build/debian debian
 RUN sed -e "s/ID_REL_BASE_REPLACE/${ID_REL_BASE}/" \
         -e "s/ID_PATCH_REPLACE/${ID_PATCH}~bionic/" \
         -e "s/DATE_STRING_REPLACE/`date +'%a, %d %b %Y %H:%M:%S %z'`/" \
-		debian/changelog.in > debian/changelog
-RUN dpkg-buildpackage -b -rfakeroot -us -uc -ui
+        debian/changelog.in > debian/changelog
+RUN dpkg-buildpackage -Z gz -b -rfakeroot -us -uc -ui
