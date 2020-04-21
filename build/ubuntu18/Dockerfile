@@ -66,7 +66,7 @@ RUN dpkg-buildpackage -b -rfakeroot -us -uc -ui
 # compression format (xz) by rebuilding the package using gzip compression.
 # Would prefer to get this from dpkg-buildpackage but that seems impossible.
 #
-RUN dpkg-deb -R ${PACKAGE_FILENAME} tmp
-RUN rm ${PACKAGE_FILENAME}
-RUN fakeroot dpkg-deb -Zgzip --build tmp ${PACKAGE_FILENAME}
+RUN dpkg-deb -R ../${PACKAGE_FILENAME} tmp
+RUN rm ../${PACKAGE_FILENAME}
+RUN fakeroot dpkg-deb -Zgzip --build tmp ../${PACKAGE_FILENAME}
 RUN rm -rf tmp
