@@ -1,4 +1,4 @@
-FROM osixia/openldap:1.2.5
+FROM osixia/openldap:stable
 # The default image will create an empty ldap for the company Example Inc. and
 # the domain example.org. By default the admin has the password "admin".
 
