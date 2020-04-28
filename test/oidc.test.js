@@ -156,9 +156,10 @@ describe('OIDC authentication', function () {
   it('should log out of OIDC identity provider', async function () {
     this.timeout(30000)
     await driver.get('https://auth-svc.doc:3000/oidc/logout')
-    const logoutForm = await driver.wait(until.elementLocated(By.css('form')))
-    const logoutButton = await logoutForm.findElement(By.css('button'))
-    await logoutButton.click()
+    // identity server no longer shows a logout form?
+    // const logoutForm = await driver.wait(until.elementLocated(By.css('form')))
+    // const logoutButton = await logoutForm.findElement(By.css('button'))
+    // await logoutButton.click()
     const smallElem = await driver.wait(until.elementLocated(By.xpath('//h1/small')))
     const smallText = await smallElem.getText()
     assert.include(smallText, 'You are now logged out')

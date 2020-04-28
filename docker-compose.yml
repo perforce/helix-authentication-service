@@ -45,7 +45,7 @@ services:
       - "389:389"
       - "636:636"
   oidc.doc:
-    image: soluto/oidc-server-mock:0.1.2
+    image: soluto/oidc-server-mock:latest
     container_name: oidc.doc
     environment:
       ASPNETCORE_ENVIRONMENT: Development
