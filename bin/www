@@ -2,30 +2,23 @@
 //
 // Copyright 2020 Perforce Software
 //
-
-/**
- * Module dependencies.
- */
 const app = require('@lib/app')
 const container = require('@lib/container')
 const logger = container.resolve('logger')
-const { createServer } = require('@lib/server')
-const url = require('url')
+const {
+  createServer,
+  getPort,
+  normalizePort
+} = require('@lib/server')
 
-/**
- * Get port from environment and store in Express.
- */
-const port = normalizePort(getPort())
+// Get port from environment and store in Express.
+const port = normalizePort(getPort(process.env))
 app.set('port', port)
 
-/**
- * Create HTTP/S server.
- */
+// Create HTTP/S server.
 const server = createServer(app)
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+// Listen on provided port, on all network interfaces.
 if (process.env.BIND_ADDRESS) {
   // Windows is different (?) so allow explicitly setting the bind address.
   // According to the Node documentation, it binds to 0.0.0.0 by default.
@@ -36,46 +29,7 @@ if (process.env.BIND_ADDRESS) {
 server.on('error', onError)
 server.on('listening', onListening)
 
-// Use PORT if it is defined, otherwise get the port from the SVC_BASE_URI,
-// defaulting to 80 or 443 depending on the protocol.
-function getPort () {
-  if (process.env.PORT) {
-    return process.env.PORT
-  }
-  const u = new url.URL(process.env.SVC_BASE_URI)
-  if (u.port) {
-    return u.port
-  }
-  if (u.protocol === 'https:') {
-    return '443'
-  } else if (u.protocol === 'http:') {
-    return '80'
-  }
-  throw new Error('protocol must be http: or https:')
-}
-
-/**
- * Normalize a port into a number, string, or false.
- */
-function normalizePort (val) {
-  const port = parseInt(val, 10)
-
-  if (isNaN(port)) {
-    // named pipe
-    return val
-  }
-
-  if (port >= 0) {
-    // port number
-    return port
-  }
-
-  return false
-}
-
-/**
- * Event listener for HTTP server "error" event.
- */
+// Event listener for HTTP server "error" event.
 function onError (error) {
   if (error.syscall !== 'listen') {
     throw error
@@ -96,9 +50,7 @@ function onError (error) {
   }
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
+// Event listener for HTTP server "listening" event.
 function onListening () {
   const addr = server.address()
   const bind = typeof addr === 'string'
