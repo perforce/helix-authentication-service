@@ -303,7 +303,12 @@ router.post('/validate', (req, res, next) => {
     } else if (loggedOut) {
       res.status(400).send('error: logged out?')
     } else {
-      res.json(profile)
+      const user = users.delete(profile.nameID)
+      if (user) {
+        res.json(Object.assign({}, profile, user))
+      } else {
+        res.json(profile)
+      }
     }
   })
 })
