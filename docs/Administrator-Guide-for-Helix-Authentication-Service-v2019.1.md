@@ -91,7 +91,7 @@ order for `npm` to collect the application dependencies.
 
 ### Installation Script
 
-The installation script will run on CentOS 7, 8, Debian 8, 9, 10, Fedora 31, RHEL 7 and 8, and Ubuntu 14, 16, and 18. This method is preferred as it will install all of the prerequisites as well as the recommended process manager (pm2).
+The installation script will run on CentOS 7, 8, Debian 8, 9, 10, Fedora 31, RHEL 7 and 8, and Ubuntu 16, and 18. This method is preferred as it will install all of the prerequisites as well as the recommended process manager (pm2).
 
 1. Run the `bash` script named `install.sh`, which is provided to set up a Linux-based system for running the authentication service. This script installs Node and the pm2 process manager, and then builds the service dependencies.
 1. Modify the service configuration by editing the `ecosystem.config.js` file. Configuration consists of defining the identity provider (IdP) details for either OIDC or SAML, and setting the `SVC_BASE_URI` of the authentication service.
@@ -138,9 +138,15 @@ This release of Fedora provides a compatible version of Node.js, so installation
 $ sudo dnf install nodejs
 ```
 
-#### Ubuntu 14, 16, 18
+#### Ubuntu 16, 18
 
-Ubuntu Linux lacks Node.js packages of the versions required by this service, but there are packages available from [NodeSource](https://nodesource.com/) that are easy to install.
+The easiest way to install Node.js on recent Ubuntu releases is using the `snap` command:
+
+```
+$ sudo snap install node --channel=12/stable --classic
+```
+
+As an alternative, there are packages available from [NodeSource](https://nodesource.com/) that are relatively easy to install.
 
 ```shell
 $ sudo apt-get install build-essential curl git
