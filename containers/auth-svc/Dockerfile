@@ -10,7 +10,7 @@ COPY package.json .
 COPY public public
 COPY routes routes
 COPY views views
-RUN rm -f package-lock.json && npm install -q
+RUN rm -f package-lock.json && npm install -q --only=prod
 
 COPY containers/auth-svc/saml_idp.conf.js routes
 

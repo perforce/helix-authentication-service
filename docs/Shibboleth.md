@@ -33,7 +33,7 @@ $ chmod 755 .
 $ sudo chmod -R u+rw,g+rw customized-shibboleth-idp
 $ mv customized-shibboleth-idp shibboleth-idp
 $ mv shibboleth-idp/conf/attribute-resolver-ldap.xml shibboleth-idp/conf/attribute-resolver.xml
-$ openssl req -newkey rsa:2048 -keyout key.pem -x509 -out certificate.pem -nodes -days 365 -subj "/CN=Shibboleth"
+$ openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout key.pem -out certificate.pem -subj "/CN=Shibboleth"
 $ openssl pkcs12 -inkey key.pem -in certificate.pem -export -out shibboleth-idp/credentials/idp-browser.p12
 $ rm key.pem certificate.pem
 $ cp ../../certs/server.crt shibboleth-idp/credentials/metaroot.pem
