@@ -35,20 +35,6 @@ describe('Server basics', function () {
     })
   })
 
-  describe('getProtocol', function () {
-    it('should use PROTOCOL if defined', function () {
-      assert.equal(sut.getProtocol({ PROTOCOL: 'smtp' }), 'smtp:')
-    })
-
-    it('should get protocol from SVC_BASE_URI', function () {
-      assert.equal(sut.getProtocol({ SVC_BASE_URI: 'http://localhost' }), 'http:')
-    })
-
-    it('should default to http:', function () {
-      assert.equal(sut.getProtocol({}), 'http:')
-    })
-  })
-
   describe('getServiceURI', function () {
     it('should use SVC_BASE_URI if defined', function () {
       assert.equal(sut.getServiceURI({ SVC_BASE_URI: 'https://remotehost:8080' }), 'https://remotehost:8080')
