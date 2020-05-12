@@ -1,5 +1,8 @@
 # Design
 
+This document is intended for developers who are interested in the inner
+workings of the Helix Authentication Service.
+
 ## Overview
 
 The application is largely made up of protocol handlers, and thus is not all

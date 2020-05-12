@@ -1,5 +1,8 @@
 # Shibboleth
 
+This document is intended for developers who are setting up an instance of
+the Shibboleth SAML IdP for testing the Helix Authentication Service.
+
 ## Overview
 
 [Shibboleth](https://www.shibboleth.net) is one of the oldest SAML 2.0
