@@ -40,7 +40,7 @@ Supported Platforms
         10 Pro
         Server 2019
 
-    HAS has been deployed to Windows systems and works as expected.
+    HAS is known to work on the Windows systems listed above.
 
 
 Requirements
@@ -50,7 +50,9 @@ Requirements
 
 Documentation
 
-    The HAS Administrator's Guide is publicly available on perforce.com.
+    The HAS Administrator's Guide is publicly available on perforce.com. The
+    guide details the steps for installation, upgrade, and configuration of the
+    authentication service.
 
 
 Installation
@@ -100,9 +102,6 @@ New functionality in 2019.1.1.000001
 
     AS-36 (Change #1914136)
         Support logging to syslog rather than plain file.
-
-    AS-37 (Change #1911767)
-        Treat users whose AuthMethod is ldap as non-SSO users.
 
     AS-40 (Change #1917932)
         Support filtering client requests by certificate common name.
