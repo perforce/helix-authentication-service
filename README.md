@@ -7,6 +7,19 @@ authentication protocol integration service that may be used in concert with
 systems wanting to permit users to authenticate with external identity systems.
 It currently supports the OpenID Connect and SAML 2.0 authentication protocols.
 
+## Versions
+
+Official releases will have version numbers of the form `YYYY.N`, such as
+2019.1, 2020.1, or 2020.2. These releases have undergone testing and are
+available on the Perforce FTP and package server.
+
+Patch releases will have version numbers with three dot separated numbers, such
+as 2020.1.1 or 2019.1.2.
+
+The unofficial "snapshot" releases will have versions with additional numbers,
+`YYYY.N.N.NNNNNN`, where the patch and snapshot numbers are appended to the last
+major release.
+
 ## Overview
 
 ### Architecture
@@ -22,12 +35,6 @@ there the service will redirect to the configured identity provider (IdP), where
 the user will authenticate. Upon successful authentication, the system that
 initiated the login request will receive the validated user profile, at which
 point the system can give access to the user.
-
-This design lends itself well to integrating other authentication protocols,
-including custom schemes developed by authentication providers such as
-[Auth0](http://auth0.com/) -- just add `passport-auth0` as a Node dependency,
-add a new route to the service, and configure the extension to use the new
-protocol.
 
 ### Provider Support
 
