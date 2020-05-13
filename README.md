@@ -42,16 +42,6 @@ The authentication service has been tested with the following identity providers
 | [Ping](https://www.pingidentity.com/) | OK   | OK   |
 | [Shibboleth](https://www.shibboleth.net) | N/A | OK |
 
-### Node.js Version Support
-
-The `master` branch of this repository requires Node.js v12, the Long Term
-Support release. To use the service with Node.js v10 requires checking out the
-`node10` branch. That branch is provided for those situations where Node v12 is
-not available, as with CentOS/RHEL 6, and upgrading the OS is not feasible. The
-drawback is that the version of the `openid-client` module that supports Node
-v10 does not have the features and bug fixes of the more recent releases.
-Support for Node v10 is temporary and will likely be removed in the future.
-
 ## Documentation
 
 See the product documentation in the [docs](./docs) directory.
