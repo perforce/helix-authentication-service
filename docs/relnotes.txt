@@ -85,43 +85,43 @@ Changes in every release: Bugs Fixed, New Functionality
 ----------------------------------------------------------------------
 New functionality in 2019.1.1.000001
 
-    AS-23 (Change #1876368)
+    HAS-23 (Change #1876368)
         Support file patterns for finding certificate authority (CA) files.
 
-    AS-24 (Change #1875394)
+    HAS-24 (Change #1875394)
         Allow specifying the bind address for the server.
 
-    AS-25 (Change #1876395)
+    HAS-25 (Change #1876395)
         Permit specifying the SAML identity provider certificate.
 
-    AS-26 (Change #1899075)
+    HAS-26 (Change #1899075)
         Support specifying a CA path in addition to a single file.
 
-    AS-35 (Change #1910276)
+    HAS-35 (Change #1910276)
         Add OIDC_CLIENT_SECRET_FILE setting, discourage use of OIDC_CLIENT_SECRET.
 
-    AS-36 (Change #1914136)
+    HAS-36 (Change #1914136)
         Support logging to syslog rather than plain file.
 
-    AS-40 (Change #1917932)
+    HAS-40 (Change #1917932)
         Support filtering client requests by certificate common name.
 
 ----------------------------------------------------------------------
-Bugs fixed in  2019.1.1.000001
+Bugs fixed in 2019.1.1.000001
 
-    AS-29 (Change #1884852)
+    HAS-29 (Change #1884852)
         Azure login blocked with error regarding authn context value.
 
-    AS-34 (Change #1907004)
+    HAS-34 (Change #1907004)
         Throws EISDIR error when reading certificates.
 
-    AS-46 (Change #1954444)
+    HAS-46 (Change #1954444)
         OIDC needs to support Authorization Code with PKCE.
 
-    AS-50 (Change #1956618)
+    HAS-50 (Change #1956618)
         Auth via SAML and Swarm fails validation in core extension.
 
-    AS-51 (Change #1958835)
+    HAS-51 (Change #1958835)
         Updated SAML validate endpoint should require client certs.
 
 ----------------------------------------------------------------------
