@@ -414,6 +414,23 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Make sure the user email address matches the user in Active Directory.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 
+### Google gSuite
+
+#### SAML 2.0
+
+1. Visit the Google Admin console.
+1. Click the **Apps** icon.
+1. Click the **SAML apps** button.
+1. Click the **Add a service/App to your domain** link.
+1. Click the **SETUP MY OWN CUSTOM APP** link at the bottom of the dialog.
+1. On the **Google IdP Information** screen, copy the _SSO URL_ and  _Entity ID_ values to the  `SAML_IDP_SSO_URL` and `SAML_IDP_ISSUER` environment variables.
+1. Click the **NEXT** button.
+1. For the _ACS URL_ enter `{SVC_BASE_URI}/saml/sso`
+1. For the _Entity ID_ enter `urn:example:sp`
+1. Click the **NEXT** button, and then **FINISH**, and then **OK** to complete the initial setup.
+1. On the **Settings** page for the new application, click the **EDIT SERVICE** button.
+1. Change the *Service status* to **ON** to enable users to authenticate with this application.
+
 ### Okta
 
 #### OpenID Connect
