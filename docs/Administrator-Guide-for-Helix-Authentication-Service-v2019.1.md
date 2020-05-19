@@ -55,6 +55,12 @@ Contents are:
 
 ### Prerequisites
 
+You can use Helix Authentication Service with any combination of the following:
+
+- Helix Core Server version 2019.1 or later, assuming you have knowledge of Perforce administration for authentication with tickets - see [Authenticating using passwords and tickets](https://www.perforce.com/manuals/p4sag/Content/P4SAG/DB5-21975.html)
+- Helix ALM 2019.4 or later
+- Surround SCM 2019.2 or later
+
 #### Helix Authentication Service
 
 - Administrative expertise with the software of your Identity Provider.
@@ -63,19 +69,6 @@ Contents are:
 (The installation script installs pm2)
 - A web browser. Any client using the authentication service requires a web browser.
 - Any client (even the p4 command-line client) is still required to authenticate through your IdP's website. We recommend that at least one user with super level access use Perforce authentication instead of Helix Authentication Service. See the [Authorizing Access](https://www.perforce.com/manuals/p4sag/Content/P4SAG/security.authorizing.html) in the [Helix Core Server Administrators Guide](https://www.perforce.com/manuals/p4sag/Content/P4SAG/Home-p4sag.html).
-
-#### Helix ALM
-
-- Helix ALM 2019.4 or later
-
-#### Helix Core
-
-- Helix Core Server version 2019.1 or later
-- Knowledge of Perforce administration for authentication with tickets - see [Authenticating using passwords and tickets](https://www.perforce.com/manuals/p4sag/Content/P4SAG/DB5-21975.html)
-
-#### Surround SCM
-
-- Surround SCM 2019.2 or later
 
 ### Support
 
