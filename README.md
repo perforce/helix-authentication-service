@@ -10,15 +10,16 @@ It currently supports the OpenID Connect and SAML 2.0 authentication protocols.
 ## Versions
 
 Official releases will have version numbers of the form `YYYY.N`, such as
-2019.1, 2020.1, or 2020.2. These releases have undergone testing and are
+`2019.1`, `2020.1`, or `2020.2`. These releases have undergone testing and are
 available on the Perforce FTP and package server.
 
 Patch releases will have version numbers with three dot separated numbers, such
-as 2020.1.1 or 2019.1.2.
+as `2020.1.1` or `2019.1.2`.
 
 The unofficial "snapshot" releases will have versions with additional numbers,
 `YYYY.N.N.NNNNNN`, where the patch and snapshot numbers are appended to the last
-major release.
+major release. These may include changes that are not yet reflected in the
+documentation, and these versions are limited to Community Support.
 
 ## Overview
 
