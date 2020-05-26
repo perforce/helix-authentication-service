@@ -181,7 +181,9 @@ Changing the environment settings will require restarting the service for the ch
 | Name | Description |
 | ---- | ----------- |
 | `OIDC_CLIENT_ID` | The **client identifier** as provided by the OIDC identity provider. |
-| `OIDC_CLIENT_SECRET` | The **client secret** as provided by the OIDC identity provider. |
+| `OIDC_CLIENT_SECRET` | The **client secret** as provided by the OIDC identity provider. _The `OIDC_CLIENT_SECRET_FILE` setting is preferred over this setting._ |
+| `OIDC_CLIENT_SECRET_FILE` | Path of the file containing the **client secret** as provided by the OIDC identity provider. _This setting should be preferred over `OIDC_CLIENT_SECRET` to prevent accidental exposure of the client secret._ |
+| `OIDC_CODE_CHALLENGE_METHOD` | _Optional:_ Specify the authorization code challenge method, either `S256` or `plain`. The default behavior is to detect the supported methods in the OIDC issuer data, but not all identity providers supply this information, in which case this setting will become necessary. |
 | `OIDC_ISSUER_URI` | The OIDC provider **issuer** URL. |
 
 OpenID Connect has a discovery feature in which the identity provider advertises various properties via a "discovery document". The URI path will be `/.well-known/openid-configuration` at the IdP base URL, which is described in the [OpenID Connect (OIDC) specification](https://openid.net/specs/openid-connect-discovery-1_0.html). This information makes the process of configuring an OIDC client easier.
@@ -194,9 +196,12 @@ As for the OIDC issuer URI, that value is advertised in the discovery document m
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |
+| `IDP_CERT_FILE` | Path of the file containing the public certificate of the identity provider, used to validate signatures of incoming SAML responses. This is not required, but it does serve as an additional layer of security. | _none_ |
+| `SAML_IDP_METADATA_URL` | URL of the IdP metadata configuration in XML format. | _none_ |
 | `SAML_IDP_SSO_URL` | URL of IdP Single Sign-On service. | _none_ |
 | `SAML_IDP_SLO_URL` | URL of IdP Single Log-Out service. | _none_ |
 | `SAML_SP_ISSUER` | The service provider identity provider that will be using the Helix Authentication Service as a SAML IdP. | `urn:example:sp` |
+| `SAML_IDP_ISSUER` | The entity identifier for the identity provider. This is not required, but if provided, then the IdP issuer will be validated for incoming logout requests/responses.
 | `IDP_CONFIG_FILE` | Path of the configuration file that defines SAML service providers that will be connecting to the authentication service. | **Note:** When the authentication service is acting as a SAML identity provider, it reads some of its settings from a configuration file in the auth service installation. By default, this file is named `saml_idp.conf.js` and is identified by the `IDP_CONFIG_FILE` environment variable. It is evaluated using the Node.js `require()` |
 | `SAML_SP_AUDIENCE` | Service provider audience value for AudienceRestriction assertions.	| none|
 | `SAML_AUTHN_CONTEXT` | The authn context defines the method by which the user will authenticate with the IdP. Normally the default value works on most systems, but it may be necessary to change this value. For example, Azure may want this set to `urn:oasis:names:tc:SAML:2.0:ac:classes:Password` in certain cases.	| `urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport` |
@@ -207,11 +212,15 @@ SAML identity providers advertise some of this information through their metadat
 
 When configuring the service as a "service provider" within a SAML identity provider, provide an `entityID` that is unique within your set of registered applications. By default, the service uses the value `urn:example:sp`, which can be changed by setting the `SAML_SP_ISSUER` environment variable. Anywhere that `urn:example:sp` appears in this documentation, be sure to replace it with the value you defined in the identity provider.
 
+You may elect to fetch the IdP metadata by setting `SAML_IDP_METADATA_URL`, in which case several other settings _may_ be configured automatically by the service. Exactly which settings are configured automatically depends on what information the IdP advertises via the metadata. These settings include `SAML_IDP_SSO_URL`, `SAML_IDP_SLO_URL`, `SAML_NAMEID_FORMAT`, and the IdP certificate that would be loaded from the file named in `IDP_CERT_FILE`. In the unlikely scenario that the IdP returns data that needs to be modified, that can be achieved by setting the correct value in the appropriate environment variable (e.g. `SAML_NAMEID_FORMAT`).
+
 ### Other Settings
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |
-| `DEBUG` | Set to `auth:*` to enable debug logging in the service (writes to standard error). | _none_ |
+| `BIND_ADDRESS` | Define the IP address upon which the service will listen for requests. Setting this to `127.0.0.1` (i.e. `localhsot`) means that only processes on the same host can connect, while a value of `0.0.0.0` means requests made against any address assigned to the machine will work. | `0.0.0.0` |
+| `DEBUG` | Set to any value to enable debug logging in the service (writes to the console). | _none_ |
+| `LOGGING` | Path of a logging configuration file. See the [Logging](#logging) section below. Setting this will override the `DEBUG` setting. | _none_ |
 | `FORCE_AUTHN` | If set to any non-empty value, will cause the service to require the user to authenticate, even if the user is already authenticated. For SAML, this means setting the `forceAuthn` field set to true, while for OIDC it will set the `max_age` parameter to `0`. This is not supported by all identity providers, especially for OIDC. | _none_ |
 | `SESSION_SECRET` | Password used for encrypting the in-memory session data. | `keyboard cat` |
 | `SVC_BASE_URI` | The authentication service base URL visible to end users. Needs to match the application settings defined in IdP configuration. | _none_ |
@@ -219,8 +228,72 @@ When configuring the service as a "service provider" within a SAML identity prov
 | `SP_KEY_FILE` | The service provider private key file, typically needed with SAML. | _none_ |
 | `SP_KEY_ALGO` | The algorithm used to sign the requests. | `sha256` |
 | `CA_CERT_FILE` | Path of certificate authority file for service to use when verifying client certificates. | _none_ |
+| `CA_CERT_PATH` | Path of directory containing certificate authority files for service to use when verifying client certificates. All files in the named directory will be processed. | _none_ |
 | `DEFAULT_PROTOCOL` | The default authentication protocol to use. Can be oidc or saml. | `saml` |
 | `LOGIN_TIMEOUT` | How long in seconds to wait for user to successfully authenticate. | `60` |
+
+### Logging
+
+The authentication service will, by default, write only HTTP request logs to the console. With the `DEBUG` environment variable set to any value, additional logging will be written to the console. For more precise control, the `LOGGING` environment variable can be used to specify a logging configuration file. The format of the logging configuration file can be either JSON or JavaScript (like the `ecosystem.config.js` file, use an extension of `.json` for a JSON file, and `.js` for a JavaScript file). The top-level properties are listed in the table below.
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| `level` | Messages at this log level and above will be written to the named transport; follows syslog levels per [RFC5424](https://tools.ietf.org/html/rfc5424), section 6.2.1. Levels in order of priority: `emerg`, `alert`, `crit`, `error`, `warning`, `notice`, `info`, `debug` | _none_ |
+| `transport` | Either `console`, `file`, or `syslog` | _none_ |
+
+An example of logging all messages at levels from `debug` up to `emerg`, to the console, is shown below.
+
+```javascript
+module.exports = {
+  level: 'debug',
+  transport: 'console'
+}
+```
+
+Logging to a named file can be achieved by setting the `transport` to `file`. Additional properties can then be defined within a property named `file`, as described in the table below.
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| `filename` | Path for the log file. | `auth-svc.log` |
+| `maxsize` | Size in bytes before rotating the file. | _none_ |
+| `maxfiles` | Number of rotated files to retain. | _none_ |
+
+An example of logging all messages at levels from `warning` up to `emerg`, to a named file, is shown below. This example also demonstrates log rotation by defining a maximum file size and a maximum number of files to retain.
+
+```javascript
+module.exports = {
+  level: 'warning',
+  transport: 'file',
+  file: {
+    filename: '/var/log/auth-svc.log',
+    maxsize: 1048576,
+    maxfiles: 10
+  }
+}
+```
+
+Logging to the system logger (i.e. `syslog`) is configured by setting the `transport` to `syslog`. Additional properties can then be defined within a property named `syslog`, as described in the table below. Note that the syslog _program name_ will be `helix-auth-svc` for messages emitted by the authentication service.
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| `facility` | Syslog facility, such as `auth`, `cron`, `daemon`, `kern`, `mail`, etc. | `local0` |
+| `path` | Path of the syslog unix domain socket (e.g. `/dev/log`). | _none_ |
+| `host` | Host name of the syslog daemon. | _none_ |
+| `port` | Port number on which the syslog daemon is listening. | _none_ |
+| `protocol` | Communication protocol, e.g. `tcp4`, `udp4`, `unix`, etc. | _none_ |
+
+An example of logging all messages at levels from `info` up to `emerg`, to the system log, is shown below. This example demonstrates logging to `syslog` on Ubuntu 18, in which the default installation uses a unix domain socket named `/dev/log`.
+
+```javascript
+module.exports = {
+  level: 'info',
+  transport: 'syslog',
+  syslog: {
+    path: '/dev/log',
+    protocol: 'unix'
+  }
+}
+```
 
 ### Certificates
 
@@ -261,7 +334,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. From the admin dashboard, click the **CREATE APPLICATION** button.
 2. Enter a meaningful name for the application.
 3. Select the **Regular Web Application** button, then click **Create**.
-4. Open the _Settings_ tab, copy the _Client ID_ and _Client Secret_ values to `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` settings in the service configuration.
+4. Open the _Settings_ tab, copy the _Client ID_ and _Client Secret_ values to `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET_FILE` settings in the service configuration.
 5. For _Allowed Callback URLs_ add `{SVC_BASE_URI}/oidc/callback`
 6. For _Allowed Logout URLs_ add `{SVC_BASE_URI}`
 6. Scroll to the bottom of the _Settings_ screen and click the **Advanced Settings** link.
@@ -298,8 +371,10 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 ```
 
 1. Click the **ENABLE** button at the bottom of the page.
-1. On the _Usage_ tab of the addon screen, copy the _Identity Provider Login URL_ to the `SAML_IDP_SSO_URL` setting in the service configuration.
-1. To get the SLO URL you will need to download the metadata and look for the `SingleLogoutService` element, copying the _Location_ attribute value to `SAML_IDP_SLO_URL` in the config.
+1. On the _Usage_ tab of the addon screen, copy the _Identity Provider Metadata: Download_ link and save the value to the `SAML_IDP_METADATA_URL` setting in the service configuration.
+1. If you need to set the login and logout URLs directly rather than use the metadata:
+    1. On the _Usage_ tab of the addon screen, copy the _Identity Provider Login URL_ to the `SAML_IDP_SSO_URL` setting in the service configuration.
+    1. To get the SLO URL you will need to download the metadata and look for the `SingleLogoutService` element, copying the _Location_ attribute value to `SAML_IDP_SLO_URL` in the config.
 
 ### Azure Active Directory
 
@@ -312,7 +387,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Copy the _Application (client) ID_ to the `OIDC_CLIENT_ID` environment variable.
 1. Open the _OpenID Connect metadata document_ URL in the browser (click Endpoints button from app overview page).
 1. Copy the _issuer_ URL and enter as the `OIDC_ISSUER_URI` environment variable; if the issuer URI contains `{tenantid}` then replace it with the _Directory (tenant) ID_ from the application overview page.
-1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET` environment variable.
+1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET_FILE` environment variable.
 1. Add a user account (guest works well) such that it has a defined email field; for whatever reason, "personal" accounts do not have the "email" field defined.
 1. Make sure the user email address matches the user in Active Directory.
 
@@ -324,11 +399,30 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Enter the auth service URL as the redirect URL.
 1. Copy the _Application (client) ID_ to the `SAML_SP_ISSUER` environment variable.
 1. Open the API endpoints page: click the **Endpoints** button from app overview page.
-1. Copy the _SAML-P sign-on_ endpoint value to the `SAML_IDP_SSO_URL` environment variable.
-1. Copy the _SAML-P sign-out_ endpoint value to the `SAML_IDP_SLO_URL` environment variable.
-1. Set the `SAML_NAMEID_FORMAT` environment variable to the value `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
+1. Copy the _Federation metadata document_ value to the `SAML_IDP_METADATA_URL` environment variable.
+1. If you need to set the login and logout URLs and name identifier directly rather than use the metadata:
+    1. Copy the _SAML-P sign-on_ endpoint value to the `SAML_IDP_SSO_URL` environment variable.
+    1. Copy the _SAML-P sign-out_ endpoint value to the `SAML_IDP_SLO_URL` environment variable.
+    1. Set the `SAML_NAMEID_FORMAT` environment variable to the value `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
 1. Make sure the user email address matches the user in Active Directory.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
+
+### Google gSuite
+
+#### SAML 2.0
+
+1. Visit the Google Admin console.
+1. Click the **Apps** icon.
+1. Click the **SAML apps** button.
+1. Click the **Add a service/App to your domain** link.
+1. Click the **SETUP MY OWN CUSTOM APP** link at the bottom of the dialog.
+1. On the **Google IdP Information** screen, copy the _SSO URL_ and  _Entity ID_ values to the  `SAML_IDP_SSO_URL` and `SAML_IDP_ISSUER` environment variables.
+1. Click the **NEXT** button.
+1. For the _ACS URL_ enter `{SVC_BASE_URI}/saml/sso`
+1. For the _Entity ID_ enter `urn:example:sp`
+1. Click the **NEXT** button, and then **FINISH**, and then **OK** to complete the initial setup.
+1. On the **Settings** page for the new application, click the **EDIT SERVICE** button.
+1. Change the *Service status* to **ON** to enable users to authenticate with this application.
 
 ### Okta
 
@@ -339,7 +433,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Provide a meaningful name on the next screen.
 1. For the _Login_ redirect URIs enter `{SVC_BASE_URI}/oidc/callback`
 1. For the _Logout_ redirect URIs enter `{SVC_BASE_URI}`
-1. On the next screen, find the _Client ID_ and _Client secret_ values and copy to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` service settings.
+1. On the next screen, find the _Client ID_ and _Client secret_ values and copy to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET_FILE` service settings.
 1. From the _Sign On_ tab, copy the _Issuer_ value to `OIDC_ISSUER_URI`
 
 If you are already logged into Okta, do _one_ of the following:
@@ -363,7 +457,9 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 1. For _Signature Certificate_, select and upload the `certs/server.crt` file.
 1. Click the **Next** button to save the changes.
 1. There may be an additional screen to click through.
-1. From the _Sign On_ tab, click the **View Setup Instructions** button and copy the values for _IdP SSO_ and _SLO URLs_ to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL` settings in the environment.
+1. From the _Sign On_ tab, copy the _Identity Provider metadata_ link to the `SAML_IDP_METADATA_URL` environment variable.
+1. If you need to set the login and logout URLs directly rather than use the metadata:
+    1. From the _Sign On_ tab, click the **View Setup Instructions** button and copy the values for _IdP SSO_ and _SLO URLs_ to the `SAML_IDP_SSO_URL` and `SAML_IDP_SLO_URL` settings in the environment.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 1. Configure the extension to use `user` as the `user-identifier` value.
 
@@ -383,7 +479,7 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 1. On the same screen, enter `{SVC_BASE_URI}/oidc/callback` for _Redirect URI's_.
 1. Find the **Save** button and click it.
 1. From the _SSO_ tab, copy the _Client ID_ value to the `OIDC_CLIENT_ID` environment variable.
-1. From the _SSO_ tab, copy the _Client Secret_ value to `OIDC_CLIENT_SECRET` (you may need to "show" the secret first before the copy button will work).
+1. From the _SSO_ tab, copy the _Client Secret_ value to `OIDC_CLIENT_SECRET_FILE` (you may need to "show" the secret first before the copy button will work).
 1. From the _SSO_ tab, find the **OpenID Provider Configuration Information** link and open in a new tab.
 1. Find the _issuer_ and copy the URL value to the `OIDC_ISSUER_URI` environment variable.
 1. Ensure the _Application Type_ is set to _Web_.
@@ -400,8 +496,10 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 1. For _Login URL_, enter `{SVC_BASE_URI}/saml/sso`
 1. For _SAML initiator_ select _Service Provider_.
 1. Find the *Save* button and click it.
-1. From the _SSO_ tab, copy the _SAML 2.0 Endpoint_ value to the `SAML_IDP_SSO_URL` environment variable.
-1. From the _SSO_ tab, copy the _SLO Endpoint_ value to `SAML_IDP_SLO_URL`.
+1. From the _SSO_ tab, copy the _Issuer URL_ value to the `SAML_IDP_METADATA_URL` environment variable.
+1. If you need to set the login and logout URLs directly rather than use the metadata:
+    1. From the _SSO_ tab, copy the _SAML 2.0 Endpoint_ value to the `SAML_IDP_SSO_URL` environment variable.
+    1. From the _SSO_ tab, copy the _SLO Endpoint_ value to `SAML_IDP_SLO_URL`.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 
 ## Next Steps
