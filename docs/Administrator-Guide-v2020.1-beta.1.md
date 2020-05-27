@@ -424,6 +424,23 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. On the **Settings** page for the new application, click the **EDIT SERVICE** button.
 1. Change the *Service status* to **ON** to enable users to authenticate with this application.
 
+### Google Identity Platform
+
+#### OpenID Connect
+
+These steps are based on the documented
+[procedure](https://developers.google.com/identity/protocols/oauth2/openid-connect)
+on the Google Developers web site. Be sure to read those instructions for
+complete details.
+
+1. Create or select a project in the [APIs Console](https://console.developers.google.com/).
+1. Click on **CREATE CREDENTIALS** button on the _Credentials_ page, select **OAuth client ID**, and then enter a name for the service.
+1. For _Application type_ choose **Web Application** and provide a descriptive name.
+1. On the next screen, copy the _Client ID_ and _Client Secret_ values to the `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET_FILE` service settings.
+1. Enter `https://accounts.google.com` for the `OIDC_ISSUER_URI` service setting.
+1. From the _Credentials_ page, click on the newly defined credential to open the edit screen.
+1. Click the **ADD URI** button under _Authorized redirect URIs_ and enter `{SVC_BASE_URI}/oidc/callback`
+
 ### Okta
 
 #### OpenID Connect
