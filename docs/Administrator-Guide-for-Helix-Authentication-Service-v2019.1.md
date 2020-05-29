@@ -196,7 +196,7 @@ As for the OIDC issuer URI, that value is advertised in the discovery document m
 | ---- | ----------- | ------- |
 | `SAML_IDP_SSO_URL` | URL of IdP Single Sign-On service. | _none_ |
 | `SAML_IDP_SLO_URL` | URL of IdP Single Log-Out service. | _none_ |
-| `SAML_SP_ISSUER` | The service provider identity provider that will be using the Helix Authentication Service as a SAML IdP. | `urn:example:sp` |
+| `SAML_SP_ISSUER` | The entity identifier (`entityID`) for the Helix Authentication Service. | `urn:example:sp` |
 | `IDP_CONFIG_FILE` | Path of the configuration file that defines SAML service providers that will be connecting to the authentication service. | **Note:** When the authentication service is acting as a SAML identity provider, it reads some of its settings from a configuration file in the auth service installation. By default, this file is named `saml_idp.conf.js` and is identified by the `IDP_CONFIG_FILE` environment variable. It is evaluated using the Node.js `require()` |
 | `SAML_SP_AUDIENCE` | Service provider audience value for AudienceRestriction assertions.	| none|
 | `SAML_AUTHN_CONTEXT` | The authn context defines the method by which the user will authenticate with the IdP. Normally the default value works on most systems, but it may be necessary to change this value. For example, Azure may want this set to `urn:oasis:names:tc:SAML:2.0:ac:classes:Password` in certain cases.	| `urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport` |
