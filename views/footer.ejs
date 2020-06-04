@@ -1,8 +1,14 @@
 <footer class="footer Site-footer">
   <div class="content has-text-centered">
     <p>
-      <strong><%= title %></strong>
-      Copyright &copy; 2019 <a href="http://perforce.com">Perforce Software</a>, Inc.
+      <strong>
+        <%= title %>
+      </strong>
+      Copyright &copy; 
+      <script>
+        var CurrentYear = new Date().getFullYear()
+        document.write(CurrentYear)
+      </script> <a href="http://perforce.com">Perforce Software</a>, Inc.
       All rights reserved.
     </p>
   </div>
