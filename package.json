@@ -8,7 +8,7 @@
     "saml"
   ],
   "homepage": "http://www.perforce.com",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "author": {
     "name": "Perforce Software",
     "email": "support@perforce.com"
@@ -48,7 +48,6 @@
     "winston": "^3.2.1",
     "winston-syslog": "^2.4.4"
   },
-  "private": true,
   "devDependencies": {
     "chai": "^4.2.0",
     "geckodriver": "^1.19.1",
