@@ -229,6 +229,7 @@ You may elect to fetch the IdP metadata by setting `SAML_IDP_METADATA_URL`, in w
 | `SP_KEY_ALGO` | The algorithm used to sign the requests. | `sha256` |
 | `CA_CERT_FILE` | Path of certificate authority file for service to use when verifying client certificates. | _none_ |
 | `CA_CERT_PATH` | Path of directory containing certificate authority files for service to use when verifying client certificates. All files in the named directory will be processed. | _none_ |
+| `CLIENT_CERT_CN` | A name or pattern used to match against the **Common Name** in the client certificate used to acquire the user profile data. The patterns supported are described in the [minimatch](https://github.com/isaacs/minimatch) library, with the asterisk (`*`) being the most common wildcard. Examples include `client.example.com`, `*.example.com`, and `*TrustedClient*`. | _none_ |
 | `DEFAULT_PROTOCOL` | The default authentication protocol to use. Can be oidc or saml. | `saml` |
 | `LOGIN_TIMEOUT` | How long in seconds to wait for user to successfully authenticate. | `60` |
 
