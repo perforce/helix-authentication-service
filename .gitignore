@@ -16,6 +16,7 @@ build/Release
 
 # other build artifacts
 docs/licenses
+README.html
 
 # Dependency directories
 node_modules/
