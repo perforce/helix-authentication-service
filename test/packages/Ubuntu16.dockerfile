@@ -6,10 +6,10 @@ FROM ubuntu:16.04
 
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
+RUN apt-get -q update
 RUN apt-get -q -y install sudo
 
 # install node.js via package from nodesource
-RUN apt-get -q update
 ADD https://deb.nodesource.com/setup_12.x setup_12.x
 RUN bash setup_12.x
 RUN apt-get -q -y install nodejs
