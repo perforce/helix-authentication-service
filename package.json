@@ -1,7 +1,7 @@
 {
   "name": "helix-auth-svc",
   "version": "2019.1.1-000001",
-  "description": "Helix Authentication Service",
+  "description": "Helix Authentication Service: +MAIN+",
   "keywords": [
     "authentication",
     "oidc",
