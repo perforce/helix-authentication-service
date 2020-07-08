@@ -22,5 +22,8 @@ RUN yum -y install ./yum/rhel/8/x86_64/helix-auth-svc-*.rpm
 # ensure the package is fully installed
 RUN rpm -qa helix-auth-svc | grep -q helix-auth-svc
 
+# ensure the package.json has the expected version string
+RUN grep -qE 'HAS/noarch/20..\../.+' /opt/perforce/helix-auth-svc/package.json
+
 # ensure pm2 is installed as expected
 RUN test -f /usr/bin/pm2

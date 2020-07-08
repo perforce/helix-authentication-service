@@ -23,5 +23,8 @@ RUN apt install ./apt/ubuntu/xenial/incoming/helix-auth-svc_*.deb
 # ensure the package is fully installed
 RUN dpkg-query -s helix-auth-svc | grep -q 'install ok installed'
 
+# ensure the package.json has the expected version string
+RUN grep -qE 'HAS/noarch/20..\../.+' /opt/perforce/helix-auth-svc/package.json
+
 # ensure pm2 is installed as expected
 RUN test -f /usr/bin/pm2
