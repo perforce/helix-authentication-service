@@ -1,5 +1,6 @@
 %define p4release %(echo -n $ID_REL_BASE)
 %define p4change %(echo -n $ID_PATCH)
+%define hasversion %(echo -n "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}")
 %define installprefix /opt/perforce/helix-auth-svc
 
 Name:           helix-auth-svc
@@ -49,7 +50,9 @@ cp -pr views/* %{buildroot}%{installprefix}/views
 cp ecosystem.config.js %{buildroot}%{installprefix}/ecosystem.config.js
 cp logging.config.js %{buildroot}%{installprefix}/logging.config.js
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
-sed -e "s/\"2020.1.9999999\"/\"${ID_REL_BASE}\"/" package.json > %{buildroot}%{installprefix}/package.json
+sed -e "s/\"2019.1.1-000001\"/\"${ID_REL_BASE}.${ID_PATCH}\"/" \
+    -e "s|+MAIN+|%{hasversion}|" \
+    package.json > %{buildroot}%{installprefix}/package.json
 cp README.md %{buildroot}%{installprefix}/README.md
 
 %files
