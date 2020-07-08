@@ -98,7 +98,8 @@ New functionality in 2019.1.1.000001
         Support specifying a CA path in addition to a single file.
 
     HAS-35 (Change #1910276)
-        Add OIDC_CLIENT_SECRET_FILE setting, discourage use of OIDC_CLIENT_SECRET.
+        Added the OIDC_CLIENT_SECRET_FILE setting because we discourage the
+        use of OIDC_CLIENT_SECRET.
 
     HAS-36 (Change #1914136)
         Support logging to syslog rather than plain file.
