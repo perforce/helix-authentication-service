@@ -49,6 +49,13 @@ RUN sed -e "s/\"2019.1.1-000001\"/\"${ID_REL_BASE}.${ID_PATCH}\"/" \
 COPY README.md README.md
 
 #
+# produce an HTML version of the Markdown README file
+#
+RUN npm -q ci
+RUN npx showdown makehtml -i README.md -o README.html --tables --completeHTMLDocument
+RUN rm -rf node_modules
+
+#
 # build only what is needed for deployment
 #
 RUN npm ci -q --only=production

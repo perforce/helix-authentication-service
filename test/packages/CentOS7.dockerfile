@@ -25,5 +25,8 @@ RUN rpm -qa helix-auth-svc | grep -q helix-auth-svc
 # ensure the package.json has the expected version string
 RUN grep -qE 'HAS/noarch/20..\../.+' /opt/perforce/helix-auth-svc/package.json
 
+# ensure certain files are present
+RUN test -f /opt/perforce/helix-auth-svc/README.html
+
 # ensure pm2 is installed as expected
 RUN test -f /usr/bin/pm2

@@ -54,6 +54,7 @@ sed -e "s/\"2019.1.1-000001\"/\"${ID_REL_BASE}.${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
 cp README.md %{buildroot}%{installprefix}/README.md
+cp README.html %{buildroot}%{installprefix}/README.html
 
 %files
 %docdir %{installprefix}/docs
