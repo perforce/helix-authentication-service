@@ -24,7 +24,7 @@ module.exports = {
       OIDC_ISSUER_URI: 'http://localhost:3001/',
       SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
       SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
-      SAML_SP_ISSUER: 'urn:example:sp',
+      SAML_SP_ENTITY_ID: 'https://has.example.com',
       SP_CERT_FILE: 'certs/server.crt',
       SP_KEY_FILE: 'certs/server.key',
       SVC_BASE_URI: 'https://localhost:3000'
@@ -38,7 +38,7 @@ module.exports = {
       // FORCE_AUTHN: false,
       // IDP_CERT_FILE: undefined,
       // LOGGING: undefined,
-      // SAML_IDP_ISSUER: undefined,
+      // SAML_IDP_ENTITY_ID: undefined,
       // IDP_CONFIG_FILE: './saml_idp.conf.js',
       // LOGIN_TIMEOUT: 60,
       // OIDC_CLIENT_SECRET: undefined,

@@ -51,7 +51,7 @@ the default port.
 'saml' => array(
     'header' => 'saml-response: ',
     'sp' => array(
-        'entityId' => 'urn:example:sp',
+        'entityId' => 'https://has.example.com',
         'assertionConsumerService' => array(
             'url' => 'http://swarm.example.com',
         ),
@@ -74,7 +74,7 @@ changed without modifying the authentication service source code.
 The authentication service must be configured to know about the service provider
 (Swarm) that will be connecting to it. This is defined in the `IDP_CONFIG_FILE`
 configuration file described in the HAS administrator's guide. In this example,
-the key would be `urn:example:sp` and its value would be
+the key would be `https://has.example.com` and its value would be
 `http://swarm.example.com/login` (Swarm wants the extra `/login` on the URL).
 
 The service can support multiple Swarm installations, simply add more entries to

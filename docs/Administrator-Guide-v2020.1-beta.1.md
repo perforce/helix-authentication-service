@@ -200,8 +200,8 @@ As for the OIDC issuer URI, that value is advertised in the discovery document m
 | `SAML_IDP_METADATA_URL` | URL of the IdP metadata configuration in XML format. | _none_ |
 | `SAML_IDP_SSO_URL` | URL of IdP Single Sign-On service. | _none_ |
 | `SAML_IDP_SLO_URL` | URL of IdP Single Log-Out service. | _none_ |
-| `SAML_SP_ISSUER` | The entity identifier (`entityID`) for the Helix Authentication Service. | `urn:example:sp` |
-| `SAML_IDP_ISSUER` | The entity identifier (`entityID`) for the identity provider. This is not required, but if provided, then the IdP issuer will be validated for incoming logout requests/responses.
+| `SAML_SP_ENTITY_ID` | The entity identifier (`entityID`) for the Helix Authentication Service. | `https://has.example.com` |
+| `SAML_IDP_ENTITY_ID` | The entity identifier (`entityID`) for the identity provider. This is not required, but if provided, then the IdP issuer will be validated for incoming logout requests/responses.
 | `IDP_CONFIG_FILE` | Path of the configuration file that defines SAML service providers that will be connecting to the authentication service. | **Note:** When the authentication service is acting as a SAML identity provider, it reads some of its settings from a configuration file in the auth service installation. By default, this file is named `saml_idp.conf.js` and is identified by the `IDP_CONFIG_FILE` environment variable. It is evaluated using the Node.js `require()` |
 | `SAML_SP_AUDIENCE` | Service provider audience value for AudienceRestriction assertions.	| none|
 | `SAML_AUTHN_CONTEXT` | The authn context defines the method by which the user will authenticate with the IdP. Normally the default value works on most systems, but it may be necessary to change this value. For example, Azure may want this set to `urn:oasis:names:tc:SAML:2.0:ac:classes:Password` in certain cases.	| `urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport` |
@@ -210,7 +210,7 @@ As for the OIDC issuer URI, that value is advertised in the discovery document m
 
 SAML identity providers advertise some of this information through their metadata URL. The URL is different for each provider, unlike OIDC. See [Example Identity Provider Configurations](#example-identity-provider-configurations).
 
-When configuring the service as a "service provider" within a SAML identity provider, provide an `entityID` that is unique within your set of registered applications. By default, the service uses the value `urn:example:sp`, which can be changed by setting the `SAML_SP_ISSUER` environment variable. Anywhere that `urn:example:sp` appears in this documentation, be sure to replace it with the value you defined in the identity provider.
+When configuring the service as a "service provider" within a SAML identity provider, provide an `entityID` that is unique within your set of registered applications. By default, the service uses the value `https://has.example.com`, which can be changed by setting the `SAML_SP_ENTITY_ID` environment variable.
 
 You may elect to fetch the IdP metadata by setting `SAML_IDP_METADATA_URL`, in which case several other settings _may_ be configured automatically by the service. Exactly which settings are configured automatically depends on what information the IdP advertises via the metadata. These settings include `SAML_IDP_SSO_URL`, `SAML_IDP_SLO_URL`, `SAML_NAMEID_FORMAT`, and the IdP certificate that would be loaded from the file named in `IDP_CERT_FILE`. In the unlikely scenario that the IdP returns data that needs to be modified, that can be achieved by setting the correct value in the appropriate environment variable (e.g. `SAML_NAMEID_FORMAT`).
 
@@ -398,7 +398,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Register a new application under Azure Active Directory.
 1. You can use a single app registration for both OIDC and SAML.
 1. Enter the auth service URL as the redirect URL.
-1. Copy the _Application (client) ID_ to the `SAML_SP_ISSUER` environment variable.
+1. Copy the _Application (client) ID_ to the `SAML_SP_ENTITY_ID` environment variable.
 1. Open the API endpoints page: click the **Endpoints** button from app overview page.
 1. Copy the _Federation metadata document_ value to the `SAML_IDP_METADATA_URL` environment variable.
 1. If you need to set the login and logout URLs and name identifier directly rather than use the metadata:
@@ -417,10 +417,10 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Click the **SAML apps** button.
 1. Click the **Add a service/App to your domain** link.
 1. Click the **SETUP MY OWN CUSTOM APP** link at the bottom of the dialog.
-1. On the **Google IdP Information** screen, copy the _SSO URL_ and  _Entity ID_ values to the  `SAML_IDP_SSO_URL` and `SAML_IDP_ISSUER` environment variables.
+1. On the **Google IdP Information** screen, copy the _SSO URL_ and  _Entity ID_ values to the  `SAML_IDP_SSO_URL` and `SAML_IDP_ENTITY_ID` environment variables.
 1. Click the **NEXT** button.
 1. For the _ACS URL_ enter `{SVC_BASE_URI}/saml/sso`
-1. For the _Entity ID_ enter `urn:example:sp`
+1. For the _Entity ID_ enter the value from the `SAML_SP_ENTITY_ID` setting in the service configuration.
 1. Click the **NEXT** button, and then **FINISH**, and then **OK** to complete the initial setup.
 1. On the **Settings** page for the new application, click the **EDIT SERVICE** button.
 1. Change the *Service status* to **ON** to enable users to authenticate with this application.
@@ -468,10 +468,10 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 1. Provide a meaningful name on the next screen.
 1. Click **Save** to go to the next screen.
 1. For the _Single sign on URL_ enter `{SVC_BASE_URI}/saml/sso`
-1. For the _Audience URI_ enter `urn:example:sp`
+1. For the _Audience URI_ enter the value from the `SAML_SP_ENTITY_ID` setting in the service configuration.
 1. Click the **Show Advanced Settings** link and check the **Enable Single Logout** checkbox.
 1. For the _Single Logout URL_ enter `{SVC_BASE_URI}/saml/slo`
-1. For the _SP Issuer_ enter `urn:example:sp`
+1. For the _SP Issuer_ enter the value from the `SAML_SP_ENTITY_ID` setting in the service configuration.
 1. For _Signature Certificate_, select and upload the `certs/server.crt` file.
 1. Click the **Next** button to save the changes.
 1. There may be an additional screen to click through.
@@ -506,7 +506,7 @@ Otherwise you will immediately go to the "login failed" page, and the only indic
 #### SAML 2.0
 
 1. From the admin dashboard, create a new app: search for "SAML" and select _SAML Test Connector (Advanced)_ from the list.
-1. On the _Configuration_ screen, enter `urn:example:sp` for _Audience_.
+1. On the _Configuration_ screen, enter the value from the `SAML_SP_ENTITY_ID` service setting into the _Audience_ field.
 1. On the same screen, enter `{SVC_BASE_URI}/saml/sso` for _Recipient_.
 1. And for _ACS (Consumer) URL Validator_, enter `.*` to match any value.
 1. For _ACS (Consumer) URL_, enter `{SVC_BASE_URI}/saml/sso`
