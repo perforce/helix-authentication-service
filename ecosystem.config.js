@@ -33,6 +33,7 @@ module.exports = {
       //
       // BIND_ADDRESS: '0.0.0.0',
       // CA_CERT_PATH: undefined,
+      // CLIENT_CERT_CN: undefined,
       // DEBUG: undefined,
       // DEFAULT_PROTOCOL: 'saml',
       // FORCE_AUTHN: false,
