@@ -11,7 +11,9 @@ License:        BSD
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
 
-Requires:       nodejs >= 12.16
+# Leaving the epoch off results in centos installing an older version of nodejs,
+# and for whatever reason, having the epoch forces yum to work correctly.
+Requires:       nodejs >= 2:12.16
 
 %description
 Authentication protocol (OIDC, SAML) integration service.
