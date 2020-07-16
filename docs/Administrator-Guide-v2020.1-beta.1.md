@@ -175,6 +175,7 @@ Changing the environment settings will require restarting the service for the ch
 
 - If using `npm start`, use `Ctrl-c` to stop the running process, and run `npm start` again.
 - If using pm2, use the `pm2 startOrReload ecosystem.config.js` command to gracefully restart.
+- If using pm2 and running in production mode (when `NODE_ENV` is set to `production`), use the commands `pm2 kill` and `pm2 start auth-svc` to force the service to restart.
 
 ### OpenID Connect settings
 
@@ -536,7 +537,7 @@ Next, download the updated release of the service to a new file location. Do _no
 
 Next, copy the SSL certificates from the old install location to the new one.
 
-Finally, copy the configuration file from the old install location to the new one. This may be the `.env` file, or if using the pm2 process manager, it would be the `ecosystem.config.js` file. In either case, if the upgraded service has already been started, you will need to restart it for the configuration changes to take effect.
+Finally, copy the configuration settings from the old install location to the new one. This may be the `.env` file, or if using the pm2 process manager, it would be the `env` section of the `ecosystem.config.js` file; do not copy the entire `ecosystem.config.js` file as there may be changes made to the setup, outside of the `env` section. In either case, if the upgraded service has already been started, you will need to restart it for the configuration changes to take effect.
 
 ## Troubleshooting
 
