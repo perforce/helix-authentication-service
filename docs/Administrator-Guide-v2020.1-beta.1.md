@@ -382,12 +382,12 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 
 #### OpenID Connect
 
-1. Visit the Microsoft Azure portal.
-1. Register a new application under Azure Active Directory.
+1. Visit the Microsoft Azure portal and select Azure Active Directory.
+1. Under **App registrations**, register a new application.
 1. You can use a single app registration for both OIDC and SAML.
 1. For the redirect URL enter `{SVC_BASE_URI}/oidc/callback`.
 1. Copy the _Application (client) ID_ to the `OIDC_CLIENT_ID` environment variable.
-1. Open the _OpenID Connect metadata document_ URL in the browser (click Endpoints button from app overview page).
+1. Open the _OpenID Connect metadata document_ URL in the browser (click **Endpoints** button from app overview page).
 1. Copy the _issuer_ URL and enter as the `OIDC_ISSUER_URI` environment variable; if the issuer URI contains `{tenantid}` then replace it with the _Directory (tenant) ID_ from the application overview page.
 1. Under _Certificates &amp; Secrets_, click **New client secret**, copy the secret value to the `OIDC_CLIENT_SECRET_FILE` environment variable.
 1. Add a user account (guest works well) such that it has a defined email field; for whatever reason, "personal" accounts do not have the "email" field defined.
@@ -395,8 +395,8 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 
 #### SAML 2.0
 
-1. Visit the Microsoft Azure portal.
-1. Register a new application under Azure Active Directory.
+1. Visit the Microsoft Azure portal and select Azure Active Directory.
+1. Under **App registrations**, register a new application.
 1. You can use a single app registration for both OIDC and SAML.
 1. Enter the auth service URL as the redirect URL.
 1. Copy the _Application (client) ID_ to the `SAML_SP_ENTITY_ID` environment variable.
@@ -409,6 +409,21 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Make sure the user email address matches the user in Active Directory.
 1. Configure the extension to use `nameID` as the `name-identifier` value.
 
+#### SAML via Gallery Template
+
+1. Visit the Microsoft Azure portal and select Azure Active Directory.
+1. Under **Enterprise applications**, register a new application.
+1. In the _Add from the gallery_ form, enter `Perforce` and select the _Perforce Helix Core_ application.
+1. Click the **Add** button to add the application to the directory.
+1. Assign users to the application from the **Users and groups** screen.
+1. Start the SAML configuration process from the **Single sign-on** screen.
+1. In the _Basic SAML Configuration_ section, configure the required fields:
+    1. For the _Entity ID_ enter the value from the `SAML_SP_ENTITY_ID` setting in the service configuration.
+    1. For the _Reply URL_ enter `{SVC_BASE_URI}/saml/sso`
+    1. For the _Sign on URL_ enter `{SVC_BASE_URI}`
+1. Click the **Save** button to save the SAML configuration.
+1. From the **Single sign-on** screen, find the _App Federation Metadata Url_ field and copy the value to the `SAML_IDP_METADATA_URL` environment variable.
+
 ### Google gSuite
 
 #### SAML 2.0
@@ -418,7 +433,7 @@ For every occurrence of `SVC_BASE_URI` in the instructions below, substitute the
 1. Click the **SAML apps** button.
 1. Click the **Add a service/App to your domain** link.
 1. Click the **SETUP MY OWN CUSTOM APP** link at the bottom of the dialog.
-1. On the **Google IdP Information** screen, copy the _SSO URL_ and  _Entity ID_ values to the  `SAML_IDP_SSO_URL` and `SAML_IDP_ENTITY_ID` environment variables.
+1. On the **Google IdP Information** screen, copy the _SSO URL_ and _Entity ID_ values to the `SAML_IDP_SSO_URL` and `SAML_IDP_ENTITY_ID` environment variables.
 1. Click the **NEXT** button.
 1. For the _ACS URL_ enter `{SVC_BASE_URI}/saml/sso`
 1. For the _Entity ID_ enter the value from the `SAML_SP_ENTITY_ID` setting in the service configuration.
