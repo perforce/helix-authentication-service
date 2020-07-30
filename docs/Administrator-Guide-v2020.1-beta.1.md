@@ -556,6 +556,16 @@ Finally, copy the configuration settings from the old install location to the ne
 
 ## Troubleshooting
 
+### OIDC challenge methods not supported
+
+Some OpenID Connect identity providers may not be configured to have a default code challenge method. As a result, user authentication may fail, and the service log file will contain an error like the following:
+
+```
+error: oidc: initialization failed: code_challenge_methods_supported is not properly set on issuer ...
+```
+
+If this happens, the workaround is to set the `OIDC_CODE_CHALLENGE_METHOD` configuration setting to the value `S256` and then restart the authentication service.
+
 ### "Missing authentication strategy" displayed in browser
 
 Check authentication service log files for possible errors. During the initial setup, it is likely that the settings for the protocol (e.g. SAML or OIDC) simply have not been defined as yet. Without the necessary protocol settings, the service cannot initialize the authentication "strategy" (the appropriate [passport](http://www.passportjs.org) module).
