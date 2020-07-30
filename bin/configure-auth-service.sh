@@ -1,0 +1,627 @@
+#!/usr/bin/env bash
+#
+# Configuration script for Helix Authentication Service.
+#
+# Copyright 2020, Perforce Software Inc. All rights reserved.
+#
+INTERACTIVE=true
+MONOCHROME=false
+DEBUG=false
+PLATFORM=''
+SVC_BASE_URI=''
+SAML_IDP_METADATA_URL=''
+SAML_IDP_SSO_URL=''
+SAML_SP_ENTITY_ID=''
+OIDC_ISSUER_URI=''
+OIDC_CLIENT_ID=''
+OIDC_CLIENT_SECRET=''
+OIDC_CLIENT_SECRET_FILE='client-secret.txt'
+
+trap reset_terminal INT TERM
+
+# In case the user interrupts while being prompted for a password.
+function reset_terminal() {
+    stty echo -echonl
+    exit 1
+}
+
+# Print arguments to STDERR and exit.
+function die() {
+    error "FATAL: $*" >&2
+    exit 1
+}
+
+# Begin printing text in green.
+function highlight_on() {
+    $MONOCHROME || echo -n -e "\033[32m"
+    $MONOCHROME && echo -n '' || true
+}
+
+# Reset text color to default.
+function highlight_off() {
+    $MONOCHROME || echo -n -e "\033[0m"
+    $MONOCHROME && echo -n '' || true
+}
+
+# Print the argument in green text.
+function highlight() {
+    $MONOCHROME || echo -e "\033[32m$1\033[0m"
+    $MONOCHROME && echo -e "$1" || true
+}
+
+# Print the input validation error in red text on STDERR.
+function error_prompt() {
+    if $INTERACTIVE; then
+        error "$@"
+    fi
+}
+
+# Print the first argument in red text on STDERR.
+function error() {
+    $MONOCHROME || echo -e "\033[31m$1\033[0m" >&2
+    $MONOCHROME && echo -e "$1" >&2 || true
+}
+
+# Print the first argument in blue text on STDERR.
+function debug() {
+    $DEBUG || return 0
+    $MONOCHROME || echo -e "\033[33m$1\033[0m" >&2
+    $MONOCHROME && echo -e "$1" >&2 || true
+}
+
+# Prompt the user for information by showing a prompt string, and if the
+# prompt is for a password also disabling echo on the terminal. Optionally
+# calls a validation function to check if the response is OK.
+#
+# prompt_for <VAR> <prompt> <default> [<ispassword>] [<validationfunc>]
+function prompt_for() {
+    local var="$1"
+    local prompt="$2"
+    local default="$3"
+    local secure=false
+    local check_func=true
+    local non_default_check_func=false
+
+    [[ -n "$4" ]] && secure=$4
+    [[ -n "$5" ]] && check_func=$5 && non_default_check_func=true
+
+    if [[ "$default" = ' ' ]]; then
+        default=''
+    fi
+
+    while true; do
+        local pw=''
+        local pw2=''
+        if $secure; then
+            stty -echo echonl
+        fi
+
+        if [[ -n "$default" ]]; then
+            showDefault=$default
+            if [[ "$secure" = 'true' ]]; then
+                showDefault=$(echo "$default" | sed 's/./*/g')
+            fi
+            read -e -p "$prompt [$showDefault]: " pw
+            if [[ ! -n "$pw" ]]; then
+                pw=$default
+            fi
+        else
+            read -e -p "$prompt: " pw
+        fi
+        stty echo -echonl || true
+        if $secure; then
+            echo ''
+        fi
+        if $check_func "$pw"; then
+            if $secure && $non_default_check_func; then
+                stty -echo echonl
+                read -e -p "Re-enter new password: " pw2
+                stty echo -echonl || true
+                echo ''
+                if [[ "$pw" == "$pw2" ]]; then
+                    eval "$var=\"$pw\""
+                    break;
+                else
+                    echo 'Passwords do not match. Please try again.'
+                fi
+            else
+                eval "$var=\"$pw\""
+                break;
+            fi
+        fi
+    done
+    return 0
+}
+
+# Print the usage text to STDOUT.
+function usage() {
+    cat <<EOS
+
+Usage:
+
+    configure-auth-service.sh [-n] [-m] ...
+
+Description:
+
+    Configuration script for Helix Authentication Service.
+
+    This script will modify the ecosystem.config.js file and restart pm2
+    according to the values provided via arguments or interactive input.
+
+    -m
+        Monochrome; no colored text.
+
+    -n
+        Non-interactive mode; exits immediately if prompting is required.
+
+    --base-url
+        HTTP/S address of the authentication service.
+
+    --oidc-issuer-uri
+        Issuer URI for the OpenID Connect identity provider.
+
+    --oidc-client-id
+        Client identifier for connecting to OIDC identity provider.
+
+    --oidc-client-secret
+        Client secret associated with the OIDC client identifier.
+
+    --saml-idp-metadata-url
+        URL for the SAML identity provider configuration metadata.
+
+    --saml-idp-sso-url
+        URL for the SAML identity provider SSO endpoint.
+
+    --saml-sp-entityid
+        SAML entity identifier for the authentication service.
+
+    --debug
+        Enable debugging reporting.
+
+    -h / --help
+        Display this help message.
+
+See the Helix Authentication Service Administrator Guide for additional
+information pertaining to configuring and running the service.
+
+EOS
+}
+
+# Echo the array inputs separated by the first argument.
+function join_by() {
+    local IFS="$1"; shift; echo "$*";
+}
+
+# Validate the given argument as a URL, returning 0 if okay, 1 otherwise.
+function validate_url() {
+    local URLRE='^https?://'
+    if [[ -z "$1" ]] || [[ ! "$1" =~ $URLRE ]]; then
+        error_prompt 'Please enter a valid URL.'
+        return 1
+    fi
+    return 0
+}
+
+# Validate the given argument as a URL, if not blank.
+function optional_url() {
+    local URLRE='^https?://'
+    if [[ -n "$1" ]] && [[ ! "$1" =~ $URLRE ]]; then
+        error_prompt 'Please enter a valid URL.'
+        return 1
+    fi
+    return 0
+}
+
+# Ensure OS is compatible and dependencies are already installed.
+function ensure_readiness() {
+    if [[ -e '/etc/redhat-release' ]]; then
+        PLATFORM=redhat
+    elif [[ -e '/etc/debian_version' ]]; then
+        PLATFORM=debian
+    else
+        die 'Could not determine OS distribution.'
+    fi
+    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v12\.'; then
+        die 'Node.js v12 is required. Please run install.sh to install dependencies.'
+    fi
+    if ! which pm2 >/dev/null 2>&1; then
+        die 'pm2 is required. Please run install.sh to install dependencies.'
+    fi
+    if [[ ! -d node_modules ]]; then
+        die 'Module dependencies are missing. Please run install.sh before proceeding.'
+    fi
+}
+
+function read_arguments() {
+    # build up the list of arguments in pieces since there are so many
+    local ARGS=(base-url:)
+    ARGS+=(oidc-issuer-uri: oidc-client-id: oidc-client-secret:)
+    ARGS+=(saml-idp-sso-url: saml-sp-entityid: saml-idp-metadata-url:)
+    ARGS+=(debug help)
+    local TEMP=$(getopt -n 'configure-auth-service.sh' \
+        -o 'hmn' \
+        -l "$(join_by , ${ARGS[@]})" -- "$@")
+    if (( $? != 0 )); then
+        usage
+        exit 1
+    fi
+
+    # Re-inject the arguments from getopt, so now we know they are valid and in
+    # the expected order.
+    eval set -- "$TEMP"
+    while true; do
+        case "$1" in
+            -h)
+                usage
+                exit 0
+                ;;
+            -m)
+                MONOCHROME=true
+                shift
+                ;;
+            -n)
+                INTERACTIVE=false
+                shift
+                ;;
+            --base-url)
+                SVC_BASE_URI=$2
+                shift 2
+                ;;
+            --oidc-issuer-uri)
+                OIDC_ISSUER_URI=$2
+                shift 2
+                ;;
+            --oidc-client-id)
+                OIDC_CLIENT_ID=$2
+                shift 2
+                ;;
+            --oidc-client-secret)
+                OIDC_CLIENT_SECRET=$2
+                shift 2
+                ;;
+            --saml-idp-metadata-url)
+                SAML_IDP_METADATA_URL=$2
+                shift 2
+                ;;
+            --saml-idp-sso-url)
+                SAML_IDP_SSO_URL=$2
+                shift 2
+                ;;
+            --saml-sp-entityid)
+                SAML_SP_ENTITY_ID=$2
+                shift 2
+                ;;
+            --debug)
+                DEBUG=true
+                shift
+                ;;
+            --help)
+                usage
+                exit 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                die "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    # spurious arguments that are not supported by this script
+    if (( $# != 0 )); then
+        usage
+        exit 1
+    fi
+}
+
+# Show the argument values already provided.
+function display_arguments() {
+    highlight_on
+    cat <<EOT
+Summary of arguments passed:
+
+Service base URL               [${SVC_BASE_URI:-(not specified)}]
+OIDC Issuer URI                [${OIDC_ISSUER_URI:-(not specified)}]
+OIDC Client ID                 [${OIDC_CLIENT_ID:-(not specified)}]
+OIDC Client Secret             [(secret not shown)]
+SAML IdP Metadata URL          [${SAML_IDP_METADATA_URL:-(not specified)}]
+SAML IdP SSO URL               [${SAML_IDP_SSO_URL:-(not specified)}]
+SAML SP Entity ID              [${SAML_SP_ENTITY_ID:-(not specified)}]
+
+For a list of other options, type Ctrl-C to exit, and run this script with
+the --help option.
+
+EOT
+    highlight_off
+}
+
+# Show a message about the interactive configuration procedure.
+function display_interactive() {
+    highlight_on
+    cat <<EOT
+You have entered interactive configuration for the service. This script will
+ask a series of questions, and use your answers to configure the service for
+first time use. Options passed in from the command line or automatically
+discovered in the environment are presented as defaults. You may press enter
+to accept them, or enter an alternative.
+EOT
+    highlight_off
+}
+
+# Prompt for the URL of the authentication service.
+function prompt_for_svc_base_uri() {
+    cat <<EOT
+
+The URL of the authentication service, which must be visible to end users.
+It must match the application settings defined in the IdP configuration.
+EOT
+    prompt_for SVC_BASE_URI 'Enter the URL for the authentication service' "${SVC_BASE_URI}" false validate_url
+}
+
+# Prompt for the SAML IdP metadata URL.
+function prompt_for_saml_idp_metadata_url() {
+    cat <<EOT
+
+URL of the SAML identity provider metadata configuration in XML format.
+This may help to configure several other SAML settings automatically.
+EOT
+    prompt_for SAML_IDP_METADATA_URL 'Enter the URL for SAML IdP metadata' "${SAML_IDP_METADATA_URL}" false optional_url
+}
+
+# Prompt for the SAML IdP SSO URL.
+function prompt_for_saml_idp_sso_url() {
+    cat <<EOT
+
+URL of SAML identity provider Single Sign-On service.
+EOT
+    if [[ -n "${SAML_IDP_METADATA_URL}" ]]; then
+        echo 'This value may be used to override the SSO URL in the SAML metadata.'
+    fi
+    prompt_for SAML_IDP_SSO_URL 'Enter the URL for SAML IdP SSO endpoint' "${SAML_IDP_SSO_URL}" false optional_url
+}
+
+# Prompt for the SAML entity identifier of the service.
+function prompt_for_saml_sp_entity_id() {
+    cat <<EOT
+
+The SAML entity identifier (entityID) for the Helix Authentication Service.
+This value may be defined by the SAML identity provider (e.g. Azure).
+EOT
+    prompt_for SAML_SP_ENTITY_ID 'Enter the SAML entity ID for service' "${SAML_SP_ENTITY_ID}"
+}
+
+# Prompt for the OIDC issuer URI.
+function prompt_for_oidc_issuer_uri() {
+    cat <<EOT
+
+URI for the OIDC identity provider issuer, typically a URL.
+EOT
+    prompt_for OIDC_ISSUER_URI 'Enter the URI for OIDC issuer' "${OIDC_ISSUER_URI}"
+}
+
+# Prompt for the OIDC client identifier.
+function prompt_for_oidc_client_id() {
+    cat <<EOT
+
+The client identifier as provided by the OIDC identity provider.
+EOT
+    prompt_for OIDC_CLIENT_ID 'Enter the OIDC client ID' "${OIDC_CLIENT_ID}"
+}
+
+# Prompt for the OIDC client secret.
+function prompt_for_oidc_client_secret() {
+    cat <<EOT
+
+The client secret as provided by the OIDC identity provider.
+EOT
+    prompt_for OIDC_CLIENT_SECRET 'Enter the OIDC client secret' "${OIDC_CLIENT_SECRET}" true
+}
+
+# Prompt for inputs.
+function prompt_for_inputs() {
+    prompt_for_svc_base_uri
+    prompt_for_oidc_issuer_uri
+    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+        prompt_for_oidc_client_id
+        prompt_for_oidc_client_secret
+    fi
+    prompt_for_saml_idp_metadata_url
+    prompt_for_saml_idp_sso_url
+    if [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
+        prompt_for_saml_sp_entity_id
+    fi
+}
+
+# Validate all of the inputs however they may have been provided.
+function validate_inputs() {
+    if ! validate_url "$SVC_BASE_URI"; then
+        error 'A valid base URL for the service must be provided.'
+        return 1
+    fi
+    if [[ -z "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
+        error 'Either OIDC or SAML identity provider settings must be provided.'
+        return 1
+    fi
+    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+        if [[ -z "${OIDC_CLIENT_ID}" ]]; then
+            error 'An OIDC client identifier must be provided.'
+            return 1
+        fi
+        if [[ -z "${OIDC_CLIENT_SECRET}" ]]; then
+            error 'An OIDC client secret must be provided.'
+            return 1
+        fi
+    fi
+    if [[ -n "${SAML_IDP_SSO_URL}" ]] && ! validate_url "${SAML_IDP_SSO_URL}"; then
+        error 'A valid SAML IdP SSO URL must be provided.'
+        return 1
+    fi
+    if [[ -n "${SAML_IDP_METADATA_URL}" ]] && ! validate_url "${SAML_IDP_METADATA_URL}"; then
+        error 'A valid SAML IdP metadata URL must be provided.'
+        return 1
+    fi
+    return 0
+}
+
+# Normalize the user inputs.
+function clean_inputs() {
+    if [[ ! -z "$SVC_BASE_URI" ]]; then
+        # trim trailing slashes
+        SVC_BASE_URI="$(echo -n "$SVC_BASE_URI" | sed 's,[/]*$,,')"
+    fi
+    if [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
+        # set a default value for SAML_SP_ENTITY_ID
+        if [[ -z "${SAML_SP_ENTITY_ID}" ]]; then
+            SAML_SP_ENTITY_ID=${SVC_BASE_URI}
+        fi
+    fi
+}
+
+# Print what this script will do.
+function print_preamble() {
+    cat <<EOT
+
+The script is ready to make the configuration changes.
+
+The operations involved are as follows:
+
+EOT
+    echo "  * Set SVC_BASE_URI to ${SVC_BASE_URI}"
+    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+        echo "  * Set OIDC_ISSUER_URI to ${OIDC_ISSUER_URI}"
+    fi
+    if [[ -n "${OIDC_CLIENT_ID}" ]]; then
+        echo "  * Set OIDC_CLIENT_ID to ${OIDC_CLIENT_ID}"
+    fi
+    if [[ -n "${OIDC_CLIENT_SECRET}" ]]; then
+        echo "  * Set OIDC_CLIENT_SECRET_FILE to ${OIDC_CLIENT_SECRET_FILE}"
+        echo '    (the file will contain the client secret)'
+    fi
+    if [[ -n "${SAML_IDP_METADATA_URL}" ]]; then
+        echo "  * Set SAML_IDP_METADATA_URL to ${SAML_IDP_METADATA_URL}"
+    fi
+    if [[ -n "${SAML_IDP_SSO_URL}" ]]; then
+        echo "  * Set SAML_IDP_SSO_URL to ${SAML_IDP_SSO_URL}"
+    fi
+    if [[ -n "${SAML_SP_ENTITY_ID}" ]]; then
+        echo "  * Set SAML_SP_ENTITY_ID to ${SAML_SP_ENTITY_ID}"
+    fi
+    echo -e "\nThe service will then be restarted (via pm2).\n"
+}
+
+# Prompt user to proceed with or cancel the configuration.
+function prompt_to_proceed() {
+    echo 'Do you wish to continue?'
+    select yn in 'Yes' 'No'; do
+        case $yn in
+            Yes) break ;;
+            No) exit ;;
+        esac
+    done
+}
+
+# Make the prescribed changes to the configuration file.
+function modify_config() {
+    # make a backup of the ecosystem file one time and leave it untouched as a
+    # record of the original contents
+    if [[ ! -f ../ecosystem.config.orig ]]; then
+        cp ../ecosystem.config.js ../ecosystem.config.orig
+    fi
+    # set DEFAULT_PROTOCOL based on provided inputs
+    local DEFAULT_PROTOCOL=''
+    if [[ -n "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
+        DEFAULT_PROTOCOL='oidc'
+    elif [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
+        DEFAULT_PROTOCOL='saml'
+    fi
+    if [[ -n "${OIDC_CLIENT_SECRET}" ]]; then
+        # write OIDC_CLIENT_SECRET to file named by OIDC_CLIENT_SECRET_FILE;
+        # make the OIDC_CLIENT_SECRET_FILE file readable only by current user
+        echo "${OIDC_CLIENT_SECRET}" > ${OIDC_CLIENT_SECRET_FILE}
+        chmod 600 ${OIDC_CLIENT_SECRET_FILE}
+    fi
+    # make a backup of the previous version of the configuration file
+    cp ../ecosystem.config.js ../ecosystem.config.bak
+    # use Node.js to update the configuration file in place since the format is
+    # a bit too complex for simple sed/awk scripting to handle
+    env DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL}" \
+        SVC_BASE_URI="${SVC_BASE_URI}" \
+        OIDC_ISSUER_URI="${OIDC_ISSUER_URI}" \
+        OIDC_CLIENT_ID="${OIDC_CLIENT_ID}" \
+        OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE}" \
+        SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}" \
+        SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL}" \
+        SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID}" \
+        node ./writeconf.js
+    return 0
+}
+
+# Restart the service for the configuration changes to take effect.
+function restart_service() {
+    pushd ..
+    if [[ "${PLATFORM}" == 'redhat' ]]; then
+        # need to run pm2 as root on centos/redhat
+        sudo pm2 kill
+        sudo pm2 startOrReload ecosystem.config.js
+    else
+        pm2 kill
+        pm2 startOrReload ecosystem.config.js
+    fi
+    popd
+    return 0
+}
+
+# Print a summary of what was done and any next steps.
+function print_summary() {
+    cat <<EOT
+
+==============================================================================
+Automated configuration complete!
+
+What was done:
+  * The ecosystem.config.js file was updated.
+  * The service was restarted via pm2.
+
+What should be done now:
+  * If not already completed, the server and client certificates should be
+    replaced with genuine certificates, replacing the self-signed certs.
+    See the Administration Guide for additional information.
+  * Consult the admin guide for other settings that may need to be changed
+    in accordance with the configuration of the identity provider.
+
+==============================================================================
+
+EOT
+}
+
+function main() {
+    ensure_readiness
+    set -e
+    read_arguments "$@"
+    if $INTERACTIVE || $DEBUG; then
+        display_arguments
+    fi
+    if $INTERACTIVE; then
+        display_interactive
+        prompt_for_inputs
+        while ! validate_inputs; do
+            prompt_for_inputs
+        done
+    elif ! validate_inputs; then
+        exit 1
+    fi
+    clean_inputs
+    print_preamble
+    if $INTERACTIVE; then
+        prompt_to_proceed
+    fi
+    cd "$( cd "$(dirname "$0")" ; pwd -P )"
+    modify_config
+    restart_service
+    print_summary
+}
+
+main "$@"
