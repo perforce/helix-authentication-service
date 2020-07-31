@@ -192,9 +192,18 @@ function join_by() {
     local IFS="$1"; shift; echo "$*";
 }
 
+# Validate the given argument is not empty, returning 0 if okay, 1 otherwise.
+function validate_nonempty() {
+    if [[ -z "$1" ]]; then
+        error_prompt 'Please enter a value.'
+        return 1
+    fi
+    return 0
+}
+
 # Validate the given argument as a URL, returning 0 if okay, 1 otherwise.
 function validate_url() {
-    local URLRE='^https?://'
+    local URLRE='^https?://.+'
     if [[ -z "$1" ]] || [[ ! "$1" =~ $URLRE ]]; then
         error_prompt 'Please enter a valid URL.'
         return 1
@@ -204,9 +213,19 @@ function validate_url() {
 
 # Validate the given argument as a URL, if not blank.
 function optional_url() {
-    local URLRE='^https?://'
+    local URLRE='^https?://.+'
     if [[ -n "$1" ]] && [[ ! "$1" =~ $URLRE ]]; then
         error_prompt 'Please enter a valid URL.'
+        return 1
+    fi
+    return 0
+}
+
+# Validate the given argument as an HTTPS URL, if not blank.
+function optional_https_url() {
+    local URLRE='^https://.+'
+    if [[ -n "$1" ]] && [[ ! "$1" =~ $URLRE ]]; then
+        error_prompt 'Please enter a valid HTTPS URL.'
         return 1
     fi
     return 0
@@ -399,7 +418,7 @@ function prompt_for_oidc_issuer_uri() {
 
 URI for the OIDC identity provider issuer, typically a URL.
 EOT
-    prompt_for OIDC_ISSUER_URI 'Enter the URI for OIDC issuer' "${OIDC_ISSUER_URI}"
+    prompt_for OIDC_ISSUER_URI 'Enter the URI for OIDC issuer' "${OIDC_ISSUER_URI}" false optional_https_url
 }
 
 # Prompt for the OIDC client identifier.
@@ -408,7 +427,11 @@ function prompt_for_oidc_client_id() {
 
 The client identifier as provided by the OIDC identity provider.
 EOT
-    prompt_for OIDC_CLIENT_ID 'Enter the OIDC client ID' "${OIDC_CLIENT_ID}"
+    local validate=''
+    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+        validate='validate_nonempty'
+    fi
+    prompt_for OIDC_CLIENT_ID 'Enter the OIDC client ID' "${OIDC_CLIENT_ID}" false $validate
 }
 
 # Prompt for the OIDC client secret.
@@ -417,7 +440,11 @@ function prompt_for_oidc_client_secret() {
 
 The client secret as provided by the OIDC identity provider.
 EOT
-    prompt_for OIDC_CLIENT_SECRET 'Enter the OIDC client secret' "${OIDC_CLIENT_SECRET}" true
+    local validate=''
+    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+        validate='validate_nonempty'
+    fi
+    prompt_for OIDC_CLIENT_SECRET 'Enter the OIDC client secret' "${OIDC_CLIENT_SECRET}" true $validate
 }
 
 # Prompt for inputs.
