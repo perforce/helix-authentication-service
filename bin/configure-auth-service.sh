@@ -9,6 +9,7 @@ MONOCHROME=false
 DEBUG=false
 PLATFORM=''
 SVC_BASE_URI=''
+declare -A PROTOCOLS=()
 SAML_IDP_METADATA_URL=''
 SAML_IDP_SSO_URL=''
 SAML_SP_ENTITY_ID=''
@@ -16,14 +17,6 @@ OIDC_ISSUER_URI=''
 OIDC_CLIENT_ID=''
 OIDC_CLIENT_SECRET=''
 OIDC_CLIENT_SECRET_FILE='client-secret.txt'
-
-trap reset_terminal INT TERM
-
-# In case the user interrupts while being prompted for a password.
-function reset_terminal() {
-    stty echo -echonl
-    exit 1
-}
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -69,64 +62,72 @@ function debug() {
     $MONOCHROME && echo -e "$1" >&2 || true
 }
 
-# Prompt the user for information by showing a prompt string, and if the
-# prompt is for a password also disabling echo on the terminal. Optionally
+# Prompt the user for information by showing a prompt string. Optionally
 # calls a validation function to check if the response is OK.
 #
-# prompt_for <VAR> <prompt> <default> [<ispassword>] [<validationfunc>]
+# prompt_for <VAR> <prompt> <default> [<validationfunc>]
 function prompt_for() {
     local var="$1"
     local prompt="$2"
     local default="$3"
-    local secure=false
     local check_func=true
-    local non_default_check_func=false
 
-    [[ -n "$4" ]] && secure=$4
-    [[ -n "$5" ]] && check_func=$5 && non_default_check_func=true
+    [[ -n "$4" ]] && check_func=$4
+    [[ "$default" =~ [[:space:]]+ ]] && default=''
 
-    if [[ "$default" = ' ' ]]; then
-        default=''
-    fi
+    while true; do
+        local input=''
+        if [[ -n "$default" ]]; then
+            read -e -p "$prompt [$default]: " input
+            if [[ ! -n "$input" ]]; then
+                input=$default
+            fi
+        else
+            read -e -p "$prompt: " input
+        fi
+        if $check_func "$input"; then
+            eval "$var=\"$input\""
+            break;
+        fi
+    done
+    return 0
+}
+
+# Prompt the user for a password by showing a prompt string and not echoing
+# input to the terminal. Optionally calls a validation function to check if the
+# response is OK.
+#
+# prompt_for <VAR> <prompt> <default> [<validationfunc>]
+function prompt_for_secret() {
+    local var="$1"
+    local prompt="$2"
+    local default="$3"
+    local check_func=true
+
+    [[ -n "$4" ]] && check_func=$4
+    [[ "$default" =~ [[:space:]]+ ]] && default=''
 
     while true; do
         local pw=''
         local pw2=''
-        if $secure; then
-            stty -echo echonl
-        fi
-
         if [[ -n "$default" ]]; then
-            showDefault=$default
-            if [[ "$secure" = 'true' ]]; then
-                showDefault=$(echo "$default" | sed 's/./*/g')
-            fi
-            read -e -p "$prompt [$showDefault]: " pw
+            showDefault=$(echo "$default" | sed 's/./*/g')
+            read -s -e -p "$prompt [$showDefault]: " pw
             if [[ ! -n "$pw" ]]; then
                 pw=$default
             fi
         else
-            read -e -p "$prompt: " pw
+            read -s -e -p "$prompt: " pw
         fi
-        stty echo -echonl || true
-        if $secure; then
-            echo ''
-        fi
+        echo ''
         if $check_func "$pw"; then
-            if $secure && $non_default_check_func; then
-                stty -echo echonl
-                read -e -p "Re-enter new password: " pw2
-                stty echo -echonl || true
-                echo ''
-                if [[ "$pw" == "$pw2" ]]; then
-                    eval "$var=\"$pw\""
-                    break;
-                else
-                    echo 'Passwords do not match. Please try again.'
-                fi
-            else
+            read -s -e -p "Re-enter new secret value: " pw2
+            echo ''
+            if [[ "$pw" == "$pw2" ]]; then
                 eval "$var=\"$pw\""
                 break;
+            else
+                echo 'Secret values do not match. Please try again.'
             fi
         fi
     done
@@ -154,25 +155,25 @@ Description:
     -n
         Non-interactive mode; exits immediately if prompting is required.
 
-    --base-url
+    --base-url <base-url>
         HTTP/S address of the authentication service.
 
-    --oidc-issuer-uri
+    --oidc-issuer-uri <issuer-uri>
         Issuer URI for the OpenID Connect identity provider.
 
-    --oidc-client-id
+    --oidc-client-id <client-id>
         Client identifier for connecting to OIDC identity provider.
 
-    --oidc-client-secret
+    --oidc-client-secret <client-secret>
         Client secret associated with the OIDC client identifier.
 
-    --saml-idp-metadata-url
+    --saml-idp-metadata-url <metdata-url>
         URL for the SAML identity provider configuration metadata.
 
-    --saml-idp-sso-url
+    --saml-idp-sso-url <sso-url>
         URL for the SAML identity provider SSO endpoint.
 
-    --saml-sp-entityid
+    --saml-sp-entityid <entity-id>
         SAML entity identifier for the authentication service.
 
     --debug
@@ -221,10 +222,10 @@ function optional_url() {
     return 0
 }
 
-# Validate the given argument as an HTTPS URL, if not blank.
-function optional_https_url() {
+# Validate the given argument as an HTTPS URL.
+function validate_https_url() {
     local URLRE='^https://.+'
-    if [[ -n "$1" ]] && [[ ! "$1" =~ $URLRE ]]; then
+    if [[ -z "$1" ]] || [[ ! "$1" =~ $URLRE ]]; then
         error_prompt 'Please enter a valid HTTPS URL.'
         return 1
     fi
@@ -374,40 +375,95 @@ EOT
 function prompt_for_svc_base_uri() {
     cat <<EOT
 
+
 The URL of the authentication service, which must be visible to end users.
 It must match the application settings defined in the IdP configuration.
+The URL must begin with either http: or https:, and maybe include a port
+number. If the URL contains a port number, then the service will listen for
+connections on that port.
+
+Example: https://has.example.com:3000/
+
 EOT
-    prompt_for SVC_BASE_URI 'Enter the URL for the authentication service' "${SVC_BASE_URI}" false validate_url
+    prompt_for SVC_BASE_URI 'Enter the URL for the authentication service' "${SVC_BASE_URI}" validate_url
+}
+
+# Prompt for which protocols to configure (e.g. OIDC, SAML, both).
+function prompt_for_protocols() {
+    cat <<EOT
+
+
+The service can support both OpenID Connect and SAML 2.0, as well as both
+protocols simultaneously. Please choose which protocols you wish to
+configure from the options below.
+
+EOT
+    select protocol in 'OIDC' 'SAML' 'Both'; do
+        case $protocol in
+            OIDC)
+                PROTOCOLS['oidc']=1
+                break
+                ;;
+            SAML)
+                PROTOCOLS['saml']=1
+                break
+                ;;
+            Both)
+                PROTOCOLS['oidc']=1
+                PROTOCOLS['saml']=1
+                break
+                ;;
+            *)
+                echo 'Please select an option'
+                ;;
+        esac
+    done
 }
 
 # Prompt for the SAML IdP metadata URL.
 function prompt_for_saml_idp_metadata_url() {
     cat <<EOT
 
+
 URL of the SAML identity provider metadata configuration in XML format.
 This may help to configure several other SAML settings automatically.
+If your identity provider does not provide a metadata URL, simply press
+Enter and then provide a value for the SSO (single-sign-on) URL at the
+next prompt.
+
+Example: https://idp.example.com:8080/saml/metadata
+
 EOT
-    prompt_for SAML_IDP_METADATA_URL 'Enter the URL for SAML IdP metadata' "${SAML_IDP_METADATA_URL}" false optional_url
+    prompt_for SAML_IDP_METADATA_URL 'Enter the URL for SAML IdP metadata' "${SAML_IDP_METADATA_URL}" optional_url
 }
 
 # Prompt for the SAML IdP SSO URL.
 function prompt_for_saml_idp_sso_url() {
     cat <<EOT
 
-URL of SAML identity provider Single Sign-On service.
+
+URL of SAML identity provider Single Sign-On service. If the metadata
+already contains this value, you do not need to enter one here.
+
+Example: https://idp.example.com/test-app-12345/sso/saml
+
 EOT
     if [[ -n "${SAML_IDP_METADATA_URL}" ]]; then
         echo 'This value may be used to override the SSO URL in the SAML metadata.'
     fi
-    prompt_for SAML_IDP_SSO_URL 'Enter the URL for SAML IdP SSO endpoint' "${SAML_IDP_SSO_URL}" false optional_url
+    prompt_for SAML_IDP_SSO_URL 'Enter the URL for SAML IdP SSO endpoint' "${SAML_IDP_SSO_URL}" optional_url
 }
 
 # Prompt for the SAML entity identifier of the service.
 function prompt_for_saml_sp_entity_id() {
     cat <<EOT
 
+
 The SAML entity identifier (entityID) for the Helix Authentication Service.
-This value may be defined by the SAML identity provider (e.g. Azure).
+This value may be defined by the SAML identity provider (e.g. Azure). It is
+important that this value matches exactly what is configured in the identity
+provider, as it uniquely identifies the service application.
+
 EOT
     prompt_for SAML_SP_ENTITY_ID 'Enter the SAML entity ID for service' "${SAML_SP_ENTITY_ID}"
 }
@@ -416,49 +472,53 @@ EOT
 function prompt_for_oidc_issuer_uri() {
     cat <<EOT
 
-URI for the OIDC identity provider issuer, typically a URL.
+
+URI for the OIDC identity provider issuer, typically a URL. This value will
+always begin with https: as that is required by the OIDC standard.
+
+Example: https://oidc.example.com/
+
 EOT
-    prompt_for OIDC_ISSUER_URI 'Enter the URI for OIDC issuer' "${OIDC_ISSUER_URI}" false optional_https_url
+    prompt_for OIDC_ISSUER_URI 'Enter the URI for OIDC issuer' "${OIDC_ISSUER_URI}" validate_https_url
 }
 
 # Prompt for the OIDC client identifier.
 function prompt_for_oidc_client_id() {
     cat <<EOT
 
+
 The client identifier as provided by the OIDC identity provider.
+
 EOT
-    local validate=''
-    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
-        validate='validate_nonempty'
-    fi
-    prompt_for OIDC_CLIENT_ID 'Enter the OIDC client ID' "${OIDC_CLIENT_ID}" false $validate
+    prompt_for OIDC_CLIENT_ID 'Enter the OIDC client ID' "${OIDC_CLIENT_ID}" validate_nonempty
 }
 
 # Prompt for the OIDC client secret.
 function prompt_for_oidc_client_secret() {
     cat <<EOT
 
+
 The client secret as provided by the OIDC identity provider.
+
 EOT
-    local validate=''
-    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
-        validate='validate_nonempty'
-    fi
-    prompt_for OIDC_CLIENT_SECRET 'Enter the OIDC client secret' "${OIDC_CLIENT_SECRET}" true $validate
+    prompt_for_secret OIDC_CLIENT_SECRET 'Enter the OIDC client secret' "${OIDC_CLIENT_SECRET}" validate_nonempty
 }
 
 # Prompt for inputs.
 function prompt_for_inputs() {
     prompt_for_svc_base_uri
-    prompt_for_oidc_issuer_uri
-    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+    prompt_for_protocols
+    if [[ -n "${PROTOCOLS['oidc']}" ]]; then
+        prompt_for_oidc_issuer_uri
         prompt_for_oidc_client_id
         prompt_for_oidc_client_secret
     fi
-    prompt_for_saml_idp_metadata_url
-    prompt_for_saml_idp_sso_url
-    if [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
-        prompt_for_saml_sp_entity_id
+    if [[ -n "${PROTOCOLS['saml']}" ]]; then
+        prompt_for_saml_idp_metadata_url
+        prompt_for_saml_idp_sso_url
+        if [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
+            prompt_for_saml_sp_entity_id
+        fi
     fi
 }
 
@@ -557,6 +617,11 @@ function modify_config() {
     if [[ ! -f ../ecosystem.config.orig ]]; then
         cp ../ecosystem.config.js ../ecosystem.config.orig
     fi
+    # make a backup of the logging configuration file one time and leave it
+    # untouched as a record of the original contents
+    if [[ ! -f ../logging.config.orig ]]; then
+        cp ../logging.config.js ../logging.config.orig
+    fi
     # set DEFAULT_PROTOCOL based on provided inputs
     local DEFAULT_PROTOCOL=''
     if [[ -n "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
@@ -570,8 +635,6 @@ function modify_config() {
         echo "${OIDC_CLIENT_SECRET}" > ${OIDC_CLIENT_SECRET_FILE}
         chmod 600 ${OIDC_CLIENT_SECRET_FILE}
     fi
-    # make a backup of the previous version of the configuration file
-    cp ../ecosystem.config.js ../ecosystem.config.bak
     # use Node.js to update the configuration file in place since the format is
     # a bit too complex for simple sed/awk scripting to handle
     env DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL}" \
@@ -610,14 +673,21 @@ Automated configuration complete!
 
 What was done:
   * The ecosystem.config.js file was updated.
+  * Logging has been configured to write to auth-svc.log in this directory.
   * The service was restarted via pm2.
 
 What should be done now:
   * If not already completed, the server and client certificates should be
     replaced with genuine certificates, replacing the self-signed certs.
     See the Administration Guide for additional information.
+  * Visit the authentication service in a browser to verify it is accessible:
+    ${SVC_BASE_URI}
   * Consult the admin guide for other settings that may need to be changed
     in accordance with the configuration of the identity provider.
+  * If using Helix Core server, be sure to install and configure the login
+    extension that interoperates with the service to enable SSO authentication.
+  * If using Helix ALM, be sure to configure the License Server to connect
+    with the authentication service for enforcing access controls.
 
 ==============================================================================
 

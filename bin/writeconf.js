@@ -12,6 +12,20 @@ if (process.env.DEFAULT_PROTOCOL) {
 }
 env.SVC_BASE_URI = process.env.SVC_BASE_URI
 
+// for the time being, configure debug logging to files that rotate
+const loggingConf = {
+  level: 'debug',
+  transport: 'file',
+  file: {
+    filename: 'auth-svc.log',
+    maxsize: 1048576,
+    maxfiles: 4
+  }
+}
+const loggingFile = `module.exports = ${JSON.stringify(loggingConf, null, '  ')}`
+fs.writeFileSync('../logging.config.js', loggingFile, { mode: 0o644 })
+env.LOGGING = '../logging.config.js'
+
 // either OIDC is defined or it is completely wiped
 if (process.env.OIDC_ISSUER_URI) {
   env.OIDC_ISSUER_URI = process.env.OIDC_ISSUER_URI
