@@ -87,7 +87,7 @@ function prompt_for() {
         fi
         if $check_func "$input"; then
             eval "$var=\"$input\""
-            break;
+            break
         fi
     done
     return 0
@@ -121,11 +121,14 @@ function prompt_for_secret() {
         fi
         echo ''
         if $check_func "$pw"; then
+            if [[ -n "$default" ]]; then
+                break
+            fi
             read -s -e -p "Re-enter new secret value: " pw2
             echo ''
             if [[ "$pw" == "$pw2" ]]; then
                 eval "$var=\"$pw\""
-                break;
+                break
             else
                 echo 'Secret values do not match. Please try again.'
             fi
@@ -655,10 +658,10 @@ function restart_service() {
     if [[ "${PLATFORM}" == 'redhat' ]]; then
         # need to run pm2 as root on centos/redhat
         sudo pm2 kill
-        sudo pm2 startOrReload ecosystem.config.js
+        sudo pm2 start ecosystem.config.js
     else
         pm2 kill
-        pm2 startOrReload ecosystem.config.js
+        pm2 start ecosystem.config.js
     fi
     popd
     return 0
