@@ -94,7 +94,9 @@ echo 'This script will only install software on this machine. After this script 
 echo 'finished, you will need to:'
 echo ''
 echo '  1) Configure the service by editing the ecosystem.config.js file.'
-echo '  2) Restart the service by invoking `pm2 startOrReload ecosystem.config.js`'
+echo '  2) Restart the service by invoking the following commands:'
+echo '     $ pm2 kill'
+echo '     $ pm2 start ecosystem.config.js'
 echo ''
 if $INTERACTIVE; then
     echo ''

@@ -89,7 +89,7 @@ The installation script will run on CentOS 7, 8, Debian 8, 9, 10, Fedora 31, RHE
 1. Run the `bash` script named `install.sh`, which is provided to set up a Linux-based system for running the authentication service. This script installs Node and the pm2 process manager, and then builds the service dependencies.
 1. Modify the service configuration by editing the `ecosystem.config.js` file. Configuration consists of defining the identity provider (IdP) details for either OIDC or SAML, and setting the `SVC_BASE_URI` of the authentication service.
 1. (Recommended) For better security, replace the example self-signed SSL certificates with ones signed by a trusted certificate authority.
-1. Restart the service by using `pm2 startOrReload ecosystem.config.js`
+1. Restart the service as described in the [Restarting the Service](#restarting-the-service) section.
 
 Once the installation script has finished, continue with the configuration steps in the [Configuring Helix Authentication Service](#configuring-helix-authentication-service) section.
 
