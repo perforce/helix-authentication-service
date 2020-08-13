@@ -65,6 +65,9 @@ if [[ $EUID -eq 0 ]]; then
     die 'This script must be run as a non-root user.'
 fi
 
+# Move to source directory
+cd "$( cd "$(dirname "$0")" ; pwd -P )"
+
 # Test file permissions to ensure a successful install.
 mkdir -p node_modules > /dev/null 2>&1
 if [ $? != 0 ]; then
@@ -108,9 +111,6 @@ if $INTERACTIVE; then
         esac
     done
 fi
-
-# Move to source directory
-cd "$( cd "$(dirname "$0")" ; pwd -P )"
 
 #
 # Install Node 12 using a script from nodesource.com

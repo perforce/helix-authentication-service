@@ -23,7 +23,9 @@ const loggingConf = {
   }
 }
 const loggingFile = `module.exports = ${JSON.stringify(loggingConf, null, '  ')}`
-fs.writeFileSync('../logging.config.js', loggingFile, { mode: 0o644 })
+fs.writeFileSync('logging.config.js', loggingFile, { mode: 0o644 })
+// HAS uses require to load the logging config, and the path is relative to the
+// bin directory(?), so must include the relative path to the file.
 env.LOGGING = '../logging.config.js'
 
 // either OIDC is defined or it is completely wiped
@@ -63,4 +65,4 @@ if (process.env.SAML_IDP_METADATA_URL || process.env.SAML_IDP_SSO_URL) {
 }
 
 const body = `module.exports = ${JSON.stringify(config, null, '  ')}`
-fs.writeFileSync('../ecosystem.config.js', body, { mode: 0o644 })
+fs.writeFileSync('ecosystem.config.js', body, { mode: 0o644 })

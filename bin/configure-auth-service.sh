@@ -617,13 +617,13 @@ function prompt_to_proceed() {
 function modify_config() {
     # make a backup of the ecosystem file one time and leave it untouched as a
     # record of the original contents
-    if [[ ! -f ../ecosystem.config.orig ]]; then
-        cp ../ecosystem.config.js ../ecosystem.config.orig
+    if [[ ! -f ecosystem.config.orig ]]; then
+        cp ecosystem.config.js ecosystem.config.orig
     fi
     # make a backup of the logging configuration file one time and leave it
     # untouched as a record of the original contents
-    if [[ ! -f ../logging.config.orig ]]; then
-        cp ../logging.config.js ../logging.config.orig
+    if [[ ! -f logging.config.orig ]]; then
+        cp logging.config.js logging.config.orig
     fi
     # set DEFAULT_PROTOCOL based on provided inputs
     local DEFAULT_PROTOCOL=''
@@ -648,13 +648,12 @@ function modify_config() {
         SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}" \
         SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL}" \
         SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID}" \
-        node ./writeconf.js
+        node ./bin/writeconf.js
     return 0
 }
 
 # Restart the service for the configuration changes to take effect.
 function restart_service() {
-    pushd ..
     if [[ "${PLATFORM}" == 'redhat' ]]; then
         # need to run pm2 as root on centos/redhat
         sudo pm2 kill
@@ -663,7 +662,6 @@ function restart_service() {
         pm2 kill
         pm2 start ecosystem.config.js
     fi
-    popd
     return 0
 }
 
@@ -698,6 +696,8 @@ EOT
 }
 
 function main() {
+    # move to the source directory before everything else
+    cd "$( cd "$(dirname "$0")" ; pwd -P )/.."
     ensure_readiness
     set -e
     read_arguments "$@"
@@ -718,7 +718,6 @@ function main() {
     if $INTERACTIVE; then
         prompt_to_proceed
     fi
-    cd "$( cd "$(dirname "$0")" ; pwd -P )"
     modify_config
     restart_service
     print_summary
