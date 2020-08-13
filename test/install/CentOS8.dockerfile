@@ -5,8 +5,10 @@ FROM centos:8
 #
 
 # The docker base images are generally minimal, and our install and configure
-# scripts have certain requirements, so install those now.
-RUN yum -q -y install curl grep iputils sudo which
+# scripts have certain requirements, so install those now. Add python3 so that
+# installing pm2 does not emit "error:" which signals the automated build system
+# that an error occurred, even though it technically succeeded.
+RUN yum -q -y install curl grep iputils python3 sudo which
 RUN dnf -q -y install 'dnf-command(download)'
 
 # install (and configure) script(s) want to run as non-root user, and npm
