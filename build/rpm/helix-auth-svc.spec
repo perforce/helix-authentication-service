@@ -77,7 +77,8 @@ cd %{installprefix}
 pm2 start ecosystem.config.js
 # install pm2 startup script
 echo "Installing pm2 startup script..."
-sudo pm2 startup systemd -u ${USER} --hp ${HOME}
+STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
+sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
 pm2 save
 
 cat <<!
