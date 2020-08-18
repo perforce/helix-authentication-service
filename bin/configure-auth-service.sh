@@ -180,7 +180,7 @@ Description:
         SAML entity identifier for the authentication service.
 
     --debug
-        Enable debugging reporting.
+        Enable debugging output for this configuration script.
 
     -h / --help
         Display this help message.
