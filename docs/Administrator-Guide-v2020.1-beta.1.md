@@ -589,3 +589,7 @@ If the authentication service is not behaving as expected based on the configura
 ### pm2 caching environment variables
 
 If you remove an environment variable (for instance, by removing it from the `env` section of the `ecosystem.config.js` file) and restart the service, it may be that the pm2 daemon will cache the old value for that variable. This is especially true when pm2 is running in production or cluster mode (when `NODE_ENV` is set to `production`). To clear the cached values, it is necessary to terminate the pm2 daemon (`pm2 kill`) and then start the service again (`pm2 start auth-svc`).
+
+### pm2 restart seems to have no effect
+
+After modifying the `ecosystem.config.js` file and restarting pm2, if the changes still do not seem to be taking effect, then make sure you are running the pm2 command as the same user that started pm2 initially. This is especially true when installing the authentication service on CentOS using the service packages. The post-installation step installs and starts pm2 as the `root` user, and not the user account that was performing the install. If this is the case, stop the pm2 instance started by the non-root user, then restart the other pm2 instance as the root user.
