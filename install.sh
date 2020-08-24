@@ -177,13 +177,21 @@ npm ci -q --only=production
 
 # start the service using pm2
 echo "Starting the auth service with default configuration..."
-pm2 start ecosystem.config.js
+if [[ "${PLATFORM}" == 'redhat' ]]; then
+    sudo pm2 start ecosystem.config.js
+else
+    pm2 start ecosystem.config.js
+fi
 
 # install pm2 startup script
 echo "Installing pm2 startup script..."
 STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
 sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
-pm2 save
+if [[ "${PLATFORM}" == 'redhat' ]]; then
+    sudo pm2 save
+else
+    pm2 save
+fi
 
 echo ""
 echo "==============================================================================="
