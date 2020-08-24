@@ -31,3 +31,6 @@ RUN test -f /opt/perforce/helix-auth-svc/README.html
 
 # ensure pm2 is installed as expected
 RUN test -f /usr/bin/pm2
+
+# finally remove the package to make sure that does not fail horribly
+RUN apt-get -q -y remove helix-auth-svc
