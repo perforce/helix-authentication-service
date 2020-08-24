@@ -29,7 +29,7 @@ RUN test -f /usr/bin/pm2
 
 # pm2 is not running during the build, but there is evidence that the service
 # was started during the build
-RUN test -f .pm2/logs/auth-svc-out.log
+RUN sudo test -f /root/.pm2/logs/auth-svc-out.log
 
 # run the configure script and set up OIDC
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
