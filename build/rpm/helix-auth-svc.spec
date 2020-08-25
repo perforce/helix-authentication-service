@@ -88,8 +88,11 @@ Package installation complete! Now a few final bits to do manually.
 ===============================================================================
 
 To configure the service on this machine, edit the ecosystem.config.js file in
-%{installprefix}.
-In particular, set the OIDC or SAML settings for your identity provider.
+the %{installprefix} directory.
+In particular, set the OIDC and/or SAML settings for your identity provider.
+The configure-auth-service.sh script may be helpful for this purpose.
+
+$ %{installprefix}/bin/configure-auth-service.sh --help
 
 Note that the pm2 daemon is running as the root user.
 

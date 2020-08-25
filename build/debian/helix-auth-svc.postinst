@@ -49,8 +49,11 @@ Package installation complete! Now a few final bits to do manually.
 ===============================================================================
 
 To configure the service on this machine, edit the ecosystem.config.js file in
-${INSTALLPREFIX}.
-In particular, set the OIDC or SAML settings for your identity provider.
+the ${INSTALLPREFIX} directory.
+In particular, set the OIDC and/or SAML settings for your identity provider.
+The configure-auth-service.sh script may be helpful for this purpose.
+
+$ ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
 
 For assistance, please contact support@perforce.com
 

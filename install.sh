@@ -193,14 +193,18 @@ else
     pm2 save
 fi
 
-echo ""
-echo "==============================================================================="
-echo 'Automated install complete! Now a few final bits to do manually.'
-echo "==============================================================================="
-echo ''
-echo 'To configure the service on this machine, edit the ecosystem.config.js'
-echo 'file. In particular, set the OIDC or SAML settings according to your'
-echo 'identity provider.'
-echo ''
-echo 'For assistance, please contact support@perforce.com'
-echo ''
+cat <<EOT
+
+===============================================================================
+Automated install complete! Now a few final bits to do manually.
+===============================================================================
+
+To configure the service on this machine, edit the ecosystem.config.js file,
+setting the OIDC and/or SAML settings according to your identity provider.
+The configure-auth-service.sh script may be helpful for this purpose.
+
+$ ./bin/configure-auth-service.sh --help
+
+For assistance, please contact support@perforce.com
+
+EOT
