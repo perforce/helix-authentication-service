@@ -10,6 +10,7 @@ DEBUG=false
 PLATFORM=''
 SVC_BASE_URI=''
 declare -A PROTOCOLS=()
+DEFAULT_PROTOCOL=''
 SAML_IDP_METADATA_URL=''
 SAML_IDP_SSO_URL=''
 SAML_SP_ENTITY_ID=''
@@ -179,6 +180,11 @@ Description:
     --saml-sp-entityid <entity-id>
         SAML entity identifier for the authentication service.
 
+    --default-protocol <protocol>
+        Set the default protocol to be used when a client application does
+        not specify a protocol to be used. This option only applies when
+        configuring more than one protocol.
+
     --debug
         Enable debugging output for this configuration script.
 
@@ -260,7 +266,7 @@ function read_arguments() {
     local ARGS=(base-url:)
     ARGS+=(oidc-issuer-uri: oidc-client-id: oidc-client-secret:)
     ARGS+=(saml-idp-sso-url: saml-sp-entityid: saml-idp-metadata-url:)
-    ARGS+=(debug help)
+    ARGS+=(default-protocol: debug help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
         -l "$(join_by , ${ARGS[@]})" -- "$@")
@@ -312,6 +318,10 @@ function read_arguments() {
                 ;;
             --saml-sp-entityid)
                 SAML_SP_ENTITY_ID=$2
+                shift 2
+                ;;
+            --default-protocol)
+                DEFAULT_PROTOCOL=$2
                 shift 2
                 ;;
             --debug)
@@ -423,6 +433,34 @@ EOT
     done
 }
 
+# Prompt for which protocol to configure as the default.
+function prompt_for_default_protocol() {
+    cat <<EOT
+
+
+You chose to configure multiple protocols. Some client applications may
+not indicate which protocol they want to use, and the service will use a
+default protocol in that case. Which protocol should the service use as
+the default?
+
+EOT
+    select protocol in 'OIDC' 'SAML'; do
+        case $protocol in
+            OIDC)
+                DEFAULT_PROTOCOL='oidc'
+                break
+                ;;
+            SAML)
+                DEFAULT_PROTOCOL='saml'
+                break
+                ;;
+            *)
+                echo 'Please select an option'
+                ;;
+        esac
+    done
+}
+
 # Prompt for the SAML IdP metadata URL.
 function prompt_for_saml_idp_metadata_url() {
     cat <<EOT
@@ -523,6 +561,9 @@ function prompt_for_inputs() {
             prompt_for_saml_sp_entity_id
         fi
     fi
+    if (( ${#PROTOCOLS[@]} > 1 )); then
+        prompt_for_default_protocol
+    fi
 }
 
 # Validate all of the inputs however they may have been provided.
@@ -552,6 +593,20 @@ function validate_inputs() {
     if [[ -n "${SAML_IDP_METADATA_URL}" ]] && ! validate_url "${SAML_IDP_METADATA_URL}"; then
         error 'A valid SAML IdP metadata URL must be provided.'
         return 1
+    fi
+    if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
+        if [[ "${DEFAULT_PROTOCOL}" != 'oidc' && "${DEFAULT_PROTOCOL}" != 'saml' ]]; then
+            error 'Default protocol must be either OIDC or SAML.'
+            return 1
+        fi
+        if [[ "${DEFAULT_PROTOCOL}" == 'oidc' && -z "${OIDC_CLIENT_ID}" ]]; then
+            error 'Must configure OIDC if using it as the default protocol.'
+            return 1
+        fi
+        if [[ "${DEFAULT_PROTOCOL}" == 'saml' && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
+            error 'Must configure SAML if using it as the default protocol.'
+            return 1
+        fi
     fi
     return 0
 }
@@ -599,6 +654,9 @@ EOT
     if [[ -n "${SAML_SP_ENTITY_ID}" ]]; then
         echo "  * Set SAML_SP_ENTITY_ID to ${SAML_SP_ENTITY_ID}"
     fi
+    if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
+        echo "  * Set DEFAULT_PROTOCOL to ${DEFAULT_PROTOCOL}"
+    fi
     echo -e "\nThe service will then be restarted (via pm2).\n"
 }
 
@@ -625,12 +683,13 @@ function modify_config() {
     if [[ ! -f logging.config.orig ]]; then
         cp logging.config.js logging.config.orig
     fi
-    # set DEFAULT_PROTOCOL based on provided inputs
-    local DEFAULT_PROTOCOL=''
-    if [[ -n "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
-        DEFAULT_PROTOCOL='oidc'
-    elif [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
-        DEFAULT_PROTOCOL='saml'
+    if [[ -z "${DEFAULT_PROTOCOL}" ]]; then
+        # set DEFAULT_PROTOCOL based on provided inputs
+        if [[ -n "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
+            DEFAULT_PROTOCOL='oidc'
+        elif [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
+            DEFAULT_PROTOCOL='saml'
+        fi
     fi
     if [[ -n "${OIDC_CLIENT_SECRET}" ]]; then
         # write OIDC_CLIENT_SECRET to file named by OIDC_CLIENT_SECRET_FILE;
