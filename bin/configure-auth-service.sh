@@ -675,12 +675,12 @@ function prompt_to_proceed() {
 function modify_config() {
     # make a backup of the ecosystem file one time and leave it untouched as a
     # record of the original contents
-    if [[ ! -f ecosystem.config.orig ]]; then
+    if [[ ! -f ecosystem.config.orig && -e ecosystem.config.js ]]; then
         cp ecosystem.config.js ecosystem.config.orig
     fi
     # make a backup of the logging configuration file one time and leave it
     # untouched as a record of the original contents
-    if [[ ! -f logging.config.orig ]]; then
+    if [[ ! -f logging.config.orig && -e logging.config.js ]]; then
         cp logging.config.js logging.config.orig
     fi
     if [[ -z "${DEFAULT_PROTOCOL}" ]]; then

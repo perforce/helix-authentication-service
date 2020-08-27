@@ -2,7 +2,7 @@
 // Copyright 2020 Perforce Software
 //
 const fs = require('fs')
-const config = require('../ecosystem.config')
+const config = readConfiguration()
 
 // shortcut to the settings
 const env = config.apps[0].env
@@ -66,3 +66,25 @@ if (process.env.SAML_IDP_METADATA_URL || process.env.SAML_IDP_SSO_URL) {
 
 const body = `module.exports = ${JSON.stringify(config, null, '  ')}`
 fs.writeFileSync('ecosystem.config.js', body, { mode: 0o644 })
+
+function readConfiguration () {
+  if (fs.existsSync('../ecosystem.config.js')) {
+    return require('../ecosystem.config')
+  } else {
+    // if the ecosystem file is missing, generate from scratch
+    return {
+      apps: [{
+        name: 'auth-svc',
+        node_args: '-r module-alias/register',
+        script: './bin/www',
+        env: {
+          CA_CERT_FILE: 'certs/ca.crt',
+          NODE_ENV: 'production',
+          SP_CERT_FILE: 'certs/server.crt',
+          SP_KEY_FILE: 'certs/server.key',
+          SVC_BASE_URI: 'https://localhost:3000'
+        }
+      }]
+    }
+  }
+}
