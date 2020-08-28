@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2019.1.1.000001
+                            Version 2019.1.1.000002
 
 
 Introduction
@@ -81,6 +81,27 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2019.1.1.000002
+
+    HAS-91 (Change #1991037)
+        Linux-based configuration script to assist in configuring HAS.
+
+----------------------------------------------------------------------
+Bugs fixed in 2019.1.1.000002
+
+    HAS-111 (Change #2001802)
+        The install.sh starts pm2 as the current user, not as root on CentOS.
+
+    HAS-118 (Change #2003138)
+        Login error in browser: request identifier must be defined
+
+    HAS-119 (Change #2003163)
+        Remove color codes from auth service log output.
+
+    HAS-121 (Change #2003544)
+        Exception when CA_CERT_PATH directory contains an empty directory.
 
 ----------------------------------------------------------------------
 New functionality in 2019.1.1.000001
