@@ -112,8 +112,8 @@ function prompt_for_secret() {
         local pw=''
         local pw2=''
         if [[ -n "$default" ]]; then
-            showDefault=$(echo "$default" | sed 's/./*/g')
-            read -s -e -p "$prompt [$showDefault]: " pw
+            # conceal the length of the incoming password
+            read -s -e -p "$prompt [************]: " pw
             if [[ ! -n "$pw" ]]; then
                 pw=$default
             fi
