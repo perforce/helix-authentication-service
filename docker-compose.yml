@@ -53,9 +53,21 @@ services:
       USERS_CONFIGURATION_INLINE: |
         [
           {
+            "SubjectId": "408616",
+            "Username": "janedoe",
+            "Password": "Passw0rd!",
+            "Claims": [
+              { "Type": "name", "Value": "Jane Doe" },
+              { "Type": "given_name", "Value": "Jane" },
+              { "Type": "family_name", "Value": "Doe" },
+              { "Type": "email", "Value": "janedoe@example.com" },
+              { "Type": "email_verified", "Value": "true" }
+            ]
+          },
+          {
             "SubjectId": "408727",
             "Username": "johndoe",
-            "Password": "passw0Rd?",
+            "Password": "Passw0rd!",
             "Claims": [
               { "Type": "name", "Value": "John Doe" },
               { "Type": "given_name", "Value": "John" },

@@ -24,6 +24,17 @@ cn: Sam L. Jackson
 userPassword: Passw0rd!
 uid: jackson
 
+dn: uid=janedoe,ou=people,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+mail: janedoe@example.com
+sn: Doe
+cn: Jane Doe
+userPassword: Passw0rd!
+uid: janedoe
+
 dn: uid=johndoe,ou=people,dc=example,dc=org
 objectClass: top
 objectClass: person
