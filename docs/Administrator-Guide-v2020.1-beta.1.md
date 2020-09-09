@@ -65,7 +65,7 @@ You can use Helix Authentication Service with any combination of the following:
 
 - Administrative expertise with the software of your Identity Provider.
 - [Node.js](https://nodejs.org/), version 12 or later. (The installation script installs Node.js, version 12)
-- (recommended) A process manager for the Node.js runtime, such as [pm2](https://pm2.keymetrics.io/), [forever](https://github.com/foreversd/foreve), or [StrongLoop](http://strong-pm.io/).
+- (recommended) A process manager for the Node.js runtime, such as [pm2](https://pm2.keymetrics.io/), [forever](https://github.com/foreversd/forever), or [StrongLoop](http://strong-pm.io/).
 (The installation script installs pm2)
 - A web browser. Any client using the authentication service requires a web browser.
 - Any client (even the p4 command-line client) is still required to authenticate through your IdP's website. We recommend that at least one user with super level access use Perforce authentication instead of Helix Authentication Service. See the [Authorizing Access](https://www.perforce.com/manuals/p4sag/Content/P4SAG/security.authorizing.html) in the [Helix Core Server Administrators Guide](https://www.perforce.com/manuals/p4sag/Content/P4SAG/Home-p4sag.html).
@@ -317,7 +317,7 @@ The simplest way to run the Helix Authentication Service is using `npm start` fr
 
 ### Process Managers
 
-Node.js process managers generally offer many advantages over using just `npm` to run a Node.js application. Such managers include [pm2](https://pm2.keymetrics.io/), [forever](https://github.com/foreversd/foreve), and [StrongLoop](http://strong-pm.io/). These Node.js process managers typically hook into the system process manager (e.g. `systemd`) and thus will only go down if the entire system goes down.
+Node.js process managers generally offer many advantages over using just `npm` to run a Node.js application. Such managers include [pm2](https://pm2.keymetrics.io/), [forever](https://github.com/foreversd/forever), and [StrongLoop](http://strong-pm.io/). These Node.js process managers typically hook into the system process manager (e.g. `systemd`) and thus will only go down if the entire system goes down.
 
 ### pm2
 
