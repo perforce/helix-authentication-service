@@ -37,6 +37,12 @@ the user will authenticate. Upon successful authentication, the system that
 initiated the login request will receive the validated user profile, at which
 point the system can give access to the user.
 
+### Supported Products
+
+The authentication service provides integration support for other applications,
+including Helix Core Server, Helix ALM, and Surround SCM. See the documentation
+section below for additional prerequisites and installation details.
+
 ### Provider Support
 
 The authentication service has been tested with the following identity providers:
