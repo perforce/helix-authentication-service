@@ -16,9 +16,11 @@ RUN apt-get -q -y install nodejs
 RUN test -f /usr/bin/node
 
 # install our package using the tarball from the previous build stage
-COPY helix-auth-svc-ubuntu16.tgz .
-RUN tar zxf helix-auth-svc-ubuntu16.tgz
-RUN apt install ./apt/ubuntu/xenial/incoming/helix-auth-svc_*.deb
+# COPY helix-auth-svc-ubuntu16.tgz .
+# RUN tar zxf helix-auth-svc-ubuntu16.tgz
+# RUN apt install ./apt/ubuntu/xenial/incoming/helix-auth-svc_*.deb
+COPY package.deb .
+RUN apt install ./package.deb
 
 # ensure the package is fully installed
 RUN dpkg-query -s helix-auth-svc | grep -q 'install ok installed'
@@ -28,6 +30,9 @@ RUN grep -qE 'HAS/noarch/20..\../.+' /opt/perforce/helix-auth-svc/package.json
 
 # ensure certain files are present
 RUN test -f /opt/perforce/helix-auth-svc/README.html
+RUN test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
+RUN test -f /opt/perforce/helix-auth-svc/bin/writeconf.js
+RUN test -x /opt/perforce/helix-auth-svc/bin/www
 
 # ensure pm2 is installed as expected
 RUN test -f /usr/bin/pm2

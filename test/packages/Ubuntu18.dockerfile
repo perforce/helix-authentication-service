@@ -28,6 +28,9 @@ RUN grep -qE 'HAS/noarch/20..\../.+' /opt/perforce/helix-auth-svc/package.json
 
 # ensure certain files are present
 RUN test -f /opt/perforce/helix-auth-svc/README.html
+RUN test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
+RUN test -f /opt/perforce/helix-auth-svc/bin/writeconf.js
+RUN test -x /opt/perforce/helix-auth-svc/bin/www
 
 # ensure pm2 is installed as expected
 RUN test -f /usr/bin/pm2
