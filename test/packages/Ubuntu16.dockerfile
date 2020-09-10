@@ -16,11 +16,9 @@ RUN apt-get -q -y install nodejs
 RUN test -f /usr/bin/node
 
 # install our package using the tarball from the previous build stage
-# COPY helix-auth-svc-ubuntu16.tgz .
-# RUN tar zxf helix-auth-svc-ubuntu16.tgz
-# RUN apt install ./apt/ubuntu/xenial/incoming/helix-auth-svc_*.deb
-COPY package.deb .
-RUN apt install ./package.deb
+COPY helix-auth-svc-ubuntu16.tgz .
+RUN tar zxf helix-auth-svc-ubuntu16.tgz
+RUN apt install ./apt/ubuntu/xenial/incoming/helix-auth-svc_*.deb
 
 # ensure the package is fully installed
 RUN dpkg-query -s helix-auth-svc | grep -q 'install ok installed'
