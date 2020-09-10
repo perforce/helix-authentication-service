@@ -98,7 +98,7 @@ describe('OIDC authentication', function () {
     const usernameBox = await loginForm.findElement(By.name('Username'))
     usernameBox.sendKeys('johndoe')
     const passwordBox = await loginForm.findElement(By.name('Password'))
-    passwordBox.sendKeys('passw0Rd?')
+    passwordBox.sendKeys('Passw0rd!')
     const loginButton = await loginForm.findElement(By.xpath('//button[@value="login"]'))
     await loginButton.click()
     try {
