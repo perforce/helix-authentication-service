@@ -18,13 +18,13 @@ Although the same IdP can be used for both authentication with a Perforce Produc
 ### Perforce Helix authentication
 
 - Authentication with certain Perforce products, such as:
-- P4V, the [Helix Core Visual Client](https://www.perforce.com/products/helix-core-apps/helix-visual-client-p4v)
-- P4, the [Helix Core command-line client](https://www.perforce.com/products/helix-core-apps/command-line-client)
-- P4VS, the [Helix Plugin for Visual Studio](https://www.perforce.com/plugins-integrations/visual-studio-plugin)
-- P4EXP, the [Helix Plugin for File Explorer](https://www.perforce.com/plugins-integrations/file-explorer-plugin)
-- [Helix ALM](https://www.perforce.com/products/helix-alm) clients
-- [Helix Plugin for Eclipse (P4Eclipse)](https://www.perforce.com/plugins-integrations/eclipse-plugin) add-in
-- [Helix Plugin for Matlab (P4SL)](https://www.perforce.com/downloads/helix-plugin-matlab-p4sl)
+- P4V, the [Helix Core Visual Client](https://www.perforce.com/products/helix-core-apps/helix-visual-client-p4v) (requires version 2019.2+)
+- P4, the [Helix Core command-line client](https://www.perforce.com/products/helix-core-apps/command-line-client) (requires version 2019.1+)
+- P4VS, the [Helix Plugin for Visual Studio](https://www.perforce.com/plugins-integrations/visual-studio-plugin) (requires version 2019.2 patch 2+)
+- P4EXP, the [Helix Plugin for File Explorer](https://www.perforce.com/plugins-integrations/file-explorer-plugin) (requires version 2019.2+)
+- [Helix ALM](https://www.perforce.com/products/helix-alm) clients (requires version 2019.4.0+)
+- [Helix Plugin for Eclipse (P4Eclipse)](https://www.perforce.com/plugins-integrations/eclipse-plugin) add-in (requires version 2019.1 update 2+)
+- [Helix Plugin for Matlab (P4SL)](https://www.perforce.com/downloads/helix-plugin-matlab-p4sl) (requires version 2019.1+)
 
 ### Web App authentication
 
