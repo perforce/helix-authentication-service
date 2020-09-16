@@ -1,7 +1,8 @@
 FROM ubuntu:18.04
 #
 # $ docker build -f build/ubuntu18/Dockerfile --tag auth-svc:ubuntu18 .
-# $ docker run --rm --entrypoint cat auth-svc:ubuntu18 /build/*.deb > package.deb
+# $ docker run --rm --entrypoint find auth-svc:ubuntu18 /build -name *.deb
+# $ docker run --rm --entrypoint cat auth-svc:ubuntu18 /build/...deb > package.deb
 #
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
