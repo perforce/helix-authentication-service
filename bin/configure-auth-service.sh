@@ -247,7 +247,22 @@ function ensure_readiness() {
         PLATFORM=redhat
     elif [[ -e '/etc/debian_version' ]]; then
         PLATFORM=debian
-    else
+    elif [ -e "/etc/os-release" ]; then
+        # read os-release to find out what this system is like
+        ID_LIKE=$(awk -F= '/ID_LIKE/ {print $2}' /etc/os-release | tr -d '"')
+        read -r -a LIKES <<< "$ID_LIKE"
+        for like in "${LIKES[@]}"; do
+            if [[ "$like" == 'centos' || "$like" == 'rhel' || "$like" == 'fedora' ]]; then
+                PLATFORM=redhat
+                break
+            fi
+            if [[ "$like" == 'debian' ]]; then
+                PLATFORM=debian
+                break
+            fi
+        done
+    fi
+    if [ -z "$PLATFORM" ]; then
         die 'Could not determine OS distribution.'
     fi
     if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v12\.'; then
