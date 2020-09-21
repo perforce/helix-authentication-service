@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2019.1.1.000002
+                            Version 2020.1
 
 
 Introduction
@@ -81,6 +81,18 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2020.1
+
+    HAS-143 (Change #2014015)
+        Linux-based configuration script supports Amazon Linux 2.
+
+----------------------------------------------------------------------
+Bugs fixed in 2020.1
+
+    HAS-106 (Change #2000728, 2000731)
+        Certificate message digest caused extension connection to fail.
 
 ----------------------------------------------------------------------
 New functionality in 2019.1.1.000002
