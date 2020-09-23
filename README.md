@@ -58,7 +58,7 @@ The authentication service has been tested with the following identity providers
 
 ## Documentation
 
-See the product documentation in the [docs](./docs) directory.
+See the product documentation on the Perforce [website](https://www.perforce.com/manuals/helix-auth-svc/) for the latest released version. Older versions of the administrator guide can be found in the [docs](./docs) directory.
 
 ## How to Get Help
 
