@@ -47,14 +47,16 @@ section below for additional prerequisites and installation details.
 
 The authentication service has been tested with the following identity providers:
 
-| Provider                              | OIDC | SAML |
-| ------------------------------------- | ---- | ---- |
-| [Auth0](https://auth0.com)            | OK   | OK   |
-| [Azure](https://azure.microsoft.com)  | OK   | OK   |
-| [Okta](https://www.okta.com)          | OK   | OK   |
-| [OneLogin](https://www.onelogin.com)  | OK   | OK   |
-| [Ping](https://www.pingidentity.com/) | OK   | OK   |
-| [Shibboleth](https://www.shibboleth.net) | N/A | OK |
+| Provider                                                  | OIDC | SAML |
+| --------------------------------------------------------- | ---- | ---- |
+| [Auth0](https://auth0.com)                                | OK   | OK   |
+| [Azure](https://azure.microsoft.com)                      | OK   | OK   |
+| [Google GSuite](https://gsuite.google.com)                | N/A  | OK   |
+| [Google Identity](https://developers.google.com/identity) | OK   | N/A  |
+| [Okta](https://www.okta.com)                              | OK   | OK   |
+| [OneLogin](https://www.onelogin.com)                      | OK   | OK   |
+| [PingFederate](https://www.pingidentity.com/)             | OK   | OK   |
+| [Shibboleth](https://www.shibboleth.net)                  | N/A  | OK   |
 
 ## Documentation
 
