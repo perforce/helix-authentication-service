@@ -1,6 +1,6 @@
 {
   "name": "helix-auth-svc",
-  "version": "2020.1",
+  "version": "2020.1.0",
   "description": "Helix Authentication Service: +MAIN+",
   "keywords": [
     "authentication",
