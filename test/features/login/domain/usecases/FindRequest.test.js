@@ -28,6 +28,7 @@ describe('FindRequest use case', function () {
 
   it('should return null for a missing request entity', function () {
     // arrange
+    // eslint-disable-next-line no-unused-vars
     const stub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       return null
     })
@@ -42,6 +43,7 @@ describe('FindRequest use case', function () {
   it('should find an existing request entity', function () {
     // arrange
     const tRequest = new Request('request123', 'joeuser', false)
+    // eslint-disable-next-line no-unused-vars
     const stub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       return tRequest
     })

@@ -77,6 +77,7 @@ setTimeout(function () {
             assert.isTrue(res.body.baseUrl.startsWith('http'))
             requestId = res.body.request
           })
+          // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
             if (err) {
               return done(err)
@@ -92,6 +93,7 @@ setTimeout(function () {
           .get('/requests/status/' + requestId)
           .trustLocalhost(true)
           .expect(401)
+          // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
             if (err) {
               return done(err)
@@ -112,6 +114,7 @@ setTimeout(function () {
           .expect(res => {
             assert.equal(res.body.status, 'ok')
           })
+          // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
             if (err) {
               return done(err)
@@ -131,6 +134,7 @@ setTimeout(function () {
           .key(key2)
           .cert(cert2)
           .expect(403)
+          // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
             if (err) {
               return done(err)
@@ -152,6 +156,7 @@ setTimeout(function () {
             assert.equal(res.body.name, 'Test User')
             assert.equal(res.body.email, 'test@example.com')
           })
+          // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
             if (err) {
               return done(err)

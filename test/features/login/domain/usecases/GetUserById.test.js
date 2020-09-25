@@ -28,6 +28,7 @@ describe('GetUserById use case', function () {
 
   it('should return null for a missing user entity', function () {
     // arrange
+    // eslint-disable-next-line no-unused-vars
     const stub = sinon.stub(UserRepository.prototype, 'take').callsFake((id) => {
       return null
     })
@@ -42,6 +43,7 @@ describe('GetUserById use case', function () {
   it('should find an existing user entity', function () {
     // arrange
     const tUser = new User('joeuser', { name: 'Joe', email: 'joeuser@example.com' })
+    // eslint-disable-next-line no-unused-vars
     const stub = sinon.stub(UserRepository.prototype, 'take').callsFake((id) => {
       return tUser
     })
