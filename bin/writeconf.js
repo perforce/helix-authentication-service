@@ -64,7 +64,7 @@ if (process.env.SAML_IDP_METADATA_URL || process.env.SAML_IDP_SSO_URL) {
   delete env.SAML_IDP_SLO_URL
 }
 
-const body = `module.exports = ${JSON.stringify(config, null, '  ')}`
+const body = `module.exports = ${JSON.stringify(config, null, '  ')}\n`
 fs.writeFileSync('ecosystem.config.js', body, { mode: 0o644 })
 
 function readConfiguration () {
