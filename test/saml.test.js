@@ -150,4 +150,27 @@ describe('SAML authentication', function () {
     const h1Text = await h1Elem.getText()
     assert.include(h1Text, 'Logout successful')
   })
+
+  it('should return valid SAML metadata', function (done) {
+    https.get({
+      hostname: 'auth-svc.doc',
+      port: 3000,
+      path: '/saml/metadata',
+      rejectUnauthorized: false,
+      requestCert: false,
+      agent: false
+    }, (res) => {
+      assert.equal(res.statusCode, 200)
+      assert.match(res.headers['content-type'], /^text\/xml/)
+      res.setEncoding('utf-8')
+      let data = ''
+      res.on('data', (chunk) => { data += chunk })
+      res.on('end', () => {
+        assert.include(data, '<AssertionConsumerService')
+        done()
+      })
+    }).on('error', (err) => {
+      done(err)
+    })
+  })
 })
