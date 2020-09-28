@@ -43,6 +43,8 @@ module.exports = {
       // IDP_CONFIG_FILE: './saml_idp.conf.js',
       // LOGIN_TIMEOUT: 60,
       // OIDC_CLIENT_SECRET: undefined,
+      // PORT: 3000,
+      // PROTOCOL: 'http',
       // SAML_AUTHN_CONTEXT: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
       // SAML_IDP_METADATA_URL: undefined,
       // SAML_NAMEID_FIELD: undefined,
