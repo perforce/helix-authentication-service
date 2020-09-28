@@ -11,11 +11,6 @@ const minimatch = require('minimatch')
 // server enough time to start up, and the server hangs indefinitely because
 // mocha no longer exits after the tests complete.
 
-// To get trustLocalhost() we need to lock supertest at version 4.0.0, since
-// after that release they downgraded the included superagent, which is where
-// those functions come from. Wasted a lot of time only to find out that all of
-// their documentation was out of date.
-
 // Override any existing .env file by loading our test configuration.
 require('dotenv').config({ path: 'test/dot.env' })
 
