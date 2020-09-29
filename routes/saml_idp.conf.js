@@ -17,10 +17,10 @@ module.exports = {
   //
   // These are examples, be sure to replace them with real values.
   //
-  'https://has.example.com': {
-    acsUrl: 'http://192.168.1.68/login'
+  'urn:swarm-example:sp': {
+    acsUrl: 'http://swarm.example.com/login'
   },
-  'http://localhost:8080/account/saml/hth/metadata': {
-    acsUrl: 'http://localhost:8080/account/saml/hth/consume'
+  'http://hth.example.com/account/saml/hth/metadata': {
+    acsUrl: 'http://hth.example.com/account/saml/hth/consume'
   }
 }
