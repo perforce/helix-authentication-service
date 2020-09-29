@@ -2,28 +2,37 @@
 #
 # Authentication service installation script for Linux systems.
 #
-# Copyright 2019, Perforce Software Inc. All rights reserved.
+# Copyright 2020, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
 
+# Print arguments to STDERR and exit.
 function die() {
-    error "ERROR: $*" >&2
+    error "FATAL: $*" >&2
     exit 1
 }
 
+# Begin printing text in green.
+function highlight_on() {
+    $MONOCHROME || echo -n -e "\033[32m"
+    $MONOCHROME && echo -n '' || true
+}
+
+# Reset text color to default.
+function highlight_off() {
+    $MONOCHROME || echo -n -e "\033[0m"
+    $MONOCHROME && echo -n '' || true
+}
+
+# Print the first argument in red text on STDERR.
 function error() {
-    if ! $MONOCHROME; then
-        # ANSI red
-        echo -e "\033[31m$1\033[0m" >&2
-    else
-        echo "$1" >&2
-    fi
+    $MONOCHROME || echo -e "\033[31m$1\033[0m" >&2
+    $MONOCHROME && echo -e "$1" >&2 || true
 }
 
 function usage() {
     cat <<EOS
-Installation script for authentication service.
 
 Usage:
 
@@ -34,181 +43,219 @@ Description:
     Install the authentication service and its dependencies.
 
     -m
-            Monochrome; no colored text.
+        Monochrome; no colored text.
 
     -n
-            Non-interactive; does not prompt for confirmation.
+        Non-interactive mode; exits immediately if prompting is required.
 
-    -h | --help
-            Display this help message.
+    -h / --help
+        Display this help message.
+
+See the Helix Authentication Service Administrator Guide for additional
+information pertaining to configuring and running the service.
+
 EOS
 }
 
-while [[ -n "$1" ]]; do
-    case "$1" in
-    -m) MONOCHROME=true; shift;;
-    -n) INTERACTIVE=false; shift;;
-    -h) usage ; exit 0;;
-    --help) usage ; exit 0;;
-    --) shift ; break ;;
-    *) die "Command-line syntax error! Unknown option: $1" ; exit 1 ;;
-    esac
-done
-
-#
-# This prevents a particular kind of error caused by npm trying to reduce its
-# privileges when running the pre/post install scripts of certain Node modules,
-# and subsequently running into a file permissions error. Technically if the
-# files are owned by root and root runs this script, it _should_ work.
-#
-if [[ $EUID -eq 0 ]]; then
-    die 'This script must be run as a non-root user.'
-fi
-
-# Move to source directory
-cd "$( cd "$(dirname "$0")" ; pwd -P )"
-
-# Test file permissions to ensure a successful install.
-mkdir -p node_modules > /dev/null 2>&1
-if [ $? != 0 ]; then
-    die 'You do not have permission to write to this directory.'
-fi
-
-if [ -e "/etc/redhat-release" ]; then
-    PLATFORM=redhat
-elif [ -e "/etc/debian_version" ]; then
-    PLATFORM=debian
-elif [ -e "/etc/os-release" ]; then
-    # read os-release to find out what this system is like
-    ID_LIKE=$(awk -F= '/ID_LIKE/ {print $2}' /etc/os-release | tr -d '"')
-    read -r -a LIKES <<< "$ID_LIKE"
-    for like in "${LIKES[@]}"; do
-        if [[ "$like" == 'centos' || "$like" == 'rhel' || "$like" == 'fedora' ]]; then
-            PLATFORM=redhat
+function read_arguments() {
+    while [[ -n "$1" ]]; do
+        case "$1" in
+        -m)
+            MONOCHROME=true
+            shift
+            ;;
+        -n)
+            INTERACTIVE=false
+            shift
+            ;;
+        -h)
+            usage
+            exit 0
+            ;;
+        --help)
+            usage
+            exit 0
+            ;;
+        --)
+            shift
             break
-        fi
-        if [[ "$like" == 'debian' ]]; then
-            PLATFORM=debian
-            break
-        fi
-    done
-fi
-if [ -z "$PLATFORM" ]; then
-    # Exit now if this is not a supported Linux distribution
-    die "Could not determine OS distribution"
-fi
-set -e
-
-echo ''
-echo 'This script will install the requirements for the Authentication Service.'
-echo ''
-echo 'The operations involved are as follows:'
-echo '  * Install OS packages for build dependencies'
-echo '  * Download and install Node.js 12'
-echo '  * Download and install the pm2 process manager (http://pm2.keymetrics.io)'
-echo '  * Download and build the service dependencies'
-echo ''
-echo 'This script will only install software on this machine. After this script is'
-echo 'finished, you will need to:'
-echo ''
-echo '  1) Configure the service by editing the ecosystem.config.js file.'
-echo '  2) Restart the service by invoking the following commands:'
-echo '     $ pm2 kill'
-echo '     $ pm2 start ecosystem.config.js'
-echo ''
-if $INTERACTIVE; then
-    echo ''
-    echo "Do you wish to continue?"
-    select yn in "Yes" "No"; do
-        case $yn in
-            Yes ) break;;
-            No ) exit;;
+            ;;
+        *)
+            die "Unknown option: $1"
+            exit 1
+            ;;
         esac
     done
-fi
+}
 
-#
-# Install Node 12 using a script from nodesource.com
-#
-if ! which node >/dev/null 2>&1; then
-    echo "Preparing to install OS packages and Node.js..."
-    if [ $PLATFORM == "debian" ]; then
-        # Because apt-get will happily fail miserably _and_ return an exit code of
-        # 0, we are forced to check for a functional network connection rather than
-        # relying on set -e to work effectively with the apt-get command.
-        echo 'Checking network connection...'
-        set +e  # don't exit due to ping returning non-zero, we want that code
-        ping -c 3 ubuntu.com > /dev/null 2>&1
-        if [ $? != 0 ]; then
-            die 'Unable to reach ubuntu.com, please check your connection'
-        fi
-        set -e  # now go back to exiting if a command returns non-zero
-        sudo apt-get -q update
-        sudo apt-get -q -y install build-essential curl git
-        # Run a shell script from the internet as root to get version 12
-        # directly from the vendor. This includes npm as well.
-        #
-        # c.f. https://nodejs.org/en/download/package-manager/
-        curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-        sudo apt-get -q -y install nodejs
-    elif [ $PLATFORM == "redhat" ]; then
-        # Add --skip-broken for Oracle Linux and its redundant packages
-        sudo yum -q -y install --skip-broken curl gcc-c++ git make
-        # Run a shell script from the internet as root to get version 12
-        # directly from the vendor. This includes npm as well.
-        #
-        # c.f. https://nodejs.org/en/download/package-manager/
-        curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
-        if [ $(rpm --eval %{rhel}) == '8' ]; then
-            # NodeSource dependencies are broken for the time being on the
-            # latest CentOS/RHEL release. It expects a 'python' package but it
-            # has been renamed to 'python2' (and additionally 'python3') now.
-            dnf --repo=nodesource download nodejs
-            sudo rpm -i --nodeps nodejs-12.*.rpm
-            rm -f nodejs-12.*.rpm
-        else
-            sudo yum -q -y install nodejs
+# Check that prerequisites are met before starting installation.
+function ensure_readiness() {
+    # This prevents a particular kind of error caused by npm trying to reduce
+    # its privileges when running the pre/post install scripts of certain Node
+    # modules, and subsequently running into a file permissions error. If the
+    # files are owned by root and root runs this script, it _should_ work.
+    if [[ $EUID -eq 0 ]]; then
+        die 'This script must be run as a non-root user.'
+    fi
+
+    # Test file permissions to ensure dependencies can be installed.
+    mkdir -p node_modules > /dev/null 2>&1
+    if [ $? != 0 ]; then
+        die 'You do not have permission to write to this directory.'
+    fi
+
+    # Ensure this system is supported by the installation script.
+    if [ -e "/etc/redhat-release" ]; then
+        PLATFORM=redhat
+    elif [ -e "/etc/debian_version" ]; then
+        PLATFORM=debian
+    elif [ -e "/etc/os-release" ]; then
+        # read os-release to find out what this system is like
+        ID_LIKE=$(awk -F= '/ID_LIKE/ {print $2}' /etc/os-release | tr -d '"')
+        read -r -a LIKES <<< "$ID_LIKE"
+        for like in "${LIKES[@]}"; do
+            if [[ "$like" == 'centos' || "$like" == 'rhel' || "$like" == 'fedora' ]]; then
+                PLATFORM=redhat
+                break
+            fi
+            if [[ "$like" == 'debian' ]]; then
+                PLATFORM=debian
+                break
+            fi
+        done
+    fi
+    if [ -z "$PLATFORM" ]; then
+        die "Could not determine OS distribution"
+    fi
+}
+
+# Show a message about the interactive configuration procedure.
+function display_interactive() {
+    highlight_on
+    cat <<EOT
+
+This script will install the requirements for the Authentication Service.
+
+The operations involved are as follows:
+  * Install OS packages for build dependencies
+  * Download and install Node.js 12 (https://nodejs.org)
+  * Download and install the pm2 process manager (http://pm2.keymetrics.io)
+  * Download and build the service dependencies
+
+This script will only install software on this machine. After this script is
+finished, you will need to:
+
+  1) Configure the service by editing the ecosystem.config.js file.
+  2) Restart the service by invoking the following commands:
+     $ pm2 kill
+     $ pm2 start ecosystem.config.js
+
+EOT
+    highlight_off
+}
+
+# Prompt user to proceed with or cancel the configuration.
+function prompt_to_proceed() {
+    echo 'Do you wish to continue?'
+    select yn in 'Yes' 'No'; do
+        case $yn in
+            Yes) break;;
+            No) exit;;
+        esac
+    done
+}
+
+# Install Node.js 12 using a script from nodesource.com
+function install_nodejs() {
+    if ! which node >/dev/null 2>&1; then
+        echo "Preparing to install OS packages and Node.js..."
+        if [ $PLATFORM == "debian" ]; then
+            # Because apt-get will happily fail miserably _and_ return an exit code of
+            # 0, we are forced to check for a functional network connection rather than
+            # relying on set -e to work effectively with the apt-get command.
+            echo 'Checking network connection...'
+            set +e  # don't exit due to ping returning non-zero, we want that code
+            ping -c 3 ubuntu.com > /dev/null 2>&1
+            if [ $? != 0 ]; then
+                die 'Unable to reach ubuntu.com, please check your connection'
+            fi
+            set -e  # now go back to exiting if a command returns non-zero
+            sudo apt-get -q update
+            sudo apt-get -q -y install build-essential curl git
+            # Run a shell script from the internet as root to get version 12
+            # directly from the vendor. This includes npm as well.
+            #
+            # c.f. https://nodejs.org/en/download/package-manager/
+            curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+            sudo apt-get -q -y install nodejs
+        elif [ $PLATFORM == "redhat" ]; then
+            # Add --skip-broken for Oracle Linux and its redundant packages
+            sudo yum -q -y install --skip-broken curl gcc-c++ git make
+            # Run a shell script from the internet as root to get version 12
+            # directly from the vendor. This includes npm as well.
+            #
+            # c.f. https://nodejs.org/en/download/package-manager/
+            curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
+            if [ $(rpm --eval %{rhel}) == '8' ]; then
+                # NodeSource dependencies are broken for the time being on the
+                # latest CentOS/RHEL release. It expects a 'python' package but it
+                # has been renamed to 'python2' (and additionally 'python3') now.
+                dnf --repo=nodesource download nodejs
+                sudo rpm -i --nodeps nodejs-12.*.rpm
+                rm -f nodejs-12.*.rpm
+            else
+                sudo yum -q -y install nodejs
+            fi
         fi
     fi
-fi
+    # run npm once as the unprivileged user so it creates the ~/.config
+    # directory with the unprivileged user as the owner, rather than as root
+    # when we run the very first 'npm install' command later
+    npm version >/dev/null 2>&1
+}
 
-# run npm once as the unprivileged user so it creates the ~/.config directory
-# with the unprivileged user as the owner, rather than as root when we run the
-# very first 'npm install' command later
-npm version >/dev/null 2>&1
+# Install the pm2 process manager (https://pm2.keymetrics.io).
+function install_pm2() {
+    if ! which pm2 >/dev/null 2>&1; then
+        echo "Installing pm2 globally..."
+        sudo npm install -q -g pm2
+    fi
+}
 
-# install pm2 globally
-if ! which pm2 >/dev/null 2>&1; then
-    echo "Installing pm2 globally..."
-    sudo npm install -q -g pm2
-fi
+# Fetch and build the application dependencies.
+function install_modules() {
+    if ! test -f package.json; then
+        die 'Missing package.json file for authentication service'
+    fi
+    echo "Building dependencies for auth service..."
+    npm ci -q --only=production
+}
 
-# fetch and build the service dependencies
-if ! test -f package.json; then
-    die 'Missing package.json file for authentication service'
-fi
-echo "Building dependencies for auth service..."
-npm ci -q --only=production
+# Start the authentication service using pm2.
+function start_service() {
+    echo "Starting the auth service with default configuration..."
+    if [[ "${PLATFORM}" == 'redhat' ]]; then
+        sudo pm2 start ecosystem.config.js
+    else
+        pm2 start ecosystem.config.js
+    fi
+}
 
-# start the service using pm2
-echo "Starting the auth service with default configuration..."
-if [[ "${PLATFORM}" == 'redhat' ]]; then
-    sudo pm2 start ecosystem.config.js
-else
-    pm2 start ecosystem.config.js
-fi
+# Install pm2 into the system start-up procedure.
+function install_startup() {
+    echo "Installing pm2 startup script..."
+    STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
+    sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
+    if [[ "${PLATFORM}" == 'redhat' ]]; then
+        sudo pm2 save
+    else
+        pm2 save
+    fi
+}
 
-# install pm2 startup script
-echo "Installing pm2 startup script..."
-STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
-sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
-if [[ "${PLATFORM}" == 'redhat' ]]; then
-    sudo pm2 save
-else
-    pm2 save
-fi
-
-cat <<EOT
+# Print a summary of what was done and any next steps.
+function print_summary() {
+    cat <<EOT
 
 ===============================================================================
 Automated install complete! Now a few final bits to do manually.
@@ -223,3 +270,24 @@ $ ./bin/configure-auth-service.sh --help
 For assistance, please contact support@perforce.com
 
 EOT
+}
+
+function main() {
+    # move to the source directory before everything else
+    cd "$( cd "$(dirname "$0")" ; pwd -P )"
+    ensure_readiness
+    set -e
+    read_arguments "$@"
+    if $INTERACTIVE; then
+        display_interactive
+        prompt_to_proceed
+    fi
+    install_nodejs
+    install_pm2
+    install_modules
+    start_service
+    install_startup
+    print_summary
+}
+
+main "$@"
