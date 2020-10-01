@@ -20,8 +20,9 @@ const server = createServer(app)
 
 // Listen on provided port, on all network interfaces.
 if (process.env.BIND_ADDRESS) {
-  // Windows is different (?) so allow explicitly setting the bind address.
-  // According to the Node documentation, it binds to 0.0.0.0 by default.
+  // Allow explicitly setting the bind address if necessary. According to the
+  // Node documentation, it binds to the unspecified IPv4 _and_ IPv6 address by
+  // default ('0.0.0.0' and '::' respectively).
   server.listen(port, process.env.BIND_ADDRESS)
 } else {
   server.listen(port)
