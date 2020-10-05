@@ -1,0 +1,4 @@
+---
+distro: focal
+product-files:
+  - apt/ubuntu/focal/incoming/helix-auth-svc_<LONGREL>-<CHANGE><*>_amd64.deb
