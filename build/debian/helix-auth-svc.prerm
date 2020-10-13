@@ -21,9 +21,10 @@ case "$1" in
     remove|upgrade|deconfigure)
         if which pm2 >/dev/null 2>&1; then
             if [ -e ${INSTALLPREFIX}/ecosystem.config.js ]; then
+                PM2_USER=${SUDO_USER:-${USER}}
                 echo 'Removing pm2 service registration...'
-                pm2 delete ${INSTALLPREFIX}/ecosystem.config.js
-                pm2 save --force
+                sudo -u $PM2_USER pm2 delete ${INSTALLPREFIX}/ecosystem.config.js
+                sudo -u $PM2_USER pm2 save --force
                 echo 'pm2 service registration removed'
             fi
         fi

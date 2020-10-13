@@ -1,7 +1,7 @@
 FROM centos:7
 #
 # $ docker build -f build/centos7/Dockerfile --tag auth-svc:centos7 .
-# $ docker run --rm --entrypoint find auth-svc:centos7 /root/rpmbuild/RPMS -name *.rpm
+# $ docker run --rm --entrypoint find auth-svc:centos7 /root/rpmbuild/RPMS -name '*.rpm'
 # $ docker run --rm --entrypoint cat auth-svc:centos7 /root/rpmbuild/RPMS/...rpm > package.rpm
 #
 # Should set ID_REL_BASE and ID_PATCH build args.

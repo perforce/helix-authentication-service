@@ -71,18 +71,20 @@ cp README.html %{buildroot}%{installprefix}/README.html
 # install pm2 globally
 if ! which pm2 >/dev/null 2>&1; then
     echo "Installing pm2 globally..."
-    sudo npm install -q -g pm2
+    npm install -q -g pm2
 fi
 
+# try to have pm2 run as the unprivileged user by default
+PM2_USER=${SUDO_USER:-${USER}}
 # start the service using pm2
 echo "Starting the auth service with default configuration..."
 cd %{installprefix}
-pm2 start ecosystem.config.js
+sudo -u $PM2_USER pm2 start ecosystem.config.js
 # install pm2 startup script
 echo "Installing pm2 startup script..."
-STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
-sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
-pm2 save
+STARTUP=$(sudo -u $PM2_USER pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
+pm2 startup ${STARTUP} -u ${PM2_USER} --hp ${HOME}
+sudo -u $PM2_USER pm2 save
 
 cat <<!
 
@@ -97,8 +99,6 @@ The configure-auth-service.sh script may be helpful for this purpose.
 
 $ %{installprefix}/bin/configure-auth-service.sh --help
 
-Note that the pm2 daemon is running as the root user.
-
 For assistance, please contact support@perforce.com
 
 !
@@ -107,9 +107,10 @@ For assistance, please contact support@perforce.com
 # unregister the service with pm2
 if which pm2 >/dev/null 2>&1; then
     if [ -e %{installprefix}/ecosystem.config.js ]; then
+        PM2_USER=${SUDO_USER:-${USER}}
         echo "Removing pm2 service registration..."
-        pm2 delete %{installprefix}/ecosystem.config.js
-        pm2 save --force
+        sudo -u $PM2_USER pm2 delete %{installprefix}/ecosystem.config.js
+        sudo -u $PM2_USER pm2 save --force
         echo "pm2 service registration removed"
     fi
 fi

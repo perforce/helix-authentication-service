@@ -23,24 +23,27 @@ case "$1" in
         # install pm2 globally
         if ! which pm2 >/dev/null 2>&1; then
             echo "Installing pm2 globally..."
-            sudo npm install -q -g pm2
+            npm install -q -g pm2
         fi
 
+        # try to have pm2 run as the unprivileged user by default
+        PM2_USER=${SUDO_USER:-${USER}}
         # start the service using pm2
         echo "Starting the auth service with default configuration..."
         cd ${INSTALLPREFIX}
-        pm2 start ecosystem.config.js
-        # install pm2 startup script
+        sudo -u $PM2_USER pm2 start ecosystem.config.js
+        # Install the pm2 startup script using this roundabout method rather
+        # than simply running the suggested pm2 startup command, since that
+        # mysteriously fails on xenial.
         echo "Installing pm2 startup script..."
-        STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
-        sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
-        pm2 save
+        STARTUP=$(sudo -u $PM2_USER pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
+        pm2 startup ${STARTUP} -u ${PM2_USER} --hp ${HOME}
+        sudo -u $PM2_USER pm2 save
 
         # fix the user permissions on the directories created/modified during
         # the installation process
-        USERR=${SUDO_USER:-${USER}}
-        GROUP=$(groups ${USERR} | awk '{print $1;}')
-        chown -R ${USERR}:${GROUP} ${HOME}/.config ${HOME}/.pm2
+        GROUP=$(groups ${PM2_USER} | awk '{print $1;}')
+        chown -R ${PM2_USER}:${GROUP} ${HOME}/.config ${HOME}/.pm2
 
         cat << __POST_INSTALL_MSG__
 
