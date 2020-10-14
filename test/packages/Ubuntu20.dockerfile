@@ -4,6 +4,9 @@ FROM ubuntu:20.04
 # $ docker image ls | grep has-ubuntu20-test
 #
 
+# At some point this docker image changed and lost the USER envar.
+ENV USER=root
+
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
 RUN apt-get -q update
@@ -24,7 +27,7 @@ RUN apt install ./apt/ubuntu/focal/incoming/helix-auth-svc_*.deb
 RUN dpkg-query -s helix-auth-svc | grep -q 'install ok installed'
 
 # ensure the package.json has the expected version string
-RUN grep -qE 'HAS/noarch/20..\../.+' /opt/perforce/helix-auth-svc/package.json
+RUN grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
 
 # ensure certain files are present
 RUN test -f /opt/perforce/helix-auth-svc/README.html
