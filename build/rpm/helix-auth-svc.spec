@@ -55,7 +55,7 @@ cp -pr views/* %{buildroot}%{installprefix}/views
 cp ecosystem.config.js %{buildroot}%{installprefix}/ecosystem.config.js
 cp logging.config.js %{buildroot}%{installprefix}/logging.config.js
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
-sed -e "s/\"2020.1.0\"/\"${ID_REL_BASE}.${ID_PATCH}\"/" \
+sed -e "s/\"2020.1.1\"/\"${ID_REL_BASE}.${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
 cp README.md %{buildroot}%{installprefix}/README.md

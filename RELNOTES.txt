@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2020.1
+                            Version 2020.1.1
 
 
 Introduction
@@ -81,6 +81,12 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+Bugs fixed in 2020.1.1
+
+    HAS-154 (Change #2020788)
+        Swarm integration broken by browser content security policy.
 
 ----------------------------------------------------------------------
 New functionality in 2020.1

@@ -7,7 +7,7 @@ FROM centos:8
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
 
-ARG ID_REL_BASE=2020.1.0
+ARG ID_REL_BASE=2020.1.1
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
