@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 # $ docker image ls | grep has-ubuntu20-test
 #
 
-# At some point this docker image changed and lost the USER envar.
+# Package post-install expects a USER environment variable.
 ENV USER=root
 
 # The docker base images are generally minimal, and our package and its

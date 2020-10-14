@@ -4,6 +4,9 @@ FROM centos:8
 # $ docker image ls | grep has-centos8-test
 #
 
+# Package post-install expects a USER environment variable.
+ENV USER=root
+
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
 RUN yum -q -y install sudo
@@ -23,7 +26,7 @@ RUN yum -y install ./yum/rhel/8/x86_64/helix-auth-svc-*.rpm
 RUN rpm -qa helix-auth-svc | grep -q helix-auth-svc
 
 # ensure the package.json has the expected version string
-RUN grep -qE 'HAS/noarch/20..\../.+' /opt/perforce/helix-auth-svc/package.json
+RUN grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
 
 # ensure certain files are present
 RUN test -f /opt/perforce/helix-auth-svc/README.html
