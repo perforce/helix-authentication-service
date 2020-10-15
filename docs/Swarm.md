@@ -75,7 +75,10 @@ The authentication service must be configured to know about the service provider
 (Swarm) that will be connecting to it. This is defined in the `IDP_CONFIG_FILE`
 configuration file described in the HAS administrator's guide. In this example,
 the key would be `urn:swarm-example:sp` and its value would be
-`http://swarm.example.com/login` (Swarm wants the extra `/login` on the URL).
+`http://swarm.example.com/api/v10/session` for Swarm 2020.1 and higher; earlier
+releases of Swarm used `/login` instead of `/api/v10/session`. The suffix is
+added to the base URL by Swarm when making the SAML login request, and thus it
+may vary from one version of Swarm to the next.
 
 The service can support multiple Swarm installations, simply add more entries to
 the `IDP_CONFIG_FILE` configuration as needed (and restart the service).

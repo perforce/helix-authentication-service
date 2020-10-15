@@ -18,6 +18,9 @@ module.exports = {
   // These are examples, be sure to replace them with real values.
   //
   'urn:swarm-example:sp': {
+    acsUrl: 'http://swarm.example.com/api/v10/session'
+  },
+  'urn:swarm-2019.3:sp': {
     acsUrl: 'http://swarm.example.com/login'
   },
   'http://hth.example.com/account/saml/hth/metadata': {
