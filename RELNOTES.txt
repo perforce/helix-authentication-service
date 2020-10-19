@@ -29,7 +29,7 @@ Supported Platforms
     Linux (x86_64)
         RHEL 7, 8
         CentOS 7, 8.0
-        Ubuntu 16.04, 18.04
+        Ubuntu 16.04, 18.04, 20.04
 
     The above platforms are tested and subject to regression testing on a
     frequent basis. Errors or bugs discovered in these platforms are prioritized
@@ -81,6 +81,12 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2020.1.1
+
+    HAS-153 (Change #2020849)
+        Package for Ubuntu version 20.04.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2020.1.1
