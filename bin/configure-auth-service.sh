@@ -243,6 +243,12 @@ function validate_https_url() {
 
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
+    # Prevent the user from inadvertently starting another instance of the pm2
+    # daemon as the root user, instead of as the unpriviledged user. This also
+    # maintains consistency with the package and install script.
+    if [[ $EUID -eq 0 ]]; then
+        die 'This script must be run as a non-root user.'
+    fi
     if [[ -e '/etc/redhat-release' ]]; then
         PLATFORM=redhat
     elif [[ -e '/etc/debian_version' ]]; then
