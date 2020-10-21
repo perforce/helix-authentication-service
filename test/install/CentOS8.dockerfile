@@ -16,6 +16,7 @@ RUN dnf -q -y install 'dnf-command(download)'
 RUN useradd -m charlie
 RUN echo 'charlie ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/charlie
 USER charlie
+ENV USER=charlie
 WORKDIR /home/charlie
 
 # copy and extract the tarball from the previous build stage
