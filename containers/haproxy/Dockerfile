@@ -11,6 +11,8 @@
 # a port number. This will direct traffic to haproxy, which will then connect to
 # HAS and manage the secure session cookie.
 #
+# $ patch -p 1 < containers/haproxy/patch.diff
+#
 # The mysite.pem is nothing more than the server.crt and server.key files
 # concatenated into a single file.
 #

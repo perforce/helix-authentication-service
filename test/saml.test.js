@@ -33,8 +33,8 @@ describe('SAML authentication', function () {
   })
 
   it('should return a SAML request identifier', async function () {
-    requestId = await getRequestId('auth-svc.doc', 3000)
-    loginUrl = 'https://auth-svc.doc:3000/saml/login/' + requestId
+    requestId = await getRequestId('auth-svc.doc', 443)
+    loginUrl = 'https://auth-svc.doc/saml/login/' + requestId
   })
 
   it('should reject invalid SAML user credentials', async function () {
@@ -66,7 +66,6 @@ describe('SAML authentication', function () {
     const key = fs.readFileSync('test/client.key')
     const req = https.get({
       hostname: 'auth-svc.doc',
-      port: 3000,
       path: `/requests/status/${requestId}`,
       rejectUnauthorized: false,
       requestCert: false,
@@ -89,8 +88,8 @@ describe('SAML authentication', function () {
   it('should return a new SAML request identifier', async function () {
     // Start a fresh request because the earlier one is still pending on the
     // server and the data is deleted from the cache in a race condition.
-    requestId = await getRequestId('auth-svc.doc', 3000)
-    loginUrl = 'https://auth-svc.doc:3000/saml/login/' + requestId
+    requestId = await getRequestId('auth-svc.doc', 443)
+    loginUrl = 'https://auth-svc.doc/saml/login/' + requestId
   })
 
   it('should authenticate via SAML identity provider', async function () {
@@ -105,7 +104,7 @@ describe('SAML authentication', function () {
     // await passwordBox.submit()
     const submitButton = await searchForm.findElement(By.name('_eventId_proceed'))
     await submitButton.click()
-    await driver.wait(until.urlContains('auth-svc.doc:3000'), 10000)
+    await driver.wait(until.urlContains('auth-svc.doc'), 10000)
     const subtitleH2 = await driver.findElement(By.className('subtitle'))
     const subtitleText = await subtitleH2.getText()
     assert.equal(subtitleText, 'Login Successful')
@@ -117,7 +116,6 @@ describe('SAML authentication', function () {
     const key = fs.readFileSync('test/client.key')
     https.get({
       hostname: 'auth-svc.doc',
-      port: 3000,
       path: `/requests/status/${requestId}`,
       rejectUnauthorized: false,
       requestCert: false,
@@ -144,7 +142,7 @@ describe('SAML authentication', function () {
 
   it('should log out of SAML identity provider', async function () {
     this.timeout(30000)
-    await driver.get('https://auth-svc.doc:3000/saml/logout')
+    await driver.get('https://auth-svc.doc/saml/logout')
     const h1Elem = await driver.wait(until.elementLocated(
       By.xpath('//section[contains(@class, "Site-content")]/div/h1')))
     const h1Text = await h1Elem.getText()
@@ -154,7 +152,6 @@ describe('SAML authentication', function () {
   it('should return valid SAML metadata', function (done) {
     https.get({
       hostname: 'auth-svc.doc',
-      port: 3000,
       path: '/saml/metadata',
       rejectUnauthorized: false,
       requestCert: false,

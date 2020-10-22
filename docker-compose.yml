@@ -17,19 +17,22 @@ services:
     environment:
       NODE_ENV: development
       DEBUG: "1"
-      SVC_BASE_URI: "https://auth-svc.doc:3000"
-      DEFAULT_PROTOCOL: "saml"
-      CA_CERT_FILE: certs/ca.crt
+      SVC_BASE_URI: "https://auth-svc.doc"
+      PORT: 3000
+      PROTOCOL: "http"
+      TRUST_PROXY: 'true'
+      # CA_CERT_FILE: certs/ca.crt
+      # SP_CERT_FILE: certs/server.crt
+      # SP_KEY_FILE: certs/server.key
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "https://oidc.doc:8843"
+      DEFAULT_PROTOCOL: "saml"
       # allow the self-signed certs installed on shibboleth container
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       SAML_IDP_METADATA_URL: "https://shibboleth.doc:4443/idp/shibboleth"
       SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
       SAML_SP_ENTITY_ID: "urn:example:sp"
-      SP_CERT_FILE: certs/server.crt
-      SP_KEY_FILE: certs/server.key
     networks:
       - authen
     ports:
@@ -43,6 +46,14 @@ services:
     ports:
       - "389:389"
       - "636:636"
+  haproxy.doc:
+    build:
+      context: containers/haproxy
+    container_name: haproxy.doc
+    networks:
+      - authen
+    ports:
+      - "443:443"
   oidc.doc:
     image: soluto/oidc-server-mock:0.2.4
     container_name: oidc.doc
@@ -89,8 +100,8 @@ services:
             "AllowedGrantTypes": [ "authorization_code" ],
             "AllowAccessTokensViaBrowser": true,
             "RedirectUris": [
-              "https://auth-svc.doc:3000/oidc/callback",
-              "https://auth-svc.doc:3000"
+              "https://auth-svc.doc/oidc/callback",
+              "https://auth-svc.doc"
             ],
             "AllowedScopes": [ "openid", "profile", "email" ],
             "IdentityTokenLifetime": 3600,

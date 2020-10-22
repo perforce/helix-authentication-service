@@ -33,8 +33,8 @@ describe('OIDC authentication', function () {
   })
 
   it('should return an OIDC request identifier', async function () {
-    requestId = await getRequestId('auth-svc.doc', 3000)
-    loginUrl = 'https://auth-svc.doc:3000/oidc/login/' + requestId
+    requestId = await getRequestId('auth-svc.doc', 443)
+    loginUrl = 'https://auth-svc.doc/oidc/login/' + requestId
   })
 
   it('should reject invalid OIDC user credentials', async function () {
@@ -64,7 +64,6 @@ describe('OIDC authentication', function () {
     const key = fs.readFileSync('test/client.key')
     const req = https.get({
       hostname: 'auth-svc.doc',
-      port: 3000,
       path: `/requests/status/${requestId}`,
       rejectUnauthorized: false,
       requestCert: false,
@@ -87,8 +86,8 @@ describe('OIDC authentication', function () {
   it('should return a new OIDC request identifier', async function () {
     // Start a fresh request because the earlier one is still pending on the
     // server and the data is deleted from the cache in a race condition.
-    requestId = await getRequestId('auth-svc.doc', 3000)
-    loginUrl = 'https://auth-svc.doc:3000/oidc/login/' + requestId
+    requestId = await getRequestId('auth-svc.doc', 443)
+    loginUrl = 'https://auth-svc.doc/oidc/login/' + requestId
   })
 
   it('should authenticate via OIDC identity provider', async function () {
@@ -106,7 +105,7 @@ describe('OIDC authentication', function () {
       const allowButton = await driver.findElement(
         By.xpath('//div[@class="consent-buttons"]/button[@value="yes"]'))
       await allowButton.click()
-      await driver.wait(until.urlContains('auth-svc.doc:3000'), 5000)
+      await driver.wait(until.urlContains('auth-svc.doc'), 5000)
     } catch (err) {
       if (err.name === 'TimeoutError') {
         const currentUrl = await driver.getCurrentUrl()
@@ -128,7 +127,6 @@ describe('OIDC authentication', function () {
     const key = fs.readFileSync('test/client.key')
     https.get({
       hostname: 'auth-svc.doc',
-      port: 3000,
       path: `/requests/status/${requestId}`,
       rejectUnauthorized: false,
       requestCert: false,
@@ -155,7 +153,7 @@ describe('OIDC authentication', function () {
 
   it('should log out of OIDC identity provider', async function () {
     this.timeout(30000)
-    await driver.get('https://auth-svc.doc:3000/oidc/logout')
+    await driver.get('https://auth-svc.doc/oidc/logout')
     // identity server no longer shows a logout form?
     // const logoutForm = await driver.wait(until.elementLocated(By.css('form')))
     // const logoutButton = await logoutForm.findElement(By.css('button'))
