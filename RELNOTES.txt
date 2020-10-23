@@ -91,6 +91,10 @@ New functionality in 2020.1.1
 ----------------------------------------------------------------------
 Bugs fixed in 2020.1.1
 
+    HAS-43
+        Caused by P4-19549 in Helix Core Server, fixed in 2019.1.11,
+        2019.2.8, 2020.1.1, and 2020.2 releases.
+
     HAS-154 (Change #2020788)
         Swarm integration broken by browser content security policy.
 
