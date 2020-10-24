@@ -1,17 +1,12 @@
 #
-# WIP container for running HAProxy in front of HAS.
+# Container for running HAProxy in front of HAS.
 #
-# This serves as an example of running a load balancer in front of HAS, and
-# keeping the session cookie secure, despite running HAS on http vs https.
-# However, it does mean that the certificate verification logic in HAS is not
-# being used at all, so this is only good as an example.
-#
-# Apply the changes in patch.diff, and make similar changes in the loginhook
-# extension configuration, such that the clients reference auth-svc.doc without
-# a port number. This will direct traffic to haproxy, which will then connect to
-# HAS and manage the secure session cookie.
-#
-# $ patch -p 1 < containers/haproxy/patch.diff
+# This serves as an example of running a load balancer in front of HAS, while
+# keeping the session cookie secure, despite running HAS on http instead of
+# https. Note that configuring HAS to use http will mean that the certificate
+# verification logic in /requests/status will be bypassed, allowing any client
+# to request the user profile data. HAProxy can be configured to perform a
+# similar function, if necessary.
 #
 # The mysite.pem is nothing more than the server.crt and server.key files
 # concatenated into a single file.
