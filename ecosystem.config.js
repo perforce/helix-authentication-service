@@ -52,6 +52,7 @@ module.exports = {
       // SAML_SP_AUDIENCE: undefined,
       // SESSION_SECRET: 'keyboard cat',
       // SP_KEY_ALGO: 'sha256',
+      // TRUST_PROXY: undefined,
     }
   }]
 }
