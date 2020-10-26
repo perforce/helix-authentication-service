@@ -22,7 +22,7 @@ services:
       CA_CERT_FILE: certs/ca.crt
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
-      OIDC_ISSUER_URI: "http://oidc.doc"
+      OIDC_ISSUER_URI: "https://oidc.doc:8843"
       # allow the self-signed certs installed on shibboleth container
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       SAML_IDP_METADATA_URL: "https://shibboleth.doc:4443/idp/shibboleth"
@@ -48,6 +48,9 @@ services:
     container_name: oidc.doc
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: https://+:8843;http://+:80
+      ASPNETCORE_Kestrel__Certificates__Default__Password: oidc-server-mock-pwd
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
       API_RESOURCES_INLINE: |
         []
       USERS_CONFIGURATION_INLINE: |
@@ -97,10 +100,9 @@ services:
     networks:
       - authen
     ports:
-      # The mock OIDC server is bound to port 80, and our service and our system
-      # both need to agree on the port value, so we are stuck with using port 80
-      # on the host.
-      - "80:80"
+      - "8843:8843"
+    volumes:
+      - ./containers/oidc/https:/https:ro
   # p4d.doc is in the extension repository
   shibboleth.doc:
     build:
