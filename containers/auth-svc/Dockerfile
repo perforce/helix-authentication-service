@@ -14,8 +14,8 @@ RUN rm -f package-lock.json && npm install -q --only=prod
 
 COPY containers/auth-svc/saml_idp.conf.js routes
 
-EXPOSE 3000
+EXPOSE ${PORT}
 
-HEALTHCHECK CMD curl -k -f -s -I http://localhost:3000/ || exit 1
+HEALTHCHECK CMD curl -k -f -s -I http://localhost:${PORT}/ || exit 1
 
 ENTRYPOINT [ "node", "-r", "module-alias/register", "bin/www" ]

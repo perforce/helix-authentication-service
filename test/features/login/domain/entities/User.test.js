@@ -19,4 +19,15 @@ describe('User entity', function () {
     assert.equal(tUser.id, 'joeuser')
     assert.property(tUser.profile, 'name')
   })
+
+  it('should convert to/from JSON', function () {
+    // arrange
+    const tUser = new User('joeuser', { name: 'Joe' })
+    // act
+    const encoded = tUser.toJson()
+    const decoded = User.fromJson(encoded)
+    // assert
+    assert.equal(decoded.id, 'joeuser')
+    assert.property(decoded.profile, 'name')
+  })
 })

@@ -45,6 +45,7 @@ module.exports = {
       // OIDC_CLIENT_SECRET: undefined,
       // PORT: 3000,
       // PROTOCOL: 'http',
+      // REDIS_URL: undefined,
       // SAML_AUTHN_CONTEXT: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
       // SAML_IDP_METADATA_URL: undefined,
       // SAML_NAMEID_FIELD: undefined,

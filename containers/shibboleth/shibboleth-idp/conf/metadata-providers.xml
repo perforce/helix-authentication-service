@@ -53,7 +53,7 @@
                       xsi:type="FileBackedHTTPMetadataProvider"
                       backingFile="%{idp.home}/metadata/auth-svc.xml"
                       disregardTLSCertificate="true"
-                      metadataURL="http://auth-svc.doc:3000/saml/metadata">
+                      metadataURL="https://haproxy.doc/saml/metadata">
 
         <MetadataFilter xsi:type="SignatureValidation"
                         requireSignedRoot="false"

@@ -87,7 +87,7 @@ Edit the `shibboleth-idp/conf/metadata-providers.xml` file, adding the following
                   xsi:type="FileBackedHTTPMetadataProvider"
                   backingFile="%{idp.home}/metadata/auth-svc.xml"
                   disregardTLSCertificate="true"
-                  metadataURL="https://auth-svc.doc:3000/saml/metadata">
+                  metadataURL="https://haproxy.doc/saml/metadata">
     <MetadataFilter xsi:type="SignatureValidation"
                     requireSignedRoot="false"
                     certificateFile="%{idp.home}/credentials/metaroot.pem" />

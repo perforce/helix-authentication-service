@@ -5,13 +5,15 @@ const { AssertionError } = require('assert')
 const { assert } = require('chai')
 const { before, describe, it } = require('mocha')
 const Request = require('@login/domain/entities/Request')
-const InMemoryRequestRepository = require('@login/data/repositories/InMemoryRequestRepository')
+const RedisRequestRepository = require('@login/data/repositories/RedisRequestRepository')
 
-describe('InMemoryRequest repository', function () {
+process.env.REDIS_URL = 'redis://redis.doc:6379'
+
+describe('RedisRequest repository', function () {
   let repository
 
   before(function () {
-    repository = new InMemoryRequestRepository()
+    repository = new RedisRequestRepository()
   })
 
   it('should raise an error for invalid input', function () {

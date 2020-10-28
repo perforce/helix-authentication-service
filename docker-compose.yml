@@ -9,21 +9,20 @@ version: '3.7'
 #
 
 services:
-  auth-svc.doc:
+  auth-svc1.doc:
     build:
       context: .
       dockerfile: containers/auth-svc/Dockerfile
-    container_name: auth-svc.doc
+    image: auth-svc:latest
+    container_name: auth-svc1.doc
     environment:
       NODE_ENV: development
       DEBUG: "1"
       SVC_BASE_URI: "https://auth-svc.doc"
-      PORT: 3000
+      PORT: 3001
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
-      # CA_CERT_FILE: certs/ca.crt
-      # SP_CERT_FILE: certs/server.crt
-      # SP_KEY_FILE: certs/server.key
+      REDIS_URL: 'redis://redis.doc:6379'
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "https://oidc.doc:8843"
@@ -36,7 +35,35 @@ services:
     networks:
       - authen
     ports:
-      - "3000:3000"
+      - "3001:3001"
+    depends_on:
+      - redis.doc
+  auth-svc2.doc:
+    image: auth-svc:latest
+    container_name: auth-svc2.doc
+    environment:
+      NODE_ENV: development
+      DEBUG: "1"
+      SVC_BASE_URI: "https://auth-svc.doc"
+      PORT: 3002
+      PROTOCOL: "http"
+      TRUST_PROXY: 'true'
+      REDIS_URL: 'redis://redis.doc:6379'
+      OIDC_CLIENT_ID: client_id
+      OIDC_CLIENT_SECRET: client_secret
+      OIDC_ISSUER_URI: "https://oidc.doc:8843"
+      DEFAULT_PROTOCOL: "saml"
+      # allow the self-signed certs installed on shibboleth container
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      SAML_IDP_METADATA_URL: "https://shibboleth.doc:4443/idp/shibboleth"
+      SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+      SAML_SP_ENTITY_ID: "urn:example:sp"
+    networks:
+      - authen
+    ports:
+      - "3002:3002"
+    depends_on:
+      - auth-svc1.doc
   ldap.doc:
     build:
       context: containers/ldap
@@ -54,6 +81,9 @@ services:
       - authen
     ports:
       - "443:443"
+    depends_on:
+      - auth-svc1.doc
+      - auth-svc2.doc
   oidc.doc:
     image: soluto/oidc-server-mock:0.2.4
     container_name: oidc.doc
@@ -115,6 +145,18 @@ services:
     volumes:
       - ./containers/oidc/https:/https:ro
   # p4d.doc is in the extension repository
+  redis.doc:
+    image: redis:6.0
+    container_name: redis.doc
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - authen
+    ports:
+      - "6379:6379"
   shibboleth.doc:
     build:
       context: containers/shibboleth

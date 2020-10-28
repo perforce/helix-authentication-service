@@ -20,4 +20,16 @@ describe('Request entity', function () {
     assert.equal(tRequest.userId, 'joeuser')
     assert.isFalse(tRequest.forceAuthn)
   })
+
+  it('should convert to/from JSON', function () {
+    // arrange
+    const tRequest = new Request('request123', 'joeuser', false)
+    // act
+    const encoded = tRequest.toJson()
+    const decoded = Request.fromJson(encoded)
+    // assert
+    assert.equal(decoded.id, 'request123')
+    assert.equal(decoded.userId, 'joeuser')
+    assert.isFalse(decoded.forceAuthn)
+  })
 })

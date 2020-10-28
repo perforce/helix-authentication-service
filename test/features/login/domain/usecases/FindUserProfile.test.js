@@ -36,7 +36,7 @@ describe('FindUserProfile use case', function () {
     const requestId = 'request123'
     const requestStub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       assert.equal(id, requestId)
-      return null
+      return Promise.resolve(null)
     })
     // act
     const result = await usecase(requestId, 1000, 100)
@@ -52,12 +52,12 @@ describe('FindUserProfile use case', function () {
     // arrange
     const userStub = sinon.stub(UserRepository.prototype, 'take').callsFake((id) => {
       assert.equal(id, 'joeuser')
-      return null
+      return Promise.resolve(null)
     })
     const requestId = 'request123'
     const requestStub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       assert.equal(id, requestId)
-      return new Request('request123', 'joeuser', false)
+      return Promise.resolve(new Request('request123', 'joeuser', false))
     })
     // act
     try {
@@ -78,12 +78,12 @@ describe('FindUserProfile use case', function () {
     const userId = 'joeuser'
     const userStub = sinon.stub(UserRepository.prototype, 'take').callsFake((id) => {
       assert.equal(id, userId)
-      return new User(id, { name: 'joe', email: 'joe@example.com' })
+      return Promise.resolve(new User(id, { name: 'joe', email: 'joe@example.com' }))
     })
     const requestId = 'request123'
     const requestStub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       assert.equal(id, requestId)
-      return new Request('request123', userId, false)
+      return Promise.resolve(new Request('request123', userId, false))
     })
     // act
     const user = await usecase(requestId)
@@ -107,14 +107,14 @@ describe('FindUserProfile use case', function () {
       // path through the usecase code
       callCount++
       if (callCount > 3) {
-        return new User(id, { name: 'joe', email: 'joe@example.com' })
+        return Promise.resolve(new User(id, { name: 'joe', email: 'joe@example.com' }))
       }
-      return null
+      return Promise.resolve(null)
     })
     const requestId = 'request123'
     const requestStub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       assert.equal(id, requestId)
-      return new Request('request123', userId, false)
+      return Promise.resolve(new Request('request123', userId, false))
     })
     // act
     const user = await usecase(requestId, 1000, 100)

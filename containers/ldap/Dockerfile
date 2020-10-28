@@ -12,3 +12,5 @@ ADD add-entries.ldif /container/service/slapd/assets/config/bootstrap/ldif/custo
 #
 # $ ldapsearch -x -H ldap://192.168.99.100:389 -b dc=example,dc=org -D "cn=admin,dc=example,dc=org" -w admin
 #
+
+HEALTHCHECK CMD ldapwhoami -x -H ldap://localhost:389 -D "cn=admin,dc=example,dc=org" -w admin || exit 1
