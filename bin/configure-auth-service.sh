@@ -723,6 +723,11 @@ function modify_config() {
         SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL}" \
         SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID}" \
         node ./bin/writeconf.js
+    # ensure log file exists and is writable by the pm2 user
+    if [[ ! -f auth-svc.log ]]; then
+        touch auth-svc.log
+        chown ${SUDO_USER:-${USER}} auth-svc.log
+    fi
     return 0
 }
 
@@ -730,14 +735,8 @@ function modify_config() {
 function restart_service() {
     # try to have pm2 run as the unprivileged user by default
     PM2_USER=${SUDO_USER:-${USER}}
-    if [[ "${PLATFORM}" == 'redhat' ]]; then
-        # need to run pm2 as root on centos/redhat
-        sudo -u $PM2_USER pm2 kill
-        sudo -u $PM2_USER pm2 start ecosystem.config.js
-    else
-        sudo -u $PM2_USER pm2 kill
-        sudo -u $PM2_USER pm2 start ecosystem.config.js
-    fi
+    sudo -u $PM2_USER pm2 kill
+    sudo -u $PM2_USER pm2 start ecosystem.config.js
     return 0
 }
 
