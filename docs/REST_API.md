@@ -27,7 +27,10 @@ this:
 This is the starting point for the user authentication process. The **:userId**
 _route parameter_ can be any unique value that the client wishes to use for
 identifying the user. The service responds with a JSON body that contains a
-request identifier and URLs for the user to log in.
+request identifier and URLs for the user to log in. **Note:** The login URL will
+contain a query parameter that is helpful for rule-based routing with a load
+balancer. This parameter should be preserved when providing the login URL to the
+user.
 
 #### Request Parameters
 
@@ -56,8 +59,9 @@ In this example, the **:userId** route parameter is given as `repoman`, and the
 ```json
 {
     "request": "01DMKW0EFPKJFGY4PT7B4N0F4J",
-    "loginUrl": "https://auth-service/saml/login/01DMKW0EFPKJFGY4PT7B4N0F4J",
-    "baseUrl": "https://auth-service"
+    "loginUrl": "https://auth-service/saml/login/01DMKW0EFPKJFGY4PT7B4N0F4J?instanceId=auth1",
+    "baseUrl": "https://auth-service",
+    "instanceId": "auth1"
 }
 ```
 

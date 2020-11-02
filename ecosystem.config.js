@@ -38,6 +38,7 @@ module.exports = {
       // DEFAULT_PROTOCOL: 'saml',
       // FORCE_AUTHN: false,
       // IDP_CERT_FILE: undefined,
+      // INSTANCE_ID: 'none',
       // LOGGING: undefined,
       // SAML_IDP_ENTITY_ID: undefined,
       // IDP_CONFIG_FILE: './saml_idp.conf.js',

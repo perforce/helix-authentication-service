@@ -68,9 +68,32 @@ setTimeout(function () {
           .expect(res => {
             assert.equal(res.body.request.length, 26)
             assert.isTrue(res.body.loginUrl.startsWith('http'))
-            assert.isTrue(res.body.loginUrl.endsWith(res.body.request))
+            const suffix = `/${res.body.request}?instanceId=none`
+            assert.isTrue(res.body.loginUrl.endsWith(suffix))
             assert.isTrue(res.body.baseUrl.startsWith('http'))
             requestId = res.body.request
+          })
+          // eslint-disable-next-line no-unused-vars
+          .end(function (err, res) {
+            if (err) {
+              return done(err)
+            }
+            done()
+          })
+      })
+
+      it('should return a URL with instanceId', function (done) {
+        process.env.INSTANCE_ID = 'trueU'
+        agent
+          .get('/requests/new/realuser')
+          .trustLocalhost(true)
+          .expect(200)
+          .expect(res => {
+            assert.equal(res.body.request.length, 26)
+            assert.isTrue(res.body.loginUrl.startsWith('http'))
+            const suffix = `/${res.body.request}?instanceId=trueU`
+            assert.isTrue(res.body.loginUrl.endsWith(suffix))
+            assert.isTrue(res.body.baseUrl.startsWith('http'))
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {

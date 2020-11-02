@@ -8,9 +8,38 @@ Placing a web proxy between the client and HAS can serve several purposes, such 
 
 ## Configuring HAS
 
+### Trusting the Proxy
+
 In order for HAS to operate effectively when it is behind a web proxy, it is necessary to set the `TRUST_PROXY` environment variable. This value is then set in the `trust proxy` application setting, which is used by the Express.js framework to pick up the correct protocol (`http` or `https`). This in turn helps the `session-cookie` middleware correctly set the cookie as `secure` in responses. This is critical for the `SameSite=none` to have the desired effect during the login process -- see [Cookies.md](./Cookies.md) for more information on browser cookies and how they are used by HAS.
 
 For values supported by the `TRUST_PROXY` setting, see [behind proxies](http://expressjs.com/en/guide/behind-proxies.html) on the Express.js web site. In addition to how `trust proxy` is used, the page also describes how the request headers are used by the framework to detect the connection protocol.
+
+### Rule-based Routing
+
+At a minimum, the proxy or load balancer should be configured to route requests
+based on the session cookie set by the service. The cookie is named `JSESSIONID`
+and its value will be unique, allowing the proxy to direct requests back to the
+same service instance each time.
+
+**Note:** When using Redis for storing session state, the proxy should _not_ be
+routing requests based on session affinity. This allows for failover of the
+service to be handled by the proxy without concern for user sessions. See the
+[Failover.md](./Failover.md) document for information about service failover.
+
+A service setting named `INSTANCE_ID` is available for supporting rule-based
+routing in the proxy, prior to the session cookie being set. The value defined
+in this setting will be appended to the login URL returned to the client as a
+query parameter named `instanceId`. The proxy can then be configured to route
+incoming requests using this query parameter value, but only if the query
+parameter is present in the client request (it is difficult to configure an
+identity provider to include an arbitrary query parameter in the callback URL,
+for instance). In combination with the session affinity via the session cookie,
+the query parameter will ensure that the user is always routed to the correct
+instance of the service.
+
+**Note:** As with session affinity, if Redis is being used for storing session
+state, then the `INSTANCE_ID` setting is not necessary, as the information will
+be available to all HAS instances.
 
 ## Timeouts
 

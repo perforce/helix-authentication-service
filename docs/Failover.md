@@ -28,6 +28,12 @@ For convenience, there is a container for Redis defined in the Compose file
 The HAS instances defined in the Compose file are configured to use the Redis
 store for the request/user mapping and the session data.
 
+## Proxy Configuration
+
+When using the Redis-based failover support in HAS, the load balancer or web
+proxy in front of HAS should _not_ have session affinity enabled. Instead,
+incoming requests can go to any of the configured HAS instances.
+
 ## Testing
 
 1. Start all docker containers: `docker-compose up --build -d`
