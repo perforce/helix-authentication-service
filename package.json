@@ -2,6 +2,10 @@
   "name": "helix-auth-svc",
   "version": "2020.1.1",
   "description": "Helix Authentication Service: +MAIN+",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/perforce/helix-authentication-service.git"
+  },
   "keywords": [
     "authentication",
     "oidc",
