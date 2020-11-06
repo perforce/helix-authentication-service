@@ -11,10 +11,10 @@
       similar authentication step.</p>
       <p>If you are unsure how to proceed, please contact your administrator.</p>
     </div>
+    <% if (showHelp) { %>
+      <%- include('admin_help') %>
+    <% } %>
   </section>
-  <% if (showHelp) { %>
-    <%- include('admin_help') %>
-  <% } %>
   <%- include('footer') %>
 </body>
 </html>
