@@ -12,8 +12,8 @@ ENV USER=root
 RUN yum -q -y install sudo
 
 # install node.js via package from nodesource
-ADD https://rpm.nodesource.com/setup_12.x setup_12.x
-RUN bash setup_12.x
+ADD https://rpm.nodesource.com/setup_14.x setup_14.x
+RUN bash setup_14.x
 RUN yum -y install nodejs
 RUN test -f /usr/bin/node
 

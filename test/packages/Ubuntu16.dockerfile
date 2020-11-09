@@ -13,8 +13,8 @@ RUN apt-get -q update
 RUN apt-get -q -y install sudo
 
 # install node.js via package from nodesource
-ADD https://deb.nodesource.com/setup_12.x setup_12.x
-RUN bash setup_12.x
+ADD https://deb.nodesource.com/setup_14.x setup_14.x
+RUN bash setup_14.x
 RUN apt-get -q -y install nodejs
 RUN test -f /usr/bin/node
 

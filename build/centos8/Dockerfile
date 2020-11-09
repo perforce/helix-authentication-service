@@ -16,8 +16,8 @@ ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 # install build and packaging prerequisites
 #
 RUN yum -q -y install curl gcc-c++ git make python2 rpm-build rpmdevtools
-ADD https://rpm.nodesource.com/setup_12.x setup_12.x
-RUN bash setup_12.x
+ADD https://rpm.nodesource.com/setup_14.x setup_14.x
+RUN bash setup_14.x
 # Skip gpg key check because it fails on some systems, and how that can happen
 # in a docker container is beyond my comprehension.
 RUN yum install --nogpgcheck -y nodejs

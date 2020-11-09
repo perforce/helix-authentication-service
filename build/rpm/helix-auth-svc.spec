@@ -13,7 +13,7 @@ Source0:        helix-auth-svc.tar.gz
 
 # Leaving the epoch off results in centos installing an older version of nodejs,
 # and for whatever reason, having the epoch forces yum to work correctly.
-Requires:       nodejs >= 2:12.16
+Requires:       nodejs >= 2:14.15
 
 %description
 Authentication protocol (OIDC, SAML) integration service.

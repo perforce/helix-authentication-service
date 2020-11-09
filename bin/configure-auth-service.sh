@@ -265,8 +265,8 @@ function ensure_readiness() {
     if [ -z "$PLATFORM" ]; then
         die 'Could not determine OS distribution.'
     fi
-    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v12\.'; then
-        die 'Node.js v12 is required. Please run install.sh to install dependencies.'
+    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v14\.'; then
+        die 'Node.js v14 is required. Please run install.sh to install dependencies.'
     fi
     if ! which pm2 >/dev/null 2>&1; then
         die 'pm2 is required. Please run install.sh to install dependencies.'
