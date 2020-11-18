@@ -234,11 +234,9 @@ function install_modules() {
 # Start the authentication service using pm2.
 function start_service() {
     echo "Starting the auth service with default configuration..."
-    if [[ "${PLATFORM}" == 'redhat' ]]; then
-        sudo pm2 start ecosystem.config.js
-    else
-        pm2 start ecosystem.config.js
-    fi
+    # For consistency with the configure script, assume that the service will be
+    # run as the unprivileged user, rather than root.
+    pm2 start ecosystem.config.js
 }
 
 # Install pm2 into the system start-up procedure.
@@ -246,11 +244,7 @@ function install_startup() {
     echo "Installing pm2 startup script..."
     STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
     sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
-    if [[ "${PLATFORM}" == 'redhat' ]]; then
-        sudo pm2 save
-    else
-        pm2 save
-    fi
+    pm2 save
 }
 
 # Print a summary of what was done and any next steps.
