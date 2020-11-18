@@ -711,6 +711,7 @@ function modify_config() {
         # make the OIDC_CLIENT_SECRET_FILE file readable only by current user
         echo "${OIDC_CLIENT_SECRET}" > ${OIDC_CLIENT_SECRET_FILE}
         chmod 600 ${OIDC_CLIENT_SECRET_FILE}
+        chown ${SUDO_USER:-${USER}} ${OIDC_CLIENT_SECRET_FILE}
     fi
     # use Node.js to update the configuration file in place since the format is
     # a bit too complex for simple sed/awk scripting to handle
