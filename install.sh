@@ -6,6 +6,7 @@
 #
 INTERACTIVE=true
 MONOCHROME=false
+UPGRADE_NODE=false
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -45,6 +46,10 @@ Description:
     -m
         Monochrome; no colored text.
 
+    --upgrade
+        Upgrade an existing package-based installation of Node.js with
+        the latest supported version.
+
     -n
         Non-interactive mode; exits immediately if prompting is required.
 
@@ -62,6 +67,10 @@ function read_arguments() {
         case "$1" in
         -m)
             MONOCHROME=true
+            shift
+            ;;
+        --upgrade)
+            UPGRADE_NODE=true
             shift
             ;;
         -n)
@@ -165,9 +174,46 @@ function prompt_to_proceed() {
     done
 }
 
-# Install Node.js 14 using a script from nodesource.com
+# If Node.js is installed, ensure that the version is supported.
+function check_nodejs() {
+    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v14\.'; then
+        # check if Node.js came from the package 'nodejs' package or not
+        UPGRADABLE=true
+        if [ $PLATFORM == "debian" ]; then
+            if ! apt-cache policy nodejs | grep -Eq 'Installed:.+nodesource*'; then
+                UPGRADABLE=false
+            fi
+        elif [ $PLATFORM == "redhat" ]; then
+            if ! rpm -q nodejs >/dev/null 2>&1; then
+                UPGRADABLE=false
+            fi
+        fi
+        if ! $UPGRADABLE; then
+            error 'Found a version of Node.js that cannot be upgraded automatically.'
+            error 'Please upgrade your Node.js installation to v14 before proceeding.'
+            exit 1
+        fi
+        if $INTERACTIVE; then
+            echo ''
+            echo 'Found a version of Node.js that is not the required v14.'
+            echo 'Do you wish to upgrade the Node.js installation?'
+            select yn in 'Yes' 'No'; do
+                case $yn in
+                    Yes) break;;
+                    No) exit;;
+                esac
+            done
+        elif ! $UPGRADE_NODE; then
+            die 'Node.js v14 is required, please upgrade.'
+        fi
+        # else the script will automatically install the required version
+    fi
+}
+
+# Install or upgrade Node.js 14 using a script from nodesource.com
 function install_nodejs() {
-    if ! which node >/dev/null 2>&1; then
+    # Both an upgrade and a new installation work in the same manner.
+    if [[ $UPGRADE_NODE ]] || ! which node >/dev/null 2>&1; then
         echo "Preparing to install OS packages and Node.js..."
         if [ $PLATFORM == "debian" ]; then
             # Because apt-get will happily fail miserably _and_ return an exit code of
@@ -189,6 +235,12 @@ function install_nodejs() {
             curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
             sudo apt-get -q -y install nodejs
         elif [ $PLATFORM == "redhat" ]; then
+            # In the upgrade scenario, need to remove the repository package first.
+            if [ -f /etc/yum.repos.d/nodesource-el7.repo ]; then
+                sudo rpm -e nodesource-release-el7
+            elif [ -f /etc/yum.repos.d/nodesource-el8.repo ]; then
+                sudo rpm -e nodesource-release-el8
+            fi
             # Add --skip-broken for Oracle Linux and its redundant packages
             sudo yum -q -y install --skip-broken curl gcc-c++ git make
             # Run a shell script from the internet as root to get version 14
@@ -196,16 +248,8 @@ function install_nodejs() {
             #
             # c.f. https://nodejs.org/en/download/package-manager/
             curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
-            if [ $(rpm --eval %{rhel}) == '8' ]; then
-                # NodeSource dependencies are broken for the time being on the
-                # latest CentOS/RHEL release. It expects a 'python' package but it
-                # has been renamed to 'python2' (and additionally 'python3') now.
-                dnf --repo=nodesource download nodejs
-                sudo rpm -i --nodeps nodejs-14.*.rpm
-                rm -f nodejs-14.*.rpm
-            else
-                sudo yum -q -y install nodejs
-            fi
+            sudo yum clean all
+            sudo yum -q -y install nodejs
         fi
     fi
     # run npm once as the unprivileged user so it creates the ~/.config
@@ -272,6 +316,7 @@ function main() {
     ensure_readiness
     set -e
     read_arguments "$@"
+    check_nodejs
     if $INTERACTIVE; then
         display_interactive
         prompt_to_proceed
