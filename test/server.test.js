@@ -38,6 +38,7 @@ describe('Server basics', function () {
   describe('getServiceURI', function () {
     it('should use SVC_BASE_URI if defined', function () {
       assert.equal(sut.getServiceURI({ SVC_BASE_URI: 'https://remotehost:8080' }), 'https://remotehost:8080')
+      assert.equal(sut.getServiceURI({ SVC_BASE_URI: 'https://remotehost:8080/' }), 'https://remotehost:8080')
     })
 
     it('should use PROTOCOL if defined', function () {
