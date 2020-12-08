@@ -18,7 +18,7 @@ services:
     environment:
       NODE_ENV: development
       DEBUG: "1"
-      SVC_BASE_URI: "https://auth-svc.doc"
+      SVC_BASE_URI: "https://haproxy.doc"
       PORT: 3001
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
@@ -44,7 +44,7 @@ services:
     environment:
       NODE_ENV: development
       DEBUG: "1"
-      SVC_BASE_URI: "https://auth-svc.doc"
+      SVC_BASE_URI: "https://haproxy.doc"
       PORT: 3002
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
@@ -130,8 +130,8 @@ services:
             "AllowedGrantTypes": [ "authorization_code" ],
             "AllowAccessTokensViaBrowser": true,
             "RedirectUris": [
-              "https://auth-svc.doc/oidc/callback",
-              "https://auth-svc.doc"
+              "https://haproxy.doc/oidc/callback",
+              "https://haproxy.doc"
             ],
             "AllowedScopes": [ "openid", "profile", "email" ],
             "IdentityTokenLifetime": 3600,
