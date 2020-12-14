@@ -18,6 +18,53 @@ well as the configuration steps for the current version, see the [Helix
 Authentication Service Administrator
 Guide](https://www.perforce.com/manuals/helix-auth-svc/).
 
+## How to use this image
+
+The following are some examples of how to run the authentication service using
+Docker. The first and simplest option would be to use the Docker CLI to start
+the container:
+
+```shell
+$ docker run -d --env-file .env -p 3000:3000 --name auth-svc perforce/helix-auth-svc
+```
+
+The `.env` file referenced in the above command would look something like this:
+
+```shell
+NODE_ENV=development
+DEBUG="1"
+SVC_BASE_URI="https://192.168.24.20:3000"
+DEFAULT_PROTOCOL="saml"
+SAML_IDP_METADATA_URL="https://dev-123456.okta.com/app/abc123xyz456/sso/saml/metadata"
+SAML_SP_ENTITY_ID="urn:example:sp"
+```
+
+If you prefer Docker Compose, then create a `docker-compose.yml` file that might
+look something like this one:
+
+```yaml
+version: '3.7'
+services:
+  helix-auth-svc:
+    image: perforce/helix-auth-svc:latest
+    container_name: helix-auth-svc
+    environment:
+      NODE_ENV: development
+      DEBUG: "1"
+      SVC_BASE_URI: "https://192.168.24.20:3000"
+      DEFAULT_PROTOCOL: "saml"
+      SAML_IDP_METADATA_URL: "https://dev-123456.okta.com/app/abc123xyz456/sso/saml/metadata"
+      SAML_SP_ENTITY_ID: "urn:example:sp"
+    ports:
+      - "3000:3000"
+```
+
+You can then start the container using Docker Compose:
+
+```shell
+$ docker-compose up -d
+```
+
 ## Configuration
 
 The service is configured primarily by means of setting environment variables.
@@ -27,7 +74,7 @@ the `env` section of a Docker Compose file.
 
 See the documentation for the complete list of available settings.
 
-### SSL Certificates
+### SSL certificates
 
 The image contains a set of self-signed certificates which should be replaced
 when deploying the service to production. To facilitate this, map the
@@ -36,7 +83,7 @@ replacement certificates via a volume (for instance, using the `-v` option to
 certificate-related environment variables (`CA_CERT_PATH`, `IDP_CERT_FILE`,
 `SP_CERT_FILE`, and `SP_KEY_FILE`) to reference those files.
 
-### Swarm Support
+### Swarm support
 
 The service can be configured to act as a SAML 2.0 identity provider to other
 services, including Perforce Swarm. This can be done by mapping a volume (for
@@ -45,7 +92,7 @@ Docker Compose file) that includes a configuration file, and setting the
 `IDP_CONFIG_FILE` environment variable to reference that file. An example
 configuration file can be found [here](https://github.com/perforce/helix-authentication-service/blob/master/routes/saml_idp.conf.js).
 
-## How to Get Help
+## How to get help
 
 Configuring the authentication service, and the identity provider, is a
 non-trivial task. Some expertise with security systems is helpful. In the event

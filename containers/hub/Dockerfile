@@ -1,10 +1,16 @@
 #
 # Docker container definition for publishing on Docker Hub.
 #
-# $ docker build -t helix-auth-svc:latest -f containers/hub/Dockerfile .
+# Build:
+#
+# $ docker build -t helix-auth-svc:latest -t helix-auth-svc:2020.2 -f containers/hub/Dockerfile .
+# $ docker tag helix-auth-svc:latest perforce/helix-auth-svc:latest
+# $ docker tag helix-auth-svc:2020.2 perforce/helix-auth-svc:2020.2
+# $ docker push --all-tags perforce/helix-auth-svc
+#
+# Run:
+#
 # $ docker run -d -p 3000:3000 --name helix-auth-svc helix-auth-svc:latest
-# $ docker tag helix-auth-svc:latest p4nathan/helix-auth-svc
-# $ docker push p4nathan/helix-auth-svc
 #
 FROM node:14-slim
 
