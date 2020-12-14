@@ -13,10 +13,7 @@ three dot separated numbers, such as `2020.1.1` or `2019.1.2`.
 
 ## Documentation
 
-To learn about the architecture, supported products and identity providers, as
-well as the configuration steps for the current version, see the [Helix
-Authentication Service Administrator
-Guide](https://www.perforce.com/manuals/helix-auth-svc/).
+To learn about the architecture, supported products and identity providers, as well as the configuration steps for the current version, see the <a href="https://www.perforce.com/manuals/helix-auth-svc/" target="_blank">Helix Authentication Service Administrator Guide</a>.
 
 ## How to use this image
 
