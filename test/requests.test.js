@@ -14,9 +14,14 @@ const minimatch = require('minimatch')
 // Override any existing .env file by loading our test configuration.
 require('dotenv').config({ path: 'test/dot.env' })
 
+const path = require('path')
+
+/* global include */
+global.include = (p) => require(path.join(__dirname, '..', p))
+
 // start the server
-const app = require('@lib/app')
-const { createServer } = require('@lib/server')
+const app = include('lib/app')
+const { createServer } = include('lib/server')
 const server = createServer(app)
 const agent = request.agent(server)
 //

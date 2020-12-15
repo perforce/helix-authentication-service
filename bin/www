@@ -2,14 +2,25 @@
 //
 // Copyright 2020 Perforce Software
 //
-const app = require('@lib/app')
-const container = require('@lib/container')
+
+//
+// An attempt to alleviate one of the many shortcomings of Node.js
+// c.f. https://gist.github.com/branneman/8048520 (8. The Wrapper)
+//
+/* global include */
+global.include = function (path) {
+  const p = require('path')
+  return require(p.join(__dirname, '..', path))
+}
+
+const app = include('lib/app')
+const container = include('lib/container')
 const logger = container.resolve('logger')
 const {
   createServer,
   getPort,
   normalizePort
-} = require('@lib/server')
+} = include('lib/server')
 
 // Get port from environment and store in Express.
 const port = normalizePort(getPort(process.env))

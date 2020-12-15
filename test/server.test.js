@@ -3,7 +3,12 @@
 //
 const { assert } = require('chai')
 const { describe, it } = require('mocha')
-const sut = require('@lib/server')
+const path = require('path')
+
+/* global include */
+global.include = (p) => require(path.join(__dirname, '..', p))
+
+const sut = include('lib/server')
 
 describe('Server basics', function () {
   describe('getPort', function () {

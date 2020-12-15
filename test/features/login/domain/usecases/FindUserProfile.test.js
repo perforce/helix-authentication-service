@@ -5,11 +5,16 @@ const { AssertionError } = require('assert')
 const { assert } = require('chai')
 const { after, before, describe, it } = require('mocha')
 const sinon = require('sinon')
-const Request = require('@login/domain/entities/Request')
-const User = require('@login/domain/entities/User')
-const RequestRepository = require('@login/domain/repositories/RequestRepository')
-const UserRepository = require('@login/domain/repositories/UserRepository')
-const FindUserProfile = require('@login/domain/usecases/FindUserProfile')
+const path = require('path')
+
+/* global include */
+global.include = (p) => require(path.join(__dirname, '../../../../..', p))
+
+const Request = include('lib/features/login/domain/entities/Request')
+const User = include('lib/features/login/domain/entities/User')
+const RequestRepository = include('lib/features/login/domain/repositories/RequestRepository')
+const UserRepository = include('lib/features/login/domain/repositories/UserRepository')
+const FindUserProfile = include('lib/features/login/domain/usecases/FindUserProfile')
 
 describe('FindUserProfile use case', function () {
   let usecase

@@ -22,14 +22,9 @@
   },
   "main": "lib/app.js",
   "scripts": {
-    "start": "node -r module-alias/register ./bin/www",
-    "test": "mocha -r module-alias/register --recursive --delay --exit",
+    "start": "node ./bin/www",
+    "test": "mocha --recursive --delay --exit",
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
-  },
-  "_moduleAliases": {
-    "@root": ".",
-    "@lib": "lib",
-    "@login": "lib/features/login"
   },
   "dependencies": {
     "awilix": "^4.2.7",
@@ -44,7 +39,6 @@
     "http-errors": "^1.8.0",
     "memorystore": "^1.6.4",
     "minimatch": "^3.0.4",
-    "module-alias": "^2.2.2",
     "morgan": "~1.10.0",
     "openid-client": "^4.2.1",
     "passport": "^0.4.1",

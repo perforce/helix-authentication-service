@@ -84,16 +84,13 @@ from the [module-alias](https://github.com/ilearnio/module-alias) README file:
 require('../../../../some/very/deep/module')
 ```
 
-To alleviate this pain, this application uses the `module-alias` module, and
-defines several aliases in the `package.json` to make the paths clearer. As
-such, it is necessary to require `module-alias` whenever the application is
-started, or tests are run. This has already been set up in the `package.json`
-file and in the `Dockerfile`, so no additional actions are required. Just know
-that when you see something like this, it is relying on the aliasing feature:
-
-```javascript
-require('@lib/logging')
-```
+To alleviate this pain, this application defines a global function named
+`include()` that builds the correct path based on a relative location. As such
+you will see linter directives to treat `include` as a global, and you will see
+some `include()` calls in place of `require()`. This particular solution to the
+problem is described as **The Wrapper** in a popular GitHub
+[gist](https://gist.github.com/branneman/8048520) that offers several options
+for dealing with this nuisance.
 
 ### Mock Objects
 

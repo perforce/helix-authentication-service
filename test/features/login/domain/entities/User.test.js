@@ -4,7 +4,12 @@
 const { AssertionError } = require('assert')
 const { assert } = require('chai')
 const { describe, it } = require('mocha')
-const User = require('@login/domain/entities/User')
+const path = require('path')
+
+/* global include */
+global.include = (p) => require(path.join(__dirname, '../../../../..', p))
+
+const User = include('lib/features/login/domain/entities/User')
 
 describe('User entity', function () {
   it('should raise an error for invalid input', function () {

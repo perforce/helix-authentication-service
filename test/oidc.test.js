@@ -8,6 +8,8 @@ const { after, before, describe, it } = require('mocha')
 const { Builder, By, Capabilities, until } = require('selenium-webdriver')
 const { Options } = require('selenium-webdriver/firefox')
 const { getRequestId } = require('./helpers')
+const path = require('path')
+global.include = (p) => require(path.join(__dirname, '..', p))
 
 //
 // Selenium API: https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/
@@ -126,8 +128,7 @@ describe('OIDC authentication', function () {
         throw err
       }
     }
-    await driver.wait(until.elementLocated(By.className('title')))
-    const subtitleH2 = await driver.findElement(By.className('subtitle'))
+    const subtitleH2 = await driver.wait(until.elementLocated(By.className('subtitle')))
     const subtitleText = await subtitleH2.getText()
     assert.equal(subtitleText, 'Login Successful')
   })

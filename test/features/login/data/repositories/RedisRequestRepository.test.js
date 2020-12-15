@@ -4,8 +4,13 @@
 const { AssertionError } = require('assert')
 const { assert } = require('chai')
 const { before, describe, it } = require('mocha')
-const Request = require('@login/domain/entities/Request')
-const RedisRequestRepository = require('@login/data/repositories/RedisRequestRepository')
+const path = require('path')
+
+/* global include */
+global.include = (p) => require(path.join(__dirname, '../../../../..', p))
+
+const Request = include('lib/features/login/domain/entities/Request')
+const RedisRequestRepository = include('lib/features/login/data/repositories/RedisRequestRepository')
 
 process.env.REDIS_URL = 'redis://redis.doc:6379'
 
