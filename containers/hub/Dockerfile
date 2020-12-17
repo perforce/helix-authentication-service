@@ -12,15 +12,13 @@
 #
 # $ docker run -d -p 3000:3000 --name helix-auth-svc helix-auth-svc:latest
 #
-FROM node:14-slim
-
+FROM node:14-slim AS builder
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update && \
     apt-get -q -y install git
-
-WORKDIR /helix-auth-svc
+RUN npm -g install pkg
+WORKDIR /build
 COPY bin bin
-COPY certs certs
 COPY lib lib
 COPY package.json .
 COPY package-lock.json .
@@ -28,14 +26,20 @@ COPY public public
 COPY routes routes
 COPY views views
 RUN npm ci -q --only=prod --no-optional
+RUN pkg . --target linux
 
+#
+# Build a minimal final image based on an image that has the libraries (stdc++,
+# gcc) needed to run our compiled image (alpine is too minimal). Note that this
+# base does not have curl, so we do not have a healthcheck.
+#
+FROM debian:buster-slim
+WORKDIR /srv
+COPY --from=builder /build/helix-auth-svc .
+COPY certs certs
 ENV DEBUG "yes"
 ENV NODE_ENV development
 ENV PORT 3000
 ENV SVC_BASE_URI "https://localhost:3000"
-
 EXPOSE ${PORT}
-
-HEALTHCHECK CMD curl -k -f -s -I http://localhost:${PORT}/ || exit 1
-
-ENTRYPOINT [ "node", "bin/www" ]
+ENTRYPOINT ["./helix-auth-svc"]
