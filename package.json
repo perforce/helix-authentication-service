@@ -67,13 +67,13 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "eslint": "^7.12.1",
-    "geckodriver": "^1.20.0",
+    "eslint": "^7.17.0",
+    "geckodriver": "^1.21.1",
     "license-checker": "^25.0.1",
     "mocha": "^8.2.1",
-    "selenium-webdriver": "^4.0.0-alpha.7",
+    "selenium-webdriver": "^4.0.0-alpha.8",
     "showdown": "^1.9.1",
-    "sinon": "^9.2.1",
-    "supertest": "^6.0.0"
+    "sinon": "^9.2.2",
+    "supertest": "^6.0.1"
   }
 }
