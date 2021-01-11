@@ -27,6 +27,7 @@ RUN apt-get update && \
 ADD https://deb.nodesource.com/setup_14.x setup_14.x
 RUN bash setup_14.x
 RUN apt-get -q -y install nodejs
+RUN npm -g install pkg
 
 WORKDIR /build/${DIRNAME}
 
@@ -40,7 +41,6 @@ COPY lib lib
 COPY public public
 COPY routes routes
 COPY views views
-COPY ecosystem.config.js ecosystem.config.js
 COPY logging.config.js logging.config.js
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
@@ -50,16 +50,20 @@ RUN sed -e "s/\"2020.1.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
 COPY README.md README.md
 
 #
-# produce an HTML version of the Markdown README file
+# produce an HTML version of the Markdown README file and generate the set of
+# third party licenses into the docs directory
 #
 RUN npm -q ci
 RUN npx showdown makehtml -i README.md -o README.html --tables --completeHTMLDocument
+RUN node ./bin/copyLicenses.js
 RUN rm -rf node_modules
 
 #
-# build only what is needed for deployment
+# build only what is needed for packaging
 #
-RUN npm ci -q --only=production
+RUN npm ci -q --only=production --no-optional
+RUN pkg . --targets=linux
+RUN rm -rf node_modules
 RUN tar zcf ../${PKGNAME}.orig.tar.gz .
 
 #
@@ -70,6 +74,9 @@ RUN sed -e "s/ID_REL_BASE_REPLACE/${ID_REL_BASE}/" \
         -e "s/ID_PATCH_REPLACE/${ID_PATCH}~xenial/" \
         -e "s/DATE_STRING_REPLACE/`date +'%a, %d %b %Y %H:%M:%S %z'`/" \
 		debian/changelog.in > debian/changelog
+# prevent dh_strip from stripping our executable and thoroughly breaking it
+# (resulting executable would emit 'Pkg: Error reading from file.' and die)
+ENV DEB_BUILD_OPTIONS nostrip
 RUN dpkg-buildpackage -b -rfakeroot -us -uc
 #
 # Work around issue with older aptly that does not recognize the new default

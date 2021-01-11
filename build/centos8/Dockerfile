@@ -20,7 +20,8 @@ ADD https://rpm.nodesource.com/setup_14.x setup_14.x
 RUN bash setup_14.x
 # Skip gpg key check because it fails on some systems, and how that can happen
 # in a docker container is beyond my comprehension.
-RUN yum install --nogpgcheck -y nodejs
+RUN yum -q -y install --nogpgcheck -y nodejs
+RUN npm -g install pkg
 
 WORKDIR /build/${DIRNAME}
 
@@ -34,23 +35,26 @@ COPY lib lib
 COPY public public
 COPY routes routes
 COPY views views
-COPY ecosystem.config.js ecosystem.config.js
 COPY logging.config.js logging.config.js
 COPY package-lock.json package-lock.json
 COPY package.json package.json
 COPY README.md README.md
 
 #
-# produce an HTML version of the Markdown README file
+# produce an HTML version of the Markdown README file and generate the set of
+# third party licenses into the docs directory
 #
 RUN npm -q ci
 RUN npx showdown makehtml -i README.md -o README.html --tables --completeHTMLDocument
+RUN node ./bin/copyLicenses.js
 RUN rm -rf node_modules
 
 #
 # build only what is needed for deployment
 #
-RUN npm ci -q --only=production
+RUN npm ci -q --only=production --no-optional
+RUN pkg . --targets=linux
+RUN rm -rf node_modules
 
 #
 # build the rpm package

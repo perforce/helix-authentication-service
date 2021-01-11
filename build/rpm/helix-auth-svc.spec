@@ -11,15 +11,14 @@ License:        BSD
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
 
-# Leaving the epoch off results in centos installing an older version of nodejs,
-# and for whatever reason, having the epoch forces yum to work correctly.
-Requires:       nodejs >= 2:14.15
-
 %description
 Authentication protocol (OIDC, SAML) integration service.
 
 # empty files that rpm creates and then complains about
 %global debug_package %{nil}
+# Prevent the strip command from attempting to strip the debug info from the
+# pkg-built binary since that causes it to fail on startup.
+%global __os_install_post %{nil}
 
 %prep
 %setup -q
@@ -32,29 +31,18 @@ Authentication protocol (OIDC, SAML) integration service.
 install -d %{buildroot}%{installprefix}/bin
 install -d %{buildroot}%{installprefix}/certs
 install -d %{buildroot}%{installprefix}/docs
-install -d %{buildroot}%{installprefix}/lib
-install -d %{buildroot}%{installprefix}/node_modules
-install -d %{buildroot}%{installprefix}/public
-install -d %{buildroot}%{installprefix}/routes
-install -d %{buildroot}%{installprefix}/views
 
+install -m 0755 helix-auth-svc %{buildroot}%{installprefix}/helix-auth-svc
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
-cp -p bin/copyLicenses.js %{buildroot}%{installprefix}/bin/copyLicenses.js
 cp -p bin/writeconf.js %{buildroot}%{installprefix}/bin/writeconf.js
-install -m 0755 bin/www %{buildroot}%{installprefix}/bin/www
 cp -pr certs/* %{buildroot}%{installprefix}/certs
-cp -pr docs/* %{buildroot}%{installprefix}/docs
-cp -pr lib/* %{buildroot}%{installprefix}/lib
-# remove this problematic, seemingly duplicate, file
-rm -f node_modules/unix-dgram/build/Release/obj.target/unix_dgram.node
-cp -pr node_modules/* %{buildroot}%{installprefix}/node_modules
-cp -pr public/* %{buildroot}%{installprefix}/public
-cp -pr routes/* %{buildroot}%{installprefix}/routes
-cp -pr views/* %{buildroot}%{installprefix}/views
+cp -p docs/Administrator-Guide.md %{buildroot}%{installprefix}/docs/Administrator-Guide.md
+cp -p docs/REST_API.md %{buildroot}%{installprefix}/docs/REST_API.md
+cp -pr docs/licenses %{buildroot}%{installprefix}/docs/licenses
 
-cp ecosystem.config.js %{buildroot}%{installprefix}/ecosystem.config.js
 cp logging.config.js %{buildroot}%{installprefix}/logging.config.js
-cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
+
+# keep the package.json for the version information
 sed -e "s/\"2020.1.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
@@ -69,51 +57,52 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 %doc
 
 %post
-# install pm2 globally
-if ! which pm2 >/dev/null 2>&1; then
-    echo "Installing pm2 globally..."
-    npm install -q -g pm2
+if [ ! -f "%{installprefix}/.env" ]; then
+    echo 'DEBUG=1' > %{installprefix}/.env
 fi
+cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
+[Unit]
+Description=Helix Authentication Service
+After=network.target
 
-# try to have pm2 run as the unprivileged user by default
-PM2_USER=${SUDO_USER:-${USER}}
-# start the service using pm2
-echo "Starting the auth service with default configuration..."
-cd %{installprefix}
-sudo -u $PM2_USER pm2 start ecosystem.config.js
-# install pm2 startup script
-echo "Installing pm2 startup script..."
-STARTUP=$(sudo -u $PM2_USER pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
-pm2 startup ${STARTUP} -u ${PM2_USER} --hp ${HOME}
-sudo -u $PM2_USER pm2 save
+[Service]
+Type=simple
+Restart=always
+ExecStart=%{installprefix}/helix-auth-svc
+WorkingDirectory=%{installprefix}
 
-cat <<!
+[Install]
+WantedBy=multi-user.target
+__SERVICE_UNIT__
+
+systemctl daemon-reload
+systemctl enable helix-auth.service
+systemctl start helix-auth.service
+
+cat <<EOF
 
 ===============================================================================
 Package installation complete! Now a few final bits to do manually.
 ===============================================================================
 
-To configure the service on this machine, edit the ecosystem.config.js file in
-the %{installprefix} directory.
-In particular, set the OIDC and/or SAML settings for your identity provider.
-The configure-auth-service.sh script may be helpful for this purpose.
+To configure the service on this machine, edit the .env file in the directory
+shown below, and then restart the service: sudo systemctl restart helix-auth
 
-$ %{installprefix}/bin/configure-auth-service.sh --help
+    %{installprefix}
+
+In particular, the settings to be changed are the OIDC and/or SAML settings
+for your identity provider. The configure-auth-service.sh script may be
+helpful for this purpose.
+
+    %{installprefix}/bin/configure-auth-service.sh --help
 
 For assistance, please contact support@perforce.com
 
-!
+EOF
 
 %preun
-# unregister the service with pm2
-if which pm2 >/dev/null 2>&1; then
-    if [ -e %{installprefix}/ecosystem.config.js ]; then
-        PM2_USER=${SUDO_USER:-${USER}}
-        echo "Removing pm2 service registration..."
-        sudo -u $PM2_USER pm2 delete %{installprefix}/ecosystem.config.js
-        sudo -u $PM2_USER pm2 save --force
-        echo "pm2 service registration removed"
-    fi
-fi
+systemctl stop helix-auth.service
+rm -f /etc/systemd/system/helix-auth.service
+systemctl daemon-reload
 
 %changelog

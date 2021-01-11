@@ -20,43 +20,44 @@ INSTALLPREFIX=/opt/perforce/helix-auth-svc
 
 case "$1" in
     configure)
-        # install pm2 globally
-        if ! which pm2 >/dev/null 2>&1; then
-            echo "Installing pm2 globally..."
-            npm install -q -g pm2
+        if [ ! -f "${INSTALLPREFIX}/.env" ]; then
+            echo 'DEBUG=1' > ${INSTALLPREFIX}/.env
         fi
+        cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
+[Unit]
+Description=Helix Authentication Service
+After=network.target
 
-        # try to have pm2 run as the unprivileged user by default
-        PM2_USER=${SUDO_USER:-${USER}}
-        # start the service using pm2
-        echo "Starting the auth service with default configuration..."
-        cd ${INSTALLPREFIX}
-        sudo -u $PM2_USER pm2 start ecosystem.config.js
-        # Install the pm2 startup script using this roundabout method rather
-        # than simply running the suggested pm2 startup command, since that
-        # mysteriously fails on xenial.
-        echo "Installing pm2 startup script..."
-        STARTUP=$(sudo -u $PM2_USER pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
-        pm2 startup ${STARTUP} -u ${PM2_USER} --hp ${HOME}
-        sudo -u $PM2_USER pm2 save
+[Service]
+Type=simple
+Restart=always
+ExecStart=${INSTALLPREFIX}/helix-auth-svc
+WorkingDirectory=${INSTALLPREFIX}
 
-        # fix the user permissions on the directories created/modified during
-        # the installation process
-        GROUP=$(groups ${PM2_USER} | awk '{print $1;}')
-        chown -R ${PM2_USER}:${GROUP} ${HOME}/.config ${HOME}/.pm2
+[Install]
+WantedBy=multi-user.target
+__SERVICE_UNIT__
 
-        cat << __POST_INSTALL_MSG__
+        systemctl daemon-reload
+        systemctl enable helix-auth.service
+        systemctl start helix-auth.service
+
+        cat <<__POST_INSTALL_MSG__
 
 ===============================================================================
 Package installation complete! Now a few final bits to do manually.
 ===============================================================================
 
-To configure the service on this machine, edit the ecosystem.config.js file in
-the ${INSTALLPREFIX} directory.
-In particular, set the OIDC and/or SAML settings for your identity provider.
-The configure-auth-service.sh script may be helpful for this purpose.
+To configure the service on this machine, edit the .env file in the directory
+shown below, and then restart the service: sudo systemctl restart helix-auth
 
-$ ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
+    ${INSTALLPREFIX}
+
+In particular, the settings to be changed are the OIDC and/or SAML settings
+for your identity provider. The configure-auth-service.sh script may be
+helpful for this purpose.
+
+    ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
 
 For assistance, please contact support@perforce.com
 

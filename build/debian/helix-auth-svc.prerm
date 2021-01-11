@@ -19,15 +19,9 @@ INSTALLPREFIX=/opt/perforce/helix-auth-svc
 
 case "$1" in
     remove|upgrade|deconfigure)
-        if which pm2 >/dev/null 2>&1; then
-            if [ -e ${INSTALLPREFIX}/ecosystem.config.js ]; then
-                PM2_USER=${SUDO_USER:-${USER}}
-                echo 'Removing pm2 service registration...'
-                sudo -u $PM2_USER pm2 delete ${INSTALLPREFIX}/ecosystem.config.js
-                sudo -u $PM2_USER pm2 save --force
-                echo 'pm2 service registration removed'
-            fi
-        fi
+        systemctl stop helix-auth.service
+        rm -f /etc/systemd/system/helix-auth.service
+        systemctl daemon-reload
     ;;
 
     failed-upgrade)
