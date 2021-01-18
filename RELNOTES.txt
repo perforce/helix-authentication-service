@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2020.1.1
+                            Version 2020.2
 
 
 Introduction
@@ -45,7 +45,7 @@ Supported Platforms
 
 Requirements
 
-    Node.js v12 (LTS)
+    Node.js v14 (LTS)
 
 
 Documentation
@@ -81,6 +81,34 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2020.2
+
+    HAS-21 (Change #2041029)
+        Add scripts to install and remove HAS as a Windows service.
+
+    HAS-79 (Change #2035660, 2035664, 2035665)
+        Add support for running HAS behind a proxy, with the option of
+        storing session information in redis to enable failover, with
+        the addition of rule-based routing without redis.
+
+    HAS-141 (Change #2037047)
+        Publish the authentication service as a container to Docker Hub
+        (https://hub.docker.com/r/perforce/helix-auth-svc).
+
+----------------------------------------------------------------------
+Bugs fixed in 2020.2
+
+    HAS-162 (Change #2035660, 2035664, 2035665)
+        Resolve SameSite cookie policy enforcement in newer browsers
+        by enabling load balancer support (see also HAS-79).
+
+----------------------------------------------------------------------
+Other changes in 2020.2
+
+    HAS-168 (Change #2037742)
+        Upgrade Node.js requirement to version 14 (from 12).
 
 ----------------------------------------------------------------------
 New functionality in 2020.1.1
