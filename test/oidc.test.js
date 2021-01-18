@@ -126,6 +126,7 @@ describe('OIDC authentication', function () {
         throw err
       }
     }
+    await driver.wait(until.elementLocated(By.className('title')))
     const subtitleH2 = await driver.findElement(By.className('subtitle'))
     const subtitleText = await subtitleH2.getText()
     assert.equal(subtitleText, 'Login Successful')
