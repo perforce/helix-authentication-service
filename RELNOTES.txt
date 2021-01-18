@@ -60,7 +60,7 @@ Installation
     Linux
 
         1. From the download page, select the appropriate Linux distribution
-           option. For Linux, HAS is packaged as in DEB and RPM formats.
+           option. For Linux, HAS is packaged in DEB and RPM formats.
 
         2. To install, use the appropriate package install command for the
            system, such as `yum` or `apt` for CentOS and Ubuntu respectively.
@@ -86,23 +86,24 @@ Changes in every release: Bugs Fixed, New Functionality
 New functionality in 2020.2
 
     HAS-21 (Change #2041029)
-        Add scripts to install and remove HAS as a Windows service.
+        Scripts are now available to install and remove HAS as a Windows
+        service.
 
     HAS-79 (Change #2035660, 2035664, 2035665)
-        Add support for running HAS behind a proxy, with the option of
-        storing session information in redis to enable failover, with
-        the addition of rule-based routing without redis.
+        You can now run HAS behind a proxy, with the option of storing
+        session information in Redis to enable failover, with the addition
+        of rule-based routing without Redis.
 
     HAS-141 (Change #2037047)
-        Publish the authentication service as a container to Docker Hub
-        (https://hub.docker.com/r/perforce/helix-auth-svc).
+        You can now run HAS in a Docker container, which is available on
+        Docker Hub (https://hub.docker.com/r/perforce/helix-auth-svc).
 
 ----------------------------------------------------------------------
 Bugs fixed in 2020.2
 
     HAS-162 (Change #2035660, 2035664, 2035665)
-        Resolve SameSite cookie policy enforcement in newer browsers
-        by enabling load balancer support (see also HAS-79).
+        Fixed issue with SameSite cookie policy enforcement in newer
+        browsers by enabling load balancer support (see also HAS-79).
 
 ----------------------------------------------------------------------
 Other changes in 2020.2
