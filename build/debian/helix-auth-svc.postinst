@@ -45,11 +45,15 @@ __SERVICE_UNIT__
         cat <<__POST_INSTALL_MSG__
 
 ===============================================================================
-Package installation complete! Now a few final bits to do manually.
+Package installation complete!
 ===============================================================================
 
-To configure the service on this machine, edit the .env file in the directory
-shown below, and then restart the service: sudo systemctl restart helix-auth
+The Helix Authentication Service is now running via systemd using the service
+name 'helix-auth'. Use the command 'sudo systemctl status helix-auth' to get
+the status of the service.
+
+To configure the service, edit the .env file in the directory shown below, and
+then restart the service: sudo systemctl restart helix-auth
 
     ${INSTALLPREFIX}
 

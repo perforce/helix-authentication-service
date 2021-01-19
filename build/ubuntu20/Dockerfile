@@ -48,6 +48,7 @@ RUN sed -e "s/\"2020.1.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
         -e "s|+MAIN+|${HAS_VERSION}|" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md
+COPY RELNOTES.txt RELNOTES.txt
 
 #
 # produce an HTML version of the Markdown README file and generate the set of

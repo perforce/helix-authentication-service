@@ -37,6 +37,9 @@ install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/c
 cp -p bin/writeconf.js %{buildroot}%{installprefix}/bin/writeconf.js
 cp -pr certs/* %{buildroot}%{installprefix}/certs
 cp -p docs/Administrator-Guide.md %{buildroot}%{installprefix}/docs/Administrator-Guide.md
+cp -p docs/Cookies.md %{buildroot}%{installprefix}/docs/Cookies.md
+cp -p docs/Failover.md %{buildroot}%{installprefix}/docs/Failover.md
+cp -p docs/Proxies.md %{buildroot}%{installprefix}/docs/Proxies.md
 cp -p docs/REST_API.md %{buildroot}%{installprefix}/docs/REST_API.md
 cp -pr docs/licenses %{buildroot}%{installprefix}/docs/licenses
 
@@ -82,11 +85,15 @@ systemctl start helix-auth.service
 cat <<EOF
 
 ===============================================================================
-Package installation complete! Now a few final bits to do manually.
+Package installation complete!
 ===============================================================================
 
-To configure the service on this machine, edit the .env file in the directory
-shown below, and then restart the service: sudo systemctl restart helix-auth
+The Helix Authentication Service is now running via systemd using the service
+name 'helix-auth'. Use the command 'sudo systemctl status helix-auth' to get
+the status of the service.
+
+To configure the service, edit the .env file in the directory shown below, and
+then restart the service: sudo systemctl restart helix-auth
 
     %{installprefix}
 

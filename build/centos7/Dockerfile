@@ -37,6 +37,7 @@ COPY logging.config.js logging.config.js
 COPY package-lock.json package-lock.json
 COPY package.json package.json
 COPY README.md README.md
+COPY RELNOTES.txt RELNOTES.txt
 
 #
 # produce an HTML version of the Markdown README file and generate the set of
