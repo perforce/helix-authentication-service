@@ -60,6 +60,7 @@ sed -e "s/\"2020.1.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     package.json > %{buildroot}%{installprefix}/package.json
 cp README.md %{buildroot}%{installprefix}/README.md
 cp README.html %{buildroot}%{installprefix}/README.html
+cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 
 %files
 %docdir %{installprefix}/docs

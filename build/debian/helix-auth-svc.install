@@ -4,6 +4,7 @@ package.json    	opt/perforce/helix-auth-svc
 package-lock.json	opt/perforce/helix-auth-svc
 README.md	    	opt/perforce/helix-auth-svc
 README.html	    	opt/perforce/helix-auth-svc
+RELNOTES.txt    	opt/perforce/helix-auth-svc
 bin/		        opt/perforce/helix-auth-svc
 certs/		        opt/perforce/helix-auth-svc
 docs/    		opt/perforce/helix-auth-svc
