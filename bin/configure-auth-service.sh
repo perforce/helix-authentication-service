@@ -6,6 +6,7 @@
 #
 INTERACTIVE=true
 MONOCHROME=false
+SVC_RESTARTED=false
 DEBUG=false
 PLATFORM=''
 SVC_BASE_URI=''
@@ -18,6 +19,7 @@ OIDC_ISSUER_URI=''
 OIDC_CLIENT_ID=''
 OIDC_CLIENT_SECRET=''
 OIDC_CLIENT_SECRET_FILE='client-secret.txt'
+CONFIG_FILE_NAME='ecosystem.config.js'
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -150,8 +152,9 @@ Description:
 
     Configuration script for Helix Authentication Service.
 
-    This script will modify the ecosystem.config.js file and restart pm2
-    according to the values provided via arguments or interactive input.
+    This script will modify the ecosystem.config.js or .env file according
+    to the values provided via arguments or interactive input, and then
+    restart the service via pm2 or systemd.
 
     -m
         Monochrome; no colored text.
@@ -265,14 +268,23 @@ function ensure_readiness() {
     if [ -z "$PLATFORM" ]; then
         die 'Could not determine OS distribution.'
     fi
-    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v14\.'; then
-        die 'Node.js v14 is required. Please run install.sh to install dependencies.'
+    # Either there exists the single binary or the requirements for running the
+    # application using Node.js must be in place.
+    if [[ ! -e helix-auth-svc ]]; then
+        if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v14\.'; then
+            die 'Node.js v14 is required. Please run install.sh to install dependencies.'
+        fi
+        if ! which pm2 >/dev/null 2>&1; then
+            die 'pm2 is required. Please run install.sh to install dependencies.'
+        fi
+        if [[ ! -d node_modules ]]; then
+            die 'Module dependencies are missing. Please run install.sh before proceeding.'
+        fi
     fi
+    # If pm2 is not easily discoverable, then assume we are modifying the .env
+    # file instead of the ecosystem.config.js file that only pm2 uses.
     if ! which pm2 >/dev/null 2>&1; then
-        die 'pm2 is required. Please run install.sh to install dependencies.'
-    fi
-    if [[ ! -d node_modules ]]; then
-        die 'Module dependencies are missing. Please run install.sh before proceeding.'
+        CONFIG_FILE_NAME='.env'
     fi
 }
 
@@ -672,7 +684,7 @@ EOT
     if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
         echo "  * Set DEFAULT_PROTOCOL to ${DEFAULT_PROTOCOL}"
     fi
-    echo -e "\nThe service will then be restarted (via pm2).\n"
+    echo -e "\nThe service will then be restarted.\n"
 }
 
 # Prompt user to proceed with or cancel the configuration.
@@ -686,18 +698,90 @@ function prompt_to_proceed() {
     done
 }
 
-# Make the prescribed changes to the configuration file.
-function modify_config() {
+# Make the prescribed changes to the ecosystem configuration file.
+function modify_eco_config() {
     # make a backup of the ecosystem file one time and leave it untouched as a
     # record of the original contents
     if [[ ! -f ecosystem.config.orig && -e ecosystem.config.js ]]; then
         cp ecosystem.config.js ecosystem.config.orig
     fi
-    # make a backup of the logging configuration file one time and leave it
-    # untouched as a record of the original contents
-    if [[ ! -f logging.config.orig && -e logging.config.js ]]; then
-        cp logging.config.js logging.config.orig
+    # use Node.js to update the configuration file in place since the format is
+    # a bit too complex for simple sed/awk scripting to handle
+    env DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL}" \
+        SVC_BASE_URI="${SVC_BASE_URI}" \
+        OIDC_ISSUER_URI="${OIDC_ISSUER_URI}" \
+        OIDC_CLIENT_ID="${OIDC_CLIENT_ID}" \
+        OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE}" \
+        SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}" \
+        SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL}" \
+        SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID}" \
+        node ./bin/writeconf.js
+}
+
+# Add, modify, or remove the named setting from the .env file.
+function add_or_replace_var_in_env() {
+    if [[ -n "${2}" ]]; then
+        PRINT="print \"${1}=${2}\""
+        awk "BEGIN {flg=0} /^${1}=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" .env > .tmp.env
+    else
+        awk "!/^${1}=/" .env > .tmp.env
     fi
+    mv .tmp.env .env
+}
+
+# Make the prescribed changes to the dotenv (.env) file.
+function modify_env_config() {
+    # make a backup of the .env file one time and leave it untouched as a record
+    # of the original contents
+    if [[ ! -f .env.orig && -e .env ]]; then
+        cp .env .env.orig
+    fi
+    # use awk to add or replace each setting in the .env file
+    add_or_replace_var_in_env 'DEFAULT_PROTOCOL' "${DEFAULT_PROTOCOL}"
+    add_or_replace_var_in_env 'SVC_BASE_URI' "${SVC_BASE_URI}"
+
+    # either OIDC is defined or it is completely wiped
+    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+        add_or_replace_var_in_env 'OIDC_ISSUER_URI' "${OIDC_ISSUER_URI}"
+        add_or_replace_var_in_env 'OIDC_CLIENT_ID' "${OIDC_CLIENT_ID}"
+        add_or_replace_var_in_env 'OIDC_CLIENT_SECRET_FILE' "${OIDC_CLIENT_SECRET_FILE}"
+    else
+        add_or_replace_var_in_env 'OIDC_ISSUER_URI' ''
+        add_or_replace_var_in_env 'OIDC_CLIENT_ID' ''
+        add_or_replace_var_in_env 'OIDC_CLIENT_SECRET_FILE' ''
+    fi
+    # always use the OIDC_CLIENT_SECRET_FILE setting over the bare secret
+    add_or_replace_var_in_env 'OIDC_CLIENT_SECRET' ''
+
+    # either SAML is defined or it is completely wiped
+    if [[ -n "${SAML_IDP_METADATA_URL}" || -n "${SAML_IDP_SSO_URL}" ]]; then
+        add_or_replace_var_in_env 'SAML_IDP_METADATA_URL' "${SAML_IDP_METADATA_URL}"
+        add_or_replace_var_in_env 'SAML_IDP_SSO_URL' "${SAML_IDP_SSO_URL}"
+        add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' "${SAML_SP_ENTITY_ID}"
+    else
+        add_or_replace_var_in_env 'SAML_IDP_METADATA_URL' ''
+        add_or_replace_var_in_env 'SAML_IDP_SSO_URL' ''
+        add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' ''
+    fi
+
+    # create the logging.config.js file and set LOGGING
+    cat > logging.config.js <<EOT
+module.exports = {
+  level: 'debug',
+  transport: 'file',
+  file: {
+    filename: 'auth-svc.log',
+    maxsize: 1048576,
+    maxfiles: 4
+  }
+}
+EOT
+    chmod 0644 logging.config.js
+    add_or_replace_var_in_env 'LOGGING' '../logging.config.js'
+}
+
+# Normalize the settings and write to the configuration file.
+function modify_config() {
     if [[ -z "${DEFAULT_PROTOCOL}" ]]; then
         # set DEFAULT_PROTOCOL based on provided inputs
         if [[ -n "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
@@ -713,31 +797,39 @@ function modify_config() {
         chmod 600 ${OIDC_CLIENT_SECRET_FILE}
         chown ${SUDO_USER:-${USER}} ${OIDC_CLIENT_SECRET_FILE}
     fi
-    # use Node.js to update the configuration file in place since the format is
-    # a bit too complex for simple sed/awk scripting to handle
-    env DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL}" \
-        SVC_BASE_URI="${SVC_BASE_URI}" \
-        OIDC_ISSUER_URI="${OIDC_ISSUER_URI}" \
-        OIDC_CLIENT_ID="${OIDC_CLIENT_ID}" \
-        OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE}" \
-        SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}" \
-        SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL}" \
-        SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID}" \
-        node ./bin/writeconf.js
-    # ensure log file exists and is writable by the pm2 user
+    # make a backup of the logging configuration file one time and leave it
+    # untouched as a record of the original contents
+    if [[ ! -f logging.config.orig && -e logging.config.js ]]; then
+        cp logging.config.js logging.config.orig
+    fi
+    if [[ "${CONFIG_FILE_NAME}" == ".env" ]]; then
+        modify_env_config
+    elif [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.js" ]]; then
+        modify_eco_config
+    else
+        echo 'WARNING: configuration changes not written to file!'
+    fi
+    # ensure log file exists and is writable by the sudo user
     if [[ ! -f auth-svc.log ]]; then
         touch auth-svc.log
         chown ${SUDO_USER:-${USER}} auth-svc.log
     fi
-    return 0
 }
 
 # Restart the service for the configuration changes to take effect.
 function restart_service() {
-    # try to have pm2 run as the unprivileged user by default
-    PM2_USER=${SUDO_USER:-${USER}}
-    sudo -u $PM2_USER pm2 kill
-    sudo -u $PM2_USER pm2 start ecosystem.config.js
+    # If pm2 is present then presumably HAS is managed using it, otherwise
+    # should assume that HAS is installed as a systemd service unit.
+    if [[ -f ecosystem.config.js ]] && which pm2 >/dev/null 2>&1; then
+        # try to have pm2 run as the unprivileged user by default
+        PM2_USER=${SUDO_USER:-${USER}}
+        sudo -u $PM2_USER pm2 kill
+        sudo -u $PM2_USER pm2 start ecosystem.config.js
+        SVC_RESTARTED=true
+    elif [[ -f /etc/systemd/system/helix-auth.service ]]; then
+        sudo systemctl restart helix-auth
+        SVC_RESTARTED=true
+    fi
     return 0
 }
 
@@ -749,11 +841,18 @@ function print_summary() {
 Automated configuration complete!
 
 What was done:
-  * The ecosystem.config.js file was updated.
+  * The ${CONFIG_FILE_NAME} configuration file was updated.
   * Logging has been configured to write to auth-svc.log in this directory.
-  * The service was restarted via pm2.
+EOT
+    if $SVC_RESTARTED; then
+        echo '  * The service was restarted.'
+    fi
+    echo -e "\nWhat should be done now:"
+    if ! $SVC_RESTARTED; then
+        echo '  * The service must be restarted for the changes to take effect.'
+    fi
+    cat <<EOT
 
-What should be done now:
   * If not already completed, the server and client certificates should be
     replaced with genuine certificates, replacing the self-signed certs.
     See the Administration Guide for additional information.
