@@ -1,6 +1,9 @@
 //
 // Authentication service SAML IdP configuration file.
 //
+// For information regarding the configuration of HAS for use with Swarm, see
+// https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/example-swarm-config.html
+//
 
 //
 // Define the configuration of the SAML identity provider implementation
