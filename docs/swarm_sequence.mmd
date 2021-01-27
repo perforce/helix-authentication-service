@@ -1,0 +1,18 @@
+sequenceDiagram
+    % order of the participants affects the layout
+    participant I as IdP
+    participant H as HAS
+    participant S as Swarm
+    participant P as p4d
+    participant X as extension
+    S->>H: initiate SAML login
+    H->>I: OIDC/SAML login
+    Note over I: user authenticates
+    I-->>H: auth response
+    H-->>S: SAML response
+    S->>P: login w/SAML XML
+    P->>X: invoke loginhook
+    X->>H: validate SAML XML
+    H-->>X: validation response
+    X-->>P: login success
+    P-->>S: p4 ticket
