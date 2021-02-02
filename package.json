@@ -2,6 +2,9 @@
   "name": "helix-auth-svc",
   "version": "2020.2.0",
   "description": "Helix Authentication Service: +MAIN+",
+  "bin": {
+    "auth-svc": "./bin/www"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/perforce/helix-authentication-service.git"
@@ -19,17 +22,26 @@
   },
   "main": "lib/app.js",
   "scripts": {
-    "start": "node -r module-alias/register ./bin/www",
-    "test": "mocha -r module-alias/register --recursive --delay --exit",
+    "start": "node ./bin/www",
+    "test": "mocha --recursive --delay --exit",
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
-  "_moduleAliases": {
-    "@root": ".",
-    "@lib": "lib",
-    "@login": "lib/features/login"
+  "pkg": {
+    "scripts": [
+      "bin/**/*.js",
+      "lib/**/*.js",
+      "routes/**/*.js"
+    ],
+    "assets": [
+      "lib/features/login/presentation/pages/*",
+      "node_modules/saml/node_modules/xml-encryption/lib/templates/*",
+      "node_modules/samlp/templates/**/*",
+      "public/**/*",
+      "views/*"
+    ]
   },
   "dependencies": {
-    "awilix": "^4.2.7",
+    "awilix": "^4.3.1",
     "connect-redis": "^5.0.0",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
@@ -37,18 +49,17 @@
     "express-session": "^1.17.1",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
-    "helmet": "^4.2.0",
+    "helmet": "^4.3.1",
     "http-errors": "^1.8.0",
     "memorystore": "^1.6.4",
     "minimatch": "^3.0.4",
-    "module-alias": "^2.2.2",
     "morgan": "~1.10.0",
-    "openid-client": "^4.2.1",
+    "openid-client": "^4.2.2",
     "passport": "^0.4.1",
-    "passport-saml": "^1.5.0",
-    "passport-saml-metadata": "^2.3.0",
+    "passport-saml": "^2.0.2",
+    "passport-saml-metadata": "^2.4.0",
     "redis": "^3.0.2",
-    "samlp": "^3.4.4",
+    "samlp": "^3.5.0",
     "transitory": "^2.1.1",
     "ulid": "^2.3.0",
     "winston": "^3.3.3",
@@ -56,13 +67,13 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "eslint": "^7.12.1",
-    "geckodriver": "^1.20.0",
+    "eslint": "^7.17.0",
+    "geckodriver": "^1.21.1",
     "license-checker": "^25.0.1",
     "mocha": "^8.2.1",
-    "selenium-webdriver": "^4.0.0-alpha.7",
+    "selenium-webdriver": "^4.0.0-alpha.8",
     "showdown": "^1.9.1",
-    "sinon": "^9.2.1",
-    "supertest": "^6.0.0"
+    "sinon": "^9.2.2",
+    "supertest": "^6.0.1"
   }
 }

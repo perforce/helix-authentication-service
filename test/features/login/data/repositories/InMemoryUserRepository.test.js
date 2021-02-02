@@ -4,8 +4,13 @@
 const { AssertionError } = require('assert')
 const { assert } = require('chai')
 const { before, describe, it } = require('mocha')
-const User = require('@login/domain/entities/User')
-const InMemoryUserRepository = require('@login/data/repositories/InMemoryUserRepository')
+const path = require('path')
+
+/* global include */
+global.include = (p) => require(path.join(__dirname, '../../../../..', p))
+
+const User = include('lib/features/login/domain/entities/User')
+const InMemoryUserRepository = include('lib/features/login/data/repositories/InMemoryUserRepository')
 
 describe('InMemoryUser repository', function () {
   let repository

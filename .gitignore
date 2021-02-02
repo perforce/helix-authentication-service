@@ -31,6 +31,11 @@ jspm_packages/
 # Output of 'npm pack'
 *.tgz
 
+# Output of 'pkg'
+helix-auth-svc-linux
+helix-auth-svc-macos
+helix-auth-svc-win.exe
+
 # Yarn Integrity file
 .yarn-integrity
 

@@ -9,10 +9,6 @@ const svc = new Service({
   name: 'Helix Authentication',
   description: 'Helix Authentication Service',
   script: scriptPath,
-  nodeOptions: [
-    '-r',
-    'module-alias/register'
-  ],
   workingDirectory: path.dirname(__dirname)
 })
 svc.on('alreadyinstalled', () => {

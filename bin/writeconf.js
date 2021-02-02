@@ -75,7 +75,6 @@ function readConfiguration () {
     return {
       apps: [{
         name: 'auth-svc',
-        node_args: '-r module-alias/register',
         script: './bin/www',
         env: {
           CA_CERT_FILE: 'certs/ca.crt',
