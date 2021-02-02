@@ -85,7 +85,7 @@ describe('OIDC authentication', function () {
     }, (res) => {
       assert.equal(res.statusCode, 200)
     }).on('timeout', () => {
-      req.abort()
+      req.destroy()
       done()
     }).on('error', (err) => {
       if (err.code !== 'ECONNRESET') {

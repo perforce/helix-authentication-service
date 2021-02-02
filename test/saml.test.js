@@ -87,7 +87,7 @@ describe('SAML authentication', function () {
     }, (res) => {
       assert.equal(res.statusCode, 200)
     }).on('timeout', () => {
-      req.abort()
+      req.destroy()
       done()
     }).on('error', (err) => {
       if (err.code !== 'ECONNRESET') {
@@ -116,7 +116,7 @@ describe('SAML authentication', function () {
     const submitButton = await searchForm.findElement(By.name('_eventId_proceed'))
     await submitButton.click()
     await driver.wait(until.urlContains('haproxy.doc'), 10000)
-    const subtitleH2 = await driver.findElement(By.className('subtitle'))
+    const subtitleH2 = await driver.wait(until.elementLocated(By.className('subtitle')))
     const subtitleText = await subtitleH2.getText()
     assert.equal(subtitleText, 'Login Successful')
   })
