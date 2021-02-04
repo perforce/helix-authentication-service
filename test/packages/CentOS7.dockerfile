@@ -32,10 +32,14 @@ RUN grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
 RUN test -f /opt/perforce/helix-auth-svc/README.html
 RUN test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
 RUN test -f /opt/perforce/helix-auth-svc/bin/writeconf.js
-RUN test -x /opt/perforce/helix-auth-svc/bin/www
+RUN test -x /opt/perforce/helix-auth-svc/helix-auth-svc
 
-# ensure pm2 is installed as expected
-RUN test -f /usr/bin/pm2
+# ensure the systemd service is running
+#
+# However, systemd cannot run in unprivileged containers, and worse, you cannot
+# build a container in privileged mode, so forget anything to do with systemd.
+#
+# RUN systemctl status helix-auth | grep 'Active: active'
 
 # finally remove the package to make sure that does not fail horribly
 RUN yum -y erase helix-auth-svc

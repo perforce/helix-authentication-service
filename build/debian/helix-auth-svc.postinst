@@ -23,7 +23,17 @@ case "$1" in
         if [ ! -f "${INSTALLPREFIX}/.env" ]; then
             echo 'DEBUG=1' > ${INSTALLPREFIX}/.env
         fi
-        cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
+
+        # If this fails, it means either systemd is not installed or it does not
+        # have privileged access (to the container), in which case we will skip
+        # setting up the service unit.
+        HAS_SYSTEMD=true
+        if ! systemctl list-units >/dev/null 2>&1; then
+            HAS_SYSTEMD=false
+        fi
+
+        if $HAS_SYSTEMD; then
+            cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
 [Unit]
 Description=Helix Authentication Service
 After=network.target
@@ -38,11 +48,11 @@ WorkingDirectory=${INSTALLPREFIX}
 WantedBy=multi-user.target
 __SERVICE_UNIT__
 
-        systemctl daemon-reload
-        systemctl enable helix-auth.service
-        systemctl start helix-auth.service
+            systemctl daemon-reload
+            systemctl enable helix-auth.service
+            systemctl start helix-auth.service
 
-        cat <<__POST_INSTALL_MSG__
+            cat <<__POST_INSTALL_MSG__
 
 ===============================================================================
 Package installation complete!
@@ -66,6 +76,30 @@ helpful for this purpose.
 For assistance, please contact support@perforce.com
 
 __POST_INSTALL_MSG__
+        else
+                # systemd service unit _not_ installed
+            cat <<__POST_INSTALL_MSG__
+
+===============================================================================
+Package installation complete!
+===============================================================================
+
+The Helix Authentication Service is now installed. To configure the service,
+edit the .env file in the directory shown below, and then start the service
+by invoking ${INSTALLPREFIX}/helix-auth-svc
+
+    ${INSTALLPREFIX}
+
+In particular, the settings to be changed are the OIDC and/or SAML settings
+for your identity provider. The configure-auth-service.sh script may be
+helpful for this purpose.
+
+    ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
+
+For assistance, please contact support@perforce.com
+
+__POST_INSTALL_MSG__
+        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

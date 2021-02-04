@@ -61,7 +61,17 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 if [ ! -f "%{installprefix}/.env" ]; then
     echo 'DEBUG=1' > %{installprefix}/.env
 fi
-cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
+
+# If this fails, it means either systemd is not installed or it does not have
+# privileged access (to the container), in which case we will skip setting up
+# the service unit.
+HAS_SYSTEMD=true
+if ! systemctl list-units >/dev/null 2>&1; then
+    HAS_SYSTEMD=false
+fi
+
+if $HAS_SYSTEMD; then
+    cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
 [Unit]
 Description=Helix Authentication Service
 After=network.target
@@ -76,9 +86,9 @@ WorkingDirectory=%{installprefix}
 WantedBy=multi-user.target
 __SERVICE_UNIT__
 
-systemctl daemon-reload
-systemctl enable helix-auth.service
-systemctl start helix-auth.service
+    systemctl daemon-reload
+    systemctl enable helix-auth.service
+    systemctl start helix-auth.service
 
 cat <<EOF
 
@@ -104,10 +114,36 @@ helpful for this purpose.
 For assistance, please contact support@perforce.com
 
 EOF
+else
+    # systemd service unit _not_ installed
+cat <<EOF
+
+===============================================================================
+Package installation complete!
+===============================================================================
+
+The Helix Authentication Service is now installed. To configure the service,
+edit the .env file in the directory shown below, and then start the service
+by invoking %{installprefix}/helix-auth-svc
+
+    %{installprefix}
+
+In particular, the settings to be changed are the OIDC and/or SAML settings
+for your identity provider. The configure-auth-service.sh script may be
+helpful for this purpose.
+
+    %{installprefix}/bin/configure-auth-service.sh --help
+
+For assistance, please contact support@perforce.com
+
+EOF
+fi
 
 %preun
-systemctl stop helix-auth.service
-rm -f /etc/systemd/system/helix-auth.service
-systemctl daemon-reload
+if [ -f /etc/systemd/system/helix-auth.service ]; then
+    systemctl stop helix-auth.service
+    rm -f /etc/systemd/system/helix-auth.service
+    systemctl daemon-reload
+fi
 
 %changelog
