@@ -1,11 +1,9 @@
 FROM ubuntu:18.04
 #
-# $ docker build -f test/packages/Ubuntu18.dockerfile -t has-ubuntu18-test .
-# $ docker image ls | grep has-ubuntu18-test
+# $ docker-compose -f test/packages/docker-compose.yml up --build -d ubuntu_18_test
+# $ docker exec ubuntu_18_test /packages/ubuntu18_pkg_exec.sh
+# $ docker stop ubuntu_18_test
 #
-
-# Package post-install expects a USER environment variable.
-ENV USER=root
 
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
@@ -18,29 +16,12 @@ RUN bash setup_14.x
 RUN apt-get -q -y install nodejs
 RUN test -f /usr/bin/node
 
-# install our package using the tarball from the previous build stage
+WORKDIR /packages
+
+# copy the package tarball and test script
 COPY helix-auth-svc-ubuntu18.tgz .
-RUN tar zxf helix-auth-svc-ubuntu18.tgz
-RUN apt install ./apt/ubuntu/bionic/incoming/helix-auth-svc_*.deb
+COPY test/packages/ubuntu18_pkg_exec.sh .
 
-# ensure the package is fully installed
-RUN dpkg-query -s helix-auth-svc | grep -q 'install ok installed'
-
-# ensure the package.json has the expected version string
-RUN grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
-
-# ensure certain files are present
-RUN test -f /opt/perforce/helix-auth-svc/README.html
-RUN test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
-RUN test -f /opt/perforce/helix-auth-svc/bin/writeconf.js
-RUN test -x /opt/perforce/helix-auth-svc/helix-auth-svc
-
-# ensure the systemd service is running
-#
-# However, systemd cannot run in unprivileged containers, and worse, you cannot
-# build a container in privileged mode, so forget anything to do with systemd.
-#
-# RUN systemctl status helix-auth | grep 'Active: active'
-
-# finally remove the package to make sure that does not fail horribly
-RUN apt-get -q -y remove helix-auth-svc
+# Start the init daemon (systemd) so that systemctl commands will run properly,
+# and thus our package installation will be successful.
+ENTRYPOINT [ "/sbin/init" ]

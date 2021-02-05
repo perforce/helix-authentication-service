@@ -1,11 +1,9 @@
 FROM centos:7
 #
-# $ docker build -f test/packages/CentOS7.dockerfile -t has-centos7-test .
-# $ docker image ls | grep has-centos7-test
+# $ docker-compose -f test/packages/docker-compose.yml up --build -d centos_7_test
+# $ docker exec centos_7_test /packages/centos7_pkg_exec.sh
+# $ docker stop centos_7_test
 #
-
-# Package post-install expects a USER environment variable.
-ENV USER=root
 
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
@@ -17,29 +15,12 @@ RUN bash setup_14.x
 RUN yum -y install nodejs
 RUN test -f /usr/bin/node
 
-# install our package using the tarball from the previous build stage
+WORKDIR /packages
+
+# copy the package tarball and test script
 COPY helix-auth-svc-centos7.tgz .
-RUN tar zxf helix-auth-svc-centos7.tgz
-RUN yum -y install ./yum/rhel/7/x86_64/helix-auth-svc-*.rpm
+COPY test/packages/centos7_pkg_exec.sh .
 
-# ensure the package is fully installed
-RUN rpm -qa helix-auth-svc | grep -q helix-auth-svc
-
-# ensure the package.json has the expected version string
-RUN grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
-
-# ensure certain files are present
-RUN test -f /opt/perforce/helix-auth-svc/README.html
-RUN test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
-RUN test -f /opt/perforce/helix-auth-svc/bin/writeconf.js
-RUN test -x /opt/perforce/helix-auth-svc/helix-auth-svc
-
-# ensure the systemd service is running
-#
-# However, systemd cannot run in unprivileged containers, and worse, you cannot
-# build a container in privileged mode, so forget anything to do with systemd.
-#
-# RUN systemctl status helix-auth | grep 'Active: active'
-
-# finally remove the package to make sure that does not fail horribly
-RUN yum -y erase helix-auth-svc
+# Start the init daemon (systemd) so that systemctl commands will run properly,
+# and thus our package installation will be successful.
+ENTRYPOINT [ "/sbin/init" ]
