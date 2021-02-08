@@ -10,8 +10,8 @@ ENV USER=root
 
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
-RUN apt-get -q update
-RUN apt-get -q -y install sudo systemd systemd-sysv
+RUN apt-get -q update --fix-missing && \
+    apt-get -q -y install sudo systemd systemd-sysv
 
 # install node.js via package from nodesource
 ADD https://deb.nodesource.com/setup_14.x setup_14.x

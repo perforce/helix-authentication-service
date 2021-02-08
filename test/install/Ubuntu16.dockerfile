@@ -6,8 +6,8 @@ FROM ubuntu:16.04
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
-RUN apt-get -q update --fix-missing
-RUN apt-get -q -y install curl iputils-ping sudo
+RUN apt-get -q update --fix-missing && \
+    apt-get -q -y install curl iputils-ping sudo
 
 # install (and configure) script(s) want to run as non-root user, and npm
 # expects a home directory that the user has permissions to write to

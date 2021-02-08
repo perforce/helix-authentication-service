@@ -14,7 +14,7 @@
 #
 FROM node:14-slim AS builder
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get -q update && \
+RUN apt-get -q update --fix-missing && \
     apt-get -q -y install git
 RUN npm -g install pkg
 WORKDIR /build
