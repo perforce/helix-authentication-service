@@ -51,6 +51,7 @@ module.exports = {
       // SAML_NAMEID_FIELD: undefined,
       // SAML_NAMEID_FORMAT: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
       // SAML_SP_AUDIENCE: undefined,
+      // SAML_DISABLE_CONTEXT: true,
       // SESSION_SECRET: 'keyboard cat',
       // SP_KEY_ALGO: 'sha256',
       // TRUST_PROXY: undefined,
