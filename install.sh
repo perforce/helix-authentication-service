@@ -7,6 +7,7 @@
 INTERACTIVE=true
 MONOCHROME=false
 UPGRADE_NODE=false
+INSTALL_PM2=false
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -37,18 +38,22 @@ function usage() {
 
 Usage:
 
-    install.sh [-m] [-n]
+    install.sh [OPTIONS]
 
 Description:
 
-    Install the authentication service and its dependencies.
+    Install the authentication service and its dependencies, as well as
+    create and start a systemd service unit to manage the service.
 
-    -m
-        Monochrome; no colored text.
+    --pm2
+        Install and use the pm2 process manager instead of systemd.
 
     --upgrade
         Upgrade an existing package-based installation of Node.js with
         the latest supported version.
+
+    -m
+        Monochrome; no colored text.
 
     -n
         Non-interactive mode; exits immediately if prompting is required.
@@ -67,6 +72,10 @@ function read_arguments() {
         case "$1" in
         -m)
             MONOCHROME=true
+            shift
+            ;;
+        --pm2)
+            INSTALL_PM2=true
             shift
             ;;
         --upgrade)
@@ -146,10 +155,15 @@ function display_interactive() {
 This script will install the requirements for the Authentication Service.
 
 The operations involved are as follows:
+
   * Install OS packages for build dependencies
   * Download and install Node.js 14 (https://nodejs.org)
-  * Download and install the pm2 process manager (http://pm2.keymetrics.io)
   * Download and build the service dependencies
+EOT
+
+    if $INSTALL_PM2; then
+        cat <<EOT
+  * Download and install the pm2 process manager (http://pm2.keymetrics.io)
 
 This script will only install software on this machine. After this script is
 finished, you will need to:
@@ -160,6 +174,19 @@ finished, you will need to:
      $ pm2 start ecosystem.config.js
 
 EOT
+    else
+        cat <<EOT
+  * Create and start the systemd service unit to manage service
+
+This script will only install software on this machine. After this script is
+finished, you will need to:
+
+  1) Configure the service by editing the .env file in the base directory.
+  2) Restart the service by invoking the following command:
+     $ systemctl restart helix-auth
+
+EOT
+    fi
     highlight_off
 }
 
@@ -213,7 +240,7 @@ function check_nodejs() {
 # Install or upgrade Node.js 14 using a script from nodesource.com
 function install_nodejs() {
     # Both an upgrade and a new installation work in the same manner.
-    if [[ $UPGRADE_NODE ]] || ! which node >/dev/null 2>&1; then
+    if $UPGRADE_NODE || ! which node >/dev/null 2>&1; then
         echo "Preparing to install OS packages and Node.js..."
         if [ $PLATFORM == "debian" ]; then
             # Because apt-get will happily fail miserably _and_ return an exit code of
@@ -258,12 +285,26 @@ function install_nodejs() {
     npm version >/dev/null 2>&1
 }
 
-# Install the pm2 process manager (https://pm2.keymetrics.io).
-function install_pm2() {
-    if ! which pm2 >/dev/null 2>&1; then
-        echo "Installing pm2 globally..."
-        sudo npm install -q -g pm2
-    fi
+# Create the systemd service unit, enable, and start.
+function install_service_unit() {
+    INSTALL_PREFIX=$(pwd)
+    sudo tee /etc/systemd/system/helix-auth.service >/dev/null <<__SERVICE_UNIT__
+[Unit]
+Description=Helix Authentication Service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=${INSTALL_PREFIX}/bin/www
+WorkingDirectory=${INSTALL_PREFIX}
+
+[Install]
+WantedBy=multi-user.target
+__SERVICE_UNIT__
+    sudo systemctl daemon-reload
+    sudo systemctl enable helix-auth.service
+    sudo systemctl start helix-auth.service
 }
 
 # Fetch and build the application dependencies.
@@ -275,16 +316,16 @@ function install_modules() {
     npm ci -q --only=production
 }
 
-# Start the authentication service using pm2.
-function start_service() {
+# Install pm2 globally and install into system start-up procedure.
+function install_pm2() {
+    if ! which pm2 >/dev/null 2>&1; then
+        echo "Installing pm2 globally..."
+        sudo npm install -q -g pm2
+    fi
     echo "Starting the auth service with default configuration..."
     # For consistency with the configure script, assume that the service will be
     # run as the unprivileged user, rather than root.
     pm2 start ecosystem.config.js
-}
-
-# Install pm2 into the system start-up procedure.
-function install_startup() {
     echo "Installing pm2 startup script..."
     STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
     sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
@@ -322,10 +363,12 @@ function main() {
         prompt_to_proceed
     fi
     install_nodejs
-    install_pm2
     install_modules
-    start_service
-    install_startup
+    if $INSTALL_PM2; then
+        install_pm2
+    else
+        install_service_unit
+    fi
     print_summary
 }
 

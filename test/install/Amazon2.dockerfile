@@ -22,7 +22,7 @@ RUN tar zxf helix-authentication-service.tgz && \
     mv helix-authentication-service helix-auth-svc
 
 # run the install script non-interactively
-RUN ./helix-auth-svc/install.sh -n
+RUN ./helix-auth-svc/install.sh -n --pm2
 
 # ensure node and pm2 have been installed as expected
 RUN test -f /usr/bin/node

@@ -274,9 +274,6 @@ function ensure_readiness() {
         if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v14\.'; then
             die 'Node.js v14 is required. Please run install.sh to install dependencies.'
         fi
-        if ! which pm2 >/dev/null 2>&1; then
-            die 'pm2 is required. Please run install.sh to install dependencies.'
-        fi
         if [[ ! -d node_modules ]]; then
             die 'Module dependencies are missing. Please run install.sh before proceeding.'
         fi

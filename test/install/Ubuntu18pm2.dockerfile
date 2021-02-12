@@ -1,20 +1,15 @@
-FROM centos:7
+FROM ubuntu:18.04
 #
-# Test the install when an older Node.js package is already installed.
+# Test install.sh with the --pm2 option.
 #
-# $ docker build -f test/install/CentOSup.dockerfile -t has-centosup-install .
-# $ docker image ls | grep has-centosup-install
+# $ docker build -f test/install/Ubuntu18pm2.dockerfile -t has-ubuntu18-pm2-install .
+# $ docker image ls | grep has-ubuntu18-pm2-install
 #
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
-RUN yum -q -y install sudo which
-
-# install the previous LTS version of Node.js via package
-ADD https://rpm.nodesource.com/setup_12.x setup_12.x
-RUN bash setup_12.x
-RUN yum -y install nodejs
-RUN test -f /usr/bin/node
+RUN apt-get -q update --fix-missing && \
+    apt-get -q -y install curl iputils-ping sudo
 
 # install (and configure) script(s) want to run as non-root user, and npm
 # expects a home directory that the user has permissions to write to
@@ -30,11 +25,10 @@ RUN tar zxf helix-authentication-service.tgz && \
     mv helix-authentication-service helix-auth-svc
 
 # run the install script non-interactively
-RUN ./helix-auth-svc/install.sh -n --pm2 --upgrade
+RUN ./helix-auth-svc/install.sh -n --pm2
 
-# ensure new version of node has been installed as expected
-RUN node --version | grep -Eq '^v14\.'
-# and pm2 is installed
+# ensure node and pm2 have been installed as expected
+RUN test -f /usr/bin/node
 RUN test -f /usr/bin/pm2
 
 # pm2 is not running during the build, but there is evidence that the service

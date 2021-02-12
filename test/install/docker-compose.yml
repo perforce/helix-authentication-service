@@ -1,0 +1,95 @@
+version: '3.7'
+#
+# Setup to run docker containers in such a way that systemd is satisfied,
+# allowing us to test our install script properly.
+#
+services:
+  centos_7_install_test:
+    build:
+      context: ../..
+      dockerfile: test/install/CentOS7.dockerfile
+    image: has-centos7-install-test
+    container_name: centos_7_install_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  centos_8_install_test:
+    build:
+      context: ../..
+      dockerfile: test/install/CentOS8.dockerfile
+    image: has-centos8-install-test
+    container_name: centos_8_install_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  ubuntu_16_install_test:
+    build:
+      context: ../..
+      dockerfile: test/install/Ubuntu16.dockerfile
+    image: has-ubuntu16-install-test
+    container_name: ubuntu_16_install_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  ubuntu_18_install_test:
+    build:
+      context: ../..
+      dockerfile: test/install/Ubuntu18.dockerfile
+    image: has-ubuntu18-install-test
+    container_name: ubuntu_18_install_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  ubuntu_20_install_test:
+    build:
+      context: ../..
+      dockerfile: test/install/Ubuntu20.dockerfile
+    image: has-ubuntu20-install-test
+    container_name: ubuntu_20_install_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
