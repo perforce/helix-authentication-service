@@ -733,6 +733,10 @@ function modify_env_config() {
     if [[ ! -f .env.orig && -e .env ]]; then
         cp .env .env.orig
     fi
+    if [[ ! -f .env ]]; then
+        # create an empty .env file if it is missing
+        touch .env
+    fi
     # use awk to add or replace each setting in the .env file
     add_or_replace_var_in_env 'DEFAULT_PROTOCOL' "${DEFAULT_PROTOCOL}"
     add_or_replace_var_in_env 'SVC_BASE_URI' "${SVC_BASE_URI}"

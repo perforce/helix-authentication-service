@@ -17,7 +17,7 @@ fi
 ./helix-auth-svc/install.sh -n
 
 # ensure the systemd service is running
-sudo systemctl status helix-auth | grep 'Active: active'
+sudo systemctl status helix-auth | grep -q 'Active: active'
 
 # run the configure script and set up OIDC
 ./helix-auth-svc/bin/configure-auth-service.sh -n \
