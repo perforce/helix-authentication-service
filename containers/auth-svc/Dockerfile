@@ -2,7 +2,7 @@ FROM node:14-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update --fix-missing && \
-    apt-get -q -y install git
+    apt-get -q -y install curl git
 
 WORKDIR /service
 COPY bin bin
