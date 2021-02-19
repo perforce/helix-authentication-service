@@ -85,7 +85,8 @@ services:
       - auth-svc1.doc
       - auth-svc2.doc
   oidc.doc:
-    image: soluto/oidc-server-mock:0.2.4
+    build:
+      context: containers/oidc
     container_name: oidc.doc
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -142,8 +143,6 @@ services:
       - authen
     ports:
       - "8843:8843"
-    volumes:
-      - ./containers/oidc/https:/https:ro
   # p4d.doc is in the extension repository
   redis.doc:
     image: redis:6.0
