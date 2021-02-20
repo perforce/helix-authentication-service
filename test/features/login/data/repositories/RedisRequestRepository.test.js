@@ -9,10 +9,10 @@ const path = require('path')
 /* global include */
 global.include = (p) => require(path.join(__dirname, '../../../../..', p))
 
+process.env.REDIS_URL = 'redis://redis.doc:6379'
+
 const Request = include('lib/features/login/domain/entities/Request')
 const RedisRequestRepository = include('lib/features/login/data/repositories/RedisRequestRepository')
-
-process.env.REDIS_URL = 'redis://redis.doc:6379'
 
 describe('RedisRequest repository', function () {
   let repository
