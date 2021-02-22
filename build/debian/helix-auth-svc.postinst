@@ -21,7 +21,7 @@ INSTALLPREFIX=/opt/perforce/helix-auth-svc
 case "$1" in
     configure)
         if [ ! -f "${INSTALLPREFIX}/.env" ]; then
-            echo 'DEBUG=1' > ${INSTALLPREFIX}/.env
+            cp ${INSTALLPREFIX}/example.env ${INSTALLPREFIX}/.env
         fi
 
         # If this fails, it means either systemd is not installed or it does not

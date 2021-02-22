@@ -43,6 +43,7 @@ cp -p docs/Proxies.md %{buildroot}%{installprefix}/docs/Proxies.md
 cp -p docs/REST_API.md %{buildroot}%{installprefix}/docs/REST_API.md
 cp -pr docs/licenses %{buildroot}%{installprefix}/docs/licenses
 
+cp example.env %{buildroot}%{installprefix}/example.env
 cp logging.config.js %{buildroot}%{installprefix}/logging.config.js
 sed -e "s/\"2020.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
@@ -59,7 +60,7 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 
 %post
 if [ ! -f "%{installprefix}/.env" ]; then
-    echo 'DEBUG=1' > %{installprefix}/.env
+    cp %{installprefix}/example.env %{installprefix}/.env
 fi
 
 # If this fails, it means either systemd is not installed or it does not have
