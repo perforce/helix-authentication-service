@@ -305,6 +305,10 @@ __SERVICE_UNIT__
     sudo systemctl daemon-reload
     sudo systemctl enable helix-auth.service
     sudo systemctl start helix-auth.service
+    # create an example .env file if missing
+    if ! -f .env; then
+        cp example.env .env
+    fi
 }
 
 # Fetch and build the application dependencies.
