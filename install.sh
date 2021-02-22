@@ -176,7 +176,7 @@ finished, you will need to:
 EOT
     else
         cat <<EOT
-  * Create and start the systemd service unit to manage service
+  * Create and start the systemd service unit to manage the service
 
 This script will only install software on this machine. After this script is
 finished, you will need to:
@@ -334,13 +334,18 @@ function install_pm2() {
 
 # Print a summary of what was done and any next steps.
 function print_summary() {
+    CONFIG_FILE='.env'
+    if $INSTALL_PM2; then
+        CONFIG_FILE='ecosystem.config.js'
+    fi
+    highlight_on
     cat <<EOT
 
 ===============================================================================
 Automated install complete! Now a few final bits to do manually.
 ===============================================================================
 
-To configure the service on this machine, edit the ecosystem.config.js file,
+To configure the service on this machine, edit the ${CONFIG_FILE} file,
 setting the OIDC and/or SAML settings according to your identity provider.
 The configure-auth-service.sh script may be helpful for this purpose.
 
@@ -349,6 +354,7 @@ $ ./bin/configure-auth-service.sh --help
 For assistance, please contact support@perforce.com
 
 EOT
+    highlight_off
 }
 
 function main() {
