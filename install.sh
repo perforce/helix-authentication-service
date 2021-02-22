@@ -302,12 +302,20 @@ WorkingDirectory=${INSTALL_PREFIX}
 [Install]
 WantedBy=multi-user.target
 __SERVICE_UNIT__
-    sudo systemctl daemon-reload
-    sudo systemctl enable helix-auth.service
-    sudo systemctl start helix-auth.service
     # create an example .env file if missing
-    if ! -f .env; then
+    if ! test -f .env; then
         cp example.env .env
+    fi
+    if which systemctl >/dev/null 2>&1; then
+        sudo systemctl daemon-reload
+        sudo systemctl enable helix-auth.service
+        sudo systemctl start helix-auth.service
+    else
+        error 'The systemctl utility was not found in the PATH.'
+        error 'You will need to start the helix-auth.service like so:'
+        error '  $ sudo systemctl daemon-reload'
+        error '  $ sudo systemctl enable helix-auth.service'
+        error '  $ sudo systemctl start helix-auth.service'
     fi
 }
 
