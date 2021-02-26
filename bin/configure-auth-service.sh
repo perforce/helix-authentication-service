@@ -715,6 +715,53 @@ function modify_eco_config() {
         node ./bin/writeconf.js
 }
 
+# Retrieve any existing service settings to prime the inputs.
+function read_settings() {
+    if [[ ! -f .env ]]; then
+        return
+    fi
+    PROTO=$(awk -F = '/^DEFAULT_PROTOCOL=/ { print $2 }' .env)
+    if [[ -n "${PROTO}" ]]; then
+        DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL:-${PROTO}}"
+    fi
+    SBURI=$(awk -F = '/^SVC_BASE_URI=/ { print $2 }' .env)
+    if [[ -n "${SBURI}" ]]; then
+        SVC_BASE_URI="${SVC_BASE_URI:-${SBURI}}"
+    fi
+    OIU=$(awk -F = '/^OIDC_ISSUER_URI=/ { print $2 }' .env)
+    if [[ -n "${OIU}" ]]; then
+        OIDC_ISSUER_URI="${OIDC_ISSUER_URI:-${OIU}}"
+    fi
+    OCI=$(awk -F = '/^OIDC_CLIENT_ID=/ { print $2 }' .env)
+    if [[ -n "${OCI}" ]]; then
+        OIDC_CLIENT_ID="${OIDC_CLIENT_ID:-${OCI}}"
+    fi
+    OCSF=$(awk -F = '/^OIDC_CLIENT_SECRET_FILE=/ { print $2 }' .env)
+    if [[ -n "${OCSF}" ]]; then
+        OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE:-${OCSF}}"
+    fi
+    OCS=$(awk -F = '/^OIDC_CLIENT_SECRET=/ { print $2 }' .env)
+    if [[ -n "${OCS}" ]]; then
+        OIDC_CLIENT_SECRET="${OIDC_CLIENT_SECRET:-${OCS}}"
+    fi
+    SIMU=$(awk -F = '/^SAML_IDP_METADATA_URL=/ { print $2 }' .env)
+    if [[ -n "${SIMU}" ]]; then
+        SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL:-${SIMU}}"
+    fi
+    SISU=$(awk -F = '/^SAML_IDP_SSO_URL=/ { print $2 }' .env)
+    if [[ -n "${SISU}" ]]; then
+        SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL:-${SISU}}"
+    fi
+    SSEI=$(awk -F = '/^SAML_SP_ENTITY_ID=/ { print $2 }' .env)
+    if [[ -n "${SSEI}" ]]; then
+        SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID:-${SSEI}}"
+    fi
+    LOG=$(awk -F = '/^LOGGING=/ { print $2 }' .env)
+    if [[ -n "${LOG}" ]]; then
+        LOGGING="${LOGGING:-${LOG}}"
+    fi
+}
+
 # Add, modify, or remove the named setting from the .env file.
 function add_or_replace_var_in_env() {
     if [[ -n "${2}" ]]; then
@@ -882,6 +929,7 @@ function main() {
     fi
     if $INTERACTIVE; then
         display_interactive
+        read_settings
         prompt_for_inputs
         while ! validate_inputs; do
             prompt_for_inputs
