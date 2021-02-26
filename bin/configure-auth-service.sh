@@ -812,19 +812,11 @@ function modify_env_config() {
         add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' ''
     fi
 
-    # create the logging.config.js file and set LOGGING
-    cat > logging.config.js <<EOT
-module.exports = {
-  level: 'debug',
-  transport: 'file',
-  file: {
-    filename: 'auth-svc.log',
-    maxsize: 1048576,
-    maxfiles: 4
-  }
-}
-EOT
+    # Ensure the logging.config.js file is readable by all users to avoid
+    # difficult to debug situations where the logging is not working and no
+    # errors are displayed.
     chmod 0644 logging.config.js
+    # always enable logging for the time being
     add_or_replace_var_in_env 'LOGGING' '../logging.config.js'
 }
 
@@ -844,11 +836,6 @@ function modify_config() {
         echo "${OIDC_CLIENT_SECRET}" > ${OIDC_CLIENT_SECRET_FILE}
         chmod 600 ${OIDC_CLIENT_SECRET_FILE}
         chown ${SUDO_USER:-${USER}} ${OIDC_CLIENT_SECRET_FILE}
-    fi
-    # make a backup of the logging configuration file one time and leave it
-    # untouched as a record of the original contents
-    if [[ ! -f logging.config.orig && -e logging.config.js ]]; then
-        cp logging.config.js logging.config.orig
     fi
     if [[ "${CONFIG_FILE_NAME}" == ".env" ]]; then
         modify_env_config
