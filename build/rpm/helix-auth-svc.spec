@@ -54,9 +54,8 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 
 %files
 %docdir %{installprefix}/docs
+%config(noreplace) %{installprefix}/logging.config.js
 %{installprefix}
-
-%doc
 
 %post
 if [ ! -f "%{installprefix}/.env" ]; then

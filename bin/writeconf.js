@@ -12,18 +12,10 @@ if (process.env.DEFAULT_PROTOCOL) {
 }
 env.SVC_BASE_URI = process.env.SVC_BASE_URI
 
-// for the time being, configure debug logging to files that rotate
-const loggingConf = {
-  level: 'debug',
-  transport: 'file',
-  file: {
-    filename: 'auth-svc.log',
-    maxsize: 1048576,
-    maxfiles: 4
-  }
-}
-const loggingFile = `module.exports = ${JSON.stringify(loggingConf, null, '  ')}`
-fs.writeFileSync('logging.config.js', loggingFile, { mode: 0o644 })
+// Ensure the logging.config.js file is readable by all users to avoid difficult
+// to debug situations where the logging is not working and no errors are
+// displayed.
+fs.chmodSync('logging.config.js', 0o644)
 // HAS uses require to load the logging config, and the path is relative to the
 // bin directory(?), so must include the relative path to the file.
 env.LOGGING = '../logging.config.js'
