@@ -58,7 +58,7 @@
     "passport": "^0.4.1",
     "passport-saml": "^2.1.0",
     "passport-saml-metadata": "^2.4.1",
-    "redis": "^3.1.0",
+    "redis": "^3.1.1",
     "samlp": "^6.0.1",
     "transitory": "^2.1.1",
     "ulid": "^2.3.0",
@@ -67,11 +67,11 @@
   },
   "devDependencies": {
     "chai": "^4.3.4",
-    "eslint": "^7.23.0",
+    "eslint": "^7.24.0",
     "geckodriver": "^1.22.3",
     "license-checker": "^25.0.1",
     "mocha": "^8.3.2",
-    "selenium-webdriver": "^4.0.0-beta.2",
+    "selenium-webdriver": "^4.0.0-beta.3",
     "showdown": "^1.9.1",
     "sinon": "^9.2.4",
     "supertest": "^6.1.3"
