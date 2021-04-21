@@ -68,11 +68,7 @@ Installation
 
 Known Limitations
 
-    Commit/Edge Servers
-
-        When used with the Helix Authentication Extension in Helix Core, support
-        for commit/edge server configurations has a known issue (job #102020) in
-        which the login URL either does not appear or appears twice.
+    No known limitations with the currently released products.
 
 
 Third Party Licenses
