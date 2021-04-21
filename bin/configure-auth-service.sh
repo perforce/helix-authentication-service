@@ -244,6 +244,15 @@ function validate_https_url() {
     return 0
 }
 
+# Validate the selected default protocol (either 'saml' or 'oidc').
+function validate_protocol() {
+    if [[ "$1" == 'oidc' || "$1" == 'saml' ]]; then
+        return 0
+    fi
+    error 'Enter either "oidc" or "saml" for default protocol.'
+    return 1
+}
+
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
     if [[ -e '/etc/redhat-release' ]]; then
@@ -464,25 +473,10 @@ function prompt_for_default_protocol() {
 
 You chose to configure multiple protocols. Some client applications may
 not indicate which protocol they want to use, and the service will use a
-default protocol in that case. Which protocol should the service use as
-the default?
+default protocol in that case.
 
 EOT
-    select protocol in 'OIDC' 'SAML'; do
-        case $protocol in
-            OIDC)
-                DEFAULT_PROTOCOL='oidc'
-                break
-                ;;
-            SAML)
-                DEFAULT_PROTOCOL='saml'
-                break
-                ;;
-            *)
-                echo 'Please select an option'
-                ;;
-        esac
-    done
+    prompt_for DEFAULT_PROTOCOL 'Enter the default protocol' "${DEFAULT_PROTOCOL}" validate_protocol
 }
 
 # Prompt for the SAML IdP metadata URL.
