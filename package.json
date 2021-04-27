@@ -47,7 +47,7 @@
     "passport": "^0.4.1",
     "passport-saml": "^1.5.0",
     "passport-saml-metadata": "^2.3.0",
-    "redis": "^3.0.2",
+    "redis": "^3.1.1",
     "samlp": "^3.4.4",
     "transitory": "^2.1.1",
     "ulid": "^2.3.0",
