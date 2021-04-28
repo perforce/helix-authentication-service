@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2020.2
+                            Version 2021.1
 
 
 Introduction
@@ -77,6 +77,23 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2021.1
+
+    HAS-187 (Change #2090469)
+        New setting SAML_IDP_METADATA_FILE to specify IdP metadata from
+        a file, as an alternative to the SAML_IDP_METADATA_URL setting.
+
+----------------------------------------------------------------------
+Other changes in 2021.1
+
+    HAS-164 (Change #2082598)
+        Use systemd to manage the HAS instance instead of pm2. Configure
+        script and packages will install and start HAS as a service unit.
+
+    HAS-181 (Change #2075199)
+        Single binary build of HAS for Linux packages, no need for Node.js.
 
 ----------------------------------------------------------------------
 New functionality in 2020.2
