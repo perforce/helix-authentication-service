@@ -36,6 +36,9 @@ Supported Platforms
     for correction. Any platform not listed above is not actively tested by
     Perforce.
 
+    The 2021.1 release of Helix Authentication Service will be the last one to
+    provide a package for Ubuntu 16.04.
+
     Windows (x86_64)
         10 Pro
         Server 2019
