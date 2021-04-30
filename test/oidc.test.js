@@ -44,8 +44,8 @@ describe('OIDC authentication', function () {
   })
 
   it('should return an OIDC request identifier', async function () {
-    requestId = await getRequestId('haproxy.doc', 443)
-    loginUrl = 'https://haproxy.doc/oidc/login/' + requestId
+    requestId = await getRequestId('authen.doc', 443)
+    loginUrl = 'https://authen.doc/oidc/login/' + requestId
   })
 
   it('should reject invalid OIDC user credentials', async function () {
@@ -74,7 +74,7 @@ describe('OIDC authentication', function () {
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     const req = https.get({
-      hostname: 'haproxy.doc',
+      hostname: 'authen.doc',
       path: `/requests/status/${requestId}`,
       rejectUnauthorized: false,
       requestCert: false,
@@ -97,8 +97,8 @@ describe('OIDC authentication', function () {
   it('should return a new OIDC request identifier', async function () {
     // Start a fresh request because the earlier one is still pending on the
     // server and the data is deleted from the cache in a race condition.
-    requestId = await getRequestId('haproxy.doc', 443)
-    loginUrl = 'https://haproxy.doc/oidc/login/' + requestId
+    requestId = await getRequestId('authen.doc', 443)
+    loginUrl = 'https://authen.doc/oidc/login/' + requestId
   })
 
   it('should authenticate via OIDC identity provider', async function () {
@@ -117,7 +117,7 @@ describe('OIDC authentication', function () {
       // const allowButton = await driver.findElement(
       //   By.xpath('//div[@class="consent-buttons"]/button[@value="yes"]'))
       // await allowButton.click()
-      await driver.wait(until.urlContains('haproxy.doc'), 5000)
+      await driver.wait(until.urlContains('authen.doc'), 5000)
     } catch (err) {
       if (err.name === 'TimeoutError') {
         const currentUrl = await driver.getCurrentUrl()
@@ -138,7 +138,7 @@ describe('OIDC authentication', function () {
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     https.get({
-      hostname: 'haproxy.doc',
+      hostname: 'authen.doc',
       path: `/requests/status/${requestId}`,
       rejectUnauthorized: false,
       requestCert: false,
@@ -165,7 +165,7 @@ describe('OIDC authentication', function () {
 
   it('should log out of OIDC identity provider', async function () {
     this.timeout(30000)
-    await driver.get('https://haproxy.doc/oidc/logout')
+    await driver.get('https://authen.doc/oidc/logout')
     // identity server no longer shows a logout form?
     // const logoutForm = await driver.wait(until.elementLocated(By.css('form')))
     // const logoutButton = await logoutForm.findElement(By.css('button'))

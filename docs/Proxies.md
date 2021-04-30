@@ -53,6 +53,10 @@ When using a reverse proxy, bear in mind that the proxy will likely have a set a
 1. Use the HAS session cookie for session affinity with multiple HAS instances.
 1. Set request headers that allow Express.js to detect the effective protocol.
 
+## NGINX
+
+[NGINX](https://www.nginx.com) can be configured to act as a reverse proxy, load balancing requests across multiple instances of HAS. See the example Docker containers and configuration in the `test/nginx` directory.
+
 ## Amazon Load Balancers
 
 The elastic/application load balancers offered by Amazon Web Services are akin to an extremely simplified version of HAProxy, and as such work well with HAS. All that is necessary is for HAS to be configured to trust the proxy, using the `TRUST_PROXY` setting.

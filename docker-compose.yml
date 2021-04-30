@@ -18,7 +18,7 @@ services:
     environment:
       NODE_ENV: development
       DEBUG: "1"
-      SVC_BASE_URI: "https://haproxy.doc"
+      SVC_BASE_URI: "https://authen.doc"
       PORT: 3001
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
@@ -44,7 +44,7 @@ services:
     environment:
       NODE_ENV: development
       DEBUG: "1"
-      SVC_BASE_URI: "https://haproxy.doc"
+      SVC_BASE_URI: "https://authen.doc"
       PORT: 3002
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
@@ -73,10 +73,10 @@ services:
     ports:
       - "389:389"
       - "636:636"
-  haproxy.doc:
+  authen.doc:
     build:
       context: containers/haproxy
-    container_name: haproxy.doc
+    container_name: authen.doc
     networks:
       - authen
     ports:
@@ -131,8 +131,8 @@ services:
             "AllowedGrantTypes": [ "authorization_code" ],
             "AllowAccessTokensViaBrowser": true,
             "RedirectUris": [
-              "https://haproxy.doc/oidc/callback",
-              "https://haproxy.doc"
+              "https://authen.doc/oidc/callback",
+              "https://authen.doc"
             ],
             "AllowedScopes": [ "openid", "profile", "email" ],
             "IdentityTokenLifetime": 3600,
@@ -162,7 +162,7 @@ services:
     container_name: shibboleth.doc
     depends_on:
       - ldap.doc
-      - haproxy.doc
+      - authen.doc
     environment:
       JETTY_BROWSER_SSL_KEYSTORE_PASSWORD: "Passw0rd!"
       JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD: "Passw0rd!"

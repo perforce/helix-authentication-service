@@ -14,15 +14,15 @@ This directory contains definitions for several Docker containers for testing th
 
 The `docker-compose.yml` file in the parent directory configures those containers, plus one additional container for [Redis](https://redis.io), which supports failover of the service.
 
+* `authen.doc`: load balancer in front of authentication service instances
 * `auth-svc1.doc`: authentication service listening on port `3001`
 * `auth-svc2.doc`: authentication service listening on port `3002`
 * `ldap.doc`: OpenLDAP to which Shibboleth delegates user authentication
-* `haproxy.doc`: load balancer in front of authentication service instances
 * `oidc.doc`: OpenID Connect identity provider
 * `redis.doc`: Redis instance for failover of the authentication service instances
 * `shibboleth.doc`: SAML 2.0 identity provider
 
-The only piece of information that is needed for the client application (e.g. Helix Core with the `loginhook` extension and Swarm) is the URL to the load balancer: https://haproxy.doc
+The only piece of information that is needed for the client application (e.g. Helix Core with the `loginhook` extension and Swarm) is the URL to the load balancer: https://authen.doc
 
 How does the client application, and likewise the desktop browser connect to these containers? See the next section for the setup, and in particular the container name resolution.
 
@@ -64,7 +64,7 @@ Build and start the containers (from the parent directory) like so:
 $ docker-compose up --build -d
 ```
 
-To test authentication, open https://haproxy.doc/requests/new/foobar in a browser and copy the `loginUrl` value into the browser location bar. If using Firefox, you can click on the `loginUrl` directly. Either way, opening the login URL will direct the browser to the IdP of the default protocol (`saml` in the default docker configuration).
+To test authentication, open https://authen.doc/requests/new/foobar in a browser and copy the `loginUrl` value into the browser location bar. If using Firefox, you can click on the `loginUrl` directly. Either way, opening the login URL will direct the browser to the IdP of the default protocol (`saml` in the default docker configuration).
 
 ### User Accounts
 
@@ -87,7 +87,7 @@ For an example Docker setup with Helix Core Server and Swarm, see the `container
 
 This setup only tests OpenID Connect with the included container `oidc`, and SAML 2.0 with the included container `shibboleth`. To test other identity providers, it is necessary to change the configuration in the `docker-compose.yml` file in the parent directory and rebuild the containers.
 
-As an example, changing the `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `OIDC_ISSUER_URI` settings in the `auth-svc1.doc` and `auth-svc2.doc` containers to refer to an external OIDC IdP, and configuring that IdP to route to `https://haproxy.doc/oidc/callback`, should work.
+As an example, changing the `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `OIDC_ISSUER_URI` settings in the `auth-svc1.doc` and `auth-svc2.doc` containers to refer to an external OIDC IdP, and configuring that IdP to route to `https://authen.doc/oidc/callback`, should work.
 
 Note that after changing settings in the docker containers, you must rebuild and start them:
 
