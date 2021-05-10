@@ -716,42 +716,52 @@ function read_settings() {
     fi
     PROTO=$(awk -F = '/^DEFAULT_PROTOCOL=/ { print $2 }' .env)
     if [[ -n "${PROTO}" ]]; then
+        PROTO=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$PROTO")
         DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL:-${PROTO}}"
     fi
     SBURI=$(awk -F = '/^SVC_BASE_URI=/ { print $2 }' .env)
     if [[ -n "${SBURI}" ]]; then
+        SBURI=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SBURI")
         SVC_BASE_URI="${SVC_BASE_URI:-${SBURI}}"
     fi
     OIU=$(awk -F = '/^OIDC_ISSUER_URI=/ { print $2 }' .env)
     if [[ -n "${OIU}" ]]; then
+        OIU=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OIU")
         OIDC_ISSUER_URI="${OIDC_ISSUER_URI:-${OIU}}"
     fi
     OCI=$(awk -F = '/^OIDC_CLIENT_ID=/ { print $2 }' .env)
     if [[ -n "${OCI}" ]]; then
+        OCI=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OCI")
         OIDC_CLIENT_ID="${OIDC_CLIENT_ID:-${OCI}}"
     fi
     OCSF=$(awk -F = '/^OIDC_CLIENT_SECRET_FILE=/ { print $2 }' .env)
     if [[ -n "${OCSF}" ]]; then
+        OCSF=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OCSF")
         OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE:-${OCSF}}"
     fi
     OCS=$(awk -F = '/^OIDC_CLIENT_SECRET=/ { print $2 }' .env)
     if [[ -n "${OCS}" ]]; then
+        OCS=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OCS")
         OIDC_CLIENT_SECRET="${OIDC_CLIENT_SECRET:-${OCS}}"
     fi
     SIMU=$(awk -F = '/^SAML_IDP_METADATA_URL=/ { print $2 }' .env)
     if [[ -n "${SIMU}" ]]; then
+        SIMU=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SIMU")
         SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL:-${SIMU}}"
     fi
     SISU=$(awk -F = '/^SAML_IDP_SSO_URL=/ { print $2 }' .env)
     if [[ -n "${SISU}" ]]; then
+        SISU=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SISU")
         SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL:-${SISU}}"
     fi
     SSEI=$(awk -F = '/^SAML_SP_ENTITY_ID=/ { print $2 }' .env)
     if [[ -n "${SSEI}" ]]; then
+        SSEI=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SSEI")
         SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID:-${SSEI}}"
     fi
     LOG=$(awk -F = '/^LOGGING=/ { print $2 }' .env)
     if [[ -n "${LOG}" ]]; then
+        LOG=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$LOG")
         LOGGING="${LOGGING:-${LOG}}"
     fi
 }
