@@ -12,6 +12,10 @@ if ! systemctl list-units >/dev/null 2>&1; then
     exit 1
 fi
 
+# Turn off dnf cache maintenance that fires at exactly the wrong time and causes
+# our tests to fail (c.f. https://bugzilla.redhat.com/show_bug.cgi?id=1814337).
+systemctl stop dnf-makecache.timer
+
 tar zxf helix-auth-svc-centos8.tgz
 yum -y install ./yum/rhel/8/x86_64/helix-auth-svc-*.rpm
 
