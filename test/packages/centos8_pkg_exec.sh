@@ -14,7 +14,12 @@ fi
 
 # Turn off dnf cache maintenance that fires at exactly the wrong time and causes
 # our tests to fail (c.f. https://bugzilla.redhat.com/show_bug.cgi?id=1814337).
+#
+# Disable and stop the timer and wait some arbitrary amount of time in the hopes
+# that the dnf cache cleanup will not get in our way.
+systemctl disable dnf-makecache.timer
 systemctl stop dnf-makecache.timer
+sleep 60
 
 tar zxf helix-auth-svc-centos8.tgz
 yum -y install ./yum/rhel/8/x86_64/helix-auth-svc-*.rpm
