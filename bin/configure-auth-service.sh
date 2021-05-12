@@ -475,6 +475,8 @@ You chose to configure multiple protocols. Some client applications may
 not indicate which protocol they want to use, and the service will use a
 default protocol in that case.
 
+Accepted values are 'oidc' and 'saml'.
+
 EOT
     prompt_for DEFAULT_PROTOCOL 'Enter the default protocol' "${DEFAULT_PROTOCOL}" validate_protocol
 }
@@ -579,7 +581,14 @@ function prompt_for_inputs() {
             prompt_for_saml_sp_entity_id
         fi
     fi
+    # If configuring multiple protocols, or if they appear to configuring one
+    # protocol that is not the default protocol configured previously, then
+    # prompt them for the new default.
     if (( ${#PROTOCOLS[@]} > 1 )); then
+        prompt_for_default_protocol
+    elif [[ "${DEFAULT_PROTOCOL}" == 'saml' && -n "${PROTOCOLS['oidc']}" ]]; then
+        prompt_for_default_protocol
+    elif [[ "${DEFAULT_PROTOCOL}" == 'oidc' && -n "${PROTOCOLS['saml']}" ]]; then
         prompt_for_default_protocol
     fi
 }
@@ -590,27 +599,36 @@ function validate_inputs() {
         error 'A valid base URL for the service must be provided.'
         return 1
     fi
-    if [[ -z "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
-        error 'Either OIDC or SAML identity provider settings must be provided.'
-        return 1
-    fi
-    if [[ -n "${OIDC_ISSUER_URI}" ]]; then
-        if [[ -z "${OIDC_CLIENT_ID}" ]]; then
-            error 'An OIDC client identifier must be provided.'
+    #
+    # Validate OIDC/SAML settings only if the user chose to provide those
+    # settings during this particular run of the script (i.e. they may be
+    # running the script a second time and choosing to switch protocols).
+    #
+    if [[ -n "${PROTOCOLS['oidc']}" ]]; then
+        if [[ -z "${OIDC_ISSUER_URI}" && -z "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
+            error 'Either OIDC or SAML identity provider settings must be provided.'
             return 1
         fi
-        if [[ -z "${OIDC_CLIENT_SECRET}" ]]; then
-            error 'An OIDC client secret must be provided.'
-            return 1
+        if [[ -n "${OIDC_ISSUER_URI}" ]]; then
+            if [[ -z "${OIDC_CLIENT_ID}" ]]; then
+                error 'An OIDC client identifier must be provided.'
+                return 1
+            fi
+            if [[ -z "${OIDC_CLIENT_SECRET}" ]]; then
+                error 'An OIDC client secret must be provided.'
+                return 1
+            fi
         fi
     fi
-    if [[ -n "${SAML_IDP_SSO_URL}" ]] && ! validate_url "${SAML_IDP_SSO_URL}"; then
-        error 'A valid SAML IdP SSO URL must be provided.'
-        return 1
-    fi
-    if [[ -n "${SAML_IDP_METADATA_URL}" ]] && ! validate_url "${SAML_IDP_METADATA_URL}"; then
-        error 'A valid SAML IdP metadata URL must be provided.'
-        return 1
+    if [[ -n "${PROTOCOLS['saml']}" ]]; then
+        if [[ -n "${SAML_IDP_SSO_URL}" ]] && ! validate_url "${SAML_IDP_SSO_URL}"; then
+            error 'A valid SAML IdP SSO URL must be provided.'
+            return 1
+        fi
+        if [[ -n "${SAML_IDP_METADATA_URL}" ]] && ! validate_url "${SAML_IDP_METADATA_URL}"; then
+            error 'A valid SAML IdP metadata URL must be provided.'
+            return 1
+        fi
     fi
     if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
         if [[ "${DEFAULT_PROTOCOL}" != 'oidc' && "${DEFAULT_PROTOCOL}" != 'saml' ]]; then
