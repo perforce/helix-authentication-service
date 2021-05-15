@@ -46,7 +46,7 @@ RUN test -f helix-auth-svc/client-secret.txt && \
     grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.js
 
 # run the configure script and set up SAML
-RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
+RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
     --base-url https://localhost:3000 \
     --saml-idp-metadata-url https://saml.idp/metadata
 
