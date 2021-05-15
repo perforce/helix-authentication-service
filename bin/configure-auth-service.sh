@@ -19,7 +19,7 @@ OIDC_ISSUER_URI=''
 OIDC_CLIENT_ID=''
 OIDC_CLIENT_SECRET=''
 OIDC_CLIENT_SECRET_FILE='client-secret.txt'
-CONFIG_FILE_NAME='ecosystem.config.js'
+CONFIG_FILE_NAME='.env'
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -188,6 +188,9 @@ Description:
         not specify a protocol to be used. This option only applies when
         configuring more than one protocol.
 
+    --pm2
+        Configure for the pm2 process manager instead of systemd.
+
     --debug
         Enable debugging output for this configuration script.
 
@@ -287,11 +290,6 @@ function ensure_readiness() {
             die 'Module dependencies are missing. Please run install.sh before proceeding.'
         fi
     fi
-    # If pm2 is not easily discoverable, then assume we are modifying the .env
-    # file instead of the ecosystem.config.js file that only pm2 uses.
-    if ! which pm2 >/dev/null 2>&1; then
-        CONFIG_FILE_NAME='.env'
-    fi
 }
 
 function read_arguments() {
@@ -299,7 +297,7 @@ function read_arguments() {
     local ARGS=(base-url:)
     ARGS+=(oidc-issuer-uri: oidc-client-id: oidc-client-secret:)
     ARGS+=(saml-idp-sso-url: saml-sp-entityid: saml-idp-metadata-url:)
-    ARGS+=(default-protocol: debug help)
+    ARGS+=(default-protocol: pm2 debug help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
         -l "$(join_by , ${ARGS[@]})" -- "$@")
@@ -356,6 +354,10 @@ function read_arguments() {
             --default-protocol)
                 DEFAULT_PROTOCOL=$2
                 shift 2
+                ;;
+            --pm2)
+                CONFIG_FILE_NAME='ecosystem.config.js'
+                shift
                 ;;
             --debug)
                 DEBUG=true
