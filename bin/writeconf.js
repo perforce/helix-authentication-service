@@ -56,10 +56,18 @@ if (process.env.SAML_IDP_METADATA_URL || process.env.SAML_IDP_SSO_URL) {
   delete env.SAML_IDP_SLO_URL
 }
 
+// detect whether to use the single binary or the bin/www "executable"
+if (fs.existsSync('./helix-auth-svc')) {
+  config.apps[0].script = './helix-auth-svc'
+} else {
+  config.apps[0].script = './bin/www'
+}
+
 const body = `module.exports = ${JSON.stringify(config, null, '  ')}\n`
 fs.writeFileSync('ecosystem.config.js', body, { mode: 0o644 })
 
 function readConfiguration () {
+  // node require paths are relative to this file, not cwd
   if (fs.existsSync('../ecosystem.config.js')) {
     return require('../ecosystem.config')
   } else {
