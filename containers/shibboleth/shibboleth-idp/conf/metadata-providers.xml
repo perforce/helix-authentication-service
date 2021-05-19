@@ -49,11 +49,11 @@
         </MetadataFilter>
     </MetadataProvider>
     -->
-    <MetadataProvider id="HTTPMetadata"
+    <!-- <MetadataProvider id="HTTPMetadata"
                       xsi:type="FileBackedHTTPMetadataProvider"
                       backingFile="%{idp.home}/metadata/auth-svc.xml"
                       disregardTLSCertificate="true"
-                      metadataURL="https://authen.doc/saml/metadata">
+                      metadataURL="https://example.com/saml/metadata">
 
         <MetadataFilter xsi:type="SignatureValidation"
                         requireSignedRoot="false"
@@ -61,7 +61,7 @@
         <MetadataFilter xsi:type="EntityRoleWhiteList">
             <RetainedRole>md:SPSSODescriptor</RetainedRole>
         </MetadataFilter>
-    </MetadataProvider>
+    </MetadataProvider> -->
 
     <!--
     Example file metadata provider.  Use this if you want to load metadata
@@ -72,9 +72,9 @@
     responsibility to ensure that the contents on disk are trustworthy.
     -->
     
-    <!--
-    <MetadataProvider id="LocalMetadata"  xsi:type="FilesystemMetadataProvider" metadataFile="PATH_TO_YOUR_METADATA"/>
-    -->
+    <MetadataProvider id="LocalMetadata"
+                      xsi:type="FilesystemMetadataProvider"
+                      metadataFile="%{idp.home}/metadata/has-metadata.xml"/>
 
     <!--
     Example CAS metadata source.

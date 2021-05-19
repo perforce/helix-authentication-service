@@ -83,23 +83,17 @@ idp.attribute.resolver.LDAP.useStartTLS         = false
 Edit the `shibboleth-idp/conf/metadata-providers.xml` file, adding the following:
 
 ```xml
-<MetadataProvider id="HTTPMetadata"
-                  xsi:type="FileBackedHTTPMetadataProvider"
-                  backingFile="%{idp.home}/metadata/auth-svc.xml"
-                  disregardTLSCertificate="true"
-                  metadataURL="https://authen.doc/saml/metadata">
-    <MetadataFilter xsi:type="SignatureValidation"
-                    requireSignedRoot="false"
-                    certificateFile="%{idp.home}/credentials/metaroot.pem" />
-    <MetadataFilter xsi:type="EntityRoleWhiteList">
-        <RetainedRole>md:SPSSODescriptor</RetainedRole>
-    </MetadataFilter>
-</MetadataProvider>
+    <MetadataProvider id="LocalMetadata"
+                      xsi:type="FilesystemMetadataProvider"
+                      metadataFile="%{idp.home}/metadata/has-metadata.xml"/>
 ```
 
-This directs Shibboleth to fetch the service provider SAML metadata directly
-from our service instance, verifying it using the certificate we copied in
-earlier (i.e. `shibboleth-idp/credentials/metaroot.pem`).
+This directs Shibboleth to fetch the service provider SAML metadata from a named
+file, verifying it using the certificate we copied in earlier (i.e.
+`shibboleth-idp/credentials/metaroot.pem`).
+
+To produce the SP metadata, start HAS and get the `/saml/metadata` to a file,
+moving it to the `shibboleth-idp/metadata` directory.
 
 #### SAML NameID
 
