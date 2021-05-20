@@ -292,6 +292,16 @@ function ensure_readiness() {
     fi
 }
 
+# If user elected to configure for pm2, make sure that the system is
+# sufficiently ready for doing so.
+function ensure_pm2_readiness() {
+    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.js" ]]; then
+        if ! which node >/dev/null 2>&1; then
+            die 'Node.js is required for pm2. Please run install.sh to install dependencies.'
+        fi
+    fi
+}
+
 function read_arguments() {
     # build up the list of arguments in pieces since there are so many
     local ARGS=(base-url:)
@@ -841,7 +851,15 @@ function modify_env_config() {
     # errors are displayed.
     chmod 0644 logging.config.js
     # always enable logging for the time being
-    add_or_replace_var_in_env 'LOGGING' '../logging.config.js'
+    if [[ -f 'bin/www' ]]; then
+        # As a plain Node.js application, the logging require path is relative
+        # to the bin/www script.
+        add_or_replace_var_in_env 'LOGGING' '../logging.config.js'
+    else
+        # As a single binary, a full path is required since any relative path
+        # would be treated as internal to the binary archive.
+        add_or_replace_var_in_env 'LOGGING' "$(pwd)/logging.config.js"
+    fi
 }
 
 # Normalize the settings and write to the configuration file.
@@ -935,6 +953,7 @@ function main() {
     ensure_readiness
     set -e
     read_arguments "$@"
+    ensure_pm2_readiness
     if $INTERACTIVE || $DEBUG; then
         display_arguments
     fi

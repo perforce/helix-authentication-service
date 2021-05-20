@@ -16,9 +16,15 @@ env.SVC_BASE_URI = process.env.SVC_BASE_URI
 // to debug situations where the logging is not working and no errors are
 // displayed.
 fs.chmodSync('logging.config.js', 0o644)
-// HAS uses require to load the logging config, and the path is relative to the
-// bin directory(?), so must include the relative path to the file.
-env.LOGGING = '../logging.config.js'
+if (fs.existsSync('bin/www')) {
+  // As a plain Node.js application, the logging require path is relative to the
+  // bin/www script.
+  env.LOGGING = '../logging.config.js'
+} else {
+  // As a single binary, a full path is required since any relative path would
+  // be treated as internal to the binary archive.
+  env.LOGGING = `${process.cwd()}/logging.config.js`
+}
 
 // either OIDC is defined or it is completely wiped
 if (process.env.OIDC_ISSUER_URI) {
