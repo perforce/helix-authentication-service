@@ -27,7 +27,7 @@ RUN apt-get update && \
 ADD https://deb.nodesource.com/setup_14.x setup_14.x
 RUN bash setup_14.x
 RUN apt-get -q -y install nodejs
-RUN npm -g install pkg
+RUN npm -g install pkg@5.1.0
 
 WORKDIR /build/${DIRNAME}
 
