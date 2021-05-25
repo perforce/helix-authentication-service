@@ -593,6 +593,12 @@ function prompt_for_inputs() {
             prompt_for_saml_sp_entity_id
         fi
     fi
+    # ensure correct default protocol (if read from file)
+    if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
+        if [[ "${DEFAULT_PROTOCOL}" != 'oidc' && "${DEFAULT_PROTOCOL}" != 'saml' ]]; then
+            prompt_for_default_protocol
+        fi
+    fi
     # If configuring multiple protocols, or if they appear to configuring one
     # protocol that is not the default protocol configured previously, then
     # prompt them for the new default.
@@ -931,7 +937,6 @@ EOT
         echo '  * The service must be restarted for the changes to take effect.'
     fi
     cat <<EOT
-
   * If not already completed, the server and client certificates should be
     replaced with genuine certificates, replacing the self-signed certs.
     See the Administration Guide for additional information.
