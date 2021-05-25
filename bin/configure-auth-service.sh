@@ -914,7 +914,11 @@ function restart_service() {
         PM2_USER=${SUDO_USER:-${USER}}
         sudo -u $PM2_USER pm2 delete ecosystem.config.js
         sudo -u $PM2_USER pm2 save
-    elif [[ -f /etc/systemd/system/helix-auth.service ]]; then
+    fi
+    # Just in case pm2 was installed but not being used to manage the HAS
+    # process, also try stopping HAS using systemctl if the service unit is
+    # present.
+    if [[ -f /etc/systemd/system/helix-auth.service ]]; then
         sudo systemctl stop helix-auth
     fi
     set -e
