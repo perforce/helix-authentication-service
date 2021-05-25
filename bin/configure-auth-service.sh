@@ -903,16 +903,29 @@ function modify_config() {
 
 # Restart the service for the configuration changes to take effect.
 function restart_service() {
-    # If pm2 is present then presumably HAS is managed using it, otherwise
-    # should assume that HAS is installed as a systemd service unit.
+    # ignore errors when attempting to stop the service
+    set +e
+    # Stop the existing service, if it is running.
     if [[ -f ecosystem.config.js ]] && which pm2 >/dev/null 2>&1; then
-        # try to have pm2 run as the unprivileged user by default
+        # If pm2 is present then presumably HAS is managed using it, in which
+        # case we use the pm2 commands to stop and delete the old application
+        # before starting again (possibly via systemctl). This likely also helps
+        # reload the settings properly without having kill the pm2 daemon.
         PM2_USER=${SUDO_USER:-${USER}}
-        sudo -u $PM2_USER pm2 kill
+        sudo -u $PM2_USER pm2 delete ecosystem.config.js
+        sudo -u $PM2_USER pm2 save
+    elif [[ -f /etc/systemd/system/helix-auth.service ]]; then
+        sudo systemctl stop helix-auth
+    fi
+    set -e
+
+    # Start the service using the preferred process manager.
+    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.js" ]]; then
+        PM2_USER=${SUDO_USER:-${USER}}
         sudo -u $PM2_USER pm2 start ecosystem.config.js
         SVC_RESTARTED=true
     elif [[ -f /etc/systemd/system/helix-auth.service ]]; then
-        sudo systemctl restart helix-auth
+        sudo systemctl start helix-auth
         SVC_RESTARTED=true
     fi
     return 0
