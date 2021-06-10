@@ -1,5 +1,5 @@
 module.exports = {
   'urn:swarm-example:sp': {
-    acsUrl: 'http://swarm.doc:8080/api/v10/session'
+    acsUrl: 'https://swarm.doc:8043/api/v10/session'
   }
 }
