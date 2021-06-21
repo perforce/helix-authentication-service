@@ -51,36 +51,15 @@ $ npm test
 ## Running the Service on HTTP
 
 If for some reason you do not want the auth service to be using HTTPS and its
-self-signed certificate, you can use HTTP instead. This is particularly relevant
-when developing with a browser that refuses to open insecure web sites, such as
-the SAML Desktop Agent with its embedded Chromium browser.
+default self-signed certificate, you can use HTTP instead. This is particularly
+relevant when developing with a browser that refuses to open insecure web sites,
+such as the SAML Desktop Agent with its embedded Chromium browser.
 
 To switch from `http:` to `https:` you will need to change at least three settings:
 
 1. Set `SVC_BASE_URI` appropriately in the auth service configuration.
 1. Set service URL in the client system (e.g. Perforce server).
 1. Set the callback URL in the identity provider.
-
-## Generating the Certificates
-
-For development we create a self-signed certificate for the authentication
-service and use that to sign the client signing request for the server
-extension, thus creating the client certificate for the extension. This works
-fine for the client since our service will accept its own certificate as a
-certificate authority. However, we cannot use this same trick with the service
-since the browsers will not accept our fake certificate authority. For now, we
-only sign the client certificate and leave the service certificate as
-self-signed, since most browsers will tolerate that.
-
-```shell
-$ cd certs
-$ openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout ca.key -out ca.crt -subj "/CN=FakeAuthority"
-$ openssl req -nodes -days 3650 -newkey rsa:4096 -keyout client.key -out client.csr -subj "/CN=LoginExtension"
-$ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -set_serial 01 -days 3650
-# remove the client.csr
-# move the client.crt and client.key to the login extension
-$ openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout server.key -out server.crt -subj "/CN=AuthService"
-```
 
 ## Coding Conventions
 
