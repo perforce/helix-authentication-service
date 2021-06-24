@@ -59,7 +59,8 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 
 %post
 if [ ! -f "%{installprefix}/.env" ]; then
-    cp %{installprefix}/example.env %{installprefix}/.env
+    PRINT="print \"LOGGING=%{installprefix}/logging.config.js\""
+    awk "BEGIN {flg=0} /^${1}=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env
 fi
 
 # If this fails, it means either systemd is not installed or it does not have

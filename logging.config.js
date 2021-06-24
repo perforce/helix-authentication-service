@@ -1,11 +1,11 @@
 //
 // Default logging configuration file for Helix Authentication Service.
 //
-// See the service documentation for details on the various settings, including
-// configuration specific to the available transports.
+// See https://www.perforce.com/manuals/helix-auth-svc/ for documentation on the
+// available settings, including configuration specific to the log transports.
 //
 module.exports = {
-  level: 'debug',
+  level: 'info',
   transport: 'file',
   file: {
     filename: 'auth-svc.log',
