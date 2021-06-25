@@ -16,7 +16,7 @@ FROM node:14-slim AS builder
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install git
-RUN npm -g install pkg@5.1.0
+RUN npm -g install pkg@5.3.0
 WORKDIR /build
 COPY bin bin
 COPY lib lib

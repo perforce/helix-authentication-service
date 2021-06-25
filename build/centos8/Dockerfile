@@ -21,7 +21,7 @@ RUN bash setup_14.x
 # Skip gpg key check because it fails on some systems, and how that can happen
 # in a docker container is beyond my comprehension.
 RUN yum -q -y install --nogpgcheck -y nodejs
-RUN npm -g install pkg@5.1.0
+RUN npm -g install pkg@5.3.0
 
 WORKDIR /build/${DIRNAME}
 
