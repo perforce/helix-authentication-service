@@ -56,7 +56,7 @@
     "morgan": "~1.10.0",
     "openid-client": "^4.7.4",
     "passport": "^0.4.1",
-    "passport-saml": "^2.2.0",
+    "passport-saml": "^3.1.0",
     "passport-saml-metadata": "^2.4.1",
     "redis": "^3.1.2",
     "samlp": "^6.0.2",
