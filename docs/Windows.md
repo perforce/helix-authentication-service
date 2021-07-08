@@ -10,9 +10,10 @@ Download and run the Windows-based installers for [Git](https://git-scm.com) and
 
 ### Installing Module Dependencies
 
-Installing the module dependencies for the authentication service is done from a command prompt. Open a **PowerShell** window (preferably as an _Administrator_) and change to the directory containing the authentication service, then run the following  commands:
+Installing the module dependencies for the authentication service is done from a command prompt. Open a **PowerShell** window (preferably as an _Administrator_) and change to the directory containing the authentication service, then run the following commands (note that **order matters** here):
 
 ```
+> cd helix-authentication-service
 > npm ci --only=prod --no-optional
 > npm -g install node-windows
 > npm link node-windows
@@ -32,7 +33,7 @@ If the service does _not_ appear to be installed and running, then run the `unin
 
 ## Starting and Stopping the Service
 
-Once installed as a Windows service, the authentication service can be started and stopped using the Windows service utilities. The **Services** application provides a graphical interface for this purpose, while the `NET` command is available from the command shell. For example, stopping the service from the command shell can be done using the `NET STOP` command, as shown below:
+Once installed as a Windows service, with the name *Helix Authentication*, the authentication service can be started and stopped using the Windows service utilities. The **Services** application provides a graphical interface for this purpose, while the `NET` command is available from the command shell. For example, stopping the service from the command shell can be done using the `NET STOP` command, as shown below:
 
 ```
 > net stop helixauthentication.exe
@@ -44,7 +45,7 @@ Note, you will need to run the `NET` command as an administrator.
 
 ## Configuration
 
-The configuration of the authentication service is managed through environment variables. An easy method for setting the variables for the service is via a file named `.env` in the directory containing the authentication service. The `.env` file is a plain text file that contains names and values, separated by an equals (=) sign. For example:
+The configuration of the authentication service is managed through environment variables. An easy method for setting the variables for the service is via a file named `.env` in the directory containing the authentication service. To start, copy the `example.env` file and paste with the name `.env` and then edit with your favorite editor. The `.env` file is a plain text file that contains names and values, separated by an equals (=) sign. For example:
 
 ```
 SVC_BASE_URI=https://has.example.com
@@ -54,6 +55,8 @@ LOGGING='C:\\helix-auth-svc\\logging.config.js'
 See the [Helix Authentication Service Administrator Guide](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html) configuration chapter for all of the available settings.
 
 When modifying the `.env` file, you must stop and start the authentication service for the changes to take effect. See the section above for the commands to stop and start the service.
+
+**Note:** When specifying values in the `.env` configuration file, you can enclose the values in single (') or double (") quotes. For file paths, you can use a single backslash (\\) or double (\\\\), both will be treated the same.
 
 ## Logging
 
@@ -80,6 +83,8 @@ module.exports = {
   }
 }
 ```
+
+**Note:** The 1.0.0-beta.5 version of `node-windows` seems to send all logging to the _Application_ category in the event viewer, despite the value of the `eventLog` setting above.
 
 ## Removal
 
