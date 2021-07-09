@@ -25,4 +25,4 @@ EXPOSE ${PORT}
 
 HEALTHCHECK CMD curl -k -f -s -I http://localhost:${PORT}/ || exit 1
 
-ENTRYPOINT [ "node", "bin/www" ]
+CMD [ "node", "bin/www" ]

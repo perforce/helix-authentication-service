@@ -42,4 +42,4 @@ ENV NODE_ENV development
 ENV PORT 3000
 ENV SVC_BASE_URI "https://localhost:3000"
 EXPOSE ${PORT}
-ENTRYPOINT ["./helix-auth-svc"]
+CMD ["./helix-auth-svc"]
