@@ -43,4 +43,6 @@ $ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -set
 $ openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout server.key -out server.crt -subj "/CN=AuthService"
 $ openssl pkcs12 -export -inkey server.key -in server.crt -out server.p12
 # enter the passphrase mentioned above
+$ openssl rsa -aes256 -in server.key -out encrypted.key
+# enter the passphrase mentioned above
 ```
