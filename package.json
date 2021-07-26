@@ -54,7 +54,7 @@
     "memorystore": "^1.6.6",
     "minimatch": "^3.0.4",
     "morgan": "~1.10.0",
-    "node-saml": "^3.1.0",
+    "node-saml": "^4.0.0-beta.0",
     "openid-client": "^4.7.4",
     "passport": "^0.4.1",
     "passport-saml": "^3.1.0",
