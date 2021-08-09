@@ -7,16 +7,18 @@ const { before, describe, it } = require('mocha')
 const path = require('path')
 
 /* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
+global.include = (p) => require(path.join(__dirname, '../../..', p))
 
-const Request = include('lib/features/login/domain/entities/Request')
-const InMemoryRequestRepository = include('lib/features/login/data/repositories/InMemoryRequestRepository')
+process.env.REDIS_URL = 'redis://redis.doc:6379'
 
-describe('InMemoryRequest repository', function () {
+const Request = include('lib/domain/entities/Request')
+const RedisRequestRepository = include('lib/data/repositories/RedisRequestRepository')
+
+describe('RedisRequest repository', function () {
   let repository
 
   before(function () {
-    repository = new InMemoryRequestRepository()
+    repository = new RedisRequestRepository()
   })
 
   it('should raise an error for invalid input', function () {

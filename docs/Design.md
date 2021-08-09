@@ -19,12 +19,12 @@ test-driven-development.
 
 ## Clean Architecture
 
-In terms of "features", the application has only one, the "login" feature. All
-of the application related code is defined within the `lib/features/login`
-directory. Everything outside of that directory is essentially "scaffolding",
-primarily concerned with setting up the [Express.js](https://expressjs.com) web
-framework and logging. Within the `login` directory, the code is divided into
-three layers.
+In terms of "features", the application has only one, the "login" feature.
+Therefore, all of the application related code is defined within the `lib`
+directory, with no further distinction. Everything outside of the `data`,
+`domain`, and `presentation` directories is essentially "scaffolding", primarily
+concerned with setting up the [Express.js](https://expressjs.com) web framework
+and logging.
 
 ### Presentation
 

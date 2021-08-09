@@ -8,10 +8,10 @@ const sinon = require('sinon')
 const path = require('path')
 
 /* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
+global.include = (p) => require(path.join(__dirname, '../../..', p))
 
-const ReceiveUserProfile = include('lib/features/login/domain/usecases/ReceiveUserProfile')
-const UserRepository = include('lib/features/login/domain/repositories/UserRepository')
+const ReceiveUserProfile = include('lib/domain/usecases/ReceiveUserProfile')
+const UserRepository = include('lib/domain/repositories/UserRepository')
 
 describe('ReceiveUserProfile use case', function () {
   let usecase
