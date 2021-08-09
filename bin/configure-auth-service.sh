@@ -954,6 +954,11 @@ EOT
     if ! $SVC_RESTARTED; then
         echo '  * The service must be restarted for the changes to take effect.'
     fi
+    if [[ -n "${SAML_IDP_SSO_URL}" && -z "${SAML_IDP_METADATA_URL}" ]]; then
+        echo '  * Be sure to set IDP_CERT_FILE to the path of a file containing the'
+        echo '    public certificate of the SAML identity provider. This facilitates'
+        echo '    the verification of the SAML response, preventing MITM attacks.'
+    fi
     cat <<EOT
   * If not already completed, the server and client certificates should be
     replaced with genuine certificates, replacing the self-signed certs.
