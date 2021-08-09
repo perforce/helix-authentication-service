@@ -2,7 +2,7 @@
 #
 # Authentication service installation script for Linux systems.
 #
-# Copyright 2020, Perforce Software Inc. All rights reserved.
+# Copyright 2021, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false

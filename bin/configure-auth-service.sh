@@ -2,7 +2,7 @@
 #
 # Configuration script for Helix Authentication Service.
 #
-# Copyright 2020, Perforce Software Inc. All rights reserved.
+# Copyright 2021, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false

@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Perforce Software
+// Copyright 2020-2021 Perforce Software
 //
 const path = require('path')
 const Service = require('node-windows').Service
