@@ -776,7 +776,9 @@ function read_settings() {
     if [[ -n "${OCSF}" ]]; then
         OCSF=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OCSF")
         OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE:-${OCSF}}"
-        OIDC_CLIENT_SECRET=$(<${OIDC_CLIENT_SECRET_FILE})
+        if [ -f "${OIDC_CLIENT_SECRET_FILE}" ]; then
+            OIDC_CLIENT_SECRET=$(<${OIDC_CLIENT_SECRET_FILE})
+        fi
     fi
     OCS=$(grep '^OIDC_CLIENT_SECRET=' .env | cut -d= -f2-)
     if [[ -n "${OCS}" ]]; then
