@@ -82,6 +82,28 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
+New functionality in 2021.2
+
+    HAS-217 (Change #2148535)
+        Allow using [] for setting multiple values for SAML_AUTHN_CONTEXT
+        in the .env configuration file.
+
+    HAS-218 (Change #2147565)
+        Support PFX certificate files as well as a passphrase for the
+        private key component of the TLS certificate.
+
+----------------------------------------------------------------------
+Bugs fixed in 2021.2
+
+    HAS-225 (Change #2162386)
+        Use latest version of node-saml library to prevent configuring the
+        service in such a manner as to allow a SAML MITM attack.
+
+    HAS-226 (Change #2168428)
+        Configure script now recommends setting IDP_CERT_FILE when configuring
+        for SAML to avoid a possible MITM attack.
+
+----------------------------------------------------------------------
 New functionality in 2021.1
 
     HAS-187 (Change #2090469)
