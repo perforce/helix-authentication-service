@@ -1,6 +1,6 @@
 {
   "name": "helix-auth-svc",
-  "version": "2021.1.0",
+  "version": "2021.2.0",
   "description": "Helix Authentication Service: +MAIN+",
   "bin": {
     "auth-svc": "./bin/www"

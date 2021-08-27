@@ -3,9 +3,9 @@
 #
 # Build:
 #
-# $ docker build -t helix-auth-svc:latest -t helix-auth-svc:2021.1 -f containers/hub/Dockerfile .
+# $ docker build -t helix-auth-svc:latest -t helix-auth-svc:2021.2 -f containers/hub/Dockerfile .
 # $ docker tag helix-auth-svc:latest perforce/helix-auth-svc:latest
-# $ docker tag helix-auth-svc:2021.1 perforce/helix-auth-svc:2021.1
+# $ docker tag helix-auth-svc:2021.2 perforce/helix-auth-svc:2021.2
 # $ docker push --all-tags perforce/helix-auth-svc
 #
 # Run:

@@ -45,7 +45,7 @@ cp -pr docs/licenses %{buildroot}%{installprefix}/docs/licenses
 
 cp example.env %{buildroot}%{installprefix}/example.env
 cp logging.config.js %{buildroot}%{installprefix}/logging.config.js
-sed -e "s/\"2021.1.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+sed -e "s/\"2021.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
 cp README.md %{buildroot}%{installprefix}/README.md

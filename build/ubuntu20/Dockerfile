@@ -7,7 +7,7 @@ FROM ubuntu:20.04
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
 
-ARG ID_REL_BASE=2021.1.0
+ARG ID_REL_BASE=2021.2.0
 ARG ID_PATCH=9999999
 ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
@@ -45,7 +45,7 @@ COPY example.env example.env
 COPY logging.config.js logging.config.js
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
-RUN sed -e "s/\"2021.1.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+RUN sed -e "s/\"2021.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
         -e "s|+MAIN+|${HAS_VERSION}|" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md
