@@ -45,16 +45,23 @@ $ docker run --name dnsmasq -d -p 53:53/udp -p 5380:8080 \
     --restart always jpillora/dnsmasq
 ```
 
-If using a macOS system, the commands below will configure the host to use dnsmasq for host name resolution:
+If using a **macOS** system, the commands below will configure the host to use dnsmasq for host name resolution:
 
 ```shell
 $ sudo mkdir /etc/resolver
 $ echo 'nameserver 127.0.0.1' | sudo tee /etc/resolver/doc
+$ scutil --dns | grep doc
 ```
 
-If using a systemd-based Linux desktop, this [page](https://sixfeetup.com/blog/local-development-with-wildcard-dns-on-linux) describes the steps for running dnsmasq and `systemd-resolved` together. Note that this only works for the desktop system itself, if you want other hosts to be able to use this system for DNS, you will need to disable the stub listener for `systemd-resolved` and rely directly on dnsmasq.
+The output of the `scutil --dns` command should show the resolver for the `doc` domain.
+
+If using a systemd-based **Linux** desktop, this [page](https://sixfeetup.com/blog/local-development-with-wildcard-dns-on-linux) describes the steps for running dnsmasq and `systemd-resolved` together. Note that this only works for the desktop system itself, if you want other hosts to be able to use this system for DNS, you will need to disable the stub listener for `systemd-resolved` and rely directly on dnsmasq.
 
 An alternative to using dnsmasq would be to hard-code the names in the `/etc/hosts` file, or configure a DNS server to resolve the names.
+
+#### DNS and VPN
+
+Note that VPN software such as Cisco AnyConnect will block any attempts to use a local DNS resolver, so you will need to disconnect from VPN when using a local name resolver.
 
 ## Usage
 
