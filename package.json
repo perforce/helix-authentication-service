@@ -33,7 +33,7 @@
       "routes/**/*.js"
     ],
     "assets": [
-      "lib/presentation/pages/*",
+      "lib/features/login/presentation/pages/*",
       "node_modules/saml/node_modules/xml-encryption/lib/templates/*",
       "node_modules/samlp/templates/**/*",
       "public/**/*",

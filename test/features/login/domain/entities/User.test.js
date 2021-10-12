@@ -7,9 +7,9 @@ const { describe, it } = require('mocha')
 const path = require('path')
 
 /* global include */
-global.include = (p) => require(path.join(__dirname, '../../..', p))
+global.include = (p) => require(path.join(__dirname, '../../../../..', p))
 
-const User = include('lib/domain/entities/User')
+const User = include('lib/features/login/domain/entities/User')
 
 describe('User entity', function () {
   it('should raise an error for invalid input', function () {
