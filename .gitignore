@@ -45,3 +45,4 @@ helix-auth-svc-win.exe
 .vscode
 *.rpm
 *.deb
+tmp

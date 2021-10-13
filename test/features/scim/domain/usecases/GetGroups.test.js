@@ -1,0 +1,139 @@
+//
+// Copyright 2021 Perforce Software
+//
+const { AssertionError } = require('assert')
+const { assert } = require('chai')
+const { after, before, describe, it } = require('mocha')
+const sinon = require('sinon')
+const path = require('path')
+
+/* global include */
+global.include = (p) => require(path.join(__dirname, '../../../../..', p))
+
+const Query = include('lib/features/scim/domain/entities/Query')
+const Group = include('lib/features/scim/domain/entities/Group')
+const GetGroups = include('lib/features/scim/domain/usecases/GetGroups')
+const EntityRepository = include('lib/features/scim/domain/repositories/EntityRepository')
+
+describe('GetGroups use case', function () {
+  let usecase
+
+  before(function () {
+    const entityRepository = new EntityRepository()
+    usecase = GetGroups({ entityRepository })
+  })
+
+  after(function () {
+    sinon.restore()
+  })
+
+  it('should raise an error for invalid input', async function () {
+    assert.throws(() => GetGroups({ entityRepository: null }), AssertionError)
+    try {
+      await usecase(null)
+      assert.fail('should have raised error')
+    } catch (err) {
+      assert.instanceOf(err, AssertionError)
+    }
+  })
+
+  it('should return [] when no groups available', async function () {
+    // arrange
+    // eslint-disable-next-line no-unused-vars
+    const stub = sinon.stub(EntityRepository.prototype, 'getGroups').callsFake((query) => {
+      return []
+    })
+    const query = new Query()
+    // act
+    const results = await usecase(query)
+    // assert
+    assert.isEmpty(results)
+    assert.isTrue(stub.calledOnce)
+    stub.restore()
+  })
+
+  it('should return one entry when one group exists', async function () {
+    // arrange
+    const tGroup = new Group('staff', [])
+    // eslint-disable-next-line no-unused-vars
+    const stub = sinon.stub(EntityRepository.prototype, 'getGroups').callsFake((query) => {
+      return [tGroup]
+    })
+    const query = new Query()
+    // act
+    const results = await usecase(query)
+    // assert
+    assert.isNotEmpty(results)
+    assert.equal(results[0].displayName, 'staff')
+    assert.isTrue(stub.calledOnce)
+    stub.restore()
+  })
+
+  it('should filter results by matching attribute', async function () {
+    // arrange
+    const tGroup1 = new Group('admins', [])
+    const tGroup2 = new Group('staff', [])
+    const tGroup3 = new Group('zebras', [])
+    // eslint-disable-next-line no-unused-vars
+    const stub = sinon.stub(EntityRepository.prototype, 'getGroups').callsFake((query) => {
+      return [tGroup1, tGroup2, tGroup3]
+    })
+    const query = new Query({
+      filter: 'displayName eq "staff"'
+    })
+    // act
+    const results = await usecase(query)
+    // assert
+    assert.lengthOf(results, 1)
+    assert.equal(results[0].displayName, 'staff')
+    assert.isTrue(stub.calledOnce)
+    stub.restore()
+  })
+
+  it('should sort results by specific attribute', async function () {
+    // arrange
+    const tGroup1 = new Group('admins', [])
+    const tGroup2 = new Group('staff', [])
+    const tGroup3 = new Group('zebras', [])
+    // eslint-disable-next-line no-unused-vars
+    const stub = sinon.stub(EntityRepository.prototype, 'getGroups').callsFake((query) => {
+      return [tGroup3, tGroup2, tGroup1]
+    })
+    const query = new Query({
+      sortBy: 'displayName'
+    })
+    // act
+    const results = await usecase(query)
+    // assert
+    assert.lengthOf(results, 3)
+    assert.equal(results[0].displayName, 'admins')
+    assert.equal(results[1].displayName, 'staff')
+    assert.equal(results[2].displayName, 'zebras')
+    assert.isTrue(stub.calledOnce)
+    stub.restore()
+  })
+
+  it('should reverse sort results by specific attribute', async function () {
+    // arrange
+    const tGroup1 = new Group('admins', [])
+    const tGroup2 = new Group('staff', [])
+    const tGroup3 = new Group('zebras', [])
+    // eslint-disable-next-line no-unused-vars
+    const stub = sinon.stub(EntityRepository.prototype, 'getGroups').callsFake((query) => {
+      return [tGroup3, tGroup2, tGroup1]
+    })
+    const query = new Query({
+      sortBy: 'displayName',
+      sortOrder: 'descending'
+    })
+    // act
+    const results = await usecase(query)
+    // assert
+    assert.lengthOf(results, 3)
+    assert.equal(results[0].displayName, 'zebras')
+    assert.equal(results[1].displayName, 'staff')
+    assert.equal(results[2].displayName, 'admins')
+    assert.isTrue(stub.calledOnce)
+    stub.restore()
+  })
+})

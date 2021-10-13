@@ -16,6 +16,7 @@ global.include = function (path) {
 const app = include('lib/app')
 const container = include('lib/container')
 const logger = container.resolve('logger')
+const settings = container.resolve('settingsRepository')
 const {
   createServer,
   getPort,
@@ -23,18 +24,19 @@ const {
 } = include('lib/server')
 
 // Get port from environment and store in Express.
-const port = normalizePort(getPort(process.env))
+const port = normalizePort(getPort(settings))
 app.set('port', port)
 
 // Create HTTP/S server.
-const server = createServer(app)
+const server = createServer(app, settings)
 
 // Listen on provided port, on all network interfaces.
-if (process.env.BIND_ADDRESS) {
+const bindaddr = settings.get('BIND_ADDRESS')
+if (bindaddr) {
   // Allow explicitly setting the bind address if necessary. According to the
   // Node documentation, it binds to the unspecified IPv4 _and_ IPv6 address by
   // default ('0.0.0.0' and '::' respectively).
-  server.listen(port, process.env.BIND_ADDRESS)
+  server.listen(port, bindaddr)
 } else {
   server.listen(port)
 }

@@ -9,7 +9,9 @@ const router = express.Router()
 router.get('/', (req, res, next) => {
   // detect if the system has not yet been configured by an administrator
   const hasSaml = (process.env.SAML_IDP_METADATA_FILE || process.env.SAML_IDP_METADATA_URL || process.env.SAML_IDP_SSO_URL)
-  const showHelp = (process.env.OIDC_ISSUER_URI === undefined && !hasSaml)
+  const hasOidc = process.env.OIDC_ISSUER_URI !== undefined
+  const hasScim = process.env.P4PORT !== undefined
+  const showHelp = !(hasOidc || hasSaml || hasScim)
   res.render('index', { showHelp })
 })
 

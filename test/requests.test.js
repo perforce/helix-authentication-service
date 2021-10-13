@@ -22,7 +22,9 @@ global.include = (p) => require(path.join(__dirname, '..', p))
 // start the server
 const app = include('lib/app')
 const { createServer } = include('lib/server')
-const server = createServer(app)
+const container = include('lib/container')
+const settings = container.resolve('settingsRepository')
+const server = createServer(app, settings)
 const agent = request.agent(server)
 //
 // Would have used the ca function but that made no difference,
