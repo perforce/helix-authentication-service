@@ -17,7 +17,7 @@ require('dotenv').config({ path: 'test/dot.env' })
 const path = require('path')
 
 /* global include */
-global.include = (p) => require(path.join(__dirname, '..', p))
+global.include = (p) => require(path.join(__dirname, '../../../../..', p))
 
 // start the server
 const app = include('lib/app')
