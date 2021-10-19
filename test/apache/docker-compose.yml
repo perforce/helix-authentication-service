@@ -1,0 +1,87 @@
+version: '3.7'
+
+#
+# Set of containers for testing the published Docker Hub image with nginx as a
+# load balancer/reverse proxy. This is not used for automated testing.
+#
+
+#
+# Container names have a domain-like naming scheme to facilitate dnsmasq usage.
+# By ending in .doc, which is not a valid TLD, we can easily configure dnsmasq
+# to resolve these names to the docker machine. This allows the containers to
+# use the same names to refer to each other as the host does when resolving the
+# container names.
+#
+
+services:
+  auth-svc1.doc:
+    image: perforce/helix-auth-svc:latest
+    container_name: auth-svc1.doc
+    environment:
+      NODE_ENV: development
+      DEBUG: "1"
+      SVC_BASE_URI: "https://authen.doc"
+      PORT: 3001
+      PROTOCOL: "http"
+      TRUST_PROXY: 'true'
+      REDIS_URL: 'redis://redis.doc:6379'
+      DEFAULT_PROTOCOL: "saml"
+      SP_CERT_FILE: "certs/server.crt"
+      SP_KEY_FILE: "certs/server.key"
+      SAML_IDP_METADATA_URL: "https://dev-531210.okta.com/app/exk7mes1d0uz9kWnq357/sso/saml/metadata"
+      SAML_SP_ENTITY_ID: "urn:authen.doc:sp"
+    networks:
+      - authen
+    ports:
+      - "3001:3001"
+    depends_on:
+      - redis.doc
+  auth-svc2.doc:
+    image: perforce/helix-auth-svc:latest
+    container_name: auth-svc2.doc
+    environment:
+      NODE_ENV: development
+      DEBUG: "1"
+      SVC_BASE_URI: "https://authen.doc"
+      PORT: 3002
+      PROTOCOL: "http"
+      TRUST_PROXY: 'true'
+      REDIS_URL: 'redis://redis.doc:6379'
+      DEFAULT_PROTOCOL: "saml"
+      SP_CERT_FILE: "certs/server.crt"
+      SP_KEY_FILE: "certs/server.key"
+      SAML_IDP_METADATA_URL: "https://dev-531210.okta.com/app/exk7mes1d0uz9kWnq357/sso/saml/metadata"
+      SAML_SP_ENTITY_ID: "urn:authen.doc:sp"
+    networks:
+      - authen
+    ports:
+      - "3002:3002"
+    depends_on:
+      - auth-svc1.doc
+  authen.doc:
+    build:
+      context: containers/apache
+    container_name: authen.doc
+    networks:
+      - authen
+    ports:
+      - "443:443"
+    depends_on:
+      - auth-svc1.doc
+      - auth-svc2.doc
+  redis.doc:
+    image: redis:6.0
+    container_name: redis.doc
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - authen
+    ports:
+      - "6379:6379"
+
+networks:
+  authen:
+    name: auth-service
