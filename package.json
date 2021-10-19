@@ -41,7 +41,7 @@
     ]
   },
   "dependencies": {
-    "awilix": "^4.3.4",
+    "awilix": "^5.0.1",
     "connect-redis": "^6.0.0",
     "dotenv": "^10.0.0",
     "ejs": "^3.1.6",
@@ -58,7 +58,7 @@
     "node-saml": "^4.0.0-beta.0",
     "openid-client": "^4.9.1",
     "p4api": "^3.4.0",
-    "passport": "^0.4.1",
+    "passport": "^0.5.0",
     "passport-http-bearer": "^1.0.1",
     "passport-saml": "^3.2.0",
     "passport-saml-metadata": "^2.5.0",
@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "chai": "^4.3.4",
-    "eslint": "^7.32.0",
+    "eslint": "^8.0.1",
     "geckodriver": "^2.0.4",
     "get-port": "^5.1.1",
     "license-checker": "^25.0.1",

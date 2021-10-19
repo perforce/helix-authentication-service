@@ -84,7 +84,8 @@ describe('1-step SAML validation', function () {
     const idp = new saml2.IdentityProvider(idpOptions)
     // begin the 1-step login process to get the actual login URL
     loginUrl = await new Promise((resolve, reject) => {
-      sp.create_login_request_url(idp, {}, (err, loginUrl, _requestId) => {
+      // eslint-disable-next-line no-unused-vars
+      sp.create_login_request_url(idp, {}, (err, loginUrl, requestId) => {
         if (err) {
           reject(err)
         } else {
