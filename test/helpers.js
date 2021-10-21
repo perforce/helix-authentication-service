@@ -1,13 +1,14 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const https = require('https')
-const { ulid } = require('ulid')
-const { assert } = require('chai')
-const { P4 } = require('p4api')
+import * as https from 'node:https'
+import { ulid } from 'ulid'
+import { assert } from 'chai'
+import p4pkg from 'p4api'
+const { P4 } = p4pkg
 
 // Retrieve a new request identifier for user authentication.
-function getRequestId (hostname, port) {
+export function getRequestId (hostname, port) {
   // Use a ULID instead of a static value so that we avoid overlapping status
   // requests resulting in "missed notification" style bugs in the tests.
   return new Promise((resolve, reject) => {
@@ -48,7 +49,7 @@ function makeP4 (config) {
 }
 
 // Search all the things to find a string of output that contains query.
-function findData (command, query) {
+export function findData (command, query) {
   if (command.prompt && typeof command.prompt === 'string') {
     if (command.prompt.includes(query)) {
       return true
@@ -71,13 +72,13 @@ function findData (command, query) {
   return false
 }
 
-function establishTrust (config) {
+export function establishTrust (config) {
   const p4 = makeP4(config)
   const trustCmd = p4.cmdSync('trust -y -f')
   assert.include(trustCmd.data, 'Added trust for P4PORT')
 }
 
-function establishSuper (config) {
+export function establishSuper (config) {
   const p4 = makeP4(config)
   const userOut = p4.cmdSync('user -o')
   const userSpec = userOut.stat[0]
@@ -93,7 +94,7 @@ function establishSuper (config) {
   assert.equal(configCmd.stat[0].Action, 'set')
 }
 
-function createUser (user, password, config) {
+export function createUser (user, password, config) {
   const p4 = makeP4(config)
   const userIn = p4.cmdSync('user -i -f', user)
   assert.equal(userIn.info[0].data, `User ${user.User} saved.`)
@@ -101,7 +102,7 @@ function createUser (user, password, config) {
   assert.equal(passwdCmd.info[0].data, 'Password updated.')
 }
 
-function createGroup (group, config) {
+export function createGroup (group, config) {
   const p4 = makeP4(config)
   const groupOut = p4.cmdSync(`group -o ${group.Group}`)
   const input = Object.assign({}, groupOut.stat[0], group)
@@ -110,7 +111,7 @@ function createGroup (group, config) {
   assert.equal(groupIn.info[0].data, `Group ${group.Group} created.`)
 }
 
-function restartServer (config) {
+export function restartServer (config) {
   // eslint-disable-next-line no-unused-vars
   return new Promise((resolve, reject) => {
     const p4 = makeP4(config)
@@ -118,14 +119,4 @@ function restartServer (config) {
     // give the server time to start up again
     setTimeout(resolve, 100)
   })
-}
-
-module.exports = {
-  getRequestId,
-  findData,
-  establishTrust,
-  establishSuper,
-  createUser,
-  createGroup,
-  restartServer
 }

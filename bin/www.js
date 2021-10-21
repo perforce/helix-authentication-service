@@ -2,26 +2,15 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-
-//
-// An attempt to alleviate one of the many shortcomings of Node.js
-// c.f. https://gist.github.com/branneman/8048520 (8. The Wrapper)
-//
-/* global include */
-global.include = function (path) {
-  const p = require('path')
-  return require(p.join(__dirname, '..', path))
-}
-
-const app = include('lib/app')
-const container = include('lib/container')
-const logger = container.resolve('logger')
-const settings = container.resolve('settingsRepository')
-const {
+import app from 'helix-auth-svc/lib/app.js'
+import container from 'helix-auth-svc/lib/container.js'
+import {
   createServer,
   getPort,
   normalizePort
-} = include('lib/server')
+} from 'helix-auth-svc/lib/server.js'
+const logger = container.resolve('logger')
+const settings = container.resolve('settingsRepository')
 
 // Get port from environment and store in Express.
 const port = normalizePort(getPort(settings))
@@ -43,6 +32,8 @@ if (bindaddr) {
 server.on('error', onError)
 server.on('listening', onListening)
 
+/* eslint no-fallthrough: ["error", { "commentPattern": "break[\\s\\w]*omitted" }] */
+
 // Event listener for HTTP server "error" event.
 function onError (error) {
   if (error.syscall !== 'listen') {
@@ -59,9 +50,11 @@ function onError (error) {
     case 'EACCES':
       console.error(`${bind} requires elevated privileges`)
       process.exit(1)
+      // caution: break is omitted intentionally
     case 'EADDRINUSE':
       console.error(`${bind} is already in use`)
       process.exit(1)
+      // caution: break is omitted intentionally
     default:
       throw error
   }

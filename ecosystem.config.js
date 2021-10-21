@@ -14,7 +14,7 @@
 module.exports = {
   apps: [{
     name: 'auth-svc',
-    script: './bin/www',
+    script: './bin/www.js',
     env: {
       CA_CERT_FILE: 'certs/ca.crt',
       NODE_ENV: 'production',

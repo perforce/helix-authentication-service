@@ -1,16 +1,11 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { before, describe, it } = require('mocha')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const Request = include('lib/features/login/domain/entities/Request')
-const InMemoryRequestRepository = include('lib/features/login/data/repositories/InMemoryRequestRepository')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { before, describe, it } from 'mocha'
+import { Request } from 'helix-auth-svc/lib/features/login/domain/entities/Request.js'
+import { InMemoryRequestRepository } from 'helix-auth-svc/lib/features/login/data/repositories/InMemoryRequestRepository.js'
 
 describe('InMemoryRequest repository', function () {
   let repository

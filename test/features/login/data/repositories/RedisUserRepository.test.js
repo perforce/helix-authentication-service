@@ -1,24 +1,21 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { before, describe, it } = require('mocha')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-process.env.REDIS_URL = 'redis://redis.doc:6379'
-
-const User = include('lib/features/login/domain/entities/User')
-const RedisUserRepository = include('lib/features/login/data/repositories/RedisUserRepository')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { before, describe, it } from 'mocha'
+import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
+import { User } from 'helix-auth-svc/lib/features/login/domain/entities/User.js'
+import { RedisUserRepository } from 'helix-auth-svc/lib/features/login/data/repositories/RedisUserRepository.js'
 
 describe('RedisUser repository', function () {
   let repository
 
   before(function () {
-    repository = new RedisUserRepository()
+    const map = new Map()
+    map.set('REDIS_URL', 'redis://redis.doc:6379')
+    const settingsRepository = new MapSettingsRepository(map)
+    repository = new RedisUserRepository({ settingsRepository })
   })
 
   it('should raise an error for invalid input', function () {

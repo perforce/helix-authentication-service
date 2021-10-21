@@ -1,16 +1,14 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const fs = require('fs')
-const https = require('https')
-const querystring = require('querystring')
-const { assert } = require('chai')
-const { after, before, describe, it } = require('mocha')
-const { Builder, By, Capabilities, until } = require('selenium-webdriver')
-const { Options } = require('selenium-webdriver/firefox')
-const saml2 = require('saml2-js')
-const path = require('path')
-global.include = (p) => require(path.join(__dirname, '..', p))
+import * as fs from 'node:fs'
+import * as https from 'node:https'
+import * as querystring from 'node:querystring'
+import { assert } from 'chai'
+import { after, before, describe, it } from 'mocha'
+import { Builder, By, Capabilities, until } from 'selenium-webdriver'
+import { Options } from 'selenium-webdriver/firefox.js'
+import saml2 from 'saml2-js'
 
 //
 // Selenium API: https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/

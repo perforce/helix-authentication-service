@@ -1,15 +1,10 @@
 //
 // Copyright 2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { describe, it } = require('mocha')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const Group = include('lib/features/scim/domain/entities/Group')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { describe, it } from 'mocha'
+import { Group } from 'helix-auth-svc/lib/features/scim/domain/entities/Group.js'
 
 describe('Group entity', function () {
   it('should raise an error for invalid input', function () {

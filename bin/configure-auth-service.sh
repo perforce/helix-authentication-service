@@ -862,9 +862,9 @@ function modify_env_config() {
     # errors are displayed.
     chmod 0644 logging.config.js
     # always enable logging for the time being
-    if [[ -f 'bin/www' ]]; then
+    if [[ -f 'bin/www.js' ]]; then
         # As a plain Node.js application, the logging require path is relative
-        # to the bin/www script.
+        # to the bin/www.js script.
         add_or_replace_var_in_env 'LOGGING' '../logging.config.js'
     else
         # As a single binary, a full path is required since any relative path

@@ -1,15 +1,10 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { describe, it } = require('mocha')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const User = include('lib/features/login/domain/entities/User')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { describe, it } from 'mocha'
+import { User } from 'helix-auth-svc/lib/features/login/domain/entities/User.js'
 
 describe('User entity', function () {
   it('should raise an error for invalid input', function () {

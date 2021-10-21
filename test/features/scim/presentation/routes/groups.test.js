@@ -1,19 +1,20 @@
 //
 // Copyright 2021 Perforce Software
 //
-const path = require('path')
-const { assert } = require('chai')
-const { describe, it, run } = require('mocha')
-const request = require('supertest')
+import { assert } from 'chai'
+import { describe, it, run } from 'mocha'
+import request from 'supertest'
+// Load the test environment before the bulk of our code initializes, otherwise
+// it will be too late due to the `import` early-binding behavior.
+import 'helix-auth-svc/test/env.js'
+import app from 'helix-auth-svc/lib/app.js'
+import { createServer } from 'helix-auth-svc/lib/server.js'
+import container from 'helix-auth-svc/lib/container.js'
 
-// Override any existing .env file by loading our test configuration.
-require('dotenv').config({ path: 'test/dot.env' })
+// Tests must be run with `mocha --delay --exit` otherwise we do not give the
+// server enough time to start up, and the server hangs indefinitely because
+// mocha no longer exits after the tests complete.
 
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-const app = include('lib/app')
-const { createServer } = include('lib/server')
-const container = include('lib/container')
 const settings = container.resolve('settingsRepository')
 const server = createServer(app, settings)
 const agent = request.agent(server)

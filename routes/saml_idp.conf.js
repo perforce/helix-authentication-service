@@ -10,7 +10,7 @@
 // in this authentication service. That is, how this service will act as
 // an identity provider to SAML clients, in particular Perforce Swarm.
 //
-module.exports = {
+export default {
   //
   // The top-level property names are the SP entity identifiers, and the value
   // defines one or more properties associated with that service provider.

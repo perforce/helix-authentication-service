@@ -3,12 +3,13 @@
 // 'docs/licenses' directory for distribution. Only considers those packages
 // that are direct dependencies of this module.
 //
-const checker = require('license-checker')
-const fs = require('fs')
-const path = require('path')
+import * as checker from 'license-checker'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 
 // collect our direct dependencies into a unique set of package names
-const packageJson = require('../package.json')
+const packageJson = JSON.parse(fs.readFileSync('package.json'))
+
 const directPackages = new Set()
 for (const pkg in packageJson.dependencies) {
   directPackages.add(pkg)

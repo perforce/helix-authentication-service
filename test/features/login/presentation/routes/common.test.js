@@ -1,13 +1,9 @@
 //
 // Copyright 2021 Perforce Software
 //
-const path = require('path')
-const { assert } = require('chai')
-const { describe, it } = require('mocha')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-const sut = include('lib/features/login/presentation/routes/common')
+import { assert } from 'chai'
+import { describe, it } from 'mocha'
+import * as sut from 'helix-auth-svc/lib/features/login/presentation/routes/common.js'
 
 describe('Login routes common', function () {
   describe('defaultProtocol', function () {

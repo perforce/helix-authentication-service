@@ -1,20 +1,15 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { after, before, describe, it } = require('mocha')
-const sinon = require('sinon')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const Request = include('lib/features/login/domain/entities/Request')
-const User = include('lib/features/login/domain/entities/User')
-const RequestRepository = include('lib/features/login/domain/repositories/RequestRepository')
-const UserRepository = include('lib/features/login/domain/repositories/UserRepository')
-const FindUserProfile = include('lib/features/login/domain/usecases/FindUserProfile')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { after, before, describe, it } from 'mocha'
+import sinon from 'sinon'
+import { Request } from 'helix-auth-svc/lib/features/login/domain/entities/Request.js'
+import { User } from 'helix-auth-svc/lib/features/login/domain/entities/User.js'
+import { RequestRepository } from 'helix-auth-svc/lib/features/login/domain/repositories/RequestRepository.js'
+import { UserRepository } from 'helix-auth-svc/lib/features/login/domain/repositories/UserRepository.js'
+import FindUserProfile from 'helix-auth-svc/lib/features/login/domain/usecases/FindUserProfile.js'
 
 describe('FindUserProfile use case', function () {
   let usecase

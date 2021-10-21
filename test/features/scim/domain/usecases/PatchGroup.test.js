@@ -1,20 +1,15 @@
 //
 // Copyright 2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { after, before, describe, it } = require('mocha')
-const sinon = require('sinon')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const Group = include('lib/features/scim/domain/entities/Group')
-const MutabilityError = include('lib/features/scim/domain/errors/MutabilityError')
-const NoSuchGroupError = include('lib/features/scim/domain/errors/NoSuchGroupError')
-const PatchGroup = include('lib/features/scim/domain/usecases/PatchGroup')
-const EntityRepository = include('lib/features/scim/domain/repositories/EntityRepository')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { after, before, describe, it } from 'mocha'
+import sinon from 'sinon'
+import { Group } from 'helix-auth-svc/lib/features/scim/domain/entities/Group.js'
+import { MutabilityError } from 'helix-auth-svc/lib/features/scim/domain/errors/MutabilityError.js'
+import { NoSuchGroupError } from 'helix-auth-svc/lib/features/scim/domain/errors/NoSuchGroupError.js'
+import PatchGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/PatchGroup.js'
+import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
 
 describe('PatchGroup use case', function () {
   let usecase

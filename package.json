@@ -3,7 +3,11 @@
   "version": "2021.2.0",
   "description": "Helix Authentication Service: +MAIN+",
   "bin": {
-    "auth-svc": "./bin/www"
+    "auth-svc": "./bin/www.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": "^14.13.1 || >=16.0.0"
   },
   "repository": {
     "type": "git",
@@ -20,9 +24,11 @@
     "name": "Perforce Software",
     "email": "support@perforce.com"
   },
-  "main": "lib/app.js",
+  "exports": {
+    "./*": "./*"
+  },
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node ./bin/www.js",
     "test": "mocha --recursive --delay --exit",
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
@@ -74,6 +80,7 @@
   "devDependencies": {
     "chai": "^4.3.4",
     "eslint": "^8.0.1",
+    "eslint-plugin-unicorn": "^37.0.1",
     "geckodriver": "^2.0.4",
     "get-port": "^5.1.1",
     "license-checker": "^25.0.1",

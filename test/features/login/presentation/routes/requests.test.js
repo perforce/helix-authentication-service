@@ -1,28 +1,22 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const fs = require('fs')
-const { assert } = require('chai')
-const { describe, it, run } = require('mocha')
-const request = require('supertest')
-const minimatch = require('minimatch')
+import * as fs from 'node:fs'
+import { assert } from 'chai'
+import { describe, it, run } from 'mocha'
+import request from 'supertest'
+import minimatch from 'minimatch'
+// Load the test environment before the bulk of our code initializes, otherwise
+// it will be too late due to the `import` early-binding behavior.
+import 'helix-auth-svc/test/env.js'
+import app from 'helix-auth-svc/lib/app.js'
+import { createServer } from 'helix-auth-svc/lib/server.js'
+import container from 'helix-auth-svc/lib/container.js'
 
 // Tests must be run with `mocha --delay --exit` otherwise we do not give the
 // server enough time to start up, and the server hangs indefinitely because
 // mocha no longer exits after the tests complete.
 
-// Override any existing .env file by loading our test configuration.
-require('dotenv').config({ path: 'test/dot.env' })
-
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-// start the server
-const app = include('lib/app')
-const { createServer } = include('lib/server')
-const container = include('lib/container')
 const settings = container.resolve('settingsRepository')
 const server = createServer(app, settings)
 const agent = request.agent(server)
@@ -41,7 +35,7 @@ const agent = request.agent(server)
 //
 setTimeout(function () {
   describe('Client certificates', function () {
-    describe('common name matching', function () {
+    describe('Common Name matching', function () {
       // easier to test the underlying function than to have dozens of certs
       it('should reject non-matching names', function () {
         assert.isFalse(minimatch('LoginExtension', 'TrustedExtension'))

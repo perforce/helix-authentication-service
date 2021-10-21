@@ -1,21 +1,16 @@
 //
 // Copyright 2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { before, describe, it } = require('mocha')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const GroupModel = include('lib/features/scim/data/models/GroupModel')
-const UserModel = include('lib/features/scim/data/models/UserModel')
-const Query = include('lib/features/scim/domain/entities/Query')
-const Group = include('lib/features/scim/domain/entities/Group')
-const User = include('lib/features/scim/domain/entities/User')
-const GetUsers = include('lib/features/scim/domain/usecases/GetUsers')
-const InMemoryEntityRepository = include('lib/features/scim/data/repositories/InMemoryEntityRepository')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { before, describe, it } from 'mocha'
+import { GroupModel } from 'helix-auth-svc/lib/features/scim/data/models/GroupModel.js'
+import { UserModel } from 'helix-auth-svc/lib/features/scim/data/models/UserModel.js'
+import { Query } from 'helix-auth-svc/lib/features/scim/domain/entities/Query.js'
+import { Group } from 'helix-auth-svc/lib/features/scim/domain/entities/Group.js'
+import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
+import GetUsers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetUsers.js'
+import { InMemoryEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/InMemoryEntityRepository.js'
 
 describe('InMemoryEntity repository', function () {
   let repository

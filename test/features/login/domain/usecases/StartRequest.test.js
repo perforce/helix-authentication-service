@@ -1,17 +1,12 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { after, before, describe, it } = require('mocha')
-const sinon = require('sinon')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const StartRequest = include('lib/features/login/domain/usecases/StartRequest')
-const RequestRepository = include('lib/features/login/domain/repositories/RequestRepository')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { after, before, describe, it } from 'mocha'
+import sinon from 'sinon'
+import StartRequest from 'helix-auth-svc/lib/features/login/domain/usecases/StartRequest.js'
+import { RequestRepository } from 'helix-auth-svc/lib/features/login/domain/repositories/RequestRepository.js'
 
 describe('StartRequest use case', function () {
   let usecase

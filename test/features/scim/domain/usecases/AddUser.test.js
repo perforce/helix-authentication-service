@@ -1,18 +1,13 @@
 //
 // Copyright 2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { after, before, describe, it } = require('mocha')
-const sinon = require('sinon')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const User = include('lib/features/scim/domain/entities/User')
-const AddUser = include('lib/features/scim/domain/usecases/AddUser')
-const EntityRepository = include('lib/features/scim/domain/repositories/EntityRepository')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { after, before, describe, it } from 'mocha'
+import sinon from 'sinon'
+import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
+import AddUser from 'helix-auth-svc/lib/features/scim/domain/usecases/AddUser.js'
+import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
 
 describe('AddUser use case', function () {
   let usecase

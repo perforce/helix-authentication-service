@@ -1,15 +1,17 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const path = require('path')
-const Service = require('node-windows').Service
+import * as path from 'node:path'
+import { Service } from 'node-windows'
+import { fileURLToPath } from 'node:url'
 
-const scriptPath = path.join(__dirname, 'www')
+const bindir = path.dirname(fileURLToPath(import.meta.url))
+const scriptPath = path.join(bindir, 'www')
 const svc = new Service({
   name: 'Helix Authentication',
   description: 'Helix Authentication Service',
   script: scriptPath,
-  workingDirectory: path.dirname(__dirname)
+  workingDirectory: path.dirname(bindir)
 })
 svc.on('alreadyinstalled', () => {
   console.info('Service already installed')

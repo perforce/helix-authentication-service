@@ -1,15 +1,10 @@
 //
 // Copyright 2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { describe, it } = require('mocha')
-const path = require('path')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const UserModel = include('lib/features/scim/data/models/UserModel')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { describe, it } from 'mocha'
+import { UserModel } from 'helix-auth-svc/lib/features/scim/data/models/UserModel.js'
 
 describe('User model', function () {
   it('should raise an error for invalid input', function () {

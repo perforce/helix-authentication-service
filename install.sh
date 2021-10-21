@@ -296,7 +296,7 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=${INSTALL_PREFIX}/bin/www
+ExecStart=${INSTALL_PREFIX}/bin/www.js
 WorkingDirectory=${INSTALL_PREFIX}
 
 [Install]

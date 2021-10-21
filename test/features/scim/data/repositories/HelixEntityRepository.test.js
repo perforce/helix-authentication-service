@@ -1,25 +1,20 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { AssertionError } = require('assert')
-const { assert } = require('chai')
-const { after, before, describe, it } = require('mocha')
-const path = require('path')
-const helpers = require('../../../../helpers')
-const runner = require('../../../../runner')
-
-/* global include */
-global.include = (p) => require(path.join(__dirname, '../../../../..', p))
-
-const MapSettingsRepository = include('lib/common/data/repositories/MapSettingsRepository')
-const GroupModel = include('lib/features/scim/data/models/GroupModel')
-const UserModel = include('lib/features/scim/data/models/UserModel')
-const Query = include('lib/features/scim/domain/entities/Query')
-const Group = include('lib/features/scim/domain/entities/Group')
-const User = include('lib/features/scim/domain/entities/User')
-const GetUsers = include('lib/features/scim/domain/usecases/GetUsers')
-const PatchGroup = include('lib/features/scim/domain/usecases/PatchGroup')
-const HelixEntityRepository = include('lib/features/scim/data/repositories/HelixEntityRepository')
+import { AssertionError } from 'node:assert'
+import { assert } from 'chai'
+import { after, before, describe, it } from 'mocha'
+import * as helpers from 'helix-auth-svc/test/helpers.js'
+import * as runner from 'helix-auth-svc/test/runner.js'
+import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
+import { GroupModel } from 'helix-auth-svc/lib/features/scim/data/models/GroupModel.js'
+import { UserModel } from 'helix-auth-svc/lib/features/scim/data/models/UserModel.js'
+import { Query } from 'helix-auth-svc/lib/features/scim/domain/entities/Query.js'
+import { Group } from 'helix-auth-svc/lib/features/scim/domain/entities/Group.js'
+import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
+import GetUsers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetUsers.js'
+import PatchGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/PatchGroup.js'
+import { HelixEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/HelixEntityRepository.js'
 
 describe('HelixEntity repository', function () {
   let repository

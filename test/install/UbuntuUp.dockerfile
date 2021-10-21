@@ -52,7 +52,7 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
 # ensure configure script created the OIDC client secret file
 RUN test -f helix-auth-svc/client-secret.txt && \
     grep -q 'client_secret' helix-auth-svc/client-secret.txt && \
-    grep -q '"script": "./bin/www",' helix-auth-svc/ecosystem.config.js && \
+    grep -q '"script": "./bin/www.js",' helix-auth-svc/ecosystem.config.js && \
     grep -q '"LOGGING": "../logging.config.js",' helix-auth-svc/ecosystem.config.js && \
     grep -q 'https://localhost:3000' helix-auth-svc/ecosystem.config.js && \
     grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.js
@@ -60,7 +60,7 @@ RUN test -f helix-auth-svc/client-secret.txt && \
 # fabricate the single-binary executable condition to test configuration
 RUN touch ./helix-auth-svc/helix-auth-svc && \
     chmod +x ./helix-auth-svc/helix-auth-svc && \
-    rm -f helix-auth-svc/bin/www
+    rm -f helix-auth-svc/bin/www.js
 
 # run the configure script and set up SAML
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
