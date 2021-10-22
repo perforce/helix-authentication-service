@@ -19,42 +19,44 @@ test-driven-development.
 
 ## Clean Architecture
 
-In terms of "features", the application has only one, the "login" feature. All
-of the application related code is defined within the `lib/features/login`
-directory. Everything outside of that directory is essentially "scaffolding",
+In terms of "features", the application has two: `login` for authentication
+integration, and `scim` for user provisioning. All of the application related
+code is defined within the `lib/features/login` and `lib/features/scim`
+directories. Everything outside of that directory is essentially "scaffolding",
 primarily concerned with setting up the [Express.js](https://expressjs.com) web
-framework and logging. Within the `login` directory, the code is divided into
-three layers.
+framework and logging. Within the `login` and `scim` directories, the code is
+divided into three layers.
 
 ### Presentation
 
 The portion of the application which is visible to the outside world. This
 includes the user-visible web pages as well as the OIDC/SAML protocol
-implementations and the RESTful API.
+implementations and the RESTful API for the SCIM-based user provisioning.
 
 ### Domain
 
 The entities and use cases which define the "policy" of the application,
-otherwise known as the business logic. Entities include the login requests and
-the user profiles. Use cases include "starting a request", "finding a user", and
-"receiving a user profile".
+otherwise known as the business logic. Entities include the login requests,
+Perforce users, and groups. The interface for several "repositories" is also
+defined here, for storing the entities. Use cases include "starting a login",
+"adding a user", and so on.
 
-Why are there two entities, one for the users and another for requests? The
-client application (e.g. Helix Core), knows the user by some identifier such as
-a username, while the authentication service uses uniquely identified login
-requests to facilitate multiple logins by a single user. Once the user entity
-has been created, its identifier is displayed in the application log, which
-helps with debugging.
+Why are there two entities in the `login` feature, one for the users and another
+for requests? The client application (e.g. Helix Core), knows the user by some
+identifier such as a username, while the authentication service uses uniquely
+identified login requests to facilitate multiple logins by a single user. Once
+the user entity has been created, its identifier is displayed in the application
+log, which helps with debugging.
 
 ### Data
 
 The "lowest" layer of the application, which interacts with those components
 living outside of the application. This normally includes databases and remote
-network-based services. For this relatively simple application, this consists of
-the in-memory data store used to hold the login requests and user profiles
-(albeit only temporarily). In a more complex application, this layer would have
-implementations of the entities called "models" and those would be retrieved
-from "data sources" such as a RESTful API or key/value store.
+network-based services. For the `login` feature, there is a simple in-memory
+store for the login requests, while the `scim` feature has a Helix repository
+that interfaces with Helix Core Server. This layer also has implementations of
+the entities called "models" that facilitate translation between the entities
+and their external representation (e.g. JSON).
 
 ### Benefits
 
@@ -76,21 +78,23 @@ the various "services" are defined in the `lib/container.js` module.
 
 ### Module Loading
 
-Node.js offers very little in terms of organizing modules in the application, so
-any deeply nested directory structure quickly becomes a nuisance. For example,
-from the [module-alias](https://github.com/ilearnio/module-alias) README file:
+Node.js offers little in terms of organizing modules in the application, so
+any deeply nested directory structure can become a nuisance. One solution that
+works well with ECMAScript Modules is to utilize the _package name_ of the
+application in the `import` statement, like so:
 
 ```javascript
-require('../../../../some/very/deep/module')
+import usersRouter from 'helix-auth-svc/lib/features/scim/presentation/routes/users.js'
 ```
 
-To alleviate this pain, this application defines a global function named
-`include()` that builds the correct path based on a relative location. As such
-you will see linter directives to treat `include` as a global, and you will see
-some `include()` calls in place of `require()`. This particular solution to the
-problem is described as **The Wrapper** in a popular GitHub
-[gist](https://gist.github.com/branneman/8048520) that offers several options
-for dealing with this nuisance.
+While the paths are a little long, they are easy to understand. This approach
+works identically for the application code and the test code, avoiding the need
+for "include" hacks when writing tests. Another approach would be to use
+relative import paths, but that is arguably more difficult to reason about.
+
+To facilitate this approach, the entire application is _exported_ in the
+`exports` property of the `package.json` file, which should be fine for an
+application, while a library would likely not use this method.
 
 ### Mock Objects
 
