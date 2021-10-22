@@ -74,7 +74,7 @@ The authentication service supports writing its own logging to the _events_ log,
 An example of logging all messages at levels from `info` up to `error`, to the "SYSTEM" _events_ log, with a source named "Auth-Service", is shown below.
 
 ```javascript
-module.exports = {
+export default {
   level: 'info',
   transport: 'event',
   event: {

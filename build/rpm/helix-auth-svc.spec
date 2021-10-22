@@ -34,7 +34,7 @@ install -d %{buildroot}%{installprefix}/docs
 
 install -m 0755 helix-auth-svc %{buildroot}%{installprefix}/helix-auth-svc
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
-cp -p bin/writeconf.js %{buildroot}%{installprefix}/bin/writeconf.js
+cp -p bin/writeconf.cjs %{buildroot}%{installprefix}/bin/writeconf.cjs
 cp -pr certs/* %{buildroot}%{installprefix}/certs
 cp -p docs/Administrator-Guide.md %{buildroot}%{installprefix}/docs/Administrator-Guide.md
 cp -p docs/Cookies.md %{buildroot}%{installprefix}/docs/Cookies.md

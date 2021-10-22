@@ -168,10 +168,10 @@ EOT
 This script will only install software on this machine. After this script is
 finished, you will need to:
 
-  1) Configure the service by editing the ecosystem.config.js file.
+  1) Configure the service by editing the ecosystem.config.cjs file.
   2) Restart the service by invoking the following commands:
      $ pm2 kill
-     $ pm2 start ecosystem.config.js
+     $ pm2 start ecosystem.config.cjs
 
 EOT
     else
@@ -337,7 +337,7 @@ function install_pm2() {
     echo "Starting the auth service with default configuration..."
     # For consistency with the configure script, assume that the service will be
     # run as the unprivileged user, rather than root.
-    pm2 start ecosystem.config.js
+    pm2 start ecosystem.config.cjs
     echo "Installing pm2 startup script..."
     STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
     sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
@@ -348,7 +348,7 @@ function install_pm2() {
 function print_summary() {
     CONFIG_FILE='.env'
     if $INSTALL_PM2; then
-        CONFIG_FILE='ecosystem.config.js'
+        CONFIG_FILE='ecosystem.config.cjs'
     fi
     highlight_on
     cat <<EOT

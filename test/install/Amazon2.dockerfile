@@ -42,12 +42,12 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
 # ensure configure script created the OIDC client secret file
 RUN test -f helix-auth-svc/client-secret.txt && \
     grep -q 'client_secret' helix-auth-svc/client-secret.txt && \
-    grep -q 'https://localhost:3000' helix-auth-svc/ecosystem.config.js && \
-    grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.js
+    grep -q 'https://localhost:3000' helix-auth-svc/ecosystem.config.cjs && \
+    grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.cjs
 
 # run the configure script and set up SAML
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
     --base-url https://localhost:3000 \
     --saml-idp-metadata-url https://saml.idp/metadata
 
-RUN grep -q 'https://saml.idp/metadata' helix-auth-svc/ecosystem.config.js
+RUN grep -q 'https://saml.idp/metadata' helix-auth-svc/ecosystem.config.cjs

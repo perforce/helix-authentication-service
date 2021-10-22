@@ -52,10 +52,10 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
 # ensure configure script created the OIDC client secret file
 RUN test -f helix-auth-svc/client-secret.txt && \
     grep -q 'client_secret' helix-auth-svc/client-secret.txt && \
-    grep -q '"script": "./bin/www.js",' helix-auth-svc/ecosystem.config.js && \
-    grep -q '"LOGGING": "../logging.config.js",' helix-auth-svc/ecosystem.config.js && \
-    grep -q 'https://localhost:3000' helix-auth-svc/ecosystem.config.js && \
-    grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.js
+    grep -q '"script": "./bin/www.js",' helix-auth-svc/ecosystem.config.cjs && \
+    grep -q '"LOGGING": "../logging.config.js",' helix-auth-svc/ecosystem.config.cjs && \
+    grep -q 'https://localhost:3000' helix-auth-svc/ecosystem.config.cjs && \
+    grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.cjs
 
 # fabricate the single-binary executable condition to test configuration
 RUN touch ./helix-auth-svc/helix-auth-svc && \
@@ -68,6 +68,6 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
     --saml-idp-metadata-url https://saml.idp/metadata
 
 # verify appropriate single-binary configuration in the pm2 file
-RUN grep -q 'https://saml.idp/metadata' helix-auth-svc/ecosystem.config.js && \
-    grep -q '"script": "./helix-auth-svc",' helix-auth-svc/ecosystem.config.js && \
-    grep -q '"LOGGING": "/home/charlie/helix-auth-svc/logging.config.js",' helix-auth-svc/ecosystem.config.js
+RUN grep -q 'https://saml.idp/metadata' helix-auth-svc/ecosystem.config.cjs && \
+    grep -q '"script": "./helix-auth-svc",' helix-auth-svc/ecosystem.config.cjs && \
+    grep -q '"LOGGING": "/home/charlie/helix-auth-svc/logging.config.js",' helix-auth-svc/ecosystem.config.cjs

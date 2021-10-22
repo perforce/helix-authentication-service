@@ -33,7 +33,7 @@ grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
 # ensure certain files are present
 test -f /opt/perforce/helix-auth-svc/README.html
 test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
-test -f /opt/perforce/helix-auth-svc/bin/writeconf.js
+test -f /opt/perforce/helix-auth-svc/bin/writeconf.cjs
 test -x /opt/perforce/helix-auth-svc/helix-auth-svc
 
 # ensure the systemd service is running

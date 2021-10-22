@@ -152,7 +152,7 @@ Description:
 
     Configuration script for Helix Authentication Service.
 
-    This script will modify the ecosystem.config.js or .env file according
+    This script will modify the ecosystem.config.cjs or .env file according
     to the values provided via arguments or interactive input, and then
     restart the service via pm2 or systemd.
 
@@ -295,7 +295,7 @@ function ensure_readiness() {
 # If user elected to configure for pm2, make sure that the system is
 # sufficiently ready for doing so.
 function ensure_pm2_readiness() {
-    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.js" ]]; then
+    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.cjs" ]]; then
         if ! which node >/dev/null 2>&1; then
             die 'Node.js is required for pm2. Please run install.sh to install dependencies.'
         fi
@@ -366,7 +366,7 @@ function read_arguments() {
                 shift 2
                 ;;
             --pm2)
-                CONFIG_FILE_NAME='ecosystem.config.js'
+                CONFIG_FILE_NAME='ecosystem.config.cjs'
                 shift
                 ;;
             --debug)
@@ -729,8 +729,8 @@ function prompt_to_proceed() {
 function modify_eco_config() {
     # make a backup of the ecosystem file one time and leave it untouched as a
     # record of the original contents
-    if [[ ! -f ecosystem.config.orig && -e ecosystem.config.js ]]; then
-        cp ecosystem.config.js ecosystem.config.orig
+    if [[ ! -f ecosystem.config.orig && -e ecosystem.config.cjs ]]; then
+        cp ecosystem.config.cjs ecosystem.config.orig
     fi
     # use Node.js to update the configuration file in place since the format is
     # a bit too complex for simple sed/awk scripting to handle
@@ -742,7 +742,7 @@ function modify_eco_config() {
         SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}" \
         SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL}" \
         SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID}" \
-        node ./bin/writeconf.js
+        node ./bin/writeconf.cjs
 }
 
 # Retrieve any existing service settings to prime the inputs.
@@ -892,7 +892,7 @@ function modify_config() {
     fi
     if [[ "${CONFIG_FILE_NAME}" == ".env" ]]; then
         modify_env_config
-    elif [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.js" ]]; then
+    elif [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.cjs" ]]; then
         modify_eco_config
     else
         echo 'WARNING: configuration changes not written to file!'
@@ -909,13 +909,13 @@ function restart_service() {
     # ignore errors when attempting to stop the service
     set +e
     # Stop the existing service, if it is running.
-    if [[ -f ecosystem.config.js ]] && which pm2 >/dev/null 2>&1; then
+    if [[ -f ecosystem.config.cjs ]] && which pm2 >/dev/null 2>&1; then
         # If pm2 is present then presumably HAS is managed using it, in which
         # case we use the pm2 commands to stop and delete the old application
         # before starting again (possibly via systemctl). This likely also helps
         # reload the settings properly without having kill the pm2 daemon.
         PM2_USER=${SUDO_USER:-${USER}}
-        sudo -u $PM2_USER pm2 delete ecosystem.config.js
+        sudo -u $PM2_USER pm2 delete ecosystem.config.cjs
         sudo -u $PM2_USER pm2 save
     fi
     # Just in case pm2 was installed but not being used to manage the HAS
@@ -927,9 +927,9 @@ function restart_service() {
     set -e
 
     # Start the service using the preferred process manager.
-    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.js" ]]; then
+    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.cjs" ]]; then
         PM2_USER=${SUDO_USER:-${USER}}
-        sudo -u $PM2_USER pm2 start ecosystem.config.js
+        sudo -u $PM2_USER pm2 start ecosystem.config.cjs
         SVC_RESTARTED=true
     elif [[ -f /etc/systemd/system/helix-auth.service ]]; then
         sudo systemctl start helix-auth
