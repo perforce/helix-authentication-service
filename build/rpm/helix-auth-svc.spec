@@ -10,15 +10,15 @@ Summary:        Helix Authentication Service
 License:        BSD
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
+# Leaving the epoch off results in centos installing an older version of nodejs,
+# and for whatever reason, having the epoch forces yum to work correctly.
+Requires:       nodejs >= 2:14.15
 
 %description
 Authentication protocol (OIDC, SAML) integration service.
 
 # empty files that rpm creates and then complains about
 %global debug_package %{nil}
-# Prevent the strip command from attempting to strip the debug info from the
-# pkg-built binary since that causes it to fail on startup.
-%global __os_install_post %{nil}
 
 %prep
 %setup -q
@@ -31,10 +31,15 @@ Authentication protocol (OIDC, SAML) integration service.
 install -d %{buildroot}%{installprefix}/bin
 install -d %{buildroot}%{installprefix}/certs
 install -d %{buildroot}%{installprefix}/docs
+install -d %{buildroot}%{installprefix}/lib
+install -d %{buildroot}%{installprefix}/node_modules
+install -d %{buildroot}%{installprefix}/public
+install -d %{buildroot}%{installprefix}/routes
+install -d %{buildroot}%{installprefix}/views
 
-install -m 0755 helix-auth-svc %{buildroot}%{installprefix}/helix-auth-svc
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
 cp -p bin/writeconf.cjs %{buildroot}%{installprefix}/bin/writeconf.cjs
+install -m 0755 bin/www.js %{buildroot}%{installprefix}/bin/www.js
 cp -pr certs/* %{buildroot}%{installprefix}/certs
 cp -p docs/Administrator-Guide.md %{buildroot}%{installprefix}/docs/Administrator-Guide.md
 cp -p docs/Cookies.md %{buildroot}%{installprefix}/docs/Cookies.md
@@ -42,9 +47,17 @@ cp -p docs/Failover.md %{buildroot}%{installprefix}/docs/Failover.md
 cp -p docs/Proxies.md %{buildroot}%{installprefix}/docs/Proxies.md
 cp -p docs/REST_API.md %{buildroot}%{installprefix}/docs/REST_API.md
 cp -pr docs/licenses %{buildroot}%{installprefix}/docs/licenses
+cp -pr lib/* %{buildroot}%{installprefix}/lib
+# remove this problematic, seemingly duplicate, file
+rm -f node_modules/unix-dgram/build/Release/obj.target/unix_dgram.node
+cp -pr node_modules/* %{buildroot}%{installprefix}/node_modules
+cp -pr public/* %{buildroot}%{installprefix}/public
+cp -pr routes/* %{buildroot}%{installprefix}/routes
+cp -pr views/* %{buildroot}%{installprefix}/views
 
 cp example.env %{buildroot}%{installprefix}/example.env
 cp logging.config.js %{buildroot}%{installprefix}/logging.config.js
+cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
 sed -e "s/\"2021.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
@@ -80,7 +93,7 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=%{installprefix}/helix-auth-svc
+ExecStart=node ./bin/www.js
 WorkingDirectory=%{installprefix}
 
 [Install]
@@ -125,7 +138,7 @@ Package installation complete!
 
 The Helix Authentication Service is now installed. To configure the service,
 edit the .env file in the directory shown below, and then start the service
-by invoking %{installprefix}/helix-auth-svc
+by invoking node %{installprefix}/bin/www.js
 
     %{installprefix}
 

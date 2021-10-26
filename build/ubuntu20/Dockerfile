@@ -27,7 +27,6 @@ RUN apt-get update && \
 ADD https://deb.nodesource.com/setup_14.x setup_14.x
 RUN bash setup_14.x
 RUN apt-get -q -y install nodejs
-RUN npm -g install pkg@5.3.0
 
 WORKDIR /build/${DIRNAME}
 
@@ -64,8 +63,6 @@ RUN rm -rf node_modules
 # build only what is needed for packaging
 #
 RUN npm ci -q --only=production --no-optional
-RUN pkg . --targets=linux
-RUN rm -rf node_modules
 RUN tar zcf ../${PKGNAME}.orig.tar.gz .
 
 #
@@ -76,9 +73,6 @@ RUN sed -e "s/ID_REL_BASE_REPLACE/${ID_REL_BASE}/" \
         -e "s/ID_PATCH_REPLACE/${ID_PATCH}~focal/" \
         -e "s/DATE_STRING_REPLACE/`date +'%a, %d %b %Y %H:%M:%S %z'`/" \
         debian/changelog.in > debian/changelog
-# prevent dh_strip from stripping our executable and thoroughly breaking it
-# (resulting executable would emit 'Pkg: Error reading from file.' and die)
-ENV DEB_BUILD_OPTIONS nostrip
 RUN dpkg-buildpackage -b -rfakeroot -us -uc -ui
 #
 # Work around issue with older aptly that does not recognize the new default

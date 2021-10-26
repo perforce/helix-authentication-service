@@ -19,7 +19,6 @@ RUN yum -q -y install curl gcc-c++ git make rpm-build rpmdevtools
 ADD https://rpm.nodesource.com/setup_14.x setup_14.x
 RUN bash setup_14.x
 RUN yum -q -y install nodejs
-RUN npm -g install pkg@5.3.0
 
 WORKDIR /build/${DIRNAME}
 
@@ -53,8 +52,6 @@ RUN rm -rf node_modules
 # build only what is needed for deployment
 #
 RUN npm ci -q --only=production --no-optional
-RUN pkg . --targets=linux
-RUN rm -rf node_modules
 
 #
 # build the rpm package

@@ -42,7 +42,7 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=${INSTALLPREFIX}/helix-auth-svc
+ExecStart=/usr/bin/node ${INSTALLPREFIX}/bin/www.js
 WorkingDirectory=${INSTALLPREFIX}
 
 [Install]
@@ -87,7 +87,7 @@ Package installation complete!
 
 The Helix Authentication Service is now installed. To configure the service,
 edit the .env file in the directory shown below, and then start the service
-by invoking ${INSTALLPREFIX}/helix-auth-svc
+by invoking node ${INSTALLPREFIX}/bin/www.js
 
     ${INSTALLPREFIX}
 
