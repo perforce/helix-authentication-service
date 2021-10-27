@@ -87,7 +87,7 @@ services, including Perforce Swarm. This can be done by mapping a volume (for
 instance, using the `-v` option to `docker`, or the `volumes` setting in a
 Docker Compose file) that includes a configuration file, and setting the
 `IDP_CONFIG_FILE` environment variable to reference that file. An example
-configuration file can be found [here](https://github.com/perforce/helix-authentication-service/blob/master/routes/saml_idp.conf.js).
+configuration file can be found [here](https://github.com/perforce/helix-authentication-service/blob/master/routes/saml_idp.conf.cjs).
 
 ## How to get help
 

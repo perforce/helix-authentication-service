@@ -19,7 +19,7 @@ COPY views views
 # much larger without any benefit.
 RUN npm ci -q --only=prod --no-optional
 
-COPY containers/auth-svc/saml_idp.conf.js routes
+COPY containers/auth-svc/saml_idp.conf.cjs routes
 
 EXPOSE ${PORT}
 

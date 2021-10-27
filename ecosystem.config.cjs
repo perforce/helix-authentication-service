@@ -40,7 +40,7 @@ module.exports = {
       // INSTANCE_ID: 'none',
       // LOGGING: undefined,
       // SAML_IDP_ENTITY_ID: undefined,
-      // IDP_CONFIG_FILE: './saml_idp.conf.js',
+      // IDP_CONFIG_FILE: './saml_idp.conf.cjs',
       // LOGIN_TIMEOUT: 60,
       // KEY_PASSPHRASE: undefined,
       // KEY_PASSPHRASE_FILE: undefined,

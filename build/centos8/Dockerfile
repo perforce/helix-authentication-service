@@ -35,7 +35,7 @@ COPY public public
 COPY routes routes
 COPY views views
 COPY example.env example.env
-COPY logging.config.js logging.config.js
+COPY logging.config.cjs logging.config.cjs
 COPY package-lock.json package-lock.json
 COPY package.json package.json
 COPY README.md README.md

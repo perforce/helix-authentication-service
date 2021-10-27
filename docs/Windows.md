@@ -49,7 +49,7 @@ The configuration of the authentication service is managed through environment v
 
 ```
 SVC_BASE_URI=https://has.example.com
-LOGGING='C:\\helix-auth-svc\\logging.config.js'
+LOGGING='C:\\helix-auth-svc\\logging.config.cjs'
 ```
 
 See the [Helix Authentication Service Administrator Guide](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html) configuration chapter for all of the available settings.

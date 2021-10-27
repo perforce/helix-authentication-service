@@ -56,7 +56,7 @@ cp -pr routes/* %{buildroot}%{installprefix}/routes
 cp -pr views/* %{buildroot}%{installprefix}/views
 
 cp example.env %{buildroot}%{installprefix}/example.env
-cp logging.config.js %{buildroot}%{installprefix}/logging.config.js
+cp logging.config.cjs %{buildroot}%{installprefix}/logging.config.cjs
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
 sed -e "s/\"2021.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
@@ -67,12 +67,12 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 
 %files
 %docdir %{installprefix}/docs
-%config(noreplace) %{installprefix}/logging.config.js
+%config(noreplace) %{installprefix}/logging.config.cjs
 %{installprefix}
 
 %post
 if [ ! -f "%{installprefix}/.env" ]; then
-    PRINT="print \"LOGGING=%{installprefix}/logging.config.js\""
+    PRINT="print \"LOGGING=%{installprefix}/logging.config.cjs\""
     awk "BEGIN {flg=0} /^${1}=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env
 fi
 

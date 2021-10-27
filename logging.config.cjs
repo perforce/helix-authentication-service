@@ -4,7 +4,7 @@
 // See https://www.perforce.com/manuals/helix-auth-svc/ for documentation on the
 // available settings, including configuration specific to the log transports.
 //
-export default {
+module.exports = {
   level: 'info',
   transport: 'file',
   file: {

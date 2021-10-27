@@ -857,19 +857,19 @@ function modify_env_config() {
         add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' ''
     fi
 
-    # Ensure the logging.config.js file is readable by all users to avoid
+    # Ensure the logging.config.cjs file is readable by all users to avoid
     # difficult to debug situations where the logging is not working and no
     # errors are displayed.
-    chmod 0644 logging.config.js
+    chmod 0644 logging.config.cjs
     # always enable logging for the time being
     if [[ -f 'bin/www.js' ]]; then
         # As a plain Node.js application, the logging require path is relative
         # to the bin/www.js script.
-        add_or_replace_var_in_env 'LOGGING' '../logging.config.js'
+        add_or_replace_var_in_env 'LOGGING' '../logging.config.cjs'
     else
         # As a single binary, a full path is required since any relative path
         # would be treated as internal to the binary archive.
-        add_or_replace_var_in_env 'LOGGING' "$(pwd)/logging.config.js"
+        add_or_replace_var_in_env 'LOGGING' "$(pwd)/logging.config.cjs"
     fi
 }
 

@@ -12,18 +12,18 @@ if (process.env.DEFAULT_PROTOCOL) {
 }
 env.SVC_BASE_URI = process.env.SVC_BASE_URI
 
-// Ensure the logging.config.js file is readable by all users to avoid difficult
+// Ensure the logging.config.cjs file is readable by all users to avoid difficult
 // to debug situations where the logging is not working and no errors are
 // displayed.
-fs.chmodSync('logging.config.js', 0o644)
+fs.chmodSync('logging.config.cjs', 0o644)
 if (fs.existsSync('bin/www.js')) {
   // As a plain Node.js application, the logging require path is relative to the
   // bin/www.js script.
-  env.LOGGING = '../logging.config.js'
+  env.LOGGING = '../logging.config.cjs'
 } else {
   // As a single binary, a full path is required since any relative path would
   // be treated as internal to the binary archive.
-  env.LOGGING = `${process.cwd()}/logging.config.js`
+  env.LOGGING = `${process.cwd()}/logging.config.cjs`
 }
 
 // either OIDC is defined or it is completely wiped

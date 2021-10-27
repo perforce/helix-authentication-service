@@ -21,7 +21,7 @@ INSTALLPREFIX=/opt/perforce/helix-auth-svc
 case "$1" in
     configure)
         if [ ! -f "${INSTALLPREFIX}/.env" ]; then
-            PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.js\""
+            PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
             awk "BEGIN {flg=0} /^${1}=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env > ${INSTALLPREFIX}/.env
         fi
 

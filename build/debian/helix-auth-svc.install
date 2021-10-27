@@ -1,5 +1,5 @@
 example.env         opt/perforce/helix-auth-svc
-logging.config.js   opt/perforce/helix-auth-svc
+logging.config.cjs  opt/perforce/helix-auth-svc
 package.json        opt/perforce/helix-auth-svc
 package-lock.json   opt/perforce/helix-auth-svc
 README.md           opt/perforce/helix-auth-svc

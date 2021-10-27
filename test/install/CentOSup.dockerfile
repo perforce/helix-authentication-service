@@ -52,7 +52,7 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
 RUN test -f helix-auth-svc/client-secret.txt && \
     grep -q 'client_secret' helix-auth-svc/client-secret.txt && \
     grep -q '"script": "./bin/www.js",' helix-auth-svc/ecosystem.config.cjs && \
-    grep -q '"LOGGING": "../logging.config.js",' helix-auth-svc/ecosystem.config.cjs && \
+    grep -q '"LOGGING": "../logging.config.cjs",' helix-auth-svc/ecosystem.config.cjs && \
     grep -q 'https://localhost:3000' helix-auth-svc/ecosystem.config.cjs && \
     grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.cjs
 
@@ -69,4 +69,4 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
 # verify appropriate single-binary configuration in the pm2 file
 RUN grep -q 'https://saml.idp/metadata' helix-auth-svc/ecosystem.config.cjs && \
     grep -q '"script": "./helix-auth-svc",' helix-auth-svc/ecosystem.config.cjs && \
-    grep -q '"LOGGING": "/home/charlie/helix-auth-svc/logging.config.js",' helix-auth-svc/ecosystem.config.cjs
+    grep -q '"LOGGING": "/home/charlie/helix-auth-svc/logging.config.cjs",' helix-auth-svc/ecosystem.config.cjs
