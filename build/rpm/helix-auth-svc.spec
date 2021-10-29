@@ -2,6 +2,8 @@
 %define p4change %(echo -n $ID_PATCH)
 %define hasversion %(echo -n "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}")
 %define installprefix /opt/perforce/helix-auth-svc
+# CentOS 8 cleverly tries to include what we already have.
+%define __requires_exclude /usr/bin/node
 
 Name:           helix-auth-svc
 Version:        %{p4release}
@@ -10,9 +12,6 @@ Summary:        Helix Authentication Service
 License:        BSD
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
-# Leaving the epoch off results in centos installing an older version of nodejs,
-# and for whatever reason, having the epoch forces yum to work correctly.
-Requires:       nodejs >= 2:14.15
 
 %description
 Authentication protocol (OIDC, SAML) integration service.
@@ -39,6 +38,7 @@ install -d %{buildroot}%{installprefix}/views
 
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
 cp -p bin/writeconf.cjs %{buildroot}%{installprefix}/bin/writeconf.cjs
+install -m 0755 bin/node %{buildroot}%{installprefix}/bin/node
 install -m 0755 bin/www.js %{buildroot}%{installprefix}/bin/www.js
 cp -pr certs/* %{buildroot}%{installprefix}/certs
 cp -p docs/Administrator-Guide.md %{buildroot}%{installprefix}/docs/Administrator-Guide.md
@@ -93,7 +93,7 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=node ./bin/www.js
+ExecStart=%{installprefix}/bin/node %{installprefix}/bin/www.js
 WorkingDirectory=%{installprefix}
 
 [Install]
@@ -138,7 +138,7 @@ Package installation complete!
 
 The Helix Authentication Service is now installed. To configure the service,
 edit the .env file in the directory shown below, and then start the service
-by invoking node %{installprefix}/bin/www.js
+by invoking './bin/node ./bin/www.js' from the directory shown below.
 
     %{installprefix}
 

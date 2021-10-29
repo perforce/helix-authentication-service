@@ -12,6 +12,10 @@ ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 
+# Disable the interesting feature of the CentOS docker image whereby they
+# quietly prevent all documentation from being installed via packages.
+RUN sed -i '/nodocs/d' /etc/yum.conf
+
 #
 # install build and packaging prerequisites
 #
@@ -46,12 +50,15 @@ COPY RELNOTES.txt RELNOTES.txt
 RUN npm -q ci
 RUN npx showdown makehtml -i README.md -o README.html --tables --completeHTMLDocument
 RUN node ./bin/copyLicenses.js
+RUN mkdir -p docs/licenses/nodejs && \
+    cp /usr/share/doc/nodejs-*/LICENSE docs/licenses/nodejs
 RUN rm -rf node_modules
 
 #
 # build only what is needed for deployment
 #
 RUN npm ci -q --only=production --no-optional
+RUN cp /usr/bin/node ./bin
 
 #
 # build the rpm package

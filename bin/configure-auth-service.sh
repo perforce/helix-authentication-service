@@ -982,6 +982,8 @@ EOT
 function main() {
     # move to the source directory before everything else
     cd "$( cd "$(dirname "$0")" ; pwd -P )/.."
+    # include our bin in case node can be found there
+    export PATH=$(pwd)/bin:${PATH}
     ensure_readiness
     set -e
     read_arguments "$@"

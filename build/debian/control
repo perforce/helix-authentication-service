@@ -9,7 +9,6 @@ Homepage: https://www.perforce.com/
 Package: helix-auth-svc
 Architecture: any
 Depends:
- nodejs (>= 14.15),
  ${misc:Depends}
 Description: Helix Authentication Service
  Authentication protocol (OIDC, SAML) integration service.
