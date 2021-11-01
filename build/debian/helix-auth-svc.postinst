@@ -22,7 +22,8 @@ case "$1" in
     configure)
         if [ ! -f "${INSTALLPREFIX}/.env" ]; then
             PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
-            awk "BEGIN {flg=0} /^${1}=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env > ${INSTALLPREFIX}/.env
+            # inject LOGGING if not already set; strip comments and blank lines
+            awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env > ${INSTALLPREFIX}/.env
         fi
 
         # If this fails, it means either systemd is not installed or it does not

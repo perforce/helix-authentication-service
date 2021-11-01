@@ -73,7 +73,8 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 %post
 if [ ! -f "%{installprefix}/.env" ]; then
     PRINT="print \"LOGGING=%{installprefix}/logging.config.cjs\""
-    awk "BEGIN {flg=0} /^${1}=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env
+    # inject LOGGING if not already set; strip comments and blank lines
+    awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env
 fi
 
 # If this fails, it means either systemd is not installed or it does not have
