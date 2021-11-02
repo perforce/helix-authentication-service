@@ -32,20 +32,6 @@
     "test": "mocha --recursive --delay --exit",
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
-  "pkg": {
-    "scripts": [
-      "bin/**/*.js",
-      "lib/**/*.js",
-      "routes/**/*.js"
-    ],
-    "assets": [
-      "lib/features/login/presentation/pages/*",
-      "node_modules/saml/node_modules/xml-encryption/lib/templates/*",
-      "node_modules/samlp/templates/**/*",
-      "public/**/*",
-      "views/*"
-    ]
-  },
   "dependencies": {
     "awilix": "^5.0.1",
     "connect-redis": "^6.0.0",
