@@ -45,4 +45,5 @@ systemctl status helix-auth | grep 'Active: active'
 # finally remove the package to make sure that does not fail horribly
 echo -e '\nRemoving helix-auth-svc package...\n'
 yum -y erase helix-auth-svc
+test ! -f /etc/systemd/system/helix-auth.service
 echo -e '\nTest completed successfully!\n'

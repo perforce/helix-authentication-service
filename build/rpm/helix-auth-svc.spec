@@ -154,11 +154,17 @@ For assistance, please contact support@perforce.com
 EOF
 fi
 
-%preun
-if [ -f /etc/systemd/system/helix-auth.service ]; then
-    systemctl stop helix-auth.service
-    rm -f /etc/systemd/system/helix-auth.service
-    systemctl daemon-reload
+%postun
+# RPM is interesting in that it installs the new version of the package over any
+# existing version, then removes the old version. As such, the preun and postun
+# hooks must account for this and very carefully remove files that were added
+# during the installation.
+if [ ! -f %{installprefix}/bin/www.js ]; then
+    if [ -f /etc/systemd/system/helix-auth.service ]; then
+        systemctl stop helix-auth.service
+        rm -f /etc/systemd/system/helix-auth.service
+        systemctl daemon-reload
+    fi
 fi
 
 %changelog
