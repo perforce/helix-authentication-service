@@ -157,7 +157,7 @@ This script will install the requirements for the Authentication Service.
 The operations involved are as follows:
 
   * Install OS packages for build dependencies
-  * Download and install Node.js 14 (https://nodejs.org)
+  * Download and install Node.js v16 (https://nodejs.org)
   * Download and build the service dependencies
 EOT
 
@@ -203,7 +203,7 @@ function prompt_to_proceed() {
 
 # If Node.js is installed, ensure that the version is supported.
 function check_nodejs() {
-    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v14\.'; then
+    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v1(4|6)\.'; then
         # check if Node.js came from the package 'nodejs' package or not
         UPGRADABLE=true
         if [ $PLATFORM == "debian" ]; then
@@ -217,12 +217,12 @@ function check_nodejs() {
         fi
         if ! $UPGRADABLE; then
             error 'Found a version of Node.js that cannot be upgraded automatically.'
-            error 'Please upgrade your Node.js installation to v14 before proceeding.'
+            error 'Please upgrade Node.js to v14 or v16 before proceeding.'
             exit 1
         fi
         if $INTERACTIVE; then
             echo ''
-            echo 'Found a version of Node.js that is not the required v14.'
+            echo 'Found a version of Node.js that is not the required v14 or v16.'
             echo 'Do you wish to upgrade the Node.js installation?'
             select yn in 'Yes' 'No'; do
                 case $yn in
@@ -231,13 +231,13 @@ function check_nodejs() {
                 esac
             done
         elif ! $UPGRADE_NODE; then
-            die 'Node.js v14 is required, please upgrade.'
+            die 'Node.js v14 or v16 is required, please upgrade.'
         fi
         # else the script will automatically install the required version
     fi
 }
 
-# Install or upgrade Node.js 14 using a script from nodesource.com
+# Install or upgrade Node.js using a script from nodesource.com
 function install_nodejs() {
     # Both an upgrade and a new installation work in the same manner.
     if $UPGRADE_NODE || ! which node >/dev/null 2>&1; then
@@ -255,11 +255,11 @@ function install_nodejs() {
             set -e  # now go back to exiting if a command returns non-zero
             sudo apt-get -q update
             sudo apt-get -q -y install build-essential curl git
-            # Run a shell script from the internet as root to get version 14
+            # Run a shell script from the internet as root to get Node.js
             # directly from the vendor. This includes npm as well.
             #
             # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+            curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
             sudo apt-get -q -y install nodejs
         elif [ $PLATFORM == "redhat" ]; then
             # In the upgrade scenario, need to remove the repository package first.
@@ -270,11 +270,11 @@ function install_nodejs() {
             fi
             # Add --skip-broken for Oracle Linux and its redundant packages
             sudo yum -q -y install --skip-broken curl gcc-c++ git make
-            # Run a shell script from the internet as root to get version 14
+            # Run a shell script from the internet as root to get Node.js
             # directly from the vendor. This includes npm as well.
             #
             # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
+            curl -sL https://rpm.nodesource.com/setup_16.x | sudo -E bash -
             sudo yum clean all
             sudo yum -q -y install nodejs
         fi

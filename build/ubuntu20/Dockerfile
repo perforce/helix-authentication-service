@@ -28,8 +28,8 @@ ENV LANG C.UTF-8
 #
 RUN apt-get update && \
     apt-get install -q -y build-essential curl debhelper devscripts git
-ADD https://deb.nodesource.com/setup_14.x setup_14.x
-RUN bash setup_14.x
+ADD https://deb.nodesource.com/setup_16.x setup_16.x
+RUN bash setup_16.x
 RUN apt-get -q -y install nodejs
 
 WORKDIR /build/${DIRNAME}

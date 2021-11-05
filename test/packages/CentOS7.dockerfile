@@ -9,17 +9,11 @@ FROM centos:7
 # post-install script have certain requirements, so install those now.
 RUN yum -q -y install sudo
 
-# install node.js via package from nodesource
-ADD https://rpm.nodesource.com/setup_14.x setup_14.x
-RUN bash setup_14.x
-RUN yum -y install nodejs
-RUN test -f /usr/bin/node
-
 WORKDIR /packages
 
 # copy the package tarball and test script
-COPY helix-auth-svc-centos7.tgz .
 COPY test/packages/centos7_pkg_exec.sh .
+COPY helix-auth-svc-centos7.tgz .
 
 # Start the init daemon (systemd) so that systemctl commands will run properly,
 # and thus our package installation will be successful.

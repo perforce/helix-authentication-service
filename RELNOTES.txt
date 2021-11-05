@@ -48,7 +48,7 @@ Supported Platforms
 
 Requirements
 
-    Node.js v14 (LTS)
+    Node.js v16 (LTS)
 
 
 Documentation

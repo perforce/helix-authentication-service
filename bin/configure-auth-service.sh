@@ -283,8 +283,8 @@ function ensure_readiness() {
     # Either there exists the single binary or the requirements for running the
     # application using Node.js must be in place.
     if [[ ! -e helix-auth-svc ]]; then
-        if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v14\.'; then
-            die 'Node.js v14 is required. Please run install.sh to install dependencies.'
+        if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6)\.'; then
+            die 'Node.js v14 or v16 is required. Please run install.sh to install dependencies.'
         fi
         if [[ ! -d node_modules ]]; then
             die 'Module dependencies are missing. Please run install.sh before proceeding.'

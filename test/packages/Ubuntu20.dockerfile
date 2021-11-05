@@ -13,17 +13,11 @@ ENV USER=root
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install sudo systemd systemd-sysv
 
-# install node.js via package from nodesource
-ADD https://deb.nodesource.com/setup_14.x setup_14.x
-RUN bash setup_14.x
-RUN apt-get -q -y install nodejs
-RUN test -f /usr/bin/node
-
 WORKDIR /packages
 
 # copy the package tarball and test script
-COPY helix-auth-svc-ubuntu20.tgz .
 COPY test/packages/ubuntu20_pkg_exec.sh .
+COPY helix-auth-svc-ubuntu20.tgz .
 
 # Start the init daemon (systemd) so that systemctl commands will run properly,
 # and thus our package installation will be successful.
