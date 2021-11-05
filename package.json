@@ -33,7 +33,7 @@
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {
-    "awilix": "^5.0.1",
+    "awilix": "^6.0.0",
     "connect-redis": "^6.0.0",
     "dotenv": "^10.0.0",
     "ejs": "^3.1.6",
@@ -48,7 +48,7 @@
     "minimatch": "^3.0.4",
     "morgan": "~1.10.0",
     "node-saml": "^4.0.0-beta.0",
-    "openid-client": "^4.9.1",
+    "openid-client": "^5.0.2",
     "p4api": "^3.4.0",
     "passport": "^0.5.0",
     "passport-http-bearer": "^1.0.1",
