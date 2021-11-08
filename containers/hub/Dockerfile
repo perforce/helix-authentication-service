@@ -27,6 +27,7 @@ COPY routes routes
 COPY views views
 RUN npm ci -q --only=prod --no-optional
 
+ENV CA_CERT_FILE certs/ca.crt
 ENV DEBUG "yes"
 ENV NODE_ENV development
 ENV PORT 3000

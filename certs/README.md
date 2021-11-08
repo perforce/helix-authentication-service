@@ -39,15 +39,15 @@ extension, and service) and produce differently formatted keys for testing.
 
 ```shell
 $ cd certs
-$ openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout ca.key -out ca.crt -subj "/CN=FakeAuthority"
-$ openssl req -nodes -days 3650 -newkey rsa:4096 -keyout client.key -out client.csr -subj "/CN=LoginExtension"
-$ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -set_serial 01 -days 3650
+$ openssl req -sha256 -x509 -nodes -days 3650 -newkey rsa:4096 -keyout ca.key -out ca.crt -subj "/CN=FakeAuthority"
+$ openssl req -sha256 -nodes -days 3650 -newkey rsa:4096 -keyout client.key -out client.csr -subj "/CN=LoginExtension"
+$ openssl x509 -sha256 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -set_serial 01 -days 3650
 #
 # remove the client.csr
 # move the client.crt and client.key to the login extension
 #
-$ openssl req -nodes -days 3650 -newkey rsa:4096 -keyout server.key -out server.csr -subj "/CN=authen.doc"
-$ openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -out server.crt -set_serial 01 -days 3650
+$ openssl req -sha256 -nodes -days 3650 -newkey rsa:4096 -keyout server.key -out server.csr -subj "/CN=authen.doc"
+$ openssl x509 -sha256 -req -in server.csr -CA ca.crt -CAkey ca.key -out server.crt -set_serial 01 -days 3650
 #
 # remove the server.csr
 #
