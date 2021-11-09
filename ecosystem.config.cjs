@@ -24,8 +24,8 @@ module.exports = {
       SAML_IDP_SSO_URL: 'http://localhost:7000/saml/sso',
       SAML_IDP_SLO_URL: 'http://localhost:7000/saml/slo',
       SAML_SP_ENTITY_ID: 'https://has.example.com',
-      SP_CERT_FILE: 'certs/server.crt',
-      SP_KEY_FILE: 'certs/server.key',
+      CERT_FILE: 'certs/server.crt',
+      KEY_FILE: 'certs/server.key',
       SVC_BASE_URI: 'https://localhost:3000'
       //
       // Below are additional optional settings and their default values.

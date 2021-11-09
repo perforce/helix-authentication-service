@@ -85,8 +85,8 @@ function readConfiguration () {
         env: {
           CA_CERT_FILE: 'certs/ca.crt',
           NODE_ENV: 'production',
-          SP_CERT_FILE: 'certs/server.crt',
-          SP_KEY_FILE: 'certs/server.key',
+          CERT_FILE: 'certs/server.crt',
+          KEY_FILE: 'certs/server.key',
           SVC_BASE_URI: 'https://localhost:3000'
         }
       }]

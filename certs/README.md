@@ -26,7 +26,7 @@ authentication service settings.
 
 An encrypted version of the `server.key` file, using the same passphrase as for
 the `server.p12` file described above. This file is useful for testing the
-`KEY_PASSPHRASE` setting with `SP_KEY_FILE` setting.
+`KEY_PASSPHRASE` setting with `KEY_FILE` setting.
 
 ## Generating the Certificates
 

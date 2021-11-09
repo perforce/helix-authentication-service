@@ -26,8 +26,8 @@ services:
       TRUST_PROXY: 'true'
       REDIS_URL: 'redis://redis.doc:6379'
       DEFAULT_PROTOCOL: "saml"
-      SP_CERT_FILE: "certs/server.crt"
-      SP_KEY_FILE: "certs/server.key"
+      CERT_FILE: "certs/server.crt"
+      KEY_FILE: "certs/server.key"
       SAML_IDP_METADATA_URL: "https://dev-531210.okta.com/app/exk7mes1d0uz9kWnq357/sso/saml/metadata"
       SAML_SP_ENTITY_ID: "urn:authen.doc:sp"
     networks:
@@ -48,8 +48,8 @@ services:
       TRUST_PROXY: 'true'
       REDIS_URL: 'redis://redis.doc:6379'
       DEFAULT_PROTOCOL: "saml"
-      SP_CERT_FILE: "certs/server.crt"
-      SP_KEY_FILE: "certs/server.key"
+      CERT_FILE: "certs/server.crt"
+      KEY_FILE: "certs/server.key"
       SAML_IDP_METADATA_URL: "https://dev-531210.okta.com/app/exk7mes1d0uz9kWnq357/sso/saml/metadata"
       SAML_SP_ENTITY_ID: "urn:authen.doc:sp"
     networks:

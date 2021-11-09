@@ -78,7 +78,7 @@ when deploying the service to production. To facilitate this, map the
 replacement certificates via a volume (for instance, using the `-v` option to
 `docker`, or the `volumes` setting in a Docker Compose file) and define the
 certificate-related environment variables (`CA_CERT_PATH`, `IDP_CERT_FILE`,
-`SP_CERT_FILE`, and `SP_KEY_FILE`) to reference those files.
+`CERT_FILE`, and `KEY_FILE`) to reference those files.
 
 ### Swarm support
 
