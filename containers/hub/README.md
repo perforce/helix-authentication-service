@@ -29,11 +29,11 @@ The `.env` file referenced in the above command would look something like this:
 
 ```shell
 NODE_ENV=development
-DEBUG="1"
-SVC_BASE_URI="https://192.168.24.20:3000"
-DEFAULT_PROTOCOL="saml"
-SAML_IDP_METADATA_URL="https://dev-123456.okta.com/app/abc123xyz456/sso/saml/metadata"
-SAML_SP_ENTITY_ID="urn:example:sp"
+DEBUG=true
+SVC_BASE_URI=https://192.168.24.20:3000
+DEFAULT_PROTOCOL=saml
+SAML_IDP_METADATA_URL=https://dev-123456.okta.com/app/abc123xyz456/sso/saml/metadata
+SAML_SP_ENTITY_ID=urn:example:sp
 ```
 
 If you prefer Docker Compose, then create a `docker-compose.yml` file that might
