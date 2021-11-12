@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 # $ docker-compose -f test/install/docker-compose.yml up --build -d ubuntu_18_install_test
 # $ docker exec ubuntu_18_install_test su charlie /install_sh/test_install_config.sh
 # $ docker stop ubuntu_18_install_test
+# $ docker rm ubuntu_18_install_test
 #
 
 # The docker base images are generally minimal, and our install and configure

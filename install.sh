@@ -6,6 +6,8 @@
 #
 INTERACTIVE=true
 MONOCHROME=false
+CREATE_USER=true
+HOMEDIR=/opt/perforce
 UPGRADE_NODE=false
 INSTALL_PM2=false
 
@@ -45,6 +47,10 @@ Description:
     Install the authentication service and its dependencies, as well as
     create and start a systemd service unit to manage the service.
 
+    --no-create-user
+        Do _not_ create the perforce user and group that will own the
+        systemd service.
+
     --pm2
         Install and use the pm2 process manager instead of systemd.
 
@@ -72,6 +78,10 @@ function read_arguments() {
         case "$1" in
         -m)
             MONOCHROME=true
+            shift
+            ;;
+        --no-create-user)
+            CREATE_USER=false
             shift
             ;;
         --pm2)
@@ -285,9 +295,41 @@ function install_nodejs() {
     npm version >/dev/null 2>&1
 }
 
+# Create the perforce user and group, if permitted, and as needed.
+function create_user_group() {
+    # create perforce group as needed
+    if ! getent group perforce >/dev/null; then
+        sudo groupadd --system perforce
+    fi
+
+    # create perforce user as needed
+    if ! getent passwd perforce >/dev/null; then
+        sudo useradd --system --comment 'Perforce Admin' --shell /bin/bash \
+            --gid perforce --home-dir "$HOMEDIR" perforce
+    fi
+
+    # create home directory and set ownership as needed
+    [ ! -d "$HOMEDIR" ] && sudo mkdir -p "$HOMEDIR"
+    sudo chown -R perforce:perforce "$HOMEDIR"
+
+    # ensure perforce user can write to the installation path
+    INSTALL_PREFIX=$(pwd)
+    sudo chown -R perforce:perforce "$INSTALL_PREFIX"
+}
+
 # Create the systemd service unit, enable, and start.
 function install_service_unit() {
     INSTALL_PREFIX=$(pwd)
+    USER_GROUP=''
+    if $CREATE_USER; then
+        # read exits with 1 because of course
+        set +e
+        read -d '' USER_GROUP << EOT
+User=perforce
+Group=perforce
+EOT
+        set -e
+    fi
     sudo tee /etc/systemd/system/helix-auth.service >/dev/null <<__SERVICE_UNIT__
 [Unit]
 Description=Helix Authentication Service
@@ -295,6 +337,7 @@ After=network.target
 
 [Service]
 Type=simple
+${USER_GROUP}
 Restart=always
 ExecStart=${INSTALL_PREFIX}/bin/www.js
 WorkingDirectory=${INSTALL_PREFIX}
@@ -386,6 +429,9 @@ function main() {
     if $INSTALL_PM2; then
         install_pm2
     else
+        if $CREATE_USER; then
+            create_user_group
+        fi
         install_service_unit
     fi
     print_summary

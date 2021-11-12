@@ -3,6 +3,7 @@ FROM centos:8
 # $ docker-compose -f test/install/docker-compose.yml up --build -d centos_8_install_test
 # $ docker exec centos_8_install_test su charlie /install_sh/test_install_config.sh
 # $ docker stop centos_8_install_test
+# $ docker rm centos_8_install_test
 #
 
 # The docker base images are generally minimal, and our install and configure

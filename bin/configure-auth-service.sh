@@ -888,7 +888,7 @@ function modify_config() {
         # make the OIDC_CLIENT_SECRET_FILE file readable only by current user
         echo "${OIDC_CLIENT_SECRET}" > ${OIDC_CLIENT_SECRET_FILE}
         chmod 600 ${OIDC_CLIENT_SECRET_FILE}
-        chown ${SUDO_USER:-${USER}} ${OIDC_CLIENT_SECRET_FILE}
+        chown ${USER} ${OIDC_CLIENT_SECRET_FILE}
     fi
     if [[ "${CONFIG_FILE_NAME}" == ".env" ]]; then
         modify_env_config
@@ -900,7 +900,7 @@ function modify_config() {
     # ensure log file exists and is writable by the sudo user
     if [[ ! -f auth-svc.log ]]; then
         touch auth-svc.log
-        chown ${SUDO_USER:-${USER}} auth-svc.log
+        chown ${USER} auth-svc.log
     fi
 }
 

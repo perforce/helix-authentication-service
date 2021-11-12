@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 # postinst script for helix-auth-svc
 #
 # see: dh_installdeb(1)
 
 set -e
 INSTALLPREFIX=/opt/perforce/helix-auth-svc
+HOMEDIR=/opt/perforce
 
 # summary of how this script can be called:
 #        * <postinst> `configure' <most-recently-configured-version>
@@ -18,8 +19,29 @@ INSTALLPREFIX=/opt/perforce/helix-auth-svc
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+function create_user_group() {
+    # create perforce group as needed
+    if ! getent group perforce >/dev/null; then
+        groupadd --system perforce
+    fi
+
+    # create perforce user as needed
+    if ! getent passwd perforce >/dev/null; then
+        useradd --system --comment 'Perforce Admin' --shell /bin/bash \
+                --gid perforce --home-dir "$HOMEDIR" perforce
+    fi
+
+    # create home directory and set ownership as needed
+    [ ! -d "$HOMEDIR" ] && mkdir -p "$HOMEDIR"
+    chown -R perforce:perforce "$HOMEDIR"
+
+    # ensure perforce user can write to the installation path
+    chown -R perforce:perforce "$INSTALLPREFIX"
+}
+
 case "$1" in
     configure)
+        create_user_group
         if [ ! -f "${INSTALLPREFIX}/.env" ]; then
             PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
             # inject LOGGING if not already set; strip comments and blank lines
@@ -42,6 +64,8 @@ After=network.target
 
 [Service]
 Type=simple
+User=perforce
+Group=perforce
 Restart=always
 ExecStart=${INSTALLPREFIX}/bin/node ${INSTALLPREFIX}/bin/www.js
 WorkingDirectory=${INSTALLPREFIX}

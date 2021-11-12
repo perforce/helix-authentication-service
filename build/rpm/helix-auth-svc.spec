@@ -12,9 +12,10 @@ Summary:        Helix Authentication Service
 License:        BSD
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
+PreReq:         shadow-utils
 
 %description
-Authentication protocol (OIDC, SAML) integration service.
+Authentication integration and user provisioning service.
 
 # empty files that rpm creates and then complains about
 %global debug_package %{nil}
@@ -71,6 +72,26 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 %{installprefix}
 
 %post
+HOMEDIR=/opt/perforce
+
+# create perforce group as needed
+if ! getent group perforce >/dev/null; then
+    groupadd --system perforce
+fi
+
+# create perforce user as needed
+if ! getent passwd perforce >/dev/null; then
+    useradd --system --comment 'Perforce Admin' --shell /bin/bash \
+            --gid perforce --home-dir "$HOMEDIR" perforce
+fi
+
+# create home directory and set ownership as needed
+[ ! -d "$HOMEDIR" ] && mkdir -p "$HOMEDIR"
+chown -R perforce:perforce "$HOMEDIR"
+
+# ensure perforce user can write to the installation path
+chown -R perforce:perforce "%{installprefix}"
+
 if [ ! -f "%{installprefix}/.env" ]; then
     PRINT="print \"LOGGING=%{installprefix}/logging.config.cjs\""
     # inject LOGGING if not already set; strip comments and blank lines
@@ -93,6 +114,8 @@ After=network.target
 
 [Service]
 Type=simple
+User=perforce
+Group=perforce
 Restart=always
 ExecStart=%{installprefix}/bin/node %{installprefix}/bin/www.js
 WorkingDirectory=%{installprefix}

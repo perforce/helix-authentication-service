@@ -3,6 +3,7 @@ Section: misc
 Priority: optional
 Maintainer: Perforce Software, Inc. <support+packaging@perforce.com>
 Build-Depends: debhelper (>= 8.0)
+Pre-Depends: adduser
 Standards-Version: 4.1.3
 Homepage: https://www.perforce.com/
 
@@ -11,4 +12,4 @@ Architecture: any
 Depends:
  ${misc:Depends}
 Description: Helix Authentication Service
- Authentication protocol (OIDC, SAML) integration service.
+ Authentication integration and user provisioning service.

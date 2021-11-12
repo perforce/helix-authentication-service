@@ -22,6 +22,10 @@ dpkg-query -s helix-auth-svc | grep -q 'install ok installed'
 # ensure the package.json has the expected version string
 grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
 
+# ensure 'perforce' user and group are created
+getent group perforce
+getent passwd perforce
+
 # ensure certain files are present
 echo -e '\nTesting for presence of certain files...\n'
 test -f /opt/perforce/helix-auth-svc/README.html

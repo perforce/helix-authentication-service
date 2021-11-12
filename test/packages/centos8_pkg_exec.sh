@@ -29,6 +29,10 @@ yum -y install ./yum/rhel/8/x86_64/helix-auth-svc-*.rpm
 # ensure the package is fully installed
 rpm -qa helix-auth-svc | grep -q helix-auth-svc
 
+# ensure 'perforce' user and group are created
+getent group perforce
+getent passwd perforce
+
 # ensure the package.json has the expected version string
 grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
 

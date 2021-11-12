@@ -19,6 +19,10 @@ apt install ./apt/ubuntu/focal/incoming/helix-auth-svc_*.deb
 # ensure the package is fully installed
 dpkg-query -s helix-auth-svc | grep -q 'install ok installed'
 
+# ensure 'perforce' user and group are created
+getent group perforce
+getent passwd perforce
+
 # ensure the package.json has the expected version string
 grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
 
