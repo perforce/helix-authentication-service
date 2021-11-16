@@ -13,6 +13,15 @@ if ! sudo systemctl list-units >/dev/null 2>&1; then
     exit 1
 fi
 
+# Turn off dnf cache maintenance that fires at exactly the wrong time and causes
+# our tests to fail (c.f. https://bugzilla.redhat.com/show_bug.cgi?id=1814337).
+if systemctl status dnf-makecache.timer >/dev/null 2>&1; then
+    echo -e '\nDisabling the DNF cache timer...\n'
+    sudo systemctl disable dnf-makecache.timer
+    sudo systemctl stop dnf-makecache.timer
+    sleep 60
+fi
+
 # run the install script non-interactively
 ./helix-auth-svc/install.sh -n
 
