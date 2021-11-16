@@ -348,7 +348,7 @@ __SERVICE_UNIT__
     # create an example .env file if missing
     if ! test -f .env; then
         # strip comments and blank lines
-        awk "/^$/{next} /^#/{next} {print}" example.env > .env
+        awk "/^$/{next} /^#/{next} {print}" example.env | sudo tee .env >/dev/null
     fi
     if which systemctl >/dev/null 2>&1; then
         sudo systemctl daemon-reload
