@@ -36,9 +36,9 @@ incoming requests can go to any of the configured HAS instances.
 
 ## Testing
 
-1. Start all docker containers: `docker-compose up --build -d`
+1. Start all docker containers: `docker compose up --build -d`
 1. Stop one of the HAS instances, either `auth-svc1.doc` or `auth-svc2.doc`
-    * e.g. `docker-compose stop auth-svc1.doc`
+    * e.g. `docker compose stop auth-svc1.doc`
 1. Open https://auth-svc.doc/requests/new/foobar in a web browser
     * Firefox is very easy to use for this purpose
 1. Click or copy/paste the `loginUrl` displayed in the browser
@@ -47,9 +47,9 @@ incoming requests can go to any of the configured HAS instances.
       clear the browser's cached data and try again. With Firefox, usually
       exiting and launching again will be sufficient.
 1. Stop the _other_ HAS instance that served the initial request
-    * e.g. `docker-compose stop auth-svc2.doc`
+    * e.g. `docker compose stop auth-svc2.doc`
 1. Start the _first_ HAS instance that was stopped before the login began
-    * e.g. `docker-compose start auth-svc1.doc`
+    * e.g. `docker compose start auth-svc1.doc`
 1. In the browser, complete the identity provider login for the user
 
 If you see the HAS login success page, then it worked.

@@ -20,7 +20,7 @@ the `containers` directory for details.
 Start by building the containers:
 
 ```shell
-$ docker-compose up --build -d
+$ docker compose up --build -d
 ```
 
 Then use `curl` to check that the service is responding correctly:

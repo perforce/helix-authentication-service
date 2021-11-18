@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 #
-# $ docker-compose -f test/packages/docker-compose.yml up --build -d ubuntu_20_test
+# $ docker compose -f test/packages/docker-compose.yml up --build -d ubuntu_20_test
 # $ docker exec ubuntu_20_test /packages/ubuntu20_pkg_exec.sh
 # $ docker stop ubuntu_20_test
 # $ docker rm ubuntu_20_test

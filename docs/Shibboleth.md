@@ -16,7 +16,7 @@ authentication service.
 
 To use the Docker containers defined in this project, you will need a
 [Docker](https://www.docker.com) installation, which should include Docker
-Compose (`docker-compose`) to build and manage the containers. Host systems that
+Compose (`docker compose`) to build and manage the containers. Host systems that
 are not Linux will likely need Docker Desktop as well.
 
 ## Initial Setup
@@ -108,15 +108,15 @@ Edit the `shibboleth-idp/conf/saml-nameid.xml` file as follows:
 ## Build and Start
 
 ```shell
-$ docker-compose build
-$ docker-compose up -d
+$ docker compose build
+$ docker compose up -d
 ```
 
 ### Testing Shibboleth
 
 The SAML IdP metadata URL will be: https://shibboleth.doc:4443/idp/shibboleth
 
-Use `docker-compose logs shibboleth.doc` to see the logs of the Shibboleth
+Use `docker compose logs shibboleth.doc` to see the logs of the Shibboleth
 server. It takes around 10 seconds on a fast machine to complete its startup. If
 there are any Java exceptions in the log, then there is trouble. Otherwise, it
 is working.

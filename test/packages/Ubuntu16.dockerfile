@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 #
-# $ docker-compose -f test/packages/docker-compose.yml up --build -d ubuntu_16_test
+# $ docker compose -f test/packages/docker-compose.yml up --build -d ubuntu_16_test
 # $ docker exec ubuntu_16_test /packages/ubuntu16_pkg_exec.sh
 # $ docker stop ubuntu_16_test
 # $ docker rm ubuntu_16_test

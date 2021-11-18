@@ -29,7 +29,7 @@ Refer to the `README.md` file in the `containers` directory for instructions.
 The containers for the extension for integrating the authentication service with
 Helix Core are in a separate
 [repository](https://github.com/perforce/helix-authentication-extension) and can
-be installed using `docker-compose` as described in the documentation for that
+be installed using `docker compose` as described in the documentation for that
 project.
 
 ## Automated Testing
@@ -43,8 +43,8 @@ system. Additionally, the [Docker](#docker) containers defined in
 `docker-compose.yml` must be built and running.
 
 ```shell
-$ docker-compose build
-$ docker-compose up -d
+$ docker compose build
+$ docker compose up -d
 $ npm test
 ```
 

@@ -1,6 +1,6 @@
 FROM centos:7
 #
-# $ docker-compose -f test/install/docker-compose.yml up --build -d centos_7_install_test
+# $ docker compose -f test/install/docker-compose.yml up --build -d centos_7_install_test
 # $ docker exec centos_7_install_test su charlie /install_sh/test_install_config.sh
 # $ docker stop centos_7_install_test
 # $ docker rm centos_7_install_test

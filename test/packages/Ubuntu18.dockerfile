@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 #
-# $ docker-compose -f test/packages/docker-compose.yml up --build -d ubuntu_18_test
+# $ docker compose -f test/packages/docker-compose.yml up --build -d ubuntu_18_test
 # $ docker exec ubuntu_18_test /packages/ubuntu18_pkg_exec.sh
 # $ docker stop ubuntu_18_test
 # $ docker rm ubuntu_18_test

@@ -41,5 +41,5 @@ An alternative to using dnsmasq would be to hard-code the names in the `/etc/hos
 Build and start the containers (from the parent directory) like so:
 
 ```shell
-$ docker-compose up --build -d
+$ docker compose up --build -d
 ```

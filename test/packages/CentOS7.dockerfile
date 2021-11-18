@@ -1,6 +1,6 @@
 FROM centos:7
 #
-# $ docker-compose -f test/packages/docker-compose.yml up --build -d centos_7_test
+# $ docker compose -f test/packages/docker-compose.yml up --build -d centos_7_test
 # $ docker exec centos_7_test /packages/centos7_pkg_exec.sh
 # $ docker stop centos_7_test
 # $ docker rm centos_7_test

@@ -68,7 +68,7 @@ Note that VPN software such as Cisco AnyConnect will block any attempts to use a
 Build and start the containers (from the parent directory) like so:
 
 ```shell
-$ docker-compose up --build -d
+$ docker compose up --build -d
 ```
 
 To test authentication, open https://authen.doc/requests/new/foobar in a browser and copy the `loginUrl` value into the browser location bar. If using Firefox, you can click on the `loginUrl` directly. Either way, opening the login URL will direct the browser to the IdP of the default protocol (`saml` in the default docker configuration).
@@ -99,5 +99,5 @@ As an example, changing the `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `OIDC_IS
 Note that after changing settings in the docker containers, you must rebuild and start them:
 
 ```shell
-$ docker-compose up --build -d
+$ docker compose up --build -d
 ```
