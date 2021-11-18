@@ -390,26 +390,53 @@ function install_pm2() {
 
 # Print a summary of what was done and any next steps.
 function print_summary() {
-    CONFIG_FILE='.env'
-    if $INSTALL_PM2; then
-        CONFIG_FILE='ecosystem.config.cjs'
-    fi
     highlight_on
-    cat <<EOT
+    if $INSTALL_PM2; then
+        cat <<EOT
 
 ===============================================================================
 Automated install complete! Now a few final bits to do manually.
 ===============================================================================
 
-To configure the service on this machine, edit the ${CONFIG_FILE} file,
-setting the OIDC and/or SAML settings according to your identity provider.
-The configure-auth-service.sh script may be helpful for this purpose.
+The Helix Authentication Service is now running via the pm2 process manager.
+Use the command 'pm2 status' to get the status of the service.
 
-$ ./bin/configure-auth-service.sh --help
+To configure the service, edit the file shown below, and then restart the
+service: pm2 reload ${INSTALLPREFIX}/ecosystem.config.cjs
+
+    ${INSTALLPREFIX}/ecosystem.config.cjs
+
+The configure-auth-service.sh script can be used to make changes to the
+configuration in both an interactive and automated fashion.
+
+    ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
 
 For assistance, please contact support@perforce.com
-
 EOT
+    else
+        cat <<EOT
+
+===============================================================================
+Automated install complete! Now a few final bits to do manually.
+===============================================================================
+
+The Helix Authentication Service is now running via systemd using the service
+name 'helix-auth'. Use the command 'sudo systemctl status helix-auth' to get
+the status of the service.
+
+To configure the service, edit the file shown below, and then restart the
+service: sudo systemctl restart helix-auth
+
+    ${INSTALLPREFIX}/.env
+
+The configure-auth-service.sh script can be used to make changes to the
+configuration in both an interactive and automated fashion.
+
+    ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
+
+For assistance, please contact support@perforce.com
+EOT
+    fi
     highlight_off
 }
 
