@@ -8,8 +8,9 @@ INTERACTIVE=true
 MONOCHROME=false
 SVC_RESTARTED=false
 DEBUG=false
-PLATFORM=''
 SVC_BASE_URI=''
+CONFIGURE_AUTH=true
+CONFIGURE_SCIM=true
 declare -A PROTOCOLS=()
 DEFAULT_PROTOCOL=''
 SAML_IDP_METADATA_URL=''
@@ -19,6 +20,14 @@ OIDC_ISSUER_URI=''
 OIDC_CLIENT_ID=''
 OIDC_CLIENT_SECRET=''
 OIDC_CLIENT_SECRET_FILE='client-secret.txt'
+FOUND_P4=true
+BEARER_TOKEN=''
+BEARER_BASE64=''
+P4PORT=''
+P4USER=''
+P4PASSWD=''
+P4D_MIN_CHANGE='1797576'
+P4D_MIN_VERSION='2019.1'
 CONFIG_FILE_NAME='.env'
 
 # Print arguments to STDERR and exit.
@@ -58,6 +67,12 @@ function error() {
     $MONOCHROME && echo -e "$1" >&2 || true
 }
 
+# Print the first argument in yellow text on STDERR.
+function warning() {
+    $MONOCHROME || echo -e "\033[33m$1\033[0m" >&2
+    $MONOCHROME && echo -e "$1" >&2 || true
+}
+
 # Print the first argument in blue text on STDERR.
 function debug() {
     $DEBUG || return 0
@@ -82,7 +97,7 @@ function prompt_for() {
         local input=''
         if [[ -n "$default" ]]; then
             read -e -p "$prompt [$default]: " input
-            if [[ ! -n "$input" ]]; then
+            if [[ -z "$input" ]]; then
                 input=$default
             fi
         else
@@ -96,19 +111,16 @@ function prompt_for() {
     return 0
 }
 
-# Prompt the user for a password by showing a prompt string and not echoing
-# input to the terminal. Optionally calls a validation function to check if the
-# response is OK.
-#
-# prompt_for <VAR> <prompt> <default> [<validationfunc>]
-function prompt_for_secret() {
+# Prompt the user for a password that will be verified soon after, and thus only
+# one prompt is issued.
+function prompt_for_password() {
     local var="$1"
     local prompt="$2"
     local default="$3"
     local check_func=true
 
     [[ -n "$4" ]] && check_func=$4
-    [[ "$default" =~ [[:space:]]+ ]] && default=''
+    [[ "$default" =~ ^[[:space:]]+$ ]] && default=''
 
     while true; do
         local pw=''
@@ -116,7 +128,7 @@ function prompt_for_secret() {
         if [[ -n "$default" ]]; then
             # conceal the length of the incoming password
             read -s -e -p "$prompt [************]: " pw
-            if [[ ! -n "$pw" ]]; then
+            if [[ -z "$pw" ]]; then
                 pw=$default
             fi
         else
@@ -125,6 +137,43 @@ function prompt_for_secret() {
         echo ''
         if $check_func "$pw"; then
             if [[ -n "$default" ]]; then
+                break
+            fi
+            # No need to prompt again, the credentials will be checked
+            # immediately rather than after receiving all user input.
+            eval "$var=\"$pw\""
+            break
+        fi
+    done
+    return 0
+}
+
+# Prompt the user for a secret value two times and compare values, ensuring they
+# match, as the value will not be verified by this script.
+function prompt_for_secret() {
+    local var="$1"
+    local prompt="$2"
+    local default="$3"
+    local check_func=true
+
+    [[ -n "$4" ]] && check_func=$4
+    [[ "$default" =~ ^[[:space:]]+$ ]] && default=''
+
+    while true; do
+        local pw=''
+        local pw2=''
+        if [[ -n "$default" ]]; then
+            # conceal the length of the incoming password
+            read -s -e -p "$prompt [************]: " pw
+            if [[ -z "$pw" ]]; then
+                pw=$default
+            fi
+        else
+            read -s -e -p "$prompt: " pw
+        fi
+        echo ''
+        if $check_func "$pw"; then
+            if [[ -n "$default" && "$pw" == "$default" ]]; then
                 break
             fi
             read -s -e -p "Re-enter new secret value: " pw2
@@ -162,8 +211,21 @@ Description:
     -n
         Non-interactive mode; exits immediately if prompting is required.
 
+
+    --bearer-token <token>
+        HTTP Bearer token for authentication of SCIM requests.
+
+    --p4port <p4port>
+        The P4PORT for the Helix Core server for user provisioning.
+
+    --super <username>
+        Helix Core super user's username for user provisioning.
+
+    --superpassword <password>
+        Helix Core super user's password for user provisioning.
+
     --base-url <base-url>
-        HTTP/S address of the authentication service.
+        HTTP/S address of this service.
 
     --oidc-issuer-uri <issuer-uri>
         Issuer URI for the OpenID Connect identity provider.
@@ -181,7 +243,7 @@ Description:
         URL for the SAML identity provider SSO endpoint.
 
     --saml-sp-entityid <entity-id>
-        SAML entity identifier for the authentication service.
+        SAML entity identifier for this service.
 
     --default-protocol <protocol>
         Set the default protocol to be used when a client application does
@@ -256,39 +318,68 @@ function validate_protocol() {
     return 1
 }
 
+# Validate first argument represents a valid P4PORT value.
+function validate_p4port() {
+    local PORT=$1
+    local PROTOS='tcp tcp4 tcp6 tcp46 tcp64 ssl ssl4 ssl6 ssl46 ssl64'
+    local PROTO=''
+    local HOST=''
+    local PNUM=''
+
+    # extract the port number, if any
+    local BITS=(${PORT//:/ })
+    local COUNT=${#BITS[@]}
+    if [[ $COUNT -eq 1 ]]; then
+        PNUM=${BITS[0]}
+    elif [[ $COUNT -eq 2 ]]; then
+        [[ $PROTOS =~ ${BITS[0]} ]] && PROTO=${BITS[0]} || HOST=${BITS[0]}
+        PNUM=${BITS[1]}
+    elif [[ $COUNT -eq 3 ]]; then
+        PROTO=${BITS[0]}
+        HOST=${BITS[1]}
+        PNUM=${BITS[2]}
+    elif [[ $COUNT -gt 3 ]]; then
+        error "Too many parts in P4PORT: $PORT"
+        return 1
+    fi
+
+    if [[ -n "$PROTO" ]] && [[ ! $PROTOS =~ $PROTO ]]; then
+        error "Invalid Helix protocol: $PROTO"
+        return 1
+    fi
+
+    # check port range (port >= 1024 && port <= 65535)
+    # see http://www.iana.org/assignments/port-numbers for details
+    local NUMRE='^[0-9]+$'
+    if [[ ! $PNUM =~ $NUMRE ]] || [ $PNUM -lt 1024 -o $PNUM -gt 65535 ]; then
+        error "Port number out of range (1024-65535): $PNUM"
+        return 1
+    fi
+    return 0
+}
+
+# Validate first argument represents a valid Perforce username.
+function validate_p4user() {
+    local USERRE='^[a-zA-Z]+'
+    if [[ -z "$1" ]] || [[ ! "$1" =~ $USERRE ]]; then
+        error 'Username must start with a letter.'
+        return 1
+    fi
+    return 0
+}
+
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
-    if [[ -e '/etc/redhat-release' ]]; then
-        PLATFORM=redhat
-    elif [[ -e '/etc/debian_version' ]]; then
-        PLATFORM=debian
-    elif [ -e "/etc/os-release" ]; then
-        # read os-release to find out what this system is like
-        ID_LIKE=$(awk -F= '/ID_LIKE/ {print $2}' /etc/os-release | tr -d '"')
-        read -r -a LIKES <<< "$ID_LIKE"
-        for like in "${LIKES[@]}"; do
-            if [[ "$like" == 'centos' || "$like" == 'rhel' || "$like" == 'fedora' ]]; then
-                PLATFORM=redhat
-                break
-            fi
-            if [[ "$like" == 'debian' ]]; then
-                PLATFORM=debian
-                break
-            fi
-        done
+    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6)\.'; then
+        die 'Node.js v14 or v16 is required. Please run install.sh to install dependencies.'
     fi
-    if [ -z "$PLATFORM" ]; then
-        die 'Could not determine OS distribution.'
+    if [[ ! -d node_modules ]]; then
+        die 'Module dependencies are missing. Please run install.sh before proceeding.'
     fi
-    # Either there exists the single binary or the requirements for running the
-    # application using Node.js must be in place.
-    if [[ ! -e helix-auth-svc ]]; then
-        if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6)\.'; then
-            die 'Node.js v14 or v16 is required. Please run install.sh to install dependencies.'
-        fi
-        if [[ ! -d node_modules ]]; then
-            die 'Module dependencies are missing. Please run install.sh before proceeding.'
-        fi
+    if ! which p4 >/dev/null 2>&1; then
+        FOUND_P4=false
+        CONFIGURE_SCIM=false
+        warning 'Perforce client "p4" is required for user provisioning.'
     fi
 }
 
@@ -302,9 +393,21 @@ function ensure_pm2_readiness() {
     fi
 }
 
+# Source selected P4 settings by use of the p4 set command.
+function source_enviro() {
+    if $FOUND_P4; then
+        if [ -n "$(p4 set -q P4PORT)" ]; then
+            eval "$(p4 set -q P4PORT)"
+        fi
+        if [ -n "$(p4 set -q P4USER)" ]; then
+            eval "$(p4 set -q P4USER)"
+        fi
+    fi
+}
+
 function read_arguments() {
     # build up the list of arguments in pieces since there are so many
-    local ARGS=(base-url:)
+    local ARGS=(bearer-token: p4port: super: superpassword: base-url:)
     ARGS+=(oidc-issuer-uri: oidc-client-id: oidc-client-secret:)
     ARGS+=(saml-idp-sso-url: saml-sp-entityid: saml-idp-metadata-url:)
     ARGS+=(default-protocol: pm2 debug help)
@@ -335,6 +438,22 @@ function read_arguments() {
                 ;;
             --base-url)
                 SVC_BASE_URI=$2
+                shift 2
+                ;;
+            --bearer-token)
+                BEARER_TOKEN=$2
+                shift 2
+                ;;
+            --p4port)
+                P4PORT=$2
+                shift 2
+                ;;
+            --super)
+                P4USER=$2
+                shift 2
+                ;;
+            --superpassword)
+                P4PASSWD=$2
                 shift 2
                 ;;
             --oidc-issuer-uri)
@@ -404,10 +523,11 @@ Summary of arguments passed:
 Service base URL               [${SVC_BASE_URI:-(not specified)}]
 OIDC Issuer URI                [${OIDC_ISSUER_URI:-(not specified)}]
 OIDC Client ID                 [${OIDC_CLIENT_ID:-(not specified)}]
-OIDC Client Secret             [(secret not shown)]
 SAML IdP Metadata URL          [${SAML_IDP_METADATA_URL:-(not specified)}]
 SAML IdP SSO URL               [${SAML_IDP_SSO_URL:-(not specified)}]
 SAML SP Entity ID              [${SAML_SP_ENTITY_ID:-(not specified)}]
+Helix server P4PORT            [${P4PORT:-(not specified)}]
+Helix super-user               [${P4USER:-(not specified)}]
 
 For a list of other options, type Ctrl-C to exit, and run this script with
 the --help option.
@@ -434,16 +554,50 @@ function prompt_for_svc_base_uri() {
     cat <<EOT
 
 
-The URL of the authentication service, which must be visible to end users.
-It must match the application settings defined in the IdP configuration.
-The URL must begin with either http: or https:, and maybe include a port
-number. If the URL contains a port number, then the service will listen for
-connections on that port.
+The URL of this service, which must be visible to end users. It must match
+the application settings defined in the IdP configuration. The URL must
+begin with either http: or https:, and maybe include a port number. If the
+URL contains a port number, then the service will listen for connections
+on that port.
 
 Example: https://has.example.com:3000/
 
 EOT
-    prompt_for SVC_BASE_URI 'Enter the URL for the authentication service' "${SVC_BASE_URI}" validate_url
+    prompt_for SVC_BASE_URI 'Enter the URL for this service' "${SVC_BASE_URI}" validate_url
+}
+
+# Prompt for which features are to be configured.
+function prompt_for_auth_scim() {
+    cat <<EOT
+
+
+The service can support authentication integration or user provisioning,
+as well as both features simultaneously. Please choose which features you
+wish to configure from the options below.
+
+EOT
+    select feature in 'Authentication' 'Provisioning' 'Both'; do
+        case $feature in
+            Authentication)
+                CONFIGURE_AUTH=true
+                CONFIGURE_SCIM=false
+                break
+                ;;
+            Provisioning)
+                CONFIGURE_AUTH=false
+                CONFIGURE_SCIM=true
+                break
+                ;;
+            Both)
+                CONFIGURE_AUTH=true
+                CONFIGURE_SCIM=true
+                break
+                ;;
+            *)
+                echo 'Please select an option'
+                ;;
+        esac
+    done
 }
 
 # Prompt for which protocols to configure (e.g. OIDC, SAML, both).
@@ -577,9 +731,37 @@ EOT
     prompt_for_secret OIDC_CLIENT_SECRET 'Enter the OIDC client secret' "${OIDC_CLIENT_SECRET}" validate_nonempty
 }
 
-# Prompt for inputs.
-function prompt_for_inputs() {
-    prompt_for_svc_base_uri
+# Prompt for the HTTP Bearer token.
+function prompt_for_bearer_token() {
+    cat <<EOT
+
+
+The SCIM cloud service provider will authenticate using an HTTP Bearer
+token. The Base64 encoded value will be saved in the configuration file,
+and typically the encoded value must also be provided to the cloud service
+provider.
+
+EOT
+    prompt_for_secret BEARER_TOKEN 'Enter the bearer token' "${BEARER_TOKEN}" validate_nonempty
+}
+
+# Prompt for the P4PORT of the Helix Core server.
+function prompt_for_p4port() {
+    prompt_for P4PORT 'Enter the P4PORT of the Helix server' "${P4PORT}" validate_p4port
+}
+
+# Prompt for the name of the Perforce super user.
+function prompt_for_p4user() {
+    prompt_for P4USER 'Enter the username of the super user' "${P4USER}" validate_p4user
+}
+
+# Prompt for the password of the Perforce super user.
+function prompt_for_p4passwd() {
+    prompt_for_password P4PASSWD 'Enter the password of the super user' "${P4PASSWD}"
+}
+
+# Prompt for authentication inputs.
+function prompt_for_auth_inputs() {
     prompt_for_protocols
     if [[ -n "${PROTOCOLS['oidc']}" ]]; then
         prompt_for_oidc_issuer_uri
@@ -611,12 +793,45 @@ function prompt_for_inputs() {
     fi
 }
 
-# Validate all of the inputs however they may have been provided.
-function validate_inputs() {
-    if ! validate_url "$SVC_BASE_URI"; then
-        error 'A valid base URL for the service must be provided.'
-        return 1
+# Prompt for user provisioning inputs.
+function prompt_for_scim_inputs() {
+    cat <<EOT
+
+The user provisioning feature will need the Helix Core Server address
+and credentials for a super user that can manage users and groups.
+
+EOT
+    prompt_for_p4port
+    while ! check_perforce_server; do
+        prompt_for_p4port
+    done
+    prompt_for_p4user
+    prompt_for_p4passwd
+    while ! check_perforce_super_user; do
+        prompt_for_p4user
+        # Clear the password so prompt_for_password will behave as if no
+        # password has yet been provided (which is partially true).
+        P4PASSWD=''
+        prompt_for_p4passwd
+    done
+    prompt_for_bearer_token
+}
+
+# Prompt for inputs.
+function prompt_for_inputs() {
+    prompt_for_svc_base_uri
+    # configuring authentication, provisioning, or both?
+    prompt_for_auth_scim
+    if $CONFIGURE_SCIM; then
+        prompt_for_scim_inputs
     fi
+    if $CONFIGURE_AUTH; then
+        prompt_for_auth_inputs
+    fi
+}
+
+# Validate inputs for the authentication integration.
+function validate_auth_inputs() {
     #
     # Validate OIDC/SAML settings only if the user chose to provide those
     # settings during this particular run of the script (i.e. they may be
@@ -665,8 +880,103 @@ function validate_inputs() {
     return 0
 }
 
+# Ensure the Helix server is running.
+function check_perforce_server() {
+    if [ -z "$P4PORT" ]; then
+        error 'No P4PORT specified'
+        return 1
+    fi
+
+    local SSLRE="^ssl"
+    local BITS=(${P4PORT//:/ })
+    if [[ ${BITS[0]} =~ $SSLRE ]]; then
+        p4 -p "$P4PORT" trust -f -y >/dev/null 2>&1
+        if (( $? != 0 )); then
+            error "Unable to trust the server [$P4PORT]"
+            return 1
+        fi
+    fi
+
+    local P4INFO=""
+    if ! P4INFO=$(p4 -p "$P4PORT" -ztag info 2>/dev/null); then
+        error "Unable to connect to Helix server [$P4PORT]"
+        return 1
+    fi
+
+    # Divide the server version into parts that can be easily analyzed.
+    local SERVER_VERSION="$(echo "$P4INFO" | grep -F '... serverVersion')"
+    IFS=' ' read -r -a PARTS <<< "${SERVER_VERSION}"
+    IFS='/' read -r -a PIECES <<< "${PARTS[2]}"
+    local P4D_REL="${PIECES[2]}"
+    local P4D_CHANGE="${PIECES[3]}"
+    if [ "$(awk 'BEGIN{ if ("'$P4D_REL'" < "'$P4D_MIN_VERSION'") print(1); else print(0) }')" -eq 1 ] || \
+       [ -n "$P4D_MIN_CHANGE" -a "$P4D_CHANGE" -lt "${P4D_MIN_CHANGE}" ]; then
+        error "This Helix server $P4D_REL/$P4D_CHANGE is not supported by Auth Extension."
+        error "Auth Extension supports Helix servers starting with [$P4D_MIN_VERSION]/[${P4D_MIN_CHANGE}]"
+        return 1
+    fi
+}
+
+# Ensure the user credentials provided are valid and confer super access.
+function check_perforce_super_user() {
+    if [ -z "$P4PORT" -o -z "$P4USER" ]; then
+        error 'No P4PORT or P4USER specified'
+        return 1
+    fi
+
+    if [[ -z "$P4PASSWD" || "$P4PASSWD" =~ ^[[:blank:]]*$ ]]; then
+        echo "P4PASSWD is empty or is whitespace. Skipping Helix server login."
+    else
+        if ! echo "$P4PASSWD" | p4 -p "$P4PORT" -u "$P4USER" login >/dev/null 2>&1; then
+            error "Unable to login to the Helix server '$P4PORT' as '$P4USER' with supplied password"
+            return 1
+        fi
+    fi
+
+    if ! p4 -p "$P4PORT" -u "$P4USER" protects -m 2>&1 | grep -q 'super'; then
+        error "User '$P4USER' must have super privileges"
+        return 1
+    fi
+    return 0
+}
+
+# Validate inputs for the user provisioning feature.
+function validate_scim_inputs() {
+    if ! validate_p4port "${P4PORT}"; then
+        return 1
+    fi
+    if ! check_perforce_server; then
+        return 1
+    fi
+    if ! validate_p4user "${P4USER}"; then
+        return 1
+    fi
+    if ! check_perforce_super_user; then
+        return 1
+    fi
+    return 0
+}
+
+# Validate all of the inputs however they may have been provided.
+function validate_inputs() {
+    if ! validate_url "$SVC_BASE_URI"; then
+        error 'A valid base URL for the service must be provided.'
+        return 1
+    fi
+    if $CONFIGURE_AUTH; then
+        validate_auth_inputs
+    fi
+    if $CONFIGURE_SCIM; then
+        validate_scim_inputs
+    fi
+    return 0
+}
+
 # Normalize the user inputs.
 function clean_inputs() {
+    if [[ ! -z "$BEARER_TOKEN" ]]; then
+        BEARER_BASE64=$(echo -n "$BEARER_TOKEN" | base64)
+    fi
     if [[ ! -z "$SVC_BASE_URI" ]]; then
         # trim trailing slashes
         SVC_BASE_URI="$(echo -n "$SVC_BASE_URI" | sed 's,[/]*$,,')"
@@ -711,6 +1021,18 @@ EOT
     if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
         echo "  * Set DEFAULT_PROTOCOL to ${DEFAULT_PROTOCOL}"
     fi
+    if [[ -n "${P4PORT}" ]]; then
+        echo "  * Set P4PORT to ${P4PORT}"
+    fi
+    if [[ -n "${P4USER}" ]]; then
+        echo "  * Set P4USER to ${P4USER}"
+    fi
+    if [[ -n "${P4PASSWD}" ]]; then
+        echo "  * Set P4PASSWD to (hidden)"
+    fi
+    if [[ -n "${BEARER_TOKEN}" ]]; then
+        echo "  * Set BEARER_TOKEN to (hidden)"
+    fi
     echo -e "\nThe service will then be restarted.\n"
 }
 
@@ -745,66 +1067,47 @@ function modify_eco_config() {
         node ./bin/writeconf.cjs
 }
 
+# If not already set, read the value for the named variable from .env file.
+function set_var_from_env() {
+    local -n ref=$1
+    local force_set=false
+    [[ -n "$2" ]] && force_set=$2
+    # awk has a hard time doing the simple things that grep and cut can do, so
+    # must invoke multiple commands through pipes like a novice.
+    VALUE=$(grep "^${1}=" .env | cut -d= -f2-)
+    if [[ -n "${VALUE}" ]]; then
+        VALUE=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$VALUE")
+        if $force_set; then
+            ref="${VALUE}"
+        else
+            ref="${ref:-${VALUE}}"
+        fi
+    fi
+}
+
 # Retrieve any existing service settings to prime the inputs.
 function read_settings() {
     if [[ ! -f .env ]]; then
         return
     fi
-    # awk has a hard time doing the simple things that grep and cut can do, so
-    # must invoke multiple commands through pipes like a novice.
-    PROTO=$(grep '^DEFAULT_PROTOCOL=' .env | cut -d= -f2-)
-    if [[ -n "${PROTO}" ]]; then
-        PROTO=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$PROTO")
-        DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL:-${PROTO}}"
+    set_var_from_env 'P4PORT' true
+    set_var_from_env 'P4USER' true
+    set_var_from_env 'P4PASSWD' true
+    set_var_from_env 'BEARER_TOKEN'
+    BEARER_TOKEN=$(echo -n "${BEARER_TOKEN}" | base64 -d)
+    set_var_from_env 'DEFAULT_PROTOCOL'
+    set_var_from_env 'SVC_BASE_URI'
+    set_var_from_env 'OIDC_ISSUER_URI'
+    set_var_from_env 'OIDC_CLIENT_ID'
+    set_var_from_env 'OIDC_CLIENT_SECRET_FILE'
+    if [ -n "${OIDC_CLIENT_SECRET_FILE}" -a -f "${OIDC_CLIENT_SECRET_FILE}" ]; then
+        OIDC_CLIENT_SECRET=$(<${OIDC_CLIENT_SECRET_FILE})
     fi
-    SBURI=$(grep '^SVC_BASE_URI=' .env | cut -d= -f2-)
-    if [[ -n "${SBURI}" ]]; then
-        SBURI=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SBURI")
-        SVC_BASE_URI="${SVC_BASE_URI:-${SBURI}}"
-    fi
-    OIU=$(grep '^OIDC_ISSUER_URI=' .env | cut -d= -f2-)
-    if [[ -n "${OIU}" ]]; then
-        OIU=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OIU")
-        OIDC_ISSUER_URI="${OIDC_ISSUER_URI:-${OIU}}"
-    fi
-    OCI=$(grep '^OIDC_CLIENT_ID=' .env | cut -d= -f2-)
-    if [[ -n "${OCI}" ]]; then
-        OCI=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OCI")
-        OIDC_CLIENT_ID="${OIDC_CLIENT_ID:-${OCI}}"
-    fi
-    OCSF=$(grep '^OIDC_CLIENT_SECRET_FILE=' .env | cut -d= -f2-)
-    if [[ -n "${OCSF}" ]]; then
-        OCSF=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OCSF")
-        OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE:-${OCSF}}"
-        if [ -f "${OIDC_CLIENT_SECRET_FILE}" ]; then
-            OIDC_CLIENT_SECRET=$(<${OIDC_CLIENT_SECRET_FILE})
-        fi
-    fi
-    OCS=$(grep '^OIDC_CLIENT_SECRET=' .env | cut -d= -f2-)
-    if [[ -n "${OCS}" ]]; then
-        OCS=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$OCS")
-        OIDC_CLIENT_SECRET="${OIDC_CLIENT_SECRET:-${OCS}}"
-    fi
-    SIMU=$(grep '^SAML_IDP_METADATA_URL=' .env | cut -d= -f2-)
-    if [[ -n "${SIMU}" ]]; then
-        SIMU=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SIMU")
-        SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL:-${SIMU}}"
-    fi
-    SISU=$(grep '^SAML_IDP_SSO_URL=' .env | cut -d= -f2-)
-    if [[ -n "${SISU}" ]]; then
-        SISU=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SISU")
-        SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL:-${SISU}}"
-    fi
-    SSEI=$(grep '^SAML_SP_ENTITY_ID=' .env | cut -d= -f2-)
-    if [[ -n "${SSEI}" ]]; then
-        SSEI=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$SSEI")
-        SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID:-${SSEI}}"
-    fi
-    LOG=$(grep '^LOGGING=' .env | cut -d= -f2-)
-    if [[ -n "${LOG}" ]]; then
-        LOG=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$LOG")
-        LOGGING="${LOGGING:-${LOG}}"
-    fi
+    set_var_from_env 'OIDC_CLIENT_SECRET'
+    set_var_from_env 'SAML_IDP_METADATA_URL'
+    set_var_from_env 'SAML_IDP_SSO_URL'
+    set_var_from_env 'SAML_SP_ENTITY_ID'
+    set_var_from_env 'LOGGING'
 }
 
 # Add, modify, or remove the named setting from the .env file.
@@ -857,20 +1160,17 @@ function modify_env_config() {
         add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' ''
     fi
 
+    add_or_replace_var_in_env 'P4PORT' "${P4PORT}"
+    add_or_replace_var_in_env 'P4USER' "${P4USER}"
+    add_or_replace_var_in_env 'P4PASSWD' "${P4PASSWD}"
+    add_or_replace_var_in_env 'BEARER_TOKEN' "${BEARER_BASE64}"
+
     # Ensure the logging.config.cjs file is readable by all users to avoid
     # difficult to debug situations where the logging is not working and no
     # errors are displayed.
     chmod 0644 logging.config.cjs
     # always enable logging for the time being
-    if [[ -f 'bin/www.js' ]]; then
-        # As a plain Node.js application, the logging require path is relative
-        # to the bin/www.js script.
-        add_or_replace_var_in_env 'LOGGING' '../logging.config.cjs'
-    else
-        # As a single binary, a full path is required since any relative path
-        # would be treated as internal to the binary archive.
-        add_or_replace_var_in_env 'LOGGING' "$(pwd)/logging.config.cjs"
-    fi
+    add_or_replace_var_in_env 'LOGGING' '../logging.config.cjs'
 }
 
 # Normalize the settings and write to the configuration file.
@@ -965,7 +1265,7 @@ EOT
   * If not already completed, the server and client certificates should be
     replaced with genuine certificates, replacing the self-signed certs.
     See the Administration Guide for additional information.
-  * Visit the authentication service in a browser to verify it is accessible:
+  * Visit the service in a browser to verify it is accessible:
     ${SVC_BASE_URI}
   * Consult the admin guide for other settings that may need to be changed
     in accordance with the configuration of the identity provider.
@@ -985,6 +1285,7 @@ function main() {
     # include our bin in case node can be found there
     export PATH=$(pwd)/bin:${PATH}
     ensure_readiness
+    source_enviro
     set -e
     read_arguments "$@"
     ensure_pm2_readiness

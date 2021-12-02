@@ -61,6 +61,18 @@ To switch from `http:` to `https:` you will need to change at least three settin
 1. Set service URL in the client system (e.g. Perforce server).
 1. Set the callback URL in the identity provider.
 
+## Configure Script on macOS
+
+The configuration script (`bin/configure-auth-service.sh`) uses the GNU getopt
+utility to read the command line arguments. However, macOS does not ship with
+GNU getopt installed. To run the script on macOS, first install GNU getopt via
+[Homebrew](https://brew.sh) `gnu-getopt` package, and then run the script with
+the path to the GNU getopt directory:
+
+```shell
+$ PATH="/usr/local/opt/gnu-getopt/bin:$PATH" ./bin/configure-auth-service.sh
+```
+
 ## Coding Conventions
 
 With respect to the JavaScript code, the formatting follows

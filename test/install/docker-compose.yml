@@ -40,6 +40,24 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
 
+  centos_8_scim_test:
+    build:
+      context: ../..
+      dockerfile: test/install/CentOS8-scim.dockerfile
+    image: has-centos8-scim-test
+    container_name: centos_8_scim_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
   ubuntu_16_install_test:
     build:
       context: ../..
@@ -82,6 +100,24 @@ services:
       dockerfile: test/install/Ubuntu20.dockerfile
     image: has-ubuntu20-install-test
     container_name: ubuntu_20_install_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  ubuntu_20_scim_test:
+    build:
+      context: ../..
+      dockerfile: test/install/Ubuntu20-scim.dockerfile
+    image: has-ubuntu20-scim-test
+    container_name: ubuntu_20_scim_test
     privileged: true
     cap_add:
       - SYS_ADMIN
