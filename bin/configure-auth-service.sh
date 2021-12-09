@@ -370,6 +370,11 @@ function validate_p4user() {
 
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
+    # Ensure write access to the configuration file.
+    touch .env > /dev/null 2>&1
+    if [ $? != 0 ]; then
+        die 'You do not have permission to write to this directory.'
+    fi
     if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6)\.'; then
         die 'Node.js v14 or v16 is required. Please run install.sh to install dependencies.'
     fi
