@@ -32,6 +32,11 @@ services:
       SAML_IDP_METADATA_URL: "https://shibboleth.doc:4443/idp/shibboleth"
       SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
       SAML_SP_ENTITY_ID: "urn:example:sp"
+      OAUTH_JWKS_URI: 'http://jwt.doc:3000/.well-known/jwks.json'
+      OAUTH_AUDIENCE: 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1'
+      OAUTH_ISSUER: 'http://jwt.doc:3000/'
+      OAUTH_ALGORITHM: 'RS256'
+      OAUTH_TENANT_ID: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9'
     networks:
       - authen
     ports:
@@ -58,6 +63,11 @@ services:
       SAML_IDP_METADATA_URL: "https://shibboleth.doc:4443/idp/shibboleth"
       SAML_NAMEID_FORMAT: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
       SAML_SP_ENTITY_ID: "urn:example:sp"
+      OAUTH_JWKS_URI: 'http://jwt.doc:3000/.well-known/jwks.json'
+      OAUTH_AUDIENCE: 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1'
+      OAUTH_ISSUER: 'http://jwt.doc:3000/'
+      OAUTH_ALGORITHM: 'RS256'
+      OAUTH_TENANT_ID: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9'
     networks:
       - authen
     ports:
@@ -84,6 +94,22 @@ services:
     depends_on:
       - auth-svc1.doc
       - auth-svc2.doc
+  jwt.doc:
+    # https://github.com/foobert/jwtdummy
+    #
+    # This container issues and validates RFC 7519 JSON Web Tokens which are
+    # used for testing the "client-sso" feature of the extension and service.
+    #
+    # visit http://jwt.doc:3000 for usage instructions
+    #
+    # This image only knows how to bind to port 3000, changing this would
+    # require forking the repo and fixing it.
+    image: foobert/jwtdummy
+    container_name: jwt.doc
+    networks:
+      - authen
+    ports:
+      - "3000:3000"
   oidc.doc:
     build:
       context: containers/oidc
