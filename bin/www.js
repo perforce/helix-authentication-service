@@ -69,3 +69,12 @@ function onListening () {
   // when things are working well, writing to the log is fine
   logger.debug('Listening on %s', bind)
 }
+
+// Work-around for bug in winston library in which file transports stop logging
+// when an uncaught exception is raised. This work-around also involves removing
+// all handleExcpetions options from the logging transport constructors.
+//
+// c.f. https://github.com/winstonjs/winston/issues/1855
+process.on('uncaughtException', (err, origin) => {
+  logger.error('www: %s occurred: %s', origin, err)
+})
