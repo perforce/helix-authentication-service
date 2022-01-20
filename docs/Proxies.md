@@ -57,23 +57,13 @@ When using a reverse proxy, bear in mind that the proxy will likely have a set a
 
 [NGINX](https://www.nginx.com) can be configured to act as a reverse proxy, load balancing requests across multiple instances of HAS. See the example Docker containers and configuration in the `test/nginx` directory.
 
+## Apache
+
+[Apache](https://httpd.apache.org), while rather heavyweight for this purpose, can be configured to act as a reverse proxy. See the example Docker containers and configuration in the `test/apache` directory.
+
 ## Amazon Load Balancers
 
 The elastic/application load balancers offered by Amazon Web Services are akin to an extremely simplified version of HAProxy, and as such work well with HAS. All that is necessary is for HAS to be configured to trust the proxy, using the `TRUST_PROXY` setting.
-
-For reference, the headers received by HAS when behind an `awselb/2.0` load balancer look like so:
-
-```
-accept: */*
-host: aws-elb.helixalm.cloud
-user-agent: curl/7.64.1
-x-amzn-trace-id: Root=1-f1275f96-32cd0203e3f0e6cee09a3b1b
-x-forwarded-for: 99.82.198.92
-x-forwarded-port: 443
-x-forwarded-proto: https
-```
-
-The `x-forwarded-proto` value is what informs the underlying Express.js framework that the protocol is secure, and hence the `session-cookie` middleware will allow setting secure cookies.
 
 ## Google Cloud Load Balancers
 

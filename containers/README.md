@@ -10,6 +10,7 @@ This directory contains definitions for several Docker containers for testing th
 * **haproxy:** HAProxy for load balancing between two instances of HAS.
 * **ldap:** OpenLDAP directory which serves as the user data source to Shibboleth.
 * **oidc:** IdentityServer4 for OpenID Connect authentication.
+* **redis:** Redis server with TLS enabled and configured to expect client certificates.
 * **shibboleth:** Shibboleth for SAML 2.0 authentication.
 
 The `docker-compose.yml` file in the parent directory configures those containers, plus one additional container for [Redis](https://redis.io), which supports failover of the service.
@@ -17,9 +18,11 @@ The `docker-compose.yml` file in the parent directory configures those container
 * `authen.doc`: load balancer in front of authentication service instances
 * `auth-svc1.doc`: authentication service listening on port `3001`
 * `auth-svc2.doc`: authentication service listening on port `3002`
+* `jwt.doc`: simplistic service for issuing and validating JSON web tokens
 * `ldap.doc`: OpenLDAP to which Shibboleth delegates user authentication
 * `oidc.doc`: OpenID Connect identity provider
 * `redis.doc`: Redis instance for failover of the authentication service instances
+* `rediss.doc`: Redis (with TLS) for failover of the authentication service instances
 * `shibboleth.doc`: SAML 2.0 identity provider
 
 The only piece of information that is needed for the client application (e.g. Helix Core with the `loginhook` extension and Swarm) is the URL to the load balancer: https://authen.doc

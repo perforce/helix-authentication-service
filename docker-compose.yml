@@ -22,7 +22,7 @@ services:
       PORT: 3001
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
-      REDIS_URL: 'redis://redis.doc:6379'
+      REDIS_URL: 'rediss://rediss.doc:6389'
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "https://oidc.doc:8843"
@@ -53,7 +53,7 @@ services:
       PORT: 3002
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
-      REDIS_URL: 'redis://redis.doc:6379'
+      REDIS_URL: 'rediss://rediss.doc:6389'
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
       OIDC_ISSUER_URI: "https://oidc.doc:8843"
@@ -171,17 +171,22 @@ services:
       - "8843:8843"
   # p4d.doc is in the extension repository
   redis.doc:
-    image: redis:6.0
+    image: redis:6.2
     container_name: redis.doc
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
     networks:
       - authen
     ports:
       - "6379:6379"
+  rediss.doc:
+    build:
+      context: containers/redis
+    container_name: rediss.doc
+    networks:
+      - authen
+    ports:
+      - "6389:6389"
   shibboleth.doc:
     build:
       context: containers/shibboleth
