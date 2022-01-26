@@ -7,7 +7,7 @@ the `Development.md` document in this directory for the development setup.
 ## Design
 
 The authentication service has two internal "repositories" for storing the login
-request and user mapping. One is an in-memory store, using the `transitory` Node
+request and user mapping. One is an in-memory store, using the `lokijs` Node
 package, and the other uses [redis](https://redis.io) to store the data via the
 `redis` Node package. The logic for setting up the repositories is found in the
 `lib/container.js` module.
