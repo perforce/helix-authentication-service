@@ -7,10 +7,15 @@
 set -e
 
 # ensure we can run systemd properly in this container
-if ! systemctl list-units >/dev/null 2>&1; then
-    echo 'error: unable to run systemd!'
-    exit 1
-fi
+WAIT_COUNT=0
+while ! systemctl list-units >/dev/null 2>&1; do
+    WAIT_COUNT=$(($WAIT_COUNT + 1))
+    if [[ $WAIT_COUNT -gt 10 ]]; then
+        echo 'error: unable to run systemd!'
+        exit 1
+    fi
+    sleep 1
+done
 
 echo -e '\nInstalling helix-auth-svc package...\n'
 tar zxf helix-auth-svc-centos7.tgz
