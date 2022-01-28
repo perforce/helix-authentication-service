@@ -8,10 +8,15 @@
 set -e
 
 # ensure we can run systemd properly in this container
-if ! sudo systemctl list-units >/dev/null 2>&1; then
-    echo 'error: unable to run systemd!'
-    exit 1
-fi
+WAIT_COUNT=0
+while ! sudo systemctl list-units >/dev/null 2>&1; do
+    WAIT_COUNT=$(($WAIT_COUNT + 1))
+    if [[ $WAIT_COUNT -gt 10 ]]; then
+        echo 'error: unable to run systemd!'
+        exit 1
+    fi
+    sleep 1
+done
 
 # Turn off dnf cache maintenance that fires at exactly the wrong time and causes
 # our tests to fail (c.f. https://bugzilla.redhat.com/show_bug.cgi?id=1814337).
