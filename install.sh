@@ -349,6 +349,9 @@ __SERVICE_UNIT__
     if ! test -f .env; then
         # strip comments and blank lines
         awk "/^$/{next} /^#/{next} {print}" example.env | sudo tee .env >/dev/null
+        if $CREATE_USER; then
+            sudo chown perforce:perforce .env
+        fi
     fi
     if which systemctl >/dev/null 2>&1; then
         sudo systemctl daemon-reload
