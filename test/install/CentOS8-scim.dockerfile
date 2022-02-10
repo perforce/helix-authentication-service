@@ -9,6 +9,12 @@ ARG APT_URL="http://package.perforce.com/apt/ubuntu"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
 ARG P4PORT="0.0.0.0:1666"
 
+#
+# workaround CentOS 8 repositories going offline
+#
+RUN sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
+RUN sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
+
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
 RUN yum -q -y install curl grep iputils patch sudo systemd which
