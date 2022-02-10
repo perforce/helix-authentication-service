@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:16.04 AS ubuntu16_pkg_base
 #
 # $ docker build -f build/ubuntu16/Dockerfile --tag auth-svc:ubuntu16 .
 # $ docker run --rm --entrypoint find auth-svc:ubuntu16 /build -name '*.deb'
@@ -6,15 +6,6 @@ FROM ubuntu:16.04
 #
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
-
-ARG ID_REL_BASE=2021.2.0
-ARG ID_PATCH=9999999
-ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
-ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
-ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
-ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~xenial_amd64.deb
-ENV DEBEMAIL 'support+packaging@perforce.com'
-ENV DEBFULLNAME 'Perforce Software, Inc.'
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
@@ -27,6 +18,21 @@ RUN apt-get update && \
 ADD https://deb.nodesource.com/setup_16.x setup_16.x
 RUN bash setup_16.x
 RUN apt-get -q -y install nodejs
+
+#
+# Build the package using the stable base image to reduce intermittent build
+# failures caused by temporary network outages.
+#
+FROM ubuntu16_pkg_base
+
+ARG ID_REL_BASE=2021.2.0
+ARG ID_PATCH=9999999
+ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
+ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
+ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
+ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~xenial_amd64.deb
+ENV DEBEMAIL 'support+packaging@perforce.com'
+ENV DEBFULLNAME 'Perforce Software, Inc.'
 
 WORKDIR /build/${DIRNAME}
 

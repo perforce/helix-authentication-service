@@ -1,4 +1,4 @@
-FROM centos:8
+FROM centos:8 AS centos8_pkg_base
 #
 # $ docker build -f build/centos8/Dockerfile --tag auth-svc:centos8 .
 # $ docker run --rm --entrypoint find auth-svc:centos8 /root/rpmbuild/RPMS -name '*.rpm'
@@ -7,10 +7,8 @@ FROM centos:8
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
 
-ARG ID_REL_BASE=2021.2.0
-ARG ID_PATCH=9999999
-ENV PKGNAME helix-auth-svc
-ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
+# Enable package documentation as we need the Node.js license file.
+RUN sed -i '/nodocs/d' /etc/yum.conf
 
 #
 # workaround CentOS 8 repositories going offline
@@ -27,6 +25,17 @@ RUN bash setup_16.x
 # Skip gpg key check because it fails on some systems, and how that can happen
 # in a docker container is beyond my comprehension.
 RUN yum -q -y install --nogpgcheck -y nodejs
+
+#
+# Build the package using the stable base image to reduce intermittent build
+# failures caused by temporary network outages.
+#
+FROM centos8_pkg_base
+
+ARG ID_REL_BASE=2021.2.0
+ARG ID_PATCH=9999999
+ENV PKGNAME helix-auth-svc
+ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 
 WORKDIR /build/${DIRNAME}
 

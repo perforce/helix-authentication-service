@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS ubuntu20_pkg_base
 #
 # $ docker build -f build/ubuntu20/Dockerfile --tag auth-svc:ubuntu20 .
 # $ docker run --rm --entrypoint find auth-svc:ubuntu20 /build -name '*.deb'
@@ -6,22 +6,12 @@ FROM ubuntu:20.04
 #
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
-
-# Disable the interesting feature of the Ubuntu docker image whereby they
-# quietly prevent all documentation from being installed via packages.
-RUN sed -i '/path-exclude=\/usr\/share\/doc\/*/d' /etc/dpkg/dpkg.cfg.d/excludes
-
-ARG ID_REL_BASE=2021.2.0
-ARG ID_PATCH=9999999
-ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
-ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
-ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
-ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~focal_amd64.deb
-ENV DEBEMAIL 'support+packaging@perforce.com'
-ENV DEBFULLNAME 'Perforce Software, Inc.'
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
+
+# Enable package documentation as we need the Node.js license file.
+RUN sed -i '/path-exclude=\/usr\/share\/doc\/*/d' /etc/dpkg/dpkg.cfg.d/excludes
 
 #
 # install build and packaging prerequisites
@@ -31,6 +21,17 @@ RUN apt-get update && \
 ADD https://deb.nodesource.com/setup_16.x setup_16.x
 RUN bash setup_16.x
 RUN apt-get -q -y install nodejs
+
+FROM ubuntu20_pkg_base
+
+ARG ID_REL_BASE=2021.2.0
+ARG ID_PATCH=9999999
+ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
+ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
+ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
+ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~focal_amd64.deb
+ENV DEBEMAIL 'support+packaging@perforce.com'
+ENV DEBFULLNAME 'Perforce Software, Inc.'
 
 WORKDIR /build/${DIRNAME}
 

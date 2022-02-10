@@ -1,4 +1,4 @@
-FROM centos:7
+FROM centos:7 AS centos7_pkg_base
 #
 # $ docker build -f build/centos7/Dockerfile --tag auth-svc:centos7 .
 # $ docker run --rm --entrypoint find auth-svc:centos7 /root/rpmbuild/RPMS -name '*.rpm'
@@ -7,13 +7,7 @@ FROM centos:7
 # Should set ID_REL_BASE and ID_PATCH build args.
 #
 
-ARG ID_REL_BASE=2021.2.0
-ARG ID_PATCH=9999999
-ENV PKGNAME helix-auth-svc
-ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
-
-# Disable the interesting feature of the CentOS docker image whereby they
-# quietly prevent all documentation from being installed via packages.
+# Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
 
 #
@@ -23,6 +17,21 @@ RUN yum -q -y install curl gcc-c++ git make rpm-build rpmdevtools
 ADD https://rpm.nodesource.com/setup_16.x setup_16.x
 RUN bash setup_16.x
 RUN yum -q -y install nodejs
+
+#
+# Build the package using the stable base image to reduce intermittent build
+# failures caused by temporary network outages.
+#
+FROM centos7_pkg_base
+
+ARG ID_REL_BASE=2021.2.0
+ARG ID_PATCH=9999999
+ENV PKGNAME helix-auth-svc
+ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
+
+# Disable the interesting feature of the CentOS docker image whereby they
+# quietly prevent all documentation from being installed via packages.
+RUN sed -i '/nodocs/d' /etc/yum.conf
 
 WORKDIR /build/${DIRNAME}
 
