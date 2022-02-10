@@ -13,6 +13,12 @@ ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 
 #
+# workaround CentOS 8 repositories going offline
+#
+RUN sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
+RUN sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
+
+#
 # install build and packaging prerequisites
 #
 RUN yum -q -y install curl gcc-c++ git make python2 rpm-build rpmdevtools
