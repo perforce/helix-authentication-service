@@ -1,6 +1,6 @@
-# Helix Authentication Service
+# REST API
 
-## REST API
+## Overview
 
 The REST API of the authentication service is intended only for application use,
 it is _not_ meant for end-users to interact with the service. Users should be
@@ -19,6 +19,8 @@ this:
 1. User authenticates with IdP, with auth service acting as the SP/RP
 1. Meanwhile, client does a `GET` on `/requests/status/:requestId`
 1. Service eventually responds with JSON-formatted user data
+
+## Routes
 
 ### /requests/new
 
