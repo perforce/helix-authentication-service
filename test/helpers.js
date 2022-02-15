@@ -39,7 +39,7 @@ export function getRequestId (hostname, port) {
   })
 }
 
-function makeP4 (config) {
+export function makeP4 (config) {
   const p4 = new P4({
     P4PORT: config.port,
     P4USER: config.user,
