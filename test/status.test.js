@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process'
 import tempy from 'tempy'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
+import mute from 'mute'
 import sinon from 'sinon'
 import { DummyRedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/DummyRedisConnector.js'
 import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
@@ -193,8 +194,11 @@ describe('Service status', function () {
     it('should return ok for working OIDC connection', async function () {
       this.timeout(10000)
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+      // mute the warning from node about disabling TLS validation
+      const unmute = mute(process.stderr)
       const result = await sut.validateOpenID('https://oidc.doc:8843')
       assert.equal(result, 'ok')
+      unmute()
       delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     })
   })
@@ -214,8 +218,11 @@ describe('Service status', function () {
     it('should return ok for working OIDC connection', async function () {
       this.timeout(10000)
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+      // mute the warning from node about disabling TLS validation
+      const unmute = mute(process.stderr)
       const result = await sut.validateSaml('https://shibboleth.doc:4443/idp/shibboleth')
       assert.equal(result, 'ok')
+      unmute()
       delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     })
   })

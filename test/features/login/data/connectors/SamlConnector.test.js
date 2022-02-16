@@ -4,14 +4,20 @@
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
+import mute from 'mute'
 import { SamlConnector } from 'helix-auth-svc/lib/features/login/data/connectors/SamlConnector.js'
 
 describe('SAML connector', function () {
+  let unmute
+
   before (function () {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+    // mute the warning from node about disabling TLS validation
+    unmute = mute(process.stderr)
   })
 
   after (function () {
+    unmute()
     delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
   })
 
