@@ -427,13 +427,14 @@ The Helix Authentication Service is now running via systemd using the service
 name 'helix-auth'. Use the command 'sudo systemctl status helix-auth' to get
 the status of the service.
 
-To configure the service, edit the file shown below, and then restart the
-service: sudo systemctl restart helix-auth
+To configure the service, edit the .env file in the directory shown below, and
+then restart the service: sudo systemctl restart helix-auth
 
-    ${INSTALLPREFIX}/.env
+    ${INSTALLPREFIX}
 
-The configure-auth-service.sh script can be used to make changes to the
-configuration in both an interactive and automated fashion.
+In particular, the settings to be changed are the OIDC and/or SAML settings
+for your identity provider. The configure-auth-service.sh script may be
+helpful for this purpose.
 
     ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
 
@@ -446,6 +447,7 @@ EOT
 function main() {
     # move to the source directory before everything else
     cd "$( cd "$(dirname "$0")" ; pwd -P )"
+    INSTALLPREFIX=$(pwd)
     ensure_readiness
     set -e
     read_arguments "$@"
