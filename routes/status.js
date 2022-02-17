@@ -10,20 +10,25 @@ const router = express.Router()
 
 // eslint-disable-next-line no-unused-vars
 router.get('/', async (req, res, next) => {
-  const caCertFile = settings.get('CA_CERT_FILE')
-  const ca = await status.validateCertAuth(caCertFile)
-  const cert = await validateCert()
-  const issuerUri = settings.get('OIDC_ISSUER_URI')
-  const oidc = await status.validateOpenID(issuerUri)
-  const entityRepository = container.resolve('entityRepository')
-  const perforce = await status.validatePerforce(entityRepository)
-  const redisConnector = container.resolve('redisConnector')
-  const redis = await status.validateRedis(redisConnector)
-  const metadataUrl = settings.get('SAML_IDP_METADATA_URL')
-  const saml = await status.validateSaml(metadataUrl)
-  const uptime = process.uptime()
-  const overall = status.summarize([ca, cert, oidc, perforce, redis, saml])
-  res.json({ status: overall, ca, cert, oidc, perforce, redis, saml, uptime })
+  try {
+    const caCertFile = settings.get('CA_CERT_FILE')
+    const ca = await status.validateCertAuth(caCertFile)
+    const cert = await validateCert()
+    const issuerUri = settings.get('OIDC_ISSUER_URI')
+    const oidc = await status.validateOpenID(issuerUri)
+    const entityRepository = container.resolve('entityRepository')
+    const perforce = await status.validatePerforce(entityRepository)
+    const redisConnector = container.resolve('redisConnector')
+    const redis = await status.validateRedis(redisConnector)
+    const metadataUrl = settings.get('SAML_IDP_METADATA_URL')
+    const saml = await status.validateSaml(metadataUrl)
+    const uptime = process.uptime()
+    const overall = status.summarize([ca, cert, oidc, perforce, redis, saml])
+    res.json({ status: overall, ca, cert, oidc, perforce, redis, saml, uptime })
+  } catch (err) {
+    // when all else fails
+    res.json({ status: err.toString() })
+  }
 })
 
 async function validateCert () {
