@@ -5,6 +5,7 @@ package-lock.json   opt/perforce/helix-auth-svc
 README.md           opt/perforce/helix-auth-svc
 README.html         opt/perforce/helix-auth-svc
 RELNOTES.txt        opt/perforce/helix-auth-svc
+sentinel.config.cjs opt/perforce/helix-auth-svc
 bin/                opt/perforce/helix-auth-svc
 certs/              opt/perforce/helix-auth-svc
 docs/Administrator-Guide.md	opt/perforce/helix-auth-svc/docs

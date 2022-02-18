@@ -58,6 +58,7 @@ cp -pr views/* %{buildroot}%{installprefix}/views
 
 cp example.env %{buildroot}%{installprefix}/example.env
 cp logging.config.cjs %{buildroot}%{installprefix}/logging.config.cjs
+cp sentinel.config.cjs %{buildroot}%{installprefix}/sentinel.config.cjs
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
 sed -e "s/\"2021.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
@@ -69,6 +70,7 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 %files
 %docdir %{installprefix}/docs
 %config(noreplace) %{installprefix}/logging.config.cjs
+%config(noreplace) %{installprefix}/sentinel.config.cjs
 %{installprefix}
 
 %post
