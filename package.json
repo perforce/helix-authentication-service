@@ -48,7 +48,7 @@
     "jwks-rsa": "^2.0.5",
     "lokijs": "^1.5.12",
     "memorystore": "^1.6.6",
-    "minimatch": "^3.0.4",
+    "minimatch": "^5.0.0",
     "morgan": "~1.10.0",
     "node-saml": "^4.0.0-beta.0",
     "openid-client": "^5.0.2",
@@ -67,7 +67,7 @@
   "devDependencies": {
     "chai": "^4.3.4",
     "eslint": "^8.0.1",
-    "eslint-plugin-unicorn": "^40.0.0",
+    "eslint-plugin-unicorn": "^41.0.0",
     "geckodriver": "^3.0.1",
     "get-port": "^6.0.0",
     "license-checker": "^25.0.1",
@@ -75,7 +75,7 @@
     "mute": "^2.0.6",
     "saml2-js": "^3.0.1",
     "selenium-webdriver": "^4.0.0",
-    "showdown": "^1.9.1",
+    "showdown": "^2.0.0",
     "sinon": "^13.0.1",
     "supertest": "^6.1.6",
     "tempy": "^2.0.0"
