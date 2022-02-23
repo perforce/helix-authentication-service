@@ -75,7 +75,7 @@
     "mute": "^2.0.6",
     "saml2-js": "^3.0.1",
     "selenium-webdriver": "^4.0.0",
-    "showdown": "^2.0.0",
+    "showdown": "^1.9.1",
     "sinon": "^13.0.1",
     "supertest": "^6.1.6",
     "tempy": "^2.0.0"
