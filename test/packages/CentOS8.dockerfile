@@ -1,20 +1,10 @@
-FROM centos:8
+FROM has-build:centos8
 #
 # $ docker compose -f test/packages/docker-compose.yml up --build -d centos_8_test
 # $ docker exec centos_8_test /packages/centos8_pkg_exec.sh
 # $ docker stop centos_8_test
 # $ docker rm centos_8_test
 #
-
-#
-# workaround CentOS 8 repositories going offline
-#
-RUN sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
-RUN sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
-
-# The docker base images are generally minimal, and our package and its
-# post-install script have certain requirements, so install those now.
-RUN yum -q -y install sudo
 
 WORKDIR /packages
 

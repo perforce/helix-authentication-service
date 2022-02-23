@@ -1,4 +1,4 @@
-FROM centos:8 AS centos8_pkg_base
+FROM has-build:centos8 AS centos8_pkg_base
 #
 # $ docker build -f build/centos8/Dockerfile --tag auth-svc:centos8 .
 # $ docker run --rm --entrypoint find auth-svc:centos8 /root/rpmbuild/RPMS -name '*.rpm'
@@ -10,16 +10,6 @@ FROM centos:8 AS centos8_pkg_base
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
 
-#
-# workaround CentOS 8 repositories going offline
-#
-RUN sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
-RUN sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
-
-#
-# install build and packaging prerequisites
-#
-RUN yum -q -y install curl gcc-c++ git make python2 rpm-build rpmdevtools
 ADD https://rpm.nodesource.com/setup_16.x setup_16.x
 RUN bash setup_16.x
 # Skip gpg key check because it fails on some systems, and how that can happen
