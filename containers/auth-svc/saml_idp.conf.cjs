@@ -1,5 +1,6 @@
 module.exports = {
   'urn:swarm-example:sp': {
-    acsUrl: 'https://swarm.doc:8043/api/v10/session'
+    // undoc: use regex to allow for swarm with multiple p4d instances
+    acsUrlRe: 'https://swarm\\.doc:8043/[^/]+/api/v10/session'
   }
 }

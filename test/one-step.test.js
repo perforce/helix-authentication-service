@@ -60,7 +60,9 @@ describe('1-step SAML validation', function () {
       entity_id: 'urn:swarm-example:sp',
       certificate: fs.readFileSync('test/client.crt', 'utf-8'),
       private_key: fs.readFileSync('test/client.key', 'utf-8'),
-      assert_endpoint: 'https://swarm.doc:8043/api/v10/session',
+      // include a dummy server identifier since the service is configured with
+      // acsUrlRe rather than acsUrl, which expects an additional path entry
+      assert_endpoint: 'https://swarm.doc:8043/test/api/v10/session',
       auth_context: {
         comparison: 'exact',
         class_refs: [
