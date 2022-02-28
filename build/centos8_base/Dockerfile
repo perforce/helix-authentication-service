@@ -24,3 +24,8 @@ RUN sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.o
 RUN yum -q -y install curl gcc-c++ git grep iputils make patch \
         python2 python3 rpm-build rpmdevtools sudo systemd which
 RUN dnf -q -y install 'dnf-command(download)'
+
+#
+# disable update of the repository cache for a very long time
+#
+RUN echo 'metadata_expire=3650d' >> /etc/yum.conf
