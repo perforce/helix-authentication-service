@@ -82,7 +82,7 @@ setTimeout(function () {
           .set('Authorization', 'Bearer notavalidtokenatall')
           .expect(400)
           .expect(res => {
-            assert.include(res.text, 'bearer token could not be processed')
+            assert.include(res.text, 'no `kid` found in JWT header')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -155,7 +155,7 @@ setTimeout(function () {
           .set('Authorization', 'Bearer dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.')
           .expect(400)
           .expect(res => {
-            assert.include(res.text, 'bearer token could not be processed')
+            assert.include(res.text, 'no `kid` found in JWT header')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
