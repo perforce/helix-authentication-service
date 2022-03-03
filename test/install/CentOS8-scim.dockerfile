@@ -1,10 +1,15 @@
-FROM has-build:centos8
+FROM rockylinux:8
 #
 # $ docker compose -f test/install/docker-compose.yml up --build -d centos_8_scim_test
 # $ docker exec centos_8_scim_test su perforce /install_sh/test_scim_config.sh
 # $ docker stop centos_8_scim_test
 # $ docker rm centos_8_scim_test
 #
+
+# The docker base images are generally minimal, and our install and configure
+# scripts have certain requirements, so install those now.
+RUN yum -q -y install patch sudo which
+
 ARG APT_URL="http://package.perforce.com/apt/ubuntu"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
 ARG P4PORT="0.0.0.0:1666"

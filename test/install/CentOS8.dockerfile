@@ -1,10 +1,14 @@
-FROM has-build:centos8
+FROM rockylinux:8
 #
 # $ docker compose -f test/install/docker-compose.yml up --build -d centos_8_install_test
 # $ docker exec centos_8_install_test su charlie /install_sh/test_install_config.sh
 # $ docker stop centos_8_install_test
 # $ docker rm centos_8_install_test
 #
+
+# The docker base images are generally minimal, and our install and configure
+# scripts have certain requirements, so install those now.
+RUN yum -q -y install patch sudo which
 
 # The install and configure scripts want to run as a non-root user, while
 # systemd must run as root, so create the user for the test script to utilize,

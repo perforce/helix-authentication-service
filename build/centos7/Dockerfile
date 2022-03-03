@@ -1,4 +1,4 @@
-FROM centos:7 AS centos7_pkg_base
+FROM centos:7
 #
 # $ docker build -f build/centos7/Dockerfile --tag auth-svc:centos7 .
 # $ docker run --rm --entrypoint find auth-svc:centos7 /root/rpmbuild/RPMS -name '*.rpm'
@@ -17,12 +17,6 @@ RUN yum -q -y install curl gcc-c++ git make rpm-build rpmdevtools
 ADD https://rpm.nodesource.com/setup_16.x setup_16.x
 RUN bash setup_16.x
 RUN yum -q -y install nodejs
-
-#
-# Build the package using the stable base image to reduce intermittent build
-# failures caused by temporary network outages.
-#
-FROM centos7_pkg_base
 
 ARG ID_REL_BASE=2021.2.0
 ARG ID_PATCH=9999999

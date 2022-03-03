@@ -1,4 +1,4 @@
-FROM has-build:centos8
+FROM rockylinux:8
 #
 # $ docker compose -f test/packages/docker-compose.yml up --build -d centos_8_test
 # $ docker exec centos_8_test /packages/centos8_pkg_exec.sh
