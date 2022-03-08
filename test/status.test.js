@@ -7,11 +7,11 @@ import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import mute from 'mute'
 import sinon from 'sinon'
+import loadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
 import { DummyRedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/DummyRedisConnector.js'
 import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { HelixEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/HelixEntityRepository.js'
-import { loadAuthorityCerts } from 'helix-auth-svc/lib/container.js'
 import * as helpers from 'helix-auth-svc/test/helpers.js'
 import * as runner from 'helix-auth-svc/test/runner.js'
 import * as sut from 'helix-auth-svc/lib/status.js'
@@ -215,7 +215,7 @@ describe('Service status', function () {
       assert.instanceOf(result, Error)
     })
 
-    it('should return ok for working OIDC connection', async function () {
+    it('should return ok for working SAML connection', async function () {
       this.timeout(10000)
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
       // mute the warning from node about disabling TLS validation

@@ -5,11 +5,11 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, describe, it } from 'mocha'
 import { ulid } from 'ulid'
+import loadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
 import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { Request } from 'helix-auth-svc/lib/features/login/domain/entities/Request.js'
 import { RedisRequestRepository } from 'helix-auth-svc/lib/features/login/data/repositories/RedisRequestRepository.js'
-import { loadAuthorityCerts } from 'helix-auth-svc/lib/container.js'
 
 describe('RedisRequest repository', function () {
   describe('without TLS', function () {
