@@ -31,14 +31,15 @@ describe('GetSamlAuthnContext use case', function () {
     assert.isUndefined(result)
   })
 
-  it('should return the plain string value if not a list', function () {
+  it('should return a singleton list even with plain string', function () {
     // arrange
     settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
     // act
     const result = usecase()
     // assert
     assert.isDefined(result)
-    assert.equal(result, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+    assert.lengthOf(result, 1)
+    assert.equal(result[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
   })
 
   it('should return a list if multiple values inside brackets', function () {
