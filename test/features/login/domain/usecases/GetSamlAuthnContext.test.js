@@ -54,6 +54,33 @@ describe('GetSamlAuthnContext use case', function () {
     assert.equal(result[1], 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
   })
 
+  it('should leave an array value as-is', function () {
+    // arrange
+    settings.set('SAML_AUTHN_CONTEXT', [
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+    ])
+    // act
+    const result = usecase()
+    // assert
+    assert.isDefined(result)
+    assert.lengthOf(result, 2)
+    assert.equal(result[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos')
+    assert.equal(result[1], 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+  })
+
+  it('should ignore empty list entries', function () {
+    // arrange
+    settings.set('SAML_AUTHN_CONTEXT', `"[urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos,,'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',]"`)
+    // act
+    const result = usecase()
+    // assert
+    assert.isDefined(result)
+    assert.lengthOf(result, 2)
+    assert.equal(result[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos')
+    assert.equal(result[1], 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+  })
+
   it('should trim mismatched quotes and brackets from list entries', function () {
     // arrange
     settings.set('SAML_AUTHN_CONTEXT', `"['urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos,'urn:oasis:names:tc:SAML:2.0:ac:classes:Password']`)
