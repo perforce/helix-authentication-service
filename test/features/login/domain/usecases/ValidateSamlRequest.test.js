@@ -70,6 +70,46 @@ describe('ValidateSamlRequest use case', function () {
     assert.isTrue(result)
   })
 
+  it('should return false for non-matching in list', async function () {
+    // arrange
+    const config = {
+      'urn:swarm-example:sp': {
+        acsUrls: [
+          'https://swarm.example.com/chicago/api/v10/session',
+          'https://swarm.example.com/tokyo/api/v10/session'
+        ]
+      }
+    }
+    const usecase = ValidateSamlRequest({ getIdPConfiguration: () => config })
+    // act
+    const result = await usecase(
+      'urn:swarm-example:sp',
+      'https://swarm.example.com/alameda/api/v10/session'
+    )
+    // assert
+    assert.isFalse(result)
+  })
+
+  it('should return true for matching in list', async function () {
+    // arrange
+    const config = {
+      'urn:swarm-example:sp': {
+        acsUrls: [
+          'https://swarm.example.com/chicago/api/v10/session',
+          'https://swarm.example.com/tokyo/api/v10/session'
+        ]
+      }
+    }
+    const usecase = ValidateSamlRequest({ getIdPConfiguration: () => config })
+    // act
+    const result = await usecase(
+      'urn:swarm-example:sp',
+      'https://swarm.example.com/tokyo/api/v10/session'
+    )
+    // assert
+    assert.isTrue(result)
+  })
+
   it('should return false for regex non-matching recipient', async function () {
     // arrange
     const config = {
