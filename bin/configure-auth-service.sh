@@ -2,7 +2,7 @@
 #
 # Configuration script for Helix Authentication Service.
 #
-# Copyright 2021, Perforce Software Inc. All rights reserved.
+# Copyright 2022, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -22,7 +22,6 @@ OIDC_CLIENT_SECRET=''
 OIDC_CLIENT_SECRET_FILE='client-secret.txt'
 FOUND_P4=true
 BEARER_TOKEN=''
-BEARER_BASE64=''
 P4PORT=''
 P4USER=''
 P4PASSWD=''
@@ -91,7 +90,7 @@ function prompt_for() {
     local check_func=true
 
     [[ -n "$4" ]] && check_func=$4
-    [[ "$default" =~ [[:space:]]+ ]] && default=''
+    [[ "$default" =~ ^[[:space:]]+$ ]] && default=''
 
     while true; do
         local input=''
@@ -742,12 +741,14 @@ function prompt_for_bearer_token() {
 
 
 The SCIM cloud service provider will authenticate using an HTTP Bearer
-token. The Base64 encoded value will be saved in the configuration file,
-and typically the encoded value must also be provided to the cloud service
-provider.
+token. This same value must be provided to the cloud service provider,
+typically in base64-encoded form. Use the 'base64' utility common on
+Unix-like platforms to generate this value, like so:
+
+$ echo -n 'super secret token' | base64
 
 EOT
-    prompt_for_secret BEARER_TOKEN 'Enter the bearer token' "${BEARER_TOKEN}" validate_nonempty
+    prompt_for BEARER_TOKEN 'Enter the bearer token' "${BEARER_TOKEN}" validate_nonempty
 }
 
 # Prompt for the P4PORT of the Helix Core server.
@@ -979,10 +980,7 @@ function validate_inputs() {
 
 # Normalize the user inputs.
 function clean_inputs() {
-    if [[ ! -z "$BEARER_TOKEN" ]]; then
-        BEARER_BASE64=$(echo -n "$BEARER_TOKEN" | base64)
-    fi
-    if [[ ! -z "$SVC_BASE_URI" ]]; then
+    if [[ -n "$SVC_BASE_URI" ]]; then
         # trim trailing slashes
         SVC_BASE_URI="$(echo -n "$SVC_BASE_URI" | sed 's,[/]*$,,')"
     fi
@@ -1036,7 +1034,7 @@ EOT
         echo "  * Set P4PASSWD to (hidden)"
     fi
     if [[ -n "${BEARER_TOKEN}" ]]; then
-        echo "  * Set BEARER_TOKEN to (hidden)"
+        echo "  * Set BEARER_TOKEN to ${BEARER_TOKEN}"
     fi
     echo -e "\nThe service will then be restarted.\n"
 }
@@ -1099,7 +1097,6 @@ function read_settings() {
     set_var_from_env 'P4USER' true
     set_var_from_env 'P4PASSWD' true
     set_var_from_env 'BEARER_TOKEN'
-    BEARER_TOKEN=$(echo -n "${BEARER_TOKEN}" | base64 -d)
     set_var_from_env 'DEFAULT_PROTOCOL'
     set_var_from_env 'SVC_BASE_URI'
     set_var_from_env 'OIDC_ISSUER_URI'
@@ -1168,7 +1165,7 @@ function modify_env_config() {
     add_or_replace_var_in_env 'P4PORT' "${P4PORT}"
     add_or_replace_var_in_env 'P4USER' "${P4USER}"
     add_or_replace_var_in_env 'P4PASSWD' "${P4PASSWD}"
-    add_or_replace_var_in_env 'BEARER_TOKEN' "${BEARER_BASE64}"
+    add_or_replace_var_in_env 'BEARER_TOKEN' "${BEARER_TOKEN}"
 
     # Ensure the logging.config.cjs file is readable by all users to avoid
     # difficult to debug situations where the logging is not working and no
@@ -1265,6 +1262,11 @@ EOT
         echo '  * Be sure to set IDP_CERT_FILE to the path of a file containing the'
         echo '    public certificate of the SAML identity provider. This facilitates'
         echo '    the verification of the SAML response, preventing MITM attacks.'
+    fi
+    if [[ -n "${BEARER_TOKEN}" ]]; then
+        BEARER_BASE64=$(echo -n "$BEARER_TOKEN" | base64)
+        echo '  * Provide the BEARER_TOKEN value to the cloud service provider.'
+        echo "    The base64-encoded value is ${BEARER_BASE64}"
     fi
     cat <<EOT
   * If not already completed, the server and client certificates should be
