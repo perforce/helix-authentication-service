@@ -35,9 +35,9 @@ fi
     --bearer-token 'keyboard cat' \
     --p4port 0.0.0.0:1666 --super super --superpassword Rebar123
 
-grep -q 'a2V5Ym9hcmQgY2F0' helix-auth-svc/.env
-grep -q '0.0.0.0:1666' helix-auth-svc/.env
-grep -q 'Rebar123' helix-auth-svc/.env
+grep -q 'keyboard cat' helix-auth-svc/.env || { echo '.env missing BEARER_TOKEN' ; exit 1; }
+grep -q '0.0.0.0:1666' helix-auth-svc/.env || { echo '.env missing P4PORT' ; exit 1; }
+grep -q 'Rebar123' helix-auth-svc/.env || { echo '.env missing P4PASSWD' ; exit 1; }
 
 cat <<EOT
 

@@ -32,14 +32,14 @@ tar zxf helix-auth-svc-centos8.tgz
 yum -y install ./yum/rhel/8/x86_64/helix-auth-svc-*.rpm
 
 # ensure the package is fully installed
-rpm -qa helix-auth-svc | grep -q helix-auth-svc
+rpm -qa helix-auth-svc | grep -q helix-auth-svc || { echo 'package install failed' ; exit 1; }
 
 # ensure 'perforce' user and group are created
 getent group perforce
 getent passwd perforce
 
 # ensure the package.json has the expected version string
-grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json
+grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json || { echo 'package.json missing version' ; exit 1; }
 
 # ensure certain files are present
 echo -e '\nTesting for presence of certain files...\n'
@@ -49,7 +49,7 @@ test -f /opt/perforce/helix-auth-svc/bin/writeconf.cjs
 test -x /opt/perforce/helix-auth-svc/bin/node
 
 # ensure the systemd service is running
-systemctl status helix-auth | grep 'Active: active'
+systemctl status helix-auth | grep 'Active: active' || { echo 'service not active' ; exit 1; }
 
 # finally remove the package to make sure that does not fail horribly
 echo -e '\nRemoving helix-auth-svc package...\n'
