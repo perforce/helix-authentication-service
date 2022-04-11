@@ -1,4 +1,4 @@
-FROM rockylinux:8
+FROM has-build:centos8
 #
 # $ docker build -f build/centos8/Dockerfile --tag auth-svc:centos8 .
 # $ docker run --rm --entrypoint find auth-svc:centos8 /root/rpmbuild/RPMS -name '*.rpm'
@@ -17,7 +17,8 @@ RUN bash setup_16.x
 RUN yum -q -y install --nogpgcheck -y nodejs
 
 # Install packages for building packages.
-RUN yum -q -y install rpmdevtools rpm-build
+# (base image has rpmdevtools, rpm-build already)
+# RUN yum -q -y install rpmdevtools rpm-build
 
 ARG ID_REL_BASE=2021.2.0
 ARG ID_PATCH=9999999
