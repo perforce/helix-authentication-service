@@ -91,14 +91,14 @@ fi
 [ ! -d "$HOMEDIR" ] && mkdir -p "$HOMEDIR"
 chown -R perforce:perforce "$HOMEDIR"
 
-# ensure perforce user can write to the installation path
-chown -R perforce:perforce "%{installprefix}"
-
 if [ ! -f "%{installprefix}/.env" ]; then
     PRINT="print \"LOGGING=%{installprefix}/logging.config.cjs\""
     # inject LOGGING if not already set; strip comments and blank lines
     awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env
 fi
+
+# ensure perforce user can write to the installation path
+chown -R perforce:perforce "%{installprefix}"
 
 # If this fails, it means either systemd is not installed or it does not have
 # privileged access (to the container), in which case we will skip setting up

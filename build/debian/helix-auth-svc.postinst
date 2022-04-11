@@ -41,12 +41,12 @@ function create_user_group() {
 
 case "$1" in
     configure)
-        create_user_group
         if [ ! -f "${INSTALLPREFIX}/.env" ]; then
             PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
             # inject LOGGING if not already set; strip comments and blank lines
             awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env > ${INSTALLPREFIX}/.env
         fi
+        create_user_group
 
         # If this fails, it means either systemd is not installed or it does not
         # have privileged access (to the container), in which case we will skip
