@@ -2,11 +2,12 @@
 #
 # Authentication service installation script for Linux systems.
 #
-# Copyright 2021, Perforce Software Inc. All rights reserved.
+# Copyright 2022, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
 CREATE_USER=true
+ALLOW_ROOT=false
 HOMEDIR=/opt/perforce
 UPGRADE_NODE=false
 INSTALL_PM2=false
@@ -58,6 +59,11 @@ Description:
         Upgrade an existing package-based installation of Node.js with
         the latest supported version.
 
+    --allow-root
+        Allow the root user to run the install script. This may leave
+        some files owned and writable only by the root user, which can
+        cause other problems.
+
     -m
         Monochrome; no colored text.
 
@@ -92,6 +98,10 @@ function read_arguments() {
             UPGRADE_NODE=true
             shift
             ;;
+        --allow-root)
+            ALLOW_ROOT=true
+            shift
+            ;;
         -n)
             INTERACTIVE=false
             shift
@@ -122,7 +132,7 @@ function ensure_readiness() {
     # its privileges when running the pre/post install scripts of certain Node
     # modules, and subsequently running into a file permissions error. If the
     # files are owned by root and root runs this script, it _should_ work.
-    if [[ $EUID -eq 0 ]]; then
+    if [[ $EUID -eq 0 ]] && ! $ALLOW_ROOT; then
         die 'This script must be run as a non-root user.'
     fi
 
@@ -448,9 +458,9 @@ function main() {
     # move to the source directory before everything else
     cd "$( cd "$(dirname "$0")" ; pwd -P )"
     INSTALLPREFIX=$(pwd)
-    ensure_readiness
     set -e
     read_arguments "$@"
+    ensure_readiness
     check_nodejs
     if $INTERACTIVE; then
         display_interactive
