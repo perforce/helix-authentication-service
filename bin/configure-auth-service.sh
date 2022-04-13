@@ -6,6 +6,7 @@
 #
 INTERACTIVE=true
 MONOCHROME=false
+ALLOW_ROOT=false
 SVC_RESTARTED=false
 DEBUG=false
 SVC_BASE_URI=''
@@ -252,6 +253,11 @@ Description:
     --pm2
         Configure for the pm2 process manager instead of systemd.
 
+    --allow-root
+        Allow the root user to run the configure script. This may leave
+        some files owned and readable only by the root user, which can
+        cause other problems.
+
     --debug
         Enable debugging output for this configuration script.
 
@@ -369,6 +375,10 @@ function validate_p4user() {
 
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
+    if [[ $EUID -eq 0 ]] && ! $ALLOW_ROOT; then
+        die 'This script should be run as a non-root user.'
+    fi
+
     # Ensure write access to the configuration file.
     touch .env > /dev/null 2>&1
     if [ $? != 0 ]; then
@@ -414,7 +424,7 @@ function read_arguments() {
     local ARGS=(bearer-token: p4port: super: superpassword: base-url:)
     ARGS+=(oidc-issuer-uri: oidc-client-id: oidc-client-secret:)
     ARGS+=(saml-idp-sso-url: saml-sp-entityid: saml-idp-metadata-url:)
-    ARGS+=(default-protocol: pm2 debug help)
+    ARGS+=(default-protocol: pm2 allow-root debug help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
         -l "$(join_by , ${ARGS[@]})" -- "$@")
@@ -490,6 +500,10 @@ function read_arguments() {
                 ;;
             --pm2)
                 CONFIG_FILE_NAME='ecosystem.config.cjs'
+                shift
+                ;;
+            --allow-root)
+                ALLOW_ROOT=true
                 shift
                 ;;
             --debug)
@@ -1291,11 +1305,11 @@ function main() {
     cd "$( cd "$(dirname "$0")" ; pwd -P )/.."
     # include our bin in case node can be found there
     export PATH=$(pwd)/bin:${PATH}
-    ensure_readiness
-    source_enviro
     set -e
     read_arguments "$@"
+    ensure_readiness
     ensure_pm2_readiness
+    source_enviro
     if $INTERACTIVE || $DEBUG; then
         display_arguments
     fi
