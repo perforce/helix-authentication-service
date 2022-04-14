@@ -75,4 +75,24 @@ describe('GetIdPConfiguration use case', function () {
     // assert
     assert.property(result, 'urn:swarm-example:sp')
   })
+
+  it('should succesfully load CommonJS with .js extension', async function () {
+    // arrange
+    const commonjs = tempy.file({ extension: 'js' })
+    fs.writeFileSync(commonjs, `// comment line
+module.exports = {
+  // comment line
+  'urn:swarm-example:sp': {
+    acsUrl: 'http://swarm.example.com/api/v10/session'
+  }
+}`)
+    const map = new Map()
+    map.set('IDP_CONFIG_FILE', commonjs)
+    const settingsRepository = new MapSettingsRepository(map)
+    const usecase = GetIdPConfiguration({ settingsRepository })
+    // act
+    const result = await usecase()
+    // assert
+    assert.property(result, 'urn:swarm-example:sp')
+  })
 })
