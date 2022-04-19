@@ -380,8 +380,7 @@ function ensure_readiness() {
     fi
 
     # Ensure write access to the configuration file.
-    touch .env > /dev/null 2>&1
-    if [ $? != 0 ]; then
+    if ! touch .env >/dev/null 2>&1; then
         die 'You do not have permission to write to this directory.'
     fi
     if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6)\.'; then
