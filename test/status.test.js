@@ -374,6 +374,14 @@ describe('Service status', function () {
       assert.equal(result, 'ok')
     })
   })
+
+
+  describe('getVersion', function () {
+    it('should return a string', async function () {
+      const result = await sut.getVersion()
+      assert.isString(result, 'version is a string')
+    })
+  })
 })
 
 // Generate a new self-signed certificate that expires in less time than the

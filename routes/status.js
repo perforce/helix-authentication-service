@@ -22,9 +22,15 @@ router.get('/', async (req, res, next) => {
     const redis = await status.validateRedis(redisConnector)
     const metadataUrl = settings.get('SAML_IDP_METADATA_URL')
     const saml = await status.validateSaml(metadataUrl)
+    const version = await status.getVersion()
     const uptime = process.uptime()
     const overall = status.summarize([ca, cert, oidc, perforce, redis, saml])
-    res.json({ status: overall, ca, cert, oidc, perforce, redis, saml, uptime })
+    res.json({
+      status: overall,
+      ca, cert, oidc, perforce, redis, saml, uptime,
+      versions: process.versions,
+      app_version: version
+    })
   } catch (err) {
     // when all else fails
     res.json({ status: err.toString() })
