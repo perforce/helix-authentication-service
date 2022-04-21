@@ -755,10 +755,7 @@ function prompt_for_bearer_token() {
 
 The SCIM cloud service provider will authenticate using an HTTP Bearer
 token. This same value must be provided to the cloud service provider,
-typically in base64-encoded form. Use the 'base64' utility common on
-Unix-like platforms to generate this value, like so:
-
-$ echo -n 'super secret token' | base64
+typically in base64-encoded form.
 
 EOT
     prompt_for BEARER_TOKEN 'Enter the bearer token' "${BEARER_TOKEN}" validate_nonempty
