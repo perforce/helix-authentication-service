@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2022 Perforce Software
 //
 import app from 'helix-auth-svc/lib/app.js'
 import container from 'helix-auth-svc/lib/container.js'
@@ -62,6 +62,17 @@ function onError (error) {
 
 // Event listener for HTTP server "listening" event.
 function onListening () {
+  // After successfully binding to the port, switch user/group if possible and
+  // if configured to do so (set the group first lest we lose the privilege to
+  // change the group after changing the user).
+  const svcGroup = settings.get('SVC_GROUP')
+  if (svcGroup && process.setgid) {
+    process.setgid(svcGroup)
+  }
+  const svcUser = settings.get('SVC_USER')
+  if (svcUser && process.setuid) {
+    process.setuid(svcUser)
+  }
   const addr = server.address()
   const bind = typeof addr === 'string'
     ? 'pipe ' + addr

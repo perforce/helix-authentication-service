@@ -330,16 +330,6 @@ function create_user_group() {
 # Create the systemd service unit, enable, and start.
 function install_service_unit() {
     INSTALL_PREFIX=$(pwd)
-    USER_GROUP=''
-    if $CREATE_USER; then
-        # read exits with 1 because of course
-        set +e
-        read -d '' USER_GROUP << EOT
-User=perforce
-Group=perforce
-EOT
-        set -e
-    fi
     sudo tee /etc/systemd/system/helix-auth.service >/dev/null <<__SERVICE_UNIT__
 [Unit]
 Description=Helix Authentication Service
@@ -347,7 +337,6 @@ After=network.target
 
 [Service]
 Type=simple
-${USER_GROUP}
 Restart=always
 ExecStart=${INSTALL_PREFIX}/bin/www.js
 WorkingDirectory=${INSTALL_PREFIX}

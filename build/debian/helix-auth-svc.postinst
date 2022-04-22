@@ -45,6 +45,9 @@ case "$1" in
             PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
             # inject LOGGING if not already set; strip comments and blank lines
             awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env > ${INSTALLPREFIX}/.env
+            # set the user and group for setuid/setgid
+            echo 'SVC_USER=perforce' >> ${INSTALLPREFIX}/.env
+            echo 'SVC_GROUP=perforce' >> ${INSTALLPREFIX}/.env
         fi
         create_user_group
 
@@ -64,8 +67,6 @@ After=network.target
 
 [Service]
 Type=simple
-User=perforce
-Group=perforce
 Restart=always
 ExecStart=${INSTALLPREFIX}/bin/node ${INSTALLPREFIX}/bin/www.js
 WorkingDirectory=${INSTALLPREFIX}

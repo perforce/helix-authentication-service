@@ -95,6 +95,9 @@ if [ ! -f "%{installprefix}/.env" ]; then
     PRINT="print \"LOGGING=%{installprefix}/logging.config.cjs\""
     # inject LOGGING if not already set; strip comments and blank lines
     awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env
+    # set the user and group for setuid/setgid
+    echo 'SVC_USER=perforce' >> %{installprefix}/.env
+    echo 'SVC_GROUP=perforce' >> %{installprefix}/.env
 fi
 
 # ensure perforce user can write to the installation path
@@ -116,8 +119,6 @@ After=network.target
 
 [Service]
 Type=simple
-User=perforce
-Group=perforce
 Restart=always
 ExecStart=%{installprefix}/bin/node %{installprefix}/bin/www.js
 WorkingDirectory=%{installprefix}
