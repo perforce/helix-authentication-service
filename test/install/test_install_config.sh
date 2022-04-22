@@ -30,9 +30,6 @@ fi
 # run the install script non-interactively
 ./helix-auth-svc/install.sh -n
 
-grep -q 'User=perforce' /etc/systemd/system/helix-auth.service || { echo 'service missing User' ; exit 1; }
-grep -q 'Group=perforce' /etc/systemd/system/helix-auth.service || { echo 'service missing Group' ; exit 1; }
-
 # ensure the systemd service is running
 sudo systemctl status helix-auth | grep -q 'Active: active' || { echo 'service not active' ; exit 1; }
 
