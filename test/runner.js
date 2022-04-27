@@ -1,7 +1,7 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2022 Perforce Software
 //
-import * as fs from 'fs-extra'
+import fs from 'fs-extra'
 import * as path from 'node:path'
 import * as process from 'node:process'
 import { exec, spawn } from 'node:child_process'
@@ -50,7 +50,7 @@ function startServerGeneric (config, ssldir) {
       }
     })
     p4d.stderr.on('data', (data) => {
-      console.error('p4d:', data)
+      console.error('p4d:', data.toString())
     })
   })
 }
@@ -72,7 +72,7 @@ export async function startSslServer (p4root) {
   fs.emptyDirSync(config.p4root)
   // set up everything for the SSL server
   const ssldir = path.join(config.p4root, 'ssl')
-  fs.mkdirSync(ssldir)
+  fs.ensureDirSync(ssldir)
   fs.chmodSync(ssldir, 0o700)
   const certfile = path.join(ssldir, 'certificate.txt')
   fs.copyFileSync('test/fixtures/certificate.txt', certfile)
