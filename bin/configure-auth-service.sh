@@ -26,6 +26,7 @@ BEARER_TOKEN=''
 P4PORT=''
 P4USER=''
 P4PASSWD=''
+INJECT_P4TRUST=false
 P4D_MIN_CHANGE='1797576'
 P4D_MIN_VERSION='2019.1'
 CONFIG_FILE_NAME='.env'
@@ -911,6 +912,7 @@ function check_perforce_server() {
             error "Unable to trust the server [$P4PORT]"
             return 1
         fi
+        INJECT_P4TRUST=true
     fi
 
     local P4INFO=""
@@ -1106,6 +1108,7 @@ function read_settings() {
     set_var_from_env 'P4PORT' true
     set_var_from_env 'P4USER' true
     set_var_from_env 'P4PASSWD' true
+    set_var_from_env 'P4TRUST'
     set_var_from_env 'BEARER_TOKEN'
     set_var_from_env 'DEFAULT_PROTOCOL'
     set_var_from_env 'SVC_BASE_URI'
@@ -1175,6 +1178,11 @@ function modify_env_config() {
     add_or_replace_var_in_env 'P4PORT' "${P4PORT}"
     add_or_replace_var_in_env 'P4USER' "${P4USER}"
     add_or_replace_var_in_env 'P4PASSWD' "${P4PASSWD}"
+    if $INJECT_P4TRUST; then
+        # When running in systemd the service usually does not have a HOME and
+        # thus will not generally be able to find the .p4trust file.
+        add_or_replace_var_in_env 'P4TRUST' "${P4TRUST:-${HOME}/.p4trust}"
+    fi
     add_or_replace_var_in_env 'BEARER_TOKEN' "${BEARER_TOKEN}"
 
     # Ensure the logging.config.cjs file is readable by all users to avoid
