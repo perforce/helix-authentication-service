@@ -1142,6 +1142,7 @@ function modify_env_config() {
     # of the original contents
     if [[ ! -f .env.orig && -e .env ]]; then
         cp .env .env.orig
+        chown --reference=example.env .env.orig
     fi
     if [[ ! -f .env ]]; then
         # create an empty .env file if it is missing
@@ -1191,6 +1192,7 @@ function modify_env_config() {
     chmod 0644 logging.config.cjs
     # always enable logging for the time being
     add_or_replace_var_in_env 'LOGGING' '../logging.config.cjs'
+    chown --reference=example.env .env
 }
 
 # Normalize the settings and write to the configuration file.
@@ -1208,7 +1210,7 @@ function modify_config() {
         # make the OIDC_CLIENT_SECRET_FILE file readable only by current user
         echo "${OIDC_CLIENT_SECRET}" > ${OIDC_CLIENT_SECRET_FILE}
         chmod 600 ${OIDC_CLIENT_SECRET_FILE}
-        chown ${USER} ${OIDC_CLIENT_SECRET_FILE}
+        chown --reference=example.env ${OIDC_CLIENT_SECRET_FILE}
     fi
     if [[ "${CONFIG_FILE_NAME}" == ".env" ]]; then
         modify_env_config
@@ -1217,10 +1219,10 @@ function modify_config() {
     else
         echo 'WARNING: configuration changes not written to file!'
     fi
-    # ensure log file exists and is writable by the sudo user
+    # ensure log file exists and is writable by the owner
     if [[ ! -f auth-svc.log ]]; then
         touch auth-svc.log
-        chown ${USER} auth-svc.log
+        chown --reference=example.env auth-svc.log
     fi
 }
 
