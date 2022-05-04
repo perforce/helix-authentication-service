@@ -1185,6 +1185,9 @@ function modify_env_config() {
         add_or_replace_var_in_env 'P4TRUST' "${P4TRUST:-${HOME}/.p4trust}"
     fi
     add_or_replace_var_in_env 'BEARER_TOKEN' "${BEARER_TOKEN}"
+    # save the encoded version of the bearer token for convenience
+    BEARER_BASE64=$(echo -n "$BEARER_TOKEN" | base64)
+    add_or_replace_var_in_env 'BEARER_BASE64' "${BEARER_BASE64}"
 
     # Ensure the logging.config.cjs file is readable by all users to avoid
     # difficult to debug situations where the logging is not working and no
