@@ -1108,6 +1108,7 @@ function read_settings() {
     set_var_from_env 'P4PORT' true
     set_var_from_env 'P4USER' true
     set_var_from_env 'P4PASSWD' true
+    set_var_from_env 'P4TICKETS'
     set_var_from_env 'P4TRUST'
     set_var_from_env 'BEARER_TOKEN'
     set_var_from_env 'DEFAULT_PROTOCOL'
@@ -1179,6 +1180,9 @@ function modify_env_config() {
     add_or_replace_var_in_env 'P4PORT' "${P4PORT}"
     add_or_replace_var_in_env 'P4USER' "${P4USER}"
     add_or_replace_var_in_env 'P4PASSWD' "${P4PASSWD}"
+    # When running in systemd the service usually does not have a HOME and thus
+    # will not generally be able to find the .p4tickets file.
+    add_or_replace_var_in_env 'P4TICKETS' "${P4TICKETS:-${HOME}/.p4tickets}"
     if $INJECT_P4TRUST; then
         # When running in systemd the service usually does not have a HOME and
         # thus will not generally be able to find the .p4trust file.
