@@ -257,7 +257,8 @@ Description:
     --allow-root
         Allow the root user to run the configure script. This may leave
         some files owned and readable only by the root user, which can
-        cause other problems.
+        cause other problems. Similarly, the P4TRUST and P4TICKETS values
+        may reference the root user's home directory.
 
     --debug
         Enable debugging output for this configuration script.
