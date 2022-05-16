@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2020-2022 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -33,24 +33,6 @@ describe('StartRequest use case', function () {
     // assert
     assert.isNotNull(request.id)
     assert.equal(request.id.length, 26)
-    assert.equal(request.userId, 'joe')
-    assert.isFalse(request.forceAuthn)
-    assert.isTrue(stub.calledOnce)
-    stub.restore()
-  })
-
-  it('should create a request entity with a specified identifier', function () {
-    // arrange
-    const stub = sinon.stub(RequestRepository.prototype, 'add').callsFake((requestId, request) => {
-      assert.equal(requestId, 'request123')
-      assert.equal(request.userId, 'joe')
-    })
-    // act
-    const request = usecase('joe', false, 'request123')
-    // assert
-    assert.isNotNull(request.id)
-    assert.equal(request.id, 'request123')
-    assert.isNotNull(request.userId)
     assert.equal(request.userId, 'joe')
     assert.isFalse(request.forceAuthn)
     assert.isTrue(stub.calledOnce)

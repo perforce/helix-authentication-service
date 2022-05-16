@@ -89,3 +89,8 @@ function onListening () {
 process.on('uncaughtException', (err, origin) => {
   logger.error('www: %s occurred: %s', origin, err)
 })
+
+// Catch the unhandled promise rejections and report details.
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('www: unhandled rejection at: %s, reason: %s', promise, reason);
+});

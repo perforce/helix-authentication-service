@@ -23,16 +23,17 @@ describe('ReceiveUserProfile use case', function () {
   it('should raise an error for invalid input', function () {
     assert.throws(() => ReceiveUserProfile({ userRepository: null }), AssertionError)
     assert.throws(() => usecase(null), AssertionError)
-    assert.throws(() => usecase('joe', null), AssertionError)
+    assert.throws(() => usecase('req-123', null), AssertionError)
+    assert.throws(() => usecase('req-123', 'user-123', null), AssertionError)
   })
 
   it('should create a user entity', function () {
     // arrange
     const stub = sinon.stub(UserRepository.prototype, 'add')
     // act
-    const user = usecase('joe', { name: 'Joe', email: 'joe@example.com' })
+    const user = usecase('req-123', 'user-123', { name: 'Joe', email: 'joe@example.com' })
     // assert
-    assert.isNotNull(user.id)
+    assert.equal(user.id, 'user-123')
     assert.property(user.profile, 'email')
     assert.isTrue(stub.calledOnce)
     stub.restore()

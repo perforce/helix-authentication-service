@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2020-2022 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -76,11 +76,11 @@ describe('FindUserProfile use case', function () {
   it('should find an existing user entity immediately', async function () {
     // arrange
     const userId = 'joeuser'
+    const requestId = 'request123'
     const userStub = sinon.stub(UserRepository.prototype, 'take').callsFake((id) => {
-      assert.equal(id, userId)
+      assert.equal(id, requestId)
       return Promise.resolve(new User(id, { name: 'joe', email: 'joe@example.com' }))
     })
-    const requestId = 'request123'
     const requestStub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       assert.equal(id, requestId)
       return Promise.resolve(new Request('request123', userId, false))
@@ -88,7 +88,7 @@ describe('FindUserProfile use case', function () {
     // act
     const user = await usecase(requestId)
     // assert
-    assert.equal(user.id, userId)
+    assert.equal(user.id, requestId)
     assert.property(user, 'profile')
     assert.property(user.profile, 'email')
     assert.isTrue(userStub.calledOnce)
@@ -100,9 +100,10 @@ describe('FindUserProfile use case', function () {
   it('should find an existing user entity eventually', async function () {
     // arrange
     const userId = 'joeuser'
+    const requestId = 'request123'
     let callCount = 0
     const userStub = sinon.stub(UserRepository.prototype, 'take').callsFake((id) => {
-      assert.equal(id, userId)
+      assert.equal(id, requestId)
       // do not return the user object on the first call to force a different
       // path through the usecase code
       callCount++
@@ -111,7 +112,6 @@ describe('FindUserProfile use case', function () {
       }
       return Promise.resolve(null)
     })
-    const requestId = 'request123'
     const requestStub = sinon.stub(RequestRepository.prototype, 'get').callsFake((id) => {
       assert.equal(id, requestId)
       return Promise.resolve(new Request('request123', userId, false))
@@ -119,7 +119,7 @@ describe('FindUserProfile use case', function () {
     // act
     const user = await usecase(requestId, 1000, 100)
     // assert
-    assert.equal(user.id, userId)
+    assert.equal(user.id, requestId)
     assert.property(user, 'profile')
     assert.property(user.profile, 'email')
     assert.isTrue(userStub.called)

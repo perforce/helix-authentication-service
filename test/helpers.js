@@ -2,20 +2,20 @@
 // Copyright 2020-2021 Perforce Software
 //
 import * as https from 'node:https'
-import { ulid } from 'ulid'
+import * as xid from 'xid-js';
 import { assert } from 'chai'
 import p4pkg from 'p4api'
 const { P4 } = p4pkg
 
 // Retrieve a new request identifier for user authentication.
 export function getRequestId (hostname, port) {
-  // Use a ULID instead of a static value so that we avoid overlapping status
-  // requests resulting in "missed notification" style bugs in the tests.
+  // use something other than ulid to avoid confusing it with request identifiers
+  const userId = xid.next()
   return new Promise((resolve, reject) => {
     https.get({
       hostname,
       port,
-      path: '/requests/new/' + ulid(),
+      path: '/requests/new/' + userId,
       rejectUnauthorized: false,
       requestCert: false,
       agent: false
