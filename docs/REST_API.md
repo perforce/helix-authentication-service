@@ -74,6 +74,8 @@ endpoint requires client certificates, which prevents unauthorized access to
 user data. How the client maps the user data returned from the service to user
 accounts is entirely application and protocol dependent
 
+**Note:** Requests for the `status` should include a query parameter named `instanceId` whose value is the one provided in the response to `/requests/new` as this _may_ be used by a load balancer to route the request to the appropriate instance of the service.
+
 #### GET ${baseUrl}/requests/status/:requestId
 
 The **:requestId** _route parameter_ is replaced with the identifier given in
