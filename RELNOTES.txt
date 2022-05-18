@@ -82,6 +82,29 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
+New functionality in 2022.1
+
+    HAS-146 (Change #2196429)
+        Support for SCIM-based user and group provisioning.
+
+    HAS-235 (Change #2209698)
+        Install script and package install will create a 'perforce' user and
+        group to own the files and run the service.
+
+    HAS-273 (Change #2234881)
+        Support for client certificates when connecting to Redis.
+
+----------------------------------------------------------------------
+Bugs fixed in 2022.1
+
+    HAS-261 (Change #2205539)
+        Updating the yum package will no longer remove the systemd service
+        definition from this version onward.
+
+    HAS-274 (Change #2232214)
+        Logging to a file will continue even if an uncaught exception occurs.
+
+----------------------------------------------------------------------
 New functionality in 2021.2
 
     HAS-217 (Change #2148535)
