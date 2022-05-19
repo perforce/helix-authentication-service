@@ -18,7 +18,7 @@ ADD https://rpm.nodesource.com/setup_16.x setup_16.x
 RUN bash setup_16.x
 RUN yum -q -y install nodejs
 
-ARG ID_REL_BASE=2021.2.0
+ARG ID_REL_BASE=2022.1.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
