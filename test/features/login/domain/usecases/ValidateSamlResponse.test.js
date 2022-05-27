@@ -32,6 +32,8 @@ describe('ValidateSamlResponse use case', function () {
     const options = {
       cert: fs.readFileSync('certs/server.crt', 'utf-8'),
       key: fs.readFileSync('certs/server.key', 'utf-8'),
+      issuer: 'urn:auth-service:idp',
+      audience: 'urn:example:sp',
     }
     const user = {
       nameID: 'joe@example.com'
