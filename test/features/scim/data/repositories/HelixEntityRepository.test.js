@@ -15,6 +15,8 @@ import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
 import GetUsers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetUsers.js'
 import PatchGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/PatchGroup.js'
 import { HelixEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/HelixEntityRepository.js'
+import p4pkg from 'p4api'
+const { P4 } = p4pkg
 
 describe('HelixEntity repository', function () {
   describe('Non-SSL', function () {
@@ -173,6 +175,47 @@ describe('HelixEntity repository', function () {
       assert.equal(user.username, 'updateuser')
       assert.equal(user.email, 'juser@work.com')
       assert.equal(user.fullname, 'Joseph User')
+    })
+
+
+    it('should deactivate and reactivate a user entity', async function () {
+      this.timeout(10000)
+
+      // create user with known password
+      const tUser = new User('activeuser', 'active@example.com', 'Active User')
+      tUser.password = 'p4ssw0rd'
+      const added = await repository.addUser(tUser)
+      assert.equal(added.id, 'user-activeuser')
+      assert.equal(added.username, 'activeuser')
+      assert.isNull(added.password)
+
+      // ensure user login successful
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: 'activeuser'
+      })
+      const loginCmd1 = p4.cmdSync('login', 'p4ssw0rd')
+      assert.equal(loginCmd1.stat[0].TicketExpiration, '43200')
+
+      // update user with active == false
+      added.active = false
+      const updated = await repository.updateUser(added)
+      assert.instanceOf(updated, UserModel)
+      assert.isNull(updated.password)
+
+      // ensure user logged out and cannot log in
+      const loginCmd2 = p4.cmdSync('login -s')
+      assert.include(loginCmd2.error[0].data, 'invalid or unset')
+      const loginCmd3 = p4.cmdSync('login', 'p4ssw0rd')
+      assert.include(loginCmd3.error[0].data, 'Password invalid.')
+
+      // activate user with new password, test login
+      updated.password = 'p4ssw0rd'
+      const onceagain = await repository.updateUser(updated)
+      assert.equal(onceagain.username, 'activeuser')
+      assert.isNull(onceagain.password)
+      const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
+      assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
     })
 
     it('should rename a user entity', async function () {
