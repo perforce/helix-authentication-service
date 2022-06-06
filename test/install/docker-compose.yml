@@ -129,3 +129,21 @@ services:
       - /run/lock
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+
+  ubuntu_22_install_test:
+    build:
+      context: ../..
+      dockerfile: test/install/Ubuntu22.dockerfile
+    image: has-ubuntu22-install-test
+    container_name: ubuntu_22_install_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
