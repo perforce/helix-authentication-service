@@ -369,7 +369,11 @@ function install_modules() {
         die 'Missing package.json file for authentication service'
     fi
     echo "Building dependencies for auth service..."
-    npm ci -q --only=production
+    if test -f package-lock.json; then
+        npm ci -q --omit=dev
+    else
+        npm i -q --omit=dev
+    fi
 }
 
 # Install pm2 globally and install into system start-up procedure.
