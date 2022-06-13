@@ -113,7 +113,7 @@ describe('IsClientAuthorized use case', function () {
       .cert(cert)
       .expect(403)
       .expect(res => {
-        assert.include(res.text, 'are not permitted')
+        assert.include(res.text, 'is not authorized')
       })
       // eslint-disable-next-line no-unused-vars
       .end(function (err, res) {
@@ -139,7 +139,7 @@ describe('IsClientAuthorized use case', function () {
       .cert(cert)
       .expect(403)
       .expect(res => {
-        assert.include(res.text, 'are not permitted')
+        assert.include(res.text, 'is not authorized')
       })
       // eslint-disable-next-line no-unused-vars
       .end(function (err, res) {
@@ -192,7 +192,7 @@ describe('IsClientAuthorized use case', function () {
       .cert(cert)
       .expect(403)
       .expect(res => {
-        assert.include(res.text, 'are not permitted')
+        assert.include(res.text, 'is not permitted')
       })
       // eslint-disable-next-line no-unused-vars
       .end(function (err, res) {
