@@ -4,7 +4,7 @@
 import * as fs from 'node:fs'
 import * as http from 'node:http'
 import NodeRSA from 'node-rsa'
-import tempy from 'tempy'
+import { temporaryFile } from 'tempy'
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
@@ -78,7 +78,7 @@ describe('ValidateWebToken use case', function () {
     this.timeout(10000)
     // arrange
     const keydata = await getSigningKey()
-    const keyfile = tempy.file({ extension: 'key' })
+    const keyfile = temporaryFile({ extension: 'key' })
     fs.writeFileSync(keyfile, keydata)
     settings.set('OAUTH_SIGNING_KEY_FILE', keyfile)
     settings.set('OAUTH_ALGORITHM', 'RS256')

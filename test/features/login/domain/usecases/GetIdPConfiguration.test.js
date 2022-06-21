@@ -5,7 +5,7 @@ import * as fs from 'node:fs'
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import tempy from 'tempy'
+import { temporaryFile } from 'tempy'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import GetIdPConfiguration from 'helix-auth-svc/lib/features/login/domain/usecases/GetIdPConfiguration.js'
 
@@ -48,7 +48,7 @@ describe('GetIdPConfiguration use case', function () {
 
   it('should fail when loading a malformed file', async function () {
     // arrange
-    const notjavascript = tempy.file({ extension: 'cjs' })
+    const notjavascript = temporaryFile({ extension: 'cjs' })
     fs.writeFileSync(notjavascript, 'this is not valid')
     const map = new Map()
     map.set('IDP_CONFIG_FILE', notjavascript)
@@ -78,7 +78,7 @@ describe('GetIdPConfiguration use case', function () {
 
   it('should succesfully load CommonJS with .js extension', async function () {
     // arrange
-    const commonjs = tempy.file({ extension: 'js' })
+    const commonjs = temporaryFile({ extension: 'js' })
     fs.writeFileSync(commonjs, `// comment line
 module.exports = {
   // comment line

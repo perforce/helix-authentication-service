@@ -2,7 +2,7 @@
 // Copyright 2022 Perforce Software
 //
 import { spawn } from 'node:child_process'
-import tempy from 'tempy'
+import { temporaryFile } from 'tempy'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import mute from 'mute'
@@ -60,8 +60,8 @@ describe('Service status', function () {
     it('should report soon-to-expire certificate', async function () {
       // this test can take a randomly long time to run
       this.timeout(30000)
-      const keyfile = tempy.file({ extension: 'key' })
-      const certfile = tempy.file({ extension: 'crt' })
+      const keyfile = temporaryFile({ extension: 'key' })
+      const certfile = temporaryFile({ extension: 'crt' })
       await makeExpiringCert(keyfile, certfile)
       const result = await sut.validateCertAuth(certfile)
       assert.equal(result, 'not ok')
@@ -97,8 +97,8 @@ describe('Service status', function () {
     it('should report soon-to-expire certificate', async function () {
       // this test can take a randomly long time to run
       this.timeout(30000)
-      const keyfile = tempy.file({ extension: 'key' })
-      const certfile = tempy.file({ extension: 'crt' })
+      const keyfile = temporaryFile({ extension: 'key' })
+      const certfile = temporaryFile({ extension: 'crt' })
       await makeExpiringCert(keyfile, certfile)
       const result = await sut.validateServerCert(certfile, keyfile)
       assert.equal(result, 'not ok')
@@ -164,10 +164,10 @@ describe('Service status', function () {
     it('should report soon-to-expire certificate', async function () {
       // this test can take a randomly long time to run
       this.timeout(30000)
-      const keyfile = tempy.file({ extension: 'key' })
-      const certfile = tempy.file({ extension: 'crt' })
+      const keyfile = temporaryFile({ extension: 'key' })
+      const certfile = temporaryFile({ extension: 'crt' })
       await makeExpiringCert(keyfile, certfile)
-      const pfxfile = tempy.file({ extension: 'p12' })
+      const pfxfile = temporaryFile({ extension: 'p12' })
       await convertToPfx(keyfile, certfile, pfxfile)
       const result = await sut.validatePfxFile(pfxfile)
       assert.equal(result, 'not ok')

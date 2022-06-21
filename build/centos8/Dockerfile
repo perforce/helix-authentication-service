@@ -50,7 +50,7 @@ COPY RELNOTES.txt RELNOTES.txt
 # third party licenses into the docs directory
 #
 RUN npm -q ci
-RUN npx showdown makehtml -i README.md -o README.html --tables --completeHTMLDocument
+RUN npx showdown makehtml -i README.md -o README.html -c tables -c completeHTMLDocument
 RUN node ./bin/copyLicenses.js
 RUN mkdir -p docs/licenses/nodejs && \
     bash -c 'cp /usr/share/doc/nodejs-*/LICENSE docs/licenses/nodejs'
