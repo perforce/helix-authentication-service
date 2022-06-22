@@ -39,7 +39,7 @@ incoming requests can go to any of the configured HAS instances.
 1. Start all docker containers: `docker compose up --build -d`
 1. Stop one of the HAS instances, either `auth-svc1.doc` or `auth-svc2.doc`
     * e.g. `docker compose stop auth-svc1.doc`
-1. Open https://auth-svc.doc/requests/new/foobar in a web browser
+1. Open https://authen.doc/requests/new/foobar in a web browser
     * Firefox is very easy to use for this purpose
 1. Click or copy/paste the `loginUrl` displayed in the browser
 1. While the identity provider login page is displayed...
