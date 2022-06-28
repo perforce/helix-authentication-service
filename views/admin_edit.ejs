@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<%- include('title') %>
+<body class="Site">
+  <%- include('header', {subtitle: 'Administration'}) %>
+  <section class="section Site-content">
+    <div class="container">
+      <form method="post" action="/admin/submit">
+        <div class="field">
+          <label class="label">PORT</label>
+          <div class="control">
+            <input class="input" type="number" name="port">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">PROTOCOL</label>
+          <div class="control">
+            <input class="input" type="text" name="protocol">
+          </div>
+        </div>
+        <div class="field is-grouped">
+          <div class="control">
+            <button class="button is-link" type="submit">Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+  <%- include('footer') %>
+</body>
+</html>
