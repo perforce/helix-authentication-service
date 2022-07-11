@@ -69,6 +69,13 @@ Installation
            system, such as `yum` or `apt` for CentOS and Ubuntu respectively.
 
 
+Upgrade
+
+    The names of the configuration files for IDP_CONFIG_FILE and LOGGING
+    in releases prior to 2022.1 ended with the .js extension. With release
+    2022.1 the names must now be changed to end with the .cjs extension.
+
+
 Known Limitations
 
     No known limitations with the currently released products.
