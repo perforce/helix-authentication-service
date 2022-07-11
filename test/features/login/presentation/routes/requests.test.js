@@ -9,7 +9,7 @@ import minimatch from 'minimatch'
 // Load the test environment before the bulk of our code initializes, otherwise
 // it will be too late due to the `import` early-binding behavior.
 import 'helix-auth-svc/test/env.js'
-import app from 'helix-auth-svc/lib/app.js'
+import createApp from 'helix-auth-svc/lib/app.js'
 import { createServer } from 'helix-auth-svc/lib/server.js'
 import container from 'helix-auth-svc/lib/container.js'
 
@@ -18,6 +18,7 @@ import container from 'helix-auth-svc/lib/container.js'
 // mocha no longer exits after the tests complete.
 
 const settings = container.resolve('settingsRepository')
+const app = createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
 //
