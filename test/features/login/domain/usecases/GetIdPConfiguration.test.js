@@ -76,6 +76,18 @@ describe('GetIdPConfiguration use case', function () {
     assert.property(result, 'urn:swarm-example:sp')
   })
 
+  it('should succesfully load from a relative path', async function () {
+    // arrange
+    const map = new Map()
+    map.set('IDP_CONFIG_FILE', './routes/saml_idp.conf.cjs')
+    const settingsRepository = new MapSettingsRepository(map)
+    const usecase = GetIdPConfiguration({ settingsRepository })
+    // act
+    const result = await usecase()
+    // assert
+    assert.property(result, 'urn:swarm-example:sp')
+  })
+
   it('should succesfully load CommonJS with .js extension', async function () {
     // arrange
     const commonjs = temporaryFile({ extension: 'js' })
