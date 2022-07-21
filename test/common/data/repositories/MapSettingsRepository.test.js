@@ -25,4 +25,15 @@ describe('MapSettingsRepository', function () {
     assert.isFalse(sut.getBool('SETTING_FALSE'))
     assert.isFalse(sut.getBool('SETTING_UNDEFINED'))
   })
+
+  it('should allow changing values', function () {
+    const settings = new Map()
+    const sut = new MapSettingsRepository(settings)
+    sut.set('HAS_TEST_BOOL', 'true')
+    assert.isTrue(sut.getBool('HAS_TEST_BOOL'))
+    sut.set('HAS_TEST_INT', '123')
+    assert.equal(sut.get('HAS_TEST_INT'), '123')
+    sut.set('HAS_TEST_STR', 'abc')
+    assert.equal(sut.get('HAS_TEST_STR'), 'abc')
+  })
 })

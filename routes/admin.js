@@ -30,7 +30,7 @@ passport.deserializeUser((obj, done) => {
 
 // eslint-disable-next-line no-unused-vars
 router.get('/', (req, res, next) => {
-  const adminEnabled = process.env.ENABLE_ADMIN
+  const adminEnabled = process.env.ADMIN_ENABLED
   res.render('admin', { adminEnabled })
 })
 
