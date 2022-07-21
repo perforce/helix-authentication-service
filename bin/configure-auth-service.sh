@@ -1085,7 +1085,7 @@ function modify_eco_config() {
 
 # If not already set, read the value for the named variable from .env file.
 function set_var_from_env() {
-    local -n ref=$1
+    local var=$1
     local force_set=false
     [[ -n "$2" ]] && force_set=$2
     # awk has a hard time doing the simple things that grep and cut can do, so
@@ -1094,9 +1094,9 @@ function set_var_from_env() {
     if [[ -n "${VALUE}" ]]; then
         VALUE=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$VALUE")
         if $force_set; then
-            ref="${VALUE}"
+            eval "$var=\"${VALUE}\""
         else
-            ref="${ref:-${VALUE}}"
+            eval "$var=\"${var:-${VALUE}}\""
         fi
     fi
 }
