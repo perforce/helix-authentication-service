@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2020-2022 Perforce Software
 //
 import * as http from 'node:http'
 import { assert } from 'chai'
@@ -83,7 +83,7 @@ setTimeout(function () {
           .set('Authorization', 'Bearer notavalidtokenatall')
           .expect(400)
           .expect(res => {
-            assert.include(res.text, 'no `kid` found in JWT header')
+            assert.include(res.text, 'invalid json web token')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -156,7 +156,7 @@ setTimeout(function () {
           .set('Authorization', 'Bearer dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.')
           .expect(400)
           .expect(res => {
-            assert.include(res.text, 'no `kid` found in JWT header')
+            assert.include(res.text, 'malformed json web token')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
