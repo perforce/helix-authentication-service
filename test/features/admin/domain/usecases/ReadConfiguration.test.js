@@ -30,7 +30,7 @@ describe('ReadConfiguration use case', function () {
       const results = new Map()
       results.set('NAME1', 'VALUE1')
       results.set('ADMIN_ENABLED', true)
-      results.set('ADMIN_USER', 'scott')
+      results.set('ADMIN_USERNAME', 'scott')
       results.set('ADMIN_PASSWD_FILE', '/etc/passwd')
       return results
     })

@@ -31,7 +31,7 @@ describe('WriteConfiguration use case', function () {
       results.set('NAME1', 'VALUE1')
       results.set('NAME3', 'VALUE3')
       results.set('ADMIN_ENABLED', true)
-      results.set('ADMIN_USER', 'scott')
+      results.set('ADMIN_USERNAME', 'scott')
       results.set('ADMIN_PASSWD_FILE', '/etc/passwd')
       return results
     })
@@ -41,7 +41,7 @@ describe('WriteConfiguration use case', function () {
       assert.equal(settings.get('NAME2'), 'VALUE2')
       assert.equal(settings.get('NAME3'), 'VALUE#3')
       assert.isTrue(settings.get('ADMIN_ENABLED'))
-      assert.equal(settings.get('ADMIN_USER'), 'scott')
+      assert.equal(settings.get('ADMIN_USERNAME'), 'scott')
       assert.equal(settings.get('ADMIN_PASSWD_FILE'), '/etc/passwd')
     })
     // act
@@ -49,7 +49,7 @@ describe('WriteConfiguration use case', function () {
     settings.set('NAME2', 'VALUE2')
     settings.set('NAME3', 'VALUE#3')
     settings.set('ADMIN_ENABLED', false)
-    settings.set('ADMIN_USER', 'charlie')
+    settings.set('ADMIN_USERNAME', 'charlie')
     settings.set('ADMIN_PASSWD_FILE', '/etc/shadow')
     await usecase(settings)
     // assert
