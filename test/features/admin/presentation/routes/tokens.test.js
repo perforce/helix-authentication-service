@@ -62,7 +62,42 @@ setTimeout(function () {
     })
 
     describe('Failure cases', function () {
-      it('should reject request without Authorization', function (done) {
+      it('should reject create without Authorization', function (done) {
+        agent
+          .post('/tokens/create')
+          .trustLocalhost(true)
+          .expect(401)
+          .expect(res => {
+            assert.include(res.text, 'Unauthorized')
+          })
+          // eslint-disable-next-line no-unused-vars
+          .end(function (err, res) {
+            if (err) {
+              return done(err)
+            }
+            done()
+          })
+      })
+
+      it('should reject create with invalid credentials', function (done) {
+        agent
+          .post('/tokens/create')
+          .trustLocalhost(true)
+          .set('Authorization', 'Bearer c3VzYW46bGlvbmVzcw==')
+          .expect(401)
+          .expect(res => {
+            assert.include(res.text, 'Unauthorized')
+          })
+          // eslint-disable-next-line no-unused-vars
+          .end(function (err, res) {
+            if (err) {
+              return done(err)
+            }
+            done()
+          })
+      })
+
+      it('should reject remove without Authorization', function (done) {
         agent
           .post('/tokens/remove')
           .trustLocalhost(true)
