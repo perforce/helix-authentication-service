@@ -46,7 +46,7 @@ describe('DeleteWebToken use case', function () {
     // act
     const found = await verifyToken(token)
     assert.property(found, 'aud')
-    await usecase(token)
+    await usecase(found)
     // attempting to verify a token that was removed is an error
     try {
       await verifyToken(token)
@@ -60,51 +60,10 @@ describe('DeleteWebToken use case', function () {
   it('should ignore repeated remove operations', async function () {
     settings.set('SVC_BASE_URI', 'https://localhost:3000')
     const token = await registerToken()
-    await usecase(token)
+    const found = await verifyToken(token)
+    await usecase(found)
     // does not raise error on repeated deletes
-    await usecase(token)
-    await usecase(token)
-  })
-
-  it('should reject malformed web token', async function () {
-    // arrange
-    const token = 'notavalidtokenatall'
-    try {
-      // act
-      await usecase(token)
-      assert.fail('should have raised error')
-    } catch (err) {
-      // assert
-      assert.include(err.message, 'invalid json web token')
-    }
-  })
-
-  it('should reject token with missing signature', async function () {
-    // arrange
-    settings.set('SVC_BASE_URI', 'https://localhost:3000')
-    const fullToken = await registerToken()
-    const lastDot = fullToken.lastIndexOf('.')
-    const token = fullToken.substring(0, lastDot + 1)
-    try {
-      // act
-      await usecase(token)
-      assert.fail('should have raised error')
-    } catch (err) {
-      // assert
-      assert.include(err.message, 'jwt signature is required')
-    }
-  })
-
-  it('should reject token header with bad JSON', async function () {
-    // arrange
-    const token = 'dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.'
-    try {
-      // act
-      await usecase(token)
-      assert.fail('should have raised error')
-    } catch (err) {
-      // assert
-      assert.include(err.message, 'malformed json web token')
-    }
+    await usecase(found)
+    await usecase(found)
   })
 })
