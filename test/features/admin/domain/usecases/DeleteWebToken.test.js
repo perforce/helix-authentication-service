@@ -47,14 +47,9 @@ describe('DeleteWebToken use case', function () {
     const found = await verifyToken(token)
     assert.property(found, 'aud')
     await usecase(found)
-    // attempting to verify a token that was removed is an error
-    try {
-      await verifyToken(token)
-      assert.fail('should have raised error')
-    } catch (err) {
-      // assert
-      assert.include(err.message, 'token registration not found')
-    }
+    // assert
+    const result = await verifyToken(token)
+    assert.isNull(result)
   })
 
   it('should ignore repeated remove operations', async function () {
