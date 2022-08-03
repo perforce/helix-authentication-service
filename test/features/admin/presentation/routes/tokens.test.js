@@ -29,15 +29,17 @@ setTimeout(function () {
   describe('Web Token requests', function () {
     describe('Success cases', function () {
       it('should create and approve a JSON web token', function (done) {
-        const basicToken = 'c2NvdHQ6dGlnZXI='
-        let webToken
+        let accessToken
         agent
           .post('/tokens/create')
           .trustLocalhost(true)
-          .set('Authorization', 'Bearer ' + basicToken)
+          .send({ grant_type: 'password', username: 'scott', password: 'tiger' })
           .expect(200)
           .expect(res => {
-            webToken = res.text
+            assert.equal(res.body.token_type, 'bearer')
+            assert.equal(res.body.expires_in, 3600)
+            assert.property(res.body, 'access_token')
+            accessToken = res.body.access_token
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -47,7 +49,7 @@ setTimeout(function () {
               agent
                 .post('/tokens/remove')
                 .trustLocalhost(true)
-                .set('Authorization', 'Bearer ' + webToken)
+                .set('Authorization', 'Bearer ' + accessToken)
                 .expect(200)
                 // eslint-disable-next-line no-unused-vars
                 .end(function (err, res) {
@@ -59,16 +61,38 @@ setTimeout(function () {
             }
           })
       })
-    })
 
-    describe('Failure cases', function () {
-      it('should reject create without Authorization', function (done) {
+      it('should return state when creating web token', function (done) {
         agent
           .post('/tokens/create')
           .trustLocalhost(true)
-          .expect(401)
+          .send({ grant_type: 'password', username: 'scott', password: 'tiger', state: 'foobar' })
+          .expect(200)
           .expect(res => {
-            assert.include(res.text, 'Unauthorized')
+            assert.equal(res.body.token_type, 'bearer')
+            assert.equal(res.body.expires_in, 3600)
+            assert.equal(res.body.state, 'foobar')
+            assert.property(res.body, 'access_token')
+          })
+          // eslint-disable-next-line no-unused-vars
+          .end(function (err, res) {
+            if (err) {
+              return done(err)
+            } else {
+              done()
+            }
+          })
+      })
+    })
+
+    describe('Failure cases', function () {
+      it('should reject create with invalid grant_type', function (done) {
+        agent
+          .post('/tokens/create')
+          .trustLocalhost(true)
+          .expect(400)
+          .expect(res => {
+            assert.include(res.text, 'grant_type invalid')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -83,7 +107,7 @@ setTimeout(function () {
         agent
           .post('/tokens/create')
           .trustLocalhost(true)
-          .set('Authorization', 'Bearer c3VzYW46bGlvbmVzcw==')
+          .send({ grant_type: 'password', username: 'susan', password: 'lioness' })
           .expect(401)
           .expect(res => {
             assert.include(res.text, 'Unauthorized')

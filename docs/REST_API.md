@@ -24,12 +24,12 @@ this:
 
 ### Administration
 
-The adminstrative (REST) interface to the service consists of two sets of endpoints, one named `/tokens` and the other being `/settings`, with the former providing a JSON Web Token needed by the latter (akin to [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750)). The steps involved in administering the service would look something like this:
+The adminstrative (REST) interface to the service consists of two sets of endpoints, one named `/tokens` and the other being `/settings`, with the former providing a JSON Web Token (as described in [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519)) needed by the latter. The steps involved in administering the service would look something like this:
 
-1. Pass the administrative user's credentials via basic authentication to `/tokens/create` and receieve the JWT as the response body.
+1. Pass the administrative user's credentials to `/tokens/create` and receieve the JWT in the response body.
 1. Retrieve the configurable settings via `/settings/fetch`, passing the JWT as the bearer token.
 1. Update some or all of the settings via `/settings/update`, again providing the JWT.
-1. End the administrative process by deleting the JWT from the in-memory registry by sending a request to `/tokens/remove`
+1. End the administrative session by deleting the JWT from the in-memory registry by sending a request to `/tokens/remove`
 
 ## Routes
 
@@ -168,22 +168,22 @@ Note that certain settings will not be returned via this endpoint, including `AD
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ...snip...glw https://auth-service/settings/fetch
+curl -k --oauth2-bearer eyJ.<snip>.glw https://auth-service/settings/fetch
 ```
 
 #### Response Example
 
 ```json
 {
-    "OIDC_CLIENT_ID":"client_id",
-    "OIDC_CLIENT_SECRET":"client_secret",
-    "OIDC_ISSUER_URI":"https://oidc.example.com",
-    "SAML_IDP_METADATA_URL":"https://saml.example.com",
-    "DEBUG":"1",
-    "DEBUG_PROXY":"1",
-    "SVC_BASE_URI":"https://has.example.com",
-    "DEFAULT_PROTOCOL":"oidc",
-    "CA_CERT_FILE":"certs/ca.crt"
+    "OIDC_CLIENT_ID": "client_id",
+    "OIDC_CLIENT_SECRET": "client_secret",
+    "OIDC_ISSUER_URI": "https://oidc.example.com",
+    "SAML_IDP_METADATA_URL": "https://saml.example.com",
+    "DEBUG": "1",
+    "DEBUG_PROXY": "1",
+    "SVC_BASE_URI": "https://has.example.com",
+    "DEFAULT_PROTOCOL": "oidc",
+    "CA_CERT_FILE": "certs/ca.crt"
 }
 ```
 
@@ -208,7 +208,7 @@ Note that calling this endpoint will overwrite the `.env` file, completely wipin
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ...snip...glw -X POST -H 'Content-Type: application/json' -d '{"DEFAULT_PROTOCOL":"saml"}' https://auth-service/settings/update
+curl -k --oauth2-bearer eyJ.<snip>.glw -X POST -H 'Content-Type: application/json' -d '{"DEFAULT_PROTOCOL":"saml"}' https://auth-service/settings/update
 ```
 
 #### Response Example
@@ -219,24 +219,31 @@ The response body will be empty.
 
 #### POST ${baseUrl}/tokens/create
 
-This is the starting point for the user administration process. The admin user's credentials must be provided via ['Basic' HTTP Authentication](https://datatracker.ietf.org/doc/html/rfc7617) (i.e. base64 encoded "&lt;username&gt;:&lt;password&gt;"). The JSON web token has an expiration time, but it is still recommended to call `/tokens/remove` when finished.
+This is the starting point for the user administration process, which taking the admin's credentials and returning a JSON Web Token to be used as "bearer" token as described in [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750). The admin user's credentials must be provided via the URL-encoded request body as described in Section 4.3 of [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749). The response body will be JSON formatted and include the token in the `access_token` property. The JSON web token has an expiration time, but it is still recommended to call `/tokens/remove` when finished.
 
-#### Request Headers
+#### Request Parameters
 
-| Name | Description |
-| ---- | ----------- |
-| `Authorization` | `Bearer ` plus base64 encoded username:password |
+| Parameter | Description | Param Type | Data Type |
+| --------- | ----------- | ---------- | --------- |
+| `grant_type` | Always `password` | Query | String |
+| `username` | The administrator's username | Query | String |
+| `password` | The administrator's password | Query | String |
+| `state` | Optional: the value will be passed back in the response body. | Query | String |
 
 #### Request Example
 
 ```shell
-$ curl -k --oauth2-bearer c2NvdHQ6dGlnZXI= -X POST https://auth-service/tokens/create
+$ curl -k -X POST -d grant_type=password -d username=scott -d password=tiger https://auth-service/tokens/create
 ```
 
 #### Response Example
 
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTk1NTkyMzAsImV4cCI6MTY1OTU2MjgzMCwiYXVkIjoiYjRmZmRhMTktMGE3ZC00NjM2LWJjMzYtZjYxMDNmYzRhOGM4IiwiaXNzIjoiaHR0cHM6Ly8xOTIuMTY4LjEuMjE0OjMwMDAifQ.QMLUWucB8JAtrl7CN0pbgr61aRxBQLFVA_psCHsiyps
+```json
+{
+    "token_type": "bearer",
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.<snip>.F0wCh_32WaFe_JDA7n9yU1aiHgOqP6ebXCbc15v5UBA",
+    "expires_in": 3600
+}
 ```
 
 ### /tokens/remove
@@ -254,7 +261,7 @@ This will invalidate the registered JSON web token, thus ending the administrati
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ...snip...glw -X POST https://auth-service/tokens/remove
+curl -k --oauth2-bearer eyJ.<snip>.glw -X POST https://auth-service/tokens/remove
 ```
 
 #### Response Example

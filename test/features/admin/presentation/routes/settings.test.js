@@ -33,8 +33,7 @@ setTimeout(function () {
         // create a test dot.env file every time for repeatability
         const dotenvFile = 'test/test-dot.env'
         fs.writeFileSync(dotenvFile, 'FOOBAR="avalue"')
-        const basicToken = 'c2NvdHQ6dGlnZXI='
-        getToken(basicToken).then((webToken) => {
+        getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings/fetch')
             .trustLocalhost(true)
@@ -56,8 +55,7 @@ setTimeout(function () {
       })
 
       it('should modify configuration settings', function (done) {
-        const basicToken = 'c2NvdHQ6dGlnZXI='
-        getToken(basicToken).then((webToken) => {
+        getToken('scott', 'tiger').then((webToken) => {
           agent
             .post('/settings/update')
             .trustLocalhost(true)
@@ -75,8 +73,7 @@ setTimeout(function () {
       })
 
       it('should fetch modified settings', function (done) {
-        const basicToken = 'c2NvdHQ6dGlnZXI='
-        getToken(basicToken).then((webToken) => {
+        getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings/fetch')
             .trustLocalhost(true)
@@ -154,8 +151,7 @@ setTimeout(function () {
       })
 
       it('should reject request of wrong content-type', function (done) {
-        const basicToken = 'c2NvdHQ6dGlnZXI='
-        getToken(basicToken).then((webToken) => {
+        getToken('scott', 'tiger').then((webToken) => {
           agent
             .post('/settings/update')
             .trustLocalhost(true)
@@ -180,19 +176,19 @@ setTimeout(function () {
   run()
 }, 500)
 
-function getToken (authToken) {
+function getToken (username, password) {
   return new Promise((resolve, reject) => {
     agent
       .post('/tokens/create')
       .trustLocalhost(true)
-      .set('Authorization', 'Bearer ' + authToken)
+      .send({ grant_type: 'password', username, password })
       .expect(200)
       // eslint-disable-next-line no-unused-vars
       .end(function (err, res) {
         if (err) {
           reject(err)
         } else {
-          resolve(res.text)
+          resolve(res.body.access_token)
         }
       })
   })
