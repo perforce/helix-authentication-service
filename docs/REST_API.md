@@ -10,6 +10,8 @@ will in turn utilize this API.
 In the descriptions below, the `${baseUrl}` is the URL configured in the
 `SVC_BASE_URI` setting in the authentication service.
 
+### Authentication
+
 The steps involved in processing an authentication event would go something like
 this:
 
@@ -19,6 +21,15 @@ this:
 1. User authenticates with IdP, with auth service acting as the SP/RP
 1. Meanwhile, client does a `GET` on `/requests/status/:requestId`
 1. Service eventually responds with JSON-formatted user data
+
+### Administration
+
+The adminstrative (REST) interface to the service consists of two sets of endpoints, one named `/tokens` and the other being `/settings`, with the former providing a JSON Web Token needed by the latter (akin to [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750)). The steps involved in administering the service would look something like this:
+
+1. Pass the administrative user's credentials via basic authentication to `/tokens/create` and receieve the JWT as the response body.
+1. Retrieve the configurable settings via `/settings/fetch`, passing the JWT as the bearer token.
+1. Update some or all of the settings via `/settings/update`, again providing the JWT.
+1. End the administrative process by deleting the JWT from the in-memory registry by sending a request to `/tokens/remove`
 
 ## Routes
 
@@ -47,7 +58,7 @@ user.
   login session. The value, if any, should be any positive number, or a
   non-empty string; anything that JavaScript would consider a "true" value.
 
-#### Request Examples
+#### Request Example
 
 ```shell
 $ curl -k https://auth-service/requests/new/repoman?forceAuthn=1
@@ -56,7 +67,7 @@ $ curl -k https://auth-service/requests/new/repoman?forceAuthn=1
 In this example, the **:userId** route parameter is given as `repoman`, and the
 `forceAuth` query parameter is specified using a "truthy" value.
 
-#### Response Examples
+#### Response Example
 
 ```json
 {
@@ -101,7 +112,7 @@ has not already been defined by the IdP (see the `SAML_NAMEID_FIELD` setting).
 | 404  | The given request identifier is not recognized (they can time out). |
 | 408  | The user login process took longer than the configured timeout period. |
 
-#### Request Examples
+#### Request Example
 
 ```shell
 $ curl -k --cert client.crt --key client.key https://auth-service/requests/status/01DMKW0EFPKJFGY4PT7B4N0F4J
@@ -110,7 +121,7 @@ $ curl -k --cert client.crt --key client.key https://auth-service/requests/statu
 In this example, the **:requestId** route parameter has been given as the
 request identifier from the example above.
 
-#### Response Examples
+#### Response Example
 
 The following example is the result of authenticating with Okta using SAML:
 
@@ -138,3 +149,114 @@ This example shows what Okta would return when using OpenID Connect:
     "email_verified": true
 }
 ```
+
+### /settings/fetch
+
+#### GET ${baseUrl}/settings/fetch
+
+Retrieve all of the settings that have defined values. The JSON Web Token from `/tokens/create` must be provided as a bearer token (via the `Authorization` header).
+
+Note that certain settings will not be returned via this endpoint, including `ADMIN_ENABLED`, 
+`ADMIN_PASSWD_FILE`, and `ADMIN_USERNAME`.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens/create` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ...snip...glw https://auth-service/settings/fetch
+```
+
+#### Response Example
+
+```json
+{
+    "OIDC_CLIENT_ID":"client_id",
+    "OIDC_CLIENT_SECRET":"client_secret",
+    "OIDC_ISSUER_URI":"https://oidc.example.com",
+    "SAML_IDP_METADATA_URL":"https://saml.example.com",
+    "DEBUG":"1",
+    "DEBUG_PROXY":"1",
+    "SVC_BASE_URI":"https://has.example.com",
+    "DEFAULT_PROTOCOL":"oidc",
+    "CA_CERT_FILE":"certs/ca.crt"
+}
+```
+
+### /settings/update
+
+#### POST ${baseUrl}/settings/update
+
+Update some or all of the settings with new values. The JSON Web Token from `/tokens/create` must be provided as a bearer token (via the `Authorization` header). The new settings are to be provided via the request body in JSON format.
+
+Note that certain settings cannot be modified via this endpoint, including `ADMIN_ENABLED`, 
+`ADMIN_PASSWD_FILE`, and `ADMIN_USERNAME`.
+
+Note that calling this endpoint will overwrite the `.env` file, completely wiping out any comments.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens/create` |
+| `Content-Type` | Always `application/json` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ...snip...glw -X POST -H 'Content-Type: application/json' -d '{"DEFAULT_PROTOCOL":"saml"}' https://auth-service/settings/update
+```
+
+#### Response Example
+
+The response body will be empty.
+
+### /tokens/create
+
+#### POST ${baseUrl}/tokens/create
+
+This is the starting point for the user administration process. The admin user's credentials must be provided via ['Basic' HTTP Authentication](https://datatracker.ietf.org/doc/html/rfc7617) (i.e. base64 encoded "&lt;username&gt;:&lt;password&gt;"). The JSON web token has an expiration time, but it is still recommended to call `/tokens/remove` when finished.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus base64 encoded username:password |
+
+#### Request Example
+
+```shell
+$ curl -k --oauth2-bearer c2NvdHQ6dGlnZXI= -X POST https://auth-service/tokens/create
+```
+
+#### Response Example
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTk1NTkyMzAsImV4cCI6MTY1OTU2MjgzMCwiYXVkIjoiYjRmZmRhMTktMGE3ZC00NjM2LWJjMzYtZjYxMDNmYzRhOGM4IiwiaXNzIjoiaHR0cHM6Ly8xOTIuMTY4LjEuMjE0OjMwMDAifQ.QMLUWucB8JAtrl7CN0pbgr61aRxBQLFVA_psCHsiyps
+```
+
+### /tokens/remove
+
+#### POST ${baseUrl}/tokens/remove
+
+This will invalidate the registered JSON web token, thus ending the administrative session. The JWT must be provided as a bearer token (via the `Authorization` header). While the JWT already has an expiration time, it is still good practice to "logout" when administration is finished.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens/create` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ...snip...glw -X POST https://auth-service/tokens/remove
+```
+
+#### Response Example
+
+The response body will be empty.
