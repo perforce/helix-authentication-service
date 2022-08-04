@@ -32,7 +32,8 @@ setTimeout(function () {
       it('should retrieve configuration settings', function (done) {
         // create a test dot.env file every time for repeatability
         const dotenvFile = 'test/test-dot.env'
-        fs.writeFileSync(dotenvFile, 'FOOBAR="avalue"')
+        settings.set('DOTENV_FILE', dotenvFile)
+        fs.writeFileSync(dotenvFile, 'HAS_UNIT_OLD1="oldvalue"')
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings/fetch')
@@ -42,7 +43,7 @@ setTimeout(function () {
             .expect('Content-Type', /application\/json/)
             .expect(res => {
               assert.equal(Object.keys(res.body).length, 1)
-              assert.equal(res.body.FOOBAR, 'avalue')
+              assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
             })
             // eslint-disable-next-line no-unused-vars
             .end(function (err, res) {
@@ -60,7 +61,7 @@ setTimeout(function () {
             .post('/settings/update')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
-            .send({ NEWKEY: 'newvalue' })
+            .send({ HAS_UNIT_NEW1: 'newvalue' })
             .expect(200)
             // eslint-disable-next-line no-unused-vars
             .end(function (err, res) {
@@ -81,14 +82,35 @@ setTimeout(function () {
             .expect(200)
             .expect('Content-Type', /application\/json/)
             .expect(res => {
-              assert.equal(res.body.FOOBAR, 'avalue')
-              assert.equal(res.body.NEWKEY, 'newvalue')
+              assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
+              assert.equal(res.body.HAS_UNIT_NEW1, 'newvalue')
             })
             // eslint-disable-next-line no-unused-vars
             .end(function (err, res) {
               if (err) {
                 return done(err)
               }
+              // verify new setting not yet applied to environment
+              assert.notProperty(process.env, 'HAS_UNIT_NEW1')
+              done()
+            })
+        })
+      })
+
+      it('should apply settings to environment', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/apply')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            // eslint-disable-next-line no-unused-vars
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              // verify setting has _now_ been applied to environment
+              assert.equal(process.env.HAS_UNIT_NEW1, 'newvalue')
               done()
             })
         })

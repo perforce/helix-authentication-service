@@ -103,6 +103,24 @@ setTimeout(function () {
           })
       })
 
+      it('should reject create with missing credentials', function (done) {
+        agent
+          .post('/tokens/create')
+          .trustLocalhost(true)
+          .send({ grant_type: 'password' })
+          .expect(401)
+          .expect(res => {
+            assert.include(res.text, 'Unauthorized')
+          })
+          // eslint-disable-next-line no-unused-vars
+          .end(function (err, res) {
+            if (err) {
+              return done(err)
+            }
+            done()
+          })
+      })
+
       it('should reject create with invalid credentials', function (done) {
         agent
           .post('/tokens/create')
