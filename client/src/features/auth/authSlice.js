@@ -18,12 +18,23 @@ const slice = createSlice({
   // },
   reducers: {},
   extraReducers: (builder) => {
+    // n.b. calls to builder.addCase() come first
     builder.addMatcher(
       auth.endpoints.login.matchFulfilled,
       (state, { payload }) => {
         state.token = payload
       }
     )
+    builder.addMatcher(
+      (action) => action.type.endsWith('/rejected'),
+      (state, { payload }) => {
+        // If a 401 response is received, invalidate the token
+        if (payload && payload.originalStatus === 401) {
+          state.token = null
+        }
+      }
+    )
+    // n.b. calls to builder.addDefaultCase() come last
   },
 })
 
