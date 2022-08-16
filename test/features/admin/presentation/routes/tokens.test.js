@@ -31,7 +31,7 @@ setTimeout(function () {
       it('should create and approve a JSON web token', function (done) {
         let accessToken
         agent
-          .post('/tokens/create')
+          .post('/tokens')
           .trustLocalhost(true)
           .send({ grant_type: 'password', username: 'scott', password: 'tiger' })
           .expect(200)
@@ -47,7 +47,7 @@ setTimeout(function () {
               return done(err)
             } else {
               agent
-                .post('/tokens/remove')
+                .delete('/tokens')
                 .trustLocalhost(true)
                 .set('Authorization', 'Bearer ' + accessToken)
                 .expect(200)
@@ -64,7 +64,7 @@ setTimeout(function () {
 
       it('should return state when creating web token', function (done) {
         agent
-          .post('/tokens/create')
+          .post('/tokens')
           .trustLocalhost(true)
           .send({ grant_type: 'password', username: 'scott', password: 'tiger', state: 'foobar' })
           .expect(200)
@@ -88,7 +88,7 @@ setTimeout(function () {
     describe('Failure cases', function () {
       it('should reject create with invalid grant_type', function (done) {
         agent
-          .post('/tokens/create')
+          .post('/tokens')
           .trustLocalhost(true)
           .expect(400)
           .expect(res => {
@@ -105,7 +105,7 @@ setTimeout(function () {
 
       it('should reject create with missing credentials', function (done) {
         agent
-          .post('/tokens/create')
+          .post('/tokens')
           .trustLocalhost(true)
           .send({ grant_type: 'password' })
           .expect(401)
@@ -123,7 +123,7 @@ setTimeout(function () {
 
       it('should reject create with invalid credentials', function (done) {
         agent
-          .post('/tokens/create')
+          .post('/tokens')
           .trustLocalhost(true)
           .send({ grant_type: 'password', username: 'susan', password: 'lioness' })
           .expect(401)
@@ -141,7 +141,7 @@ setTimeout(function () {
 
       it('should reject remove without Authorization', function (done) {
         agent
-          .post('/tokens/remove')
+          .delete('/tokens')
           .trustLocalhost(true)
           .expect(401)
           .expect(res => {
@@ -158,7 +158,7 @@ setTimeout(function () {
 
       it('should reject malformed web token', function (done) {
         agent
-          .post('/tokens/remove')
+          .delete('/tokens')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer notavalidtokenatall')
           .expect(500)
@@ -176,7 +176,7 @@ setTimeout(function () {
 
       it('should reject JWT header with bad JSON', function (done) {
         agent
-          .post('/tokens/remove')
+          .delete('/tokens')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.')
           .expect(500)
@@ -195,7 +195,7 @@ setTimeout(function () {
       it('should reject web token signed by another party', function (done) {
         const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCIsImtpZCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCJ9.eyJhdWQiOiJhcGk6Ly8yNWIxN2NkYi00YzhkLTQzNGMtOWEyMS04NmQ2N2FjNTAxZDEiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MTlkODhmMy1mOTU3LTQ0Y2YtOWFhNS0wYTFhM2E0NGY3YjkvIiwiaWF0IjoxNjQwMDM4OTY2LCJuYmYiOjE2NDAwMzg5NjYsImV4cCI6MTY0MDEyNTY2NiwiYWlvIjoiRTJaZ1lLaStuWnA3NmQ0TDdRc0Y2Zzk1TGF3NUFBPT0iLCJhcHBpZCI6ImYzNjRmZjE3LTllNDItNGY3ZS1iNzAwLTExZTE5YmEyYWM2ZiIsImFwcGlkYWNyIjoiMiIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcxOWQ4OGYzLWY5NTctNDRjZi05YWE1LTBhMWEzYTQ0ZjdiOS8iLCJvaWQiOiI0ZGJkZjQ1MC05NThkLTRjNjQtODhiMi1hYmJhMmU0NmYxZmYiLCJyaCI6IjAuQVN3QTg0aWRjVmY1ejBTYXBRb2FPa1QzdVJmX1pQTkNubjVQdHdBUjRadWlyRzhzQUFBLiIsInJvbGVzIjpbIlBlcmZvcmNlLkNhbGwiXSwic3ViIjoiNGRiZGY0NTAtOTU4ZC00YzY0LTg4YjItYWJiYTJlNDZmMWZmIiwidGlkIjoiNzE5ZDg4ZjMtZjk1Ny00NGNmLTlhYTUtMGExYTNhNDRmN2I5IiwidXRpIjoiNm5XeVVFbjJGMC00OVlVNG02bDBBQSIsInZlciI6IjEuMCJ9.fS2f3IoYxr2VlJd4BCxT4o3ikqdyjJY1AGVRe7-tBWmpZSbyKOAs39WIYReWp5vMShW1JKv_r37bYSMbIHhz0bfKM-OkQELEdOsfVoBbywkXSoxCoGXAj5q1RxuCPUEnX59UlgCNa2_Z6Rc765O9BSz7BbYBlaW2Bh6OIzTywBW2Lyn987PxiewsIECSUCP_v4lY9VsS5PUo3iQgAygQ1qUQQf3FKunZhL8SOYuz-PcGpkZqC9F8FCah3wMbyekfLu5Tjhujg7lL_RiBgQqkRjXc5WZDft0md4j-4zGQDmPCE73NP2Xh-9mkpu8cZFw-lz-wOZ8SXF43yjfpy1CxSQ'
         agent
-          .post('/tokens/remove')
+          .delete('/tokens')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer ' + token)
           .expect(401)

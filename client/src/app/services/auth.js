@@ -17,13 +17,13 @@ export const auth = createApi({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        url: 'tokens/create',
+        url: 'tokens',
         method: 'POST',
         body: { ...credentials, grant_type: 'password' },
       }),
     }),
     getSettings: builder.query({
-      query: () => 'settings/fetch',
+      query: () => 'settings',
     }),
   }),
 })
