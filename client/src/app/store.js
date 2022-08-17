@@ -19,16 +19,16 @@ persistMiddleware.startListening({
   effect: async (action, listenerApi) => {
     const state = listenerApi.getState()
     if (state.auth.token) {
-      localStorage.setItem('token', JSON.stringify(state.auth.token))
+      sessionStorage.setItem('token', JSON.stringify(state.auth.token))
     } else {
-      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
     }
   },
 })
 
 function loadTokenFromStorage() {
   try {
-    const serializedToken = localStorage.getItem('token')
+    const serializedToken = sessionStorage.getItem('token')
     if (serializedToken === null) {
       return null
     }

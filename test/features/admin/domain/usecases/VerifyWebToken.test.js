@@ -61,6 +61,22 @@ describe('VerifyWebToken use case', function () {
     }
   })
 
+  it('should reject JWT with algorithm "none"', async function () {
+    // arrange
+    settings.set('SVC_BASE_URI', 'https://localhost:3000')
+    const header = base64json({ alg: 'none' })
+    const payload = base64json({ aud: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9' })
+    const token = header + '.' + payload + '.'
+    try {
+      // act
+      await usecase(token)
+      assert.fail('should have raised error')
+    } catch (err) {
+      // assert
+      assert.include(err.message, 'jwt signature is required')
+    }
+  })
+
   it('should reject JWT with missing signature', async function () {
     // arrange
     settings.set('SVC_BASE_URI', 'https://localhost:3000')
@@ -101,3 +117,8 @@ describe('VerifyWebToken use case', function () {
     assert.isNull(result)
   })
 })
+
+function base64json(value) {
+  const s = Buffer.from(JSON.stringify(value), 'utf-8').toString('base64')
+  return s.replace(/=+$/, '');
+}
