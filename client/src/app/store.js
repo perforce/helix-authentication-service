@@ -3,7 +3,8 @@
 //
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
 import { auth } from './services/auth'
-import authReducer from '../features/auth/authSlice'
+import authReducer from 'features/auth/authSlice'
+import settingsReducer from 'features/settings/settingsSlice'
 
 const persistMiddleware = createListenerMiddleware()
 
@@ -38,7 +39,6 @@ function loadTokenFromStorage() {
   }
 }
 
-
 export const store = configureStore({
   preloadedState: {
     auth: {
@@ -48,6 +48,7 @@ export const store = configureStore({
   reducer: {
     [auth.reducerPath]: auth.reducer,
     auth: authReducer,
+    settings: settingsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(auth.middleware).concat(persistMiddleware.middleware),

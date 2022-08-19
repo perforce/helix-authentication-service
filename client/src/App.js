@@ -4,9 +4,9 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Box } from '@mui/material'
-import { Login } from './features/auth/Login'
-import { PrivateOutlet } from './utils/PrivateOutlet'
-import { ShowSettings } from './features/auth/ShowSettings'
+import { Login } from 'features/auth/Login'
+import { PrivateOutlet } from 'utils/PrivateOutlet'
+import { AllSettings } from 'features/settings/AllSettings'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -38,7 +38,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<PrivateOutlet />}>
-            <Route index element={<ShowSettings />} />
+            <Route index element={<AllSettings />} />
           </Route>
         </Routes>
       </Box>

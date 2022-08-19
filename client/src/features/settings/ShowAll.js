@@ -7,9 +7,9 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetSettingsQuery } from '../../app/services/auth'
+import { useGetSettingsQuery } from 'app/services/auth'
 
-export function ShowSettings() {
+export function ShowAll() {
   const { data, error, isFetching } = useGetSettingsQuery()
 
   return (

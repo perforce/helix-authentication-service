@@ -17,7 +17,7 @@ import {
 import { LoadingButton } from '@mui/lab'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
-import { useLoginMutation } from '../../app/services/auth'
+import { useLoginMutation } from 'app/services/auth'
 
 function PasswordInput({ name, value, onChange, onBlur }) {
   const [show, setShow] = useState(false)
