@@ -51,6 +51,9 @@ setTimeout(function () {
                 .trustLocalhost(true)
                 .set('Authorization', 'Bearer ' + accessToken)
                 .expect(200)
+                .expect(res => {
+                  assert.equal(res.body.status, 'ok')
+                })
                 // eslint-disable-next-line no-unused-vars
                 .end(function (err, res) {
                   if (err) {
