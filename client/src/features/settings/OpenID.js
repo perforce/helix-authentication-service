@@ -1,84 +1,105 @@
 //
 // Copyright 2022 Perforce Software
 //
-import React from 'react'
-import { Form, Formik } from 'formik'
-import { Alert, Container, Stack } from '@mui/material'
-import { useSelector } from 'react-redux'
-import { selectFetched } from 'features/settings/settingsSlice'
-import AutoApplyChanges from './AutoApplyChanges'
+import React, { useState } from 'react'
+import {
+  Container,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Stack,
+  Typography,
+} from '@mui/material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import TextInputField from './TextInputField'
 
-const deserialize = (incoming) => {
-  return {
-    issuer: incoming['OIDC_ISSUER_URI'] || '',
-    client: incoming['OIDC_CLIENT_ID'] || '',
-    secret: incoming['OIDC_CLIENT_SECRET'] || ''
+export const deserialize = (incoming, values) => {
+  values['o_issuer'] = incoming['OIDC_ISSUER_URI'] || ''
+  values['o_client'] = incoming['OIDC_CLIENT_ID'] || ''
+  values['o_secret'] = incoming['OIDC_CLIENT_SECRET'] || ''
+}
+
+export const serialize = (values, outgoing) => {
+  outgoing['OIDC_ISSUER_URI'] = values['o_issuer']
+  outgoing['OIDC_CLIENT_ID'] = values['o_client']
+  outgoing['OIDC_CLIENT_SECRET'] = values['o_secret']
+}
+
+export const validate = (values, errors) => {
+  if (values.issuer && !/^https?:\/\/.+/.test(values.issuer)) {
+    errors.issuer = 'Must start with http:// or https://'
   }
 }
 
-const serialize = (outgoing) => {
-  return {
-    OIDC_ISSUER_URI: outgoing['issuer'],
-    OIDC_CLIENT_ID: outgoing['client'],
-    OIDC_CLIENT_SECRET: outgoing['secret'],
-  }
-}
+function SecretInput({ name, value, label, onChange, onBlur }) {
+  const [show, setShow] = useState(false)
+  const handleClick = () => setShow(!show)
+  const handleMouseDown = (event) => event.preventDefault()
 
-export const OpenID = () => {
-  const fetched = useSelector(selectFetched)
-
-  return fetched ? (
-    <Formik
-      initialValues={deserialize(fetched)}
-      validate={values => {
-        const errors = {}
-        if (values.issuer && !/^https?:\/\/.+/.test(values.issuer)) {
-          errors.issuer = 'Must start with http:// or https://'
+  const inputId = name + '-field'
+  return (
+    <FormControl>
+      <InputLabel htmlFor={inputId}>{label}</InputLabel>
+      <OutlinedInput
+        type={show ? 'text' : 'password'}
+        id={inputId}
+        name={name}
+        value={value}
+        label={label}
+        onChange={onChange}
+        onBlur={onBlur}
+        endAdornment={
+          <InputAdornment position="end">
+            <IconButton
+              aria-label="toggle password visibility"
+              onClick={handleClick}
+              onMouseDown={handleMouseDown}
+              edge="end"
+            >
+              {show ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
         }
-        return errors
-      }}
-    >
-      {(props) => (
-        <Form>
-          <Container>
-            <Stack spacing={2}>
-              <TextInputField
-                name="issuer"
-                values={props.values}
-                errors={props.errors}
-                touched={props.touched}
-                label="Issuer URI"
-                onChange={props.handleChange}
-                onBlur={props.handleBlur}
-              />
-              <TextInputField
-                name="client"
-                values={props.values}
-                errors={props.errors}
-                touched={props.touched}
-                label="Client identifier"
-                onChange={props.handleChange}
-                onBlur={props.handleBlur}
-              />
-              <TextInputField
-                name="secret"
-                values={props.values}
-                errors={props.errors}
-                touched={props.touched}
-                label="Client secret"
-                onChange={props.handleChange}
-                onBlur={props.handleBlur}
-              />
-            </Stack>
-          </Container>
-          <AutoApplyChanges serialize={serialize} />
-        </Form>
-      )}
-    </Formik>
-  ) : (
-    <Alert severity="info">Waiting for settings...</Alert>
+      />
+    </FormControl>
   )
 }
 
-export default OpenID
+export const Component = ({ props }) => {
+  return (
+    <Container>
+      <Stack spacing={2}>
+        <Typography variant="h4" sx={{ borderTop: 1, borderColor: 'grey.500' }}>
+          OpenID Connect
+        </Typography>
+        <TextInputField
+          name="o_issuer"
+          values={props.values}
+          errors={props.errors}
+          touched={props.touched}
+          label="Issuer URI"
+          onChange={props.handleChange}
+          onBlur={props.handleBlur}
+        />
+        <TextInputField
+          name="o_client"
+          values={props.values}
+          errors={props.errors}
+          touched={props.touched}
+          label="Client identifier"
+          onChange={props.handleChange}
+          onBlur={props.handleBlur}
+        />
+        <SecretInput
+          name="o_secret"
+          value={props.values.o_secret}
+          label="Client secret"
+          onChange={props.handleChange}
+          onBlur={props.handleBlur}
+        />
+      </Stack>
+    </Container>
+  )
+}

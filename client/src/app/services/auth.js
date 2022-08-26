@@ -27,6 +27,12 @@ export const auth = createApi({
         body: { ...credentials, grant_type: 'password' },
       }),
     }),
+    logout: builder.mutation({
+      query: () => ({
+        url: 'tokens',
+        method: 'DELETE',
+      }),
+    }),
     getSettings: builder.query({
       query: () => 'settings',
     }),
@@ -53,6 +59,7 @@ export const auth = createApi({
 
 export const {
   useLoginMutation,
+  useLogoutMutation,
   useGetSettingsQuery,
   useSendChangesMutation,
 } = auth

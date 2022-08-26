@@ -87,11 +87,11 @@ export const Login = () => {
         handleSubmit,
       }) => (
         <form onSubmit={handleSubmit}>
-          <Container>
+          <Container maxWidth="sm" sx={{ my: 2 }}>
             <Stack spacing={4}>
               {error && <Alert severity="error">{error}</Alert>}
-              <Typography variant="h3" gutterBottom component="div">
-                Enter administrator credentials
+              <Typography variant="h4" component="div">
+                Administrator login
               </Typography>
               <FormControl error={errors.username && touched.username}>
                 <OutlinedInput

@@ -26,6 +26,12 @@ const slice = createSlice({
       }
     )
     builder.addMatcher(
+      auth.endpoints.logout.matchFulfilled,
+      (state) => {
+        state.token = null
+      }
+    )
+    builder.addMatcher(
       (action) => action.type.endsWith('/rejected'),
       (state, { payload }) => {
         // If a 401 response is received, invalidate the token

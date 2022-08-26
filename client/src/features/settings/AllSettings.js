@@ -2,28 +2,50 @@
 // Copyright 2022 Perforce Software
 //
 import React, { useState } from 'react'
-import { Alert, Box, Button, Stack, Tab } from '@mui/material'
-import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab'
-import { useSelector } from 'react-redux'
-import { General } from './General'
-import { OpenID } from './OpenID'
-import { SAML } from './SAML'
+import { Form, Formik } from 'formik'
+import { Alert, Button, Container, Stack } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { useDispatch, useSelector } from 'react-redux'
 import { useGetSettingsQuery, useSendChangesMutation } from 'app/services/auth'
-import { selectModified } from 'features/settings/settingsSlice'
+import { discardChanges, selectModified } from 'features/settings/settingsSlice'
+import AutoApplyChanges from './AutoApplyChanges'
+import * as General from './General'
+import * as OpenID from './OpenID'
+import * as SAML from './SAML'
+
+const deserialize = (incoming) => {
+  const values = {}
+  General.deserialize(incoming, values)
+  OpenID.deserialize(incoming, values)
+  SAML.deserialize(incoming, values)
+  return values
+}
+
+const serialize = (values) => {
+  const outgoing = {}
+  General.serialize(values, outgoing)
+  OpenID.serialize(values, outgoing)
+  SAML.serialize(values, outgoing)
+  return outgoing
+}
+
+const validate = (values) => {
+  const errors = {}
+  General.validate(values, errors)
+  OpenID.validate(values, errors)
+  SAML.validate(values, errors)
+  return errors
+}
 
 export const AllSettings = () => {
-  const { data, error } = useGetSettingsQuery()
+  const dispatch = useDispatch()
+  const { data, error, refetch } = useGetSettingsQuery()
   const [applyStatus, setApplyStatus] = useState(null)
   const [applyError, setApplyError] = useState(null)
   const [sendChanges, { isFetching }] = useSendChangesMutation()
-  const [selectedTab, setSelectedTab] = React.useState('general')
   const modified = useSelector(selectModified)
 
-  const handleChange = (event, newValue) => {
-    setSelectedTab(newValue)
-  }
-
-  const submitChanges = (event) => {
+  const handleSendChanges = (event) => {
     event.preventDefault()
     setTimeout(() => {
       if (modified) {
@@ -52,7 +74,7 @@ export const AllSettings = () => {
   }
 
   return data ? (
-    <div>
+    <Container maxWidth="lg" sx={{ my: 2 }}>
       {applyError && <Alert severity="error">{applyError}</Alert>}
       {
         applyStatus &&
@@ -60,39 +82,53 @@ export const AllSettings = () => {
           () => setApplyStatus(null)
         }>{applyStatus}</Alert>
       }
-      <Box sx={{ width: '100%', typography: 'body1' }}>
-        <TabContext value={selectedTab}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <TabList onChange={handleChange} aria-label="settings tabs">
-              <Tab label="General" value="general" />
-              <Tab label="OpenID" value="openid" />
-              <Tab label="SAML" value="saml" />
-            </TabList>
-          </Box>
-          <TabPanel value="general"><General /></TabPanel>
-          <TabPanel value="openid"><OpenID /></TabPanel>
-          <TabPanel value="saml"><SAML /></TabPanel>
-        </TabContext>
-      </Box>
-      <Stack direction="row" spacing={2}>
-        <LoadingButton
-          onClick={submitChanges}
-          type="submit"
-          variant="contained"
-          disabled={modified === null || Object.entries(modified).length === 0}
-          loading={isFetching}
-        >
-          Apply Changes
-        </LoadingButton>
-        <Button
-          onClick={openLoginPage}
-          variant="outlined"
-          disabled={modified !== null && Object.entries(modified).length > 0}
-        >
-          Test login
-        </Button>
-      </Stack>
-    </div>
+      <Formik
+        initialValues={deserialize(data)}
+        validate={validate}
+      >
+        {(props) => (
+          <Form>
+            <Stack spacing={4} sx={{ m: "2rem" }}>
+              <General.Component props={props} />
+              <OpenID.Component props={props} />
+              <SAML.Component props={props} />
+            </Stack>
+            <AutoApplyChanges serialize={serialize} />
+            <Stack direction="row" spacing={2} justifyContent="space-around">
+              <LoadingButton
+                onClick={handleSendChanges}
+                type="submit"
+                variant="contained"
+                disabled={modified === null || Object.entries(modified).length === 0}
+                loading={isFetching}
+              >
+                Apply Changes
+              </LoadingButton>
+              <Button
+                onClick={openLoginPage}
+                variant="outlined"
+                disabled={modified !== null && Object.entries(modified).length > 0}
+              >
+                Test login
+              </Button>
+              <LoadingButton
+                onClick={(event) => {
+                  event.preventDefault()
+                  dispatch(discardChanges())
+                  refetch()
+                  props.resetForm()
+                }}
+                variant="contained"
+                disabled={modified === null || Object.entries(modified).length === 0}
+                loading={isFetching}
+              >
+                Discard Changes
+              </LoadingButton>
+            </Stack>
+          </Form>
+        )}
+      </Formik>
+    </Container>
   ) : error ? (
     <Alert severity="error">{error}</Alert>
   ) : (

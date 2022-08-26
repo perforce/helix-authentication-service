@@ -11,6 +11,9 @@ const slice = createSlice({
     applyChanges(state, action) {
       state.modified = Object.assign({}, state.modified, action.payload)
     },
+    discardChanges(state, action) {
+      state.modified = null
+    },
   },
   extraReducers: (builder) => {
     // n.b. calls to builder.addCase() come first
@@ -31,7 +34,7 @@ const slice = createSlice({
   },
 })
 
-export const { applyChanges } = slice.actions
+export const { applyChanges, discardChanges } = slice.actions
 
 export default slice.reducer
 
