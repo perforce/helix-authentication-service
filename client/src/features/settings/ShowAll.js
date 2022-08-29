@@ -9,27 +9,28 @@ import {
 } from '@mui/material'
 import { useGetSettingsQuery } from 'app/services/auth'
 
+function stringify (data) {
+  const keys = Object.keys(data).sort()
+  return keys.reduce((acc, key) => {
+    const value = data[key]
+    return acc.concat(`${key}=${value}\n`)
+  }, '')
+}
+
 export function ShowAll() {
-  const { data, error, isFetching } = useGetSettingsQuery()
+  const { data, error } = useGetSettingsQuery()
 
   return (
     <Container>
       <Stack>
-        <Typography variant="h3" gutterBottom component="div">
+        <Typography variant="h4" gutterBottom component="div">
           Service Settings
         </Typography>
         <Box>
           {data ? (
-            <>
-              <Typography variant="h4" gutterBottom component="div">Data</Typography>
-              <pre>{JSON.stringify(data, null, 2)}</pre>
-              <div>{isFetching ? '...refetching' : ''}</div>
-            </>
+            <pre>{stringify(data)}</pre>
           ) : error ? (
-            <>
-              <Typography variant="h4" gutterBottom component="div">Error</Typography>
-              <pre>{JSON.stringify(error, null, 2)}</pre>
-            </>
+            <pre>{JSON.stringify(error, null, 2)}</pre>
           ) : null}
         </Box>
       </Stack>
