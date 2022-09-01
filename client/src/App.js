@@ -146,6 +146,7 @@ function App() {
           <Route path="/" element={<PrivateOutlet />}>
             <Route index element={<AllSettings />} />
           </Route>
+          <Route path="*" element={<p>Page not found</p>} />
         </Routes>
       </Box>
     </ErrorBoundary>

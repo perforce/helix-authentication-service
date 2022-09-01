@@ -11,10 +11,12 @@ import { Provider } from 'react-redux'
 const container = document.getElementById('root')
 const root = ReactDOM.createRoot(container)
 
+// Make sure basename in BrowserRouter matches `homepage` in package.json,
+// otherwise the router cannot match the location with components.
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename="/admin">
         <App />
       </BrowserRouter>
     </Provider>
