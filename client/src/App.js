@@ -88,6 +88,16 @@ function ButtonAppBar() {
       })
   }
 
+  // An elaborate method for dynamically building the menu while also avoiding
+  // the "Menu component doesn't accept a Fragment as a child" error.
+  const menuItems = auth.token ? [
+    { onClick: handleEditSettings, label: 'Edit Settings' },
+    { onClick: handleShowSettings, label: 'View Settings' },
+    { onClick: handleStatus, label: 'Status' },
+    { onClick: handleLogout, label: 'Logout' }
+  ] : [
+    { onClick: handleStatus, label: 'Status' }
+  ]
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -115,14 +125,7 @@ function ButtonAppBar() {
               'aria-labelledby': 'hamburger-button',
             }}
           >
-            {auth.token ? <>
-              <MenuItem onClick={handleEditSettings}>Edit Settings</MenuItem>
-              <MenuItem onClick={handleShowSettings}>View Settings</MenuItem>
-              <MenuItem onClick={handleStatus}>Status</MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </> : <>
-              <MenuItem onClick={handleStatus}>Status</MenuItem>
-            </>}
+            {menuItems.map((mi) => ([<MenuItem onClick={mi.onClick}>{mi.label}</MenuItem>]))}
           </Menu>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Helix Authentication Service
