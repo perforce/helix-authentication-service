@@ -15,7 +15,14 @@ describe('ReadConfiguration use case', function () {
 
   before(function () {
     const configRepository = new ConfigurationRepository()
-    usecase = ReadConfiguration({ configRepository })
+    const getIdPConfiguration = () => {
+      return {
+        'urn:swarm-example:sp': {
+          'acsUrl': 'https://swarm.example.com'
+        }
+      }
+    }
+    usecase = ReadConfiguration({ configRepository, getIdPConfiguration })
   })
 
   after(function () {
@@ -24,6 +31,7 @@ describe('ReadConfiguration use case', function () {
 
   it('should raise an error for invalid input', async function () {
     assert.throws(() => ReadConfiguration({ configRepository: null }), AssertionError)
+    assert.throws(() => ReadConfiguration({ configRepository: {}, getIdPConfiguration: null }), AssertionError)
   })
 
   it('should read values from the repository', async function () {
@@ -87,6 +95,25 @@ describe('ReadConfiguration use case', function () {
     assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
     assert.equal(settings.get('KEY_PASSPHRASE'), 'housecat')
     assert.isTrue(settings.has('KEY_PASSPHRASE_FILE'))
+    assert.isTrue(readStub.calledOnce)
+    readStub.restore()
+  })
+
+  it('should read IdP configuration into settings', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('IDP_CONFIG_FILE', 'routes/samlidp.cjs')
+      return results
+    })
+    // act
+    const settings = await usecase()
+    // assert
+    assert.lengthOf(settings, 2)
+    assert.equal(settings.get('IDP_CONFIG_FILE'), 'routes/samlidp.cjs')
+    assert.isTrue(settings.has('IDP_CONFIG'))
+    const idpConfig = settings.get('IDP_CONFIG')
+    assert.property(idpConfig, 'urn:swarm-example:sp')
     assert.isTrue(readStub.calledOnce)
     readStub.restore()
   })

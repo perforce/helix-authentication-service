@@ -162,4 +162,32 @@ describe('WriteConfiguration use case', function () {
     readStub.restore()
     writeStub.restore()
   })
+
+  it('should write IdP configuration into a file', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.isTrue(settings.has('IDP_CONFIG_FILE'))
+      const filename = settings.get('IDP_CONFIG_FILE')
+      const config = fs.readFileSync(filename, 'utf8')
+      assert.include(config, 'module.exports')
+      assert.include(config, 'urn:swarm-example:sp')
+      fs.rmSync(filename)
+    })
+    // act
+    const settings = new Map()
+    settings.set('IDP_CONFIG', {
+      'urn:swarm-example:sp': { acsUrl: 'https://swarm.example.com' }
+    })
+    await usecase(settings)
+    // assert
+    assert.isTrue(readStub.calledOnce)
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
 })
