@@ -66,7 +66,7 @@ export const AllSettings = () => {
         return response.json()
       })
       .then((response) => {
-        window.open(response.loginUrl, '_blank')
+        window.open(response.loginTestUrl, '_blank')
       })
       .catch((err) => {
         setApplyError(err.message)
