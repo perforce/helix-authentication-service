@@ -177,14 +177,24 @@ describe('HelixEntity repository', function () {
       assert.equal(user.fullname, 'Joseph User')
     })
 
-
     it('should deactivate and reactivate a user entity', async function () {
       this.timeout(10000)
 
-      // create user with known password
-      const tUser = new User('activeuser', 'active@example.com', 'Active User')
-      tUser.password = 'p4ssw0rd'
-      const added = await repository.addUser(tUser)
+      // create user with known password from JSON for a more thorough test
+      const rawJson = {
+        schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+        userName: 'activeuser',
+        name: { givenName: 'Active', familyName: 'User' },
+        emails: [{ primary: true, value: 'active@example.com', type: 'work' }],
+        displayName: 'Active User',
+        locale: 'en-US',
+        externalId: '00u1esetdqu3kOXZc697',
+        groups: [],
+        password: 'p4ssw0rd',
+        active: true
+      }
+      const tUserModel = UserModel.fromJson(rawJson)
+      const added = await repository.addUser(tUserModel)
       assert.equal(added.id, 'user-activeuser')
       assert.equal(added.username, 'activeuser')
       assert.isNull(added.password)
