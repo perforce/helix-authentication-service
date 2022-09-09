@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Perforce Software
+// Copyright 2022 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -64,6 +64,29 @@ describe('User model', function () {
     assert.equal(tUserModel.username, 'joeuser')
     assert.equal(tUserModel.email, 'joejoe@play.com')
     assert.equal(tUserModel.fullname, 'Joe Q. User')
+    assert.isTrue(tUserModel.active)
+  })
+
+  it('should read password from JSON formatted entity', function () {
+    // arrange
+    const rawJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      userName: 'joeuser',
+      name: { givenName: 'Joe', familyName: 'User' },
+      emails: [{ primary: true, value: 'juser@work.com', type: 'work' }],
+      displayName: 'Joe Q. User',
+      locale: 'en-US',
+      externalId: '00u1esetdqu3kOXZc697',
+      groups: [],
+      password: 'y+R6KTD',
+      active: true
+    }
+    const tUserModel = UserModel.fromJson(rawJson)
+    // assert
+    assert.equal(tUserModel.username, 'joeuser')
+    assert.equal(tUserModel.email, 'juser@work.com')
+    assert.equal(tUserModel.fullname, 'Joe Q. User')
+    assert.equal(tUserModel.password, 'y+R6KTD')
     assert.isTrue(tUserModel.active)
   })
 
