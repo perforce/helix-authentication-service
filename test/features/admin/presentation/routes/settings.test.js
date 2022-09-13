@@ -99,32 +99,33 @@ setTimeout(function () {
         })
       })
 
-      //
-      // To test this properly would need a means of allowing the Node.js
-      // server instance to be rebuilt and wrapped by superagent, which is
-      // probably more difficult than it's worth for automated testing.
-      //
-      // it('should apply settings to environment', function (done) {
-      //   getToken('scott', 'tiger').then((webToken) => {
-      //     agent
-      //       .post('/settings/apply')
-      //       .trustLocalhost(true)
-      //       .set('Authorization', 'Bearer ' + webToken)
-      //       .expect(200)
-      //       .expect(res => {
-      //         assert.equal(res.body.status, 'ok')
-      //       })
-      //       // eslint-disable-next-line no-unused-vars
-      //       .end(function (err, res) {
-      //         if (err) {
-      //           return done(err)
-      //         }
-      //         // verify setting has _now_ been applied to environment
-      //         assert.equal(process.env.HAS_UNIT_NEW1, 'newvalue')
-      //         done()
-      //       })
-      //   })
-      // })
+      it('should provide new service address', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/apply')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect('Location', /localhost/)
+            .expect(200)
+            .expect(res => {
+              assert.equal(res.body.status, 'ok')
+            })
+            // eslint-disable-next-line no-unused-vars
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              // We could try to verify that the setting has _now_ been applied
+              // to environment, however, to test this properly we would need a
+              // means of allowing the Node.js server instance to be rebuilt and
+              // wrapped by superagent, which is probably more difficult than
+              // it's worth for automated testing.
+              //
+              // assert.equal(process.env.HAS_UNIT_NEW1, 'newvalue')
+              done()
+            })
+        })
+      })
     })
 
     describe('Failure cases', function () {

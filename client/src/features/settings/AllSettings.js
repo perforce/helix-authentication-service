@@ -50,8 +50,19 @@ export const AllSettings = () => {
     setTimeout(() => {
       if (modified) {
         sendChanges(modified).unwrap()
-          .then(() => setApplyStatus('Settings updated successfully'))
-          .catch((err) => setApplyError(err.data || 'Oh no, there was an error!'))
+          .then((data) => {
+            const href = `${data.location}/admin`
+            setApplyStatus(<div>
+              Settings updated successfully. Open the new <a href={href}>location</a> if it has been changed.
+            </div>)
+          })
+          .catch((err) => {
+            if (err.data) {
+              setApplyError(JSON.stringify(err.data))
+            } else {
+              setApplyError('Oh no, there was an error!')
+            }
+          })
       }
     }, 100)
   }

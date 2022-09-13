@@ -2,6 +2,7 @@
 //
 // Copyright 2022 Perforce Software
 //
+import * as awilix from 'awilix'
 import createApp from 'helix-auth-svc/lib/app.js'
 import {
   default as container,
@@ -104,6 +105,15 @@ function startServer () {
   })
 }
 startServer()
+
+// Register a lightweight usecase that will signal the process to refresh the
+// environment on demand, while allowing unit tests to quietly do nothing rather
+// than terminating the test runner by sending a "kill" signal.
+container.register({
+  applyChanges: awilix.asFunction(() => {
+    return () => process.kill(process.pid, 'SIGUSR2')
+  })
+})
 
 // Work-around for bug in winston library in which file transports stop logging
 // when an uncaught exception is raised. This work-around also involves removing

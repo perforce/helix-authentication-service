@@ -51,8 +51,17 @@ export const auth = createApi({
           url: 'settings/apply',
           method: 'POST'
         })
-        return apply.data ? { data: apply.data } : { error: apply.error }
-      },      
+        if (apply.data) {
+          // Grab the updated Location for the service. Note that the value in
+          // apply.meta.request.url will be that of the local CRA server when
+          // running in development mode.
+          const location = apply.meta.response.headers.get('Location')
+          const data = Object.assign({}, apply.data, { location })
+          return { data }
+        } else {
+          return { error: apply.error }
+        }
+      },
     }),
   }),
 })
