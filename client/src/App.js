@@ -52,6 +52,11 @@ function ButtonAppBar() {
     setAnchorEl(null)
   }
 
+  const handleOpenDocs = () => {
+    setAnchorEl(null)
+    window.open('https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html', '_blank')
+  }
+
   const handleEditSettings = () => {
     setAnchorEl(null)
     navigate('/')
@@ -91,6 +96,7 @@ function ButtonAppBar() {
   // An elaborate method for dynamically building the menu while also avoiding
   // the "Menu component doesn't accept a Fragment as a child" error.
   const menuItems = auth.token ? [
+    { onClick: handleOpenDocs, label: 'Documentation' },
     { onClick: handleEditSettings, label: 'Edit Settings' },
     { onClick: handleShowSettings, label: 'View Settings' },
     { onClick: handleStatus, label: 'Status' },

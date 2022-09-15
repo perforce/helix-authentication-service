@@ -10,7 +10,6 @@ export const deserialize = (incoming, values) => {
   values['s_issuer'] = incoming['SAML_SP_ENTITY_ID'] || ''
   values['s_idpIssuer'] = incoming['SAML_IDP_ENTITY_ID'] || ''
   values['s_entryPoint'] = incoming['SAML_IDP_SSO_URL'] || ''
-  values['s_logoutUrl'] = incoming['SAML_IDP_SLO_URL'] || ''
 }
 
 export const serialize = (values, outgoing) => {
@@ -18,7 +17,6 @@ export const serialize = (values, outgoing) => {
   outgoing['SAML_SP_ENTITY_ID'] = values['s_issuer']
   outgoing['SAML_IDP_ENTITY_ID'] = values['s_idpIssuer']
   outgoing['SAML_IDP_SSO_URL'] = values['s_entryPoint']
-  outgoing['SAML_IDP_SLO_URL'] = values['s_logoutUrl']
 }
 
 export const validate = (values, errors) => {
@@ -27,9 +25,6 @@ export const validate = (values, errors) => {
   }
   if (values.entryPoint && !/^https?:\/\/.+/.test(values.entryPoint)) {
     errors.entryPoint = 'Must start with http:// or https://'
-  }
-  if (values.logoutUrl && !/^https?:\/\/.+/.test(values.logoutUrl)) {
-    errors.logoutUrl = 'Must start with http:// or https://'
   }
 }
 
@@ -40,6 +35,9 @@ export const Component = ({ props }) => {
         <Typography variant="h4" sx={{ borderTop: 1, borderColor: 'grey.500' }}>
           SAML 2.0
         </Typography>
+        <Typography>
+          If the identity provider offers a metadata URL, provide that below.
+        </Typography>
         <TextInputField
           name="s_url"
           values={props.values}
@@ -49,6 +47,9 @@ export const Component = ({ props }) => {
           onChange={props.handleChange}
           onBlur={props.handleBlur}
         />
+        <Typography>
+          Identifier for this service as registered with the IdP, this is typically the URL for service.
+        </Typography>
         <TextInputField
           name="s_issuer"
           values={props.values}
@@ -58,6 +59,10 @@ export const Component = ({ props }) => {
           onChange={props.handleChange}
           onBlur={props.handleBlur}
         />
+        <Typography>
+          Identifier for the Identity Provider.
+          If the metadata URL is specified, then this field can be left blank.
+        </Typography>
         <TextInputField
           name="s_idpIssuer"
           values={props.values}
@@ -67,21 +72,16 @@ export const Component = ({ props }) => {
           onChange={props.handleChange}
           onBlur={props.handleBlur}
         />
+        <Typography>
+          Single-Sign-On URL of the Identity Provider.
+          If the metadata URL is specified, then this field can be left blank.
+        </Typography>
         <TextInputField
           name="s_entryPoint"
           values={props.values}
           errors={props.errors}
           touched={props.touched}
           label="Single Sign On URL"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
-        />
-        <TextInputField
-          name="s_logoutUrl"
-          values={props.values}
-          errors={props.errors}
-          touched={props.touched}
-          label="Logout URL"
           onChange={props.handleChange}
           onBlur={props.handleBlur}
         />

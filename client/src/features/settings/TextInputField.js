@@ -9,8 +9,9 @@ import {
   OutlinedInput,
 } from '@mui/material'
 
-export const TextInputField = ({ name, values, errors, touched, label, onChange, onBlur }) => {
+export const TextInputField = ({ name, values, errors, touched, label, onChange, onBlur, rows }) => {
   const inputId = name + "-field"
+  const opts = rows ? { multiline: true, rows } : {}
   return (
     <FormControl error={errors[name] && touched[name]}>
       <InputLabel htmlFor={inputId}>{label}</InputLabel>
@@ -22,6 +23,7 @@ export const TextInputField = ({ name, values, errors, touched, label, onChange,
         onBlur={onBlur}
         value={values[name]}
         label={label}
+        {...opts}
       />
       <FormHelperText>{errors[name]}</FormHelperText>
     </FormControl>

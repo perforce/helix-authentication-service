@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useGetSettingsQuery, useSendChangesMutation } from 'app/services/auth'
 import { discardChanges, selectModified } from 'features/settings/settingsSlice'
 import AutoApplyChanges from './AutoApplyChanges'
+import * as Certificates from './Certificates'
 import * as General from './General'
 import * as OpenID from './OpenID'
 import * as SAML from './SAML'
@@ -18,6 +19,7 @@ const deserialize = (incoming) => {
   General.deserialize(incoming, values)
   OpenID.deserialize(incoming, values)
   SAML.deserialize(incoming, values)
+  Certificates.deserialize(incoming, values)
   return values
 }
 
@@ -26,6 +28,7 @@ const serialize = (values) => {
   General.serialize(values, outgoing)
   OpenID.serialize(values, outgoing)
   SAML.serialize(values, outgoing)
+  Certificates.serialize(values, outgoing)
   return outgoing
 }
 
@@ -34,6 +37,7 @@ const validate = (values) => {
   General.validate(values, errors)
   OpenID.validate(values, errors)
   SAML.validate(values, errors)
+  Certificates.validate(values, errors)
   return errors
 }
 
@@ -103,6 +107,7 @@ export const AllSettings = () => {
               <General.Component props={props} />
               <OpenID.Component props={props} />
               <SAML.Component props={props} />
+              <Certificates.Component props={props} />
             </Stack>
             <AutoApplyChanges serialize={serialize} />
             <Stack direction="row" spacing={2} justifyContent="space-around">

@@ -55,22 +55,28 @@ describe('ReadConfiguration use case', function () {
 
   it('should rename old settings to new names', async function () {
     // arrange
+    const certFile = temporaryFile({ extension: 'crt' })
+    fs.writeFileSync(certFile, '-----BEGIN CERTIFICATE-----')
+    const keyFile = temporaryFile({ extension: 'key' })
+    fs.writeFileSync(keyFile, '-----BEGIN PRIVATE KEY-----')
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
       const results = new Map()
       results.set('SAML_SP_ISSUER', 'spIssuer')
       results.set('SAML_IDP_ISSUER', 'idpIssuer')
-      results.set('SP_CERT_FILE', 'cert.pem')
-      results.set('SP_KEY_FILE', 'key.pem')
+      results.set('SP_CERT_FILE', certFile)
+      results.set('SP_KEY_FILE', keyFile)
       return results
     })
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 4)
+    assert.lengthOf(settings, 6)
     assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'spIssuer')
     assert.equal(settings.get('SAML_IDP_ENTITY_ID'), 'idpIssuer')
-    assert.equal(settings.get('CERT_FILE'), 'cert.pem')
-    assert.equal(settings.get('KEY_FILE'), 'key.pem')
+    assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
+    assert.equal(settings.get('CERT_FILE'), certFile)
+    assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
+    assert.equal(settings.get('KEY_FILE'), keyFile)
     assert.isTrue(readStub.calledOnce)
     readStub.restore()
   })
@@ -95,6 +101,35 @@ describe('ReadConfiguration use case', function () {
     assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
     assert.equal(settings.get('KEY_PASSPHRASE'), 'housecat')
     assert.isTrue(settings.has('KEY_PASSPHRASE_FILE'))
+    assert.isTrue(readStub.calledOnce)
+    readStub.restore()
+  })
+
+  it('should read certificates from files into settings', async function () {
+    // arrange
+    const caCertFile = temporaryFile({ extension: 'pem' })
+    fs.writeFileSync(caCertFile, '-----BEGIN AUTHORITY-----')
+    const certFile = temporaryFile({ extension: 'crt' })
+    fs.writeFileSync(certFile, '-----BEGIN CERTIFICATE-----')
+    const keyFile = temporaryFile({ extension: 'key' })
+    fs.writeFileSync(keyFile, '-----BEGIN PRIVATE KEY-----')
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('CA_CERT_FILE', caCertFile)
+      results.set('CERT_FILE', certFile)
+      results.set('KEY_FILE', keyFile)
+      return results
+    })
+    // act
+    const settings = await usecase()
+    // assert
+    assert.lengthOf(settings, 6)
+    assert.equal(settings.get('CA_CERT'), '-----BEGIN AUTHORITY-----')
+    assert.isTrue(settings.has('CA_CERT_FILE'))
+    assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
+    assert.isTrue(settings.has('CERT_FILE'))
+    assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
+    assert.isTrue(settings.has('KEY_FILE'))
     assert.isTrue(readStub.calledOnce)
     readStub.restore()
   })

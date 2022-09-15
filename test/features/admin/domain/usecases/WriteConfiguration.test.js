@@ -130,7 +130,7 @@ describe('WriteConfiguration use case', function () {
     writeStub.restore()
   })
 
-  it('should write secrets into files', async function () {
+  it('should write certs and secrets into files', async function () {
     // arrange
     const secretFile = temporaryFile({ extension: 'txt' })
     fs.writeFileSync(secretFile, 'lioness')
@@ -141,18 +141,23 @@ describe('WriteConfiguration use case', function () {
     })
     const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
       assert.isDefined(settings)
-      assert.lengthOf(settings, 2)
+      assert.lengthOf(settings, 3)
       assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
       assert.isTrue(settings.has('KEY_PASSPHRASE_FILE'))
-      const filename = settings.get('KEY_PASSPHRASE_FILE')
-      const secret = fs.readFileSync(filename, 'utf8')
+      const secretFile = settings.get('KEY_PASSPHRASE_FILE')
+      const secret = fs.readFileSync(secretFile, 'utf8')
       assert.equal(secret, 'housecat')
-      fs.rmSync(filename)
+      fs.rmSync(secretFile)
+      assert.isTrue(settings.has('CA_CERT_FILE'))
+      const certFile = settings.get('CA_CERT_FILE')
+      const certificate = fs.readFileSync(certFile, 'utf8')
+      assert.equal(certificate, '-----BEGIN CERTIFICATE-----')
     })
     // act
     const settings = new Map()
     settings.set('OIDC_CLIENT_SECRET', 'tiger')
     settings.set('KEY_PASSPHRASE', 'housecat')
+    settings.set('CA_CERT', '-----BEGIN CERTIFICATE-----')
     await usecase(settings)
     // assert
     const secret = fs.readFileSync(secretFile, 'utf8')
