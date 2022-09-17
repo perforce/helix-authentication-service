@@ -58,6 +58,15 @@ sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
 
 grep -q 'https://saml.idp/metadata' helix-auth-svc/.env || { echo '.env missing SAML' ; exit 1; }
 
+# run the configure script and set up web interface
+sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
+    --base-url https://localhost:3000 --enable-admin \
+    --admin-user=scott --admin-passwd=tiger
+
+grep -q 'ADMIN_ENABLED=true' helix-auth-svc/.env || { echo '.env missing ADMIN_ENABLED' ; exit 1; }
+grep -q 'ADMIN_USERNAME=scott' helix-auth-svc/.env || { echo '.env missing ADMIN_USERNAME' ; exit 1; }
+grep -q 'ADMIN_PASSWD_FILE' helix-auth-svc/.env || { echo '.env missing ADMIN_PASSWD_FILE' ; exit 1; }
+
 cat <<EOT
 
 ==============================================================================

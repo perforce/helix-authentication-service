@@ -43,4 +43,5 @@ jspm_packages/
 *.deb
 tmp
 test/test-dot.env
+cert-or-key-*.pem
 secret-*.txt

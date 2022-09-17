@@ -10,6 +10,10 @@ ALLOW_ROOT=false
 SVC_RESTARTED=false
 DEBUG=false
 SVC_BASE_URI=''
+ADMIN_ENABLED=''
+ADMIN_USERNAME=''
+ADMIN_PASSWD=''
+ADMIN_PASSWD_FILE='admin-passwd.txt'
 CONFIGURE_AUTH=true
 CONFIGURE_SCIM=true
 declare -A PROTOCOLS=()
@@ -190,6 +194,37 @@ function prompt_for_secret() {
     return 0
 }
 
+# Display the given prompt and prompt for a yes/no response.
+function prompt_for_yn() {
+    local var="$1"
+    local prompt="$2"
+    local default="$3"
+
+    [[ "$default" =~ ^[[:space:]]+$ ]] && default=''
+
+    # read the yes/no input like any other input
+    local input=''
+    if [[ -n "$default" ]]; then
+        read -e -p "$prompt [$default]: " input
+        if [[ -z "$input" ]]; then
+            input=$default
+        fi
+    else
+        read -e -p "$prompt: " input
+    fi
+
+    # coerce the input value into either a 'yes' or a 'no'
+    case $input in
+        [yY][eE][sS]|[yY])
+            eval "$var='yes'"
+            ;;
+        *)
+            eval "$var='no'"
+            ;;
+    esac
+    return 0
+}
+
 # Print the usage text to STDOUT.
 function usage() {
     cat <<EOS
@@ -206,27 +241,46 @@ Description:
     to the values provided via arguments or interactive input, and then
     restart the service via pm2 or systemd.
 
+    -h / --help
+        Display this help message.
+
     -m
         Monochrome; no colored text.
 
     -n
         Non-interactive mode; exits immediately if prompting is required.
 
+    --admin-user <username>
+        If given, along with --admin-passwd, will configure the service to
+        provide an administrative web interface.
+
+    --admin-passwd <password>
+        If given, along with the --admin-user, will configure the service to
+        provide an administrative web interface.
+
+    --allow-root
+        Allow the root user to run the configure script. This may leave
+        some files owned and readable only by the root user, which can
+        cause other problems. Similarly, the P4TRUST and P4TICKETS values
+        may reference the root user's home directory.
+
+    --base-url <base-url>
+        HTTP/S address of this service.
 
     --bearer-token <token>
         HTTP Bearer token for authentication of SCIM requests.
 
-    --p4port <p4port>
-        The P4PORT for the Helix Core server for user provisioning.
+    --debug
+        Enable debugging output for this configuration script.
 
-    --super <username>
-        Helix Core super user's username for user provisioning.
+    --default-protocol <protocol>
+        Set the default protocol to be used when a client application does
+        not specify a protocol to be used. This option only applies when
+        configuring more than one protocol.
 
-    --superpassword <password>
-        Helix Core super user's password for user provisioning.
-
-    --base-url <base-url>
-        HTTP/S address of this service.
+    --enable-admin
+        Enable the administrative web interface. Requires the --admin-user
+        and --admin-passwd options to complete the configuration.
 
     --oidc-issuer-uri <issuer-uri>
         Issuer URI for the OpenID Connect identity provider.
@@ -237,6 +291,12 @@ Description:
     --oidc-client-secret <client-secret>
         Client secret associated with the OIDC client identifier.
 
+    --p4port <p4port>
+        The P4PORT for the Helix Core server for user provisioning.
+
+    --pm2
+        Configure for the pm2 process manager instead of systemd.
+
     --saml-idp-metadata-url <metdata-url>
         URL for the SAML identity provider configuration metadata.
 
@@ -246,25 +306,11 @@ Description:
     --saml-sp-entityid <entity-id>
         SAML entity identifier for this service.
 
-    --default-protocol <protocol>
-        Set the default protocol to be used when a client application does
-        not specify a protocol to be used. This option only applies when
-        configuring more than one protocol.
+    --super <username>
+        Helix Core super user's username for user provisioning.
 
-    --pm2
-        Configure for the pm2 process manager instead of systemd.
-
-    --allow-root
-        Allow the root user to run the configure script. This may leave
-        some files owned and readable only by the root user, which can
-        cause other problems. Similarly, the P4TRUST and P4TICKETS values
-        may reference the root user's home directory.
-
-    --debug
-        Enable debugging output for this configuration script.
-
-    -h / --help
-        Display this help message.
+    --superpassword <password>
+        Helix Core super user's password for user provisioning.
 
 See the Helix Authentication Service Administrator Guide for additional
 information pertaining to configuring and running the service.
@@ -423,6 +469,7 @@ function source_enviro() {
 function read_arguments() {
     # build up the list of arguments in pieces since there are so many
     local ARGS=(bearer-token: p4port: super: superpassword: base-url:)
+    ARGS+=(admin-user: admin-passwd: enable-admin)
     ARGS+=(oidc-issuer-uri: oidc-client-id: oidc-client-secret:)
     ARGS+=(saml-idp-sso-url: saml-sp-entityid: saml-idp-metadata-url:)
     ARGS+=(default-protocol: pm2 allow-root debug help)
@@ -451,6 +498,14 @@ function read_arguments() {
                 INTERACTIVE=false
                 shift
                 ;;
+            --admin-user)
+                ADMIN_USERNAME=$2
+                shift 2
+                ;;
+            --admin-passwd)
+                ADMIN_PASSWD=$2
+                shift 2
+                ;;
             --base-url)
                 SVC_BASE_URI=$2
                 shift 2
@@ -458,6 +513,10 @@ function read_arguments() {
             --bearer-token)
                 BEARER_TOKEN=$2
                 shift 2
+                ;;
+            --enable-admin)
+                ADMIN_ENABLED='yes'
+                shift
                 ;;
             --p4port)
                 P4PORT=$2
@@ -540,6 +599,7 @@ function display_arguments() {
 Summary of arguments passed:
 
 Service base URL               [${SVC_BASE_URI:-(not specified)}]
+Administrative user            [${ADMIN_USERNAME:-(not specified)}]
 OIDC Issuer URI                [${OIDC_ISSUER_URI:-(not specified)}]
 OIDC Client ID                 [${OIDC_CLIENT_ID:-(not specified)}]
 SAML IdP Metadata URL          [${SAML_IDP_METADATA_URL:-(not specified)}]
@@ -579,10 +639,48 @@ begin with either http: or https:, and maybe include a port number. If the
 URL contains a port number, then the service will listen for connections
 on that port.
 
+It is strongly recommended to use HTTPS over HTTP as many browsers will not
+send cookies over an insecure connection when using OIDC/SAML protcols.
+
 Example: https://has.example.com:3000/
 
 EOT
     prompt_for SVC_BASE_URI 'Enter the URL for this service' "${SVC_BASE_URI}" validate_url
+}
+
+# Prompt for the choice of using the administrative web interface to configure
+# the service, or configuring everything with this script.
+function prompt_for_gui_or_cli() {
+    cat <<EOT
+
+
+This service can be configured using this script, or the service can be
+configured to enable an administrative web interface. If the web interface
+is enabled, then the configuration can be performed there.
+
+If you choose to enable the web interface, be aware that anyone that can
+access the service can attempt to connect to the administrative interface.
+Choosing a strong password is important.
+
+It is strongly recommended that the service URL use HTTPS instead of HTTP
+as the admin credentials and JSON web token are sent over the network.
+
+EOT
+    prompt_for_yn ADMIN_ENABLED 'Do you want to enable the admin interface?' "${ADMIN_ENABLED}"
+}
+
+function prompt_for_admin_creds() {
+    cat <<EOT
+
+
+To enable the administrative web interface, please choose a username and
+password that will be used to authenticate the administrator. Neither the
+name nor the password have any relation to other applications, they are
+strictly for accessing the administrative web interface.
+
+EOT
+    prompt_for ADMIN_USERNAME 'Enter a username for the admin user' "${ADMIN_USERNAME}" validate_nonempty
+    prompt_for_password ADMIN_PASSWD 'Enter a password for the admin user' "${ADMIN_PASSWD}"
 }
 
 # Prompt for which features are to be configured.
@@ -838,14 +936,31 @@ EOT
 # Prompt for inputs.
 function prompt_for_inputs() {
     prompt_for_svc_base_uri
-    # configuring authentication, provisioning, or both?
-    prompt_for_auth_scim
-    if $CONFIGURE_SCIM; then
-        prompt_for_scim_inputs
+    prompt_for_gui_or_cli
+    if [[ "${ADMIN_ENABLED}" == 'yes' ]]; then
+        prompt_for_admin_creds
+    else
+        # configuring authentication, provisioning, or both?
+        prompt_for_auth_scim
+        if $CONFIGURE_SCIM; then
+            prompt_for_scim_inputs
+        fi
+        if $CONFIGURE_AUTH; then
+            prompt_for_auth_inputs
+        fi
     fi
-    if $CONFIGURE_AUTH; then
-        prompt_for_auth_inputs
+}
+
+function validate_admin_creds() {
+    if [[ -z "${ADMIN_USERNAME}" ]]; then
+        error 'An administrative username must be provided.'
+        return 1
     fi
+    if [[ -z "${ADMIN_PASSWD}" ]]; then
+        error 'An administrative password must be provided.'
+        return 1
+    fi
+    return 0
 }
 
 # Validate inputs for the authentication integration.
@@ -982,6 +1097,9 @@ function validate_inputs() {
         error 'A valid base URL for the service must be provided.'
         return 1
     fi
+    if [[ "${ADMIN_ENABLED}" == 'yes' ]]; then
+        validate_admin_creds
+    fi
     if $CONFIGURE_AUTH; then
         validate_auth_inputs
     fi
@@ -1015,6 +1133,14 @@ The operations involved are as follows:
 
 EOT
     echo "  * Set SVC_BASE_URI to ${SVC_BASE_URI}"
+    if [[ -n "${ADMIN_USERNAME}" ]]; then
+        echo '  * Enable the administrative web interface'
+        echo "  * Set ADMIN_USERNAME to ${ADMIN_USERNAME}"
+    fi
+    if [[ -n "${ADMIN_PASSWD}" ]]; then
+        echo "  * Set ADMIN_PASSWD_FILE to ${ADMIN_PASSWD_FILE}"
+        echo '    (the file will contain the admin user password)'
+    fi
     if [[ -n "${OIDC_ISSUER_URI}" ]]; then
         echo "  * Set OIDC_ISSUER_URI to ${OIDC_ISSUER_URI}"
     fi
@@ -1085,6 +1211,7 @@ function modify_eco_config() {
 
 # If not already set, read the value for the named variable from .env file.
 function set_var_from_env() {
+    # would have used 'local -n' but that is not universally available
     local var=$1
     local force_set=false
     [[ -n "$2" ]] && force_set=$2
@@ -1093,10 +1220,8 @@ function set_var_from_env() {
     VALUE=$(grep "^${1}=" .env | cut -d= -f2-)
     if [[ -n "${VALUE}" ]]; then
         VALUE=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$VALUE")
-        if $force_set; then
-            eval "$var=\"${VALUE}\""
-        else
-            eval "$var=\"${var:-${VALUE}}\""
+        if $force_set || [[ -z "${!var}" ]]; then
+            eval "$var=\"$VALUE\""
         fi
     fi
 }
@@ -1125,6 +1250,17 @@ function read_settings() {
     set_var_from_env 'SAML_IDP_SSO_URL'
     set_var_from_env 'SAML_SP_ENTITY_ID'
     set_var_from_env 'LOGGING'
+    set_var_from_env 'ADMIN_ENABLED'
+    if [[ "${ADMIN_ENABLED}" == 'true' ]]; then
+        ADMIN_ENABLED='yes'
+    else
+        ADMIN_ENABLED='no'
+    fi
+    set_var_from_env 'ADMIN_USERNAME'
+    set_var_from_env 'ADMIN_PASSWD_FILE'
+    if [ -n "${ADMIN_PASSWD_FILE}" -a -f "${ADMIN_PASSWD_FILE}" ]; then
+        ADMIN_PASSWD=$(<${ADMIN_PASSWD_FILE})
+    fi
 }
 
 # Add, modify, or remove the named setting from the .env file.
@@ -1153,6 +1289,16 @@ function modify_env_config() {
     # use awk to add or replace each setting in the .env file
     add_or_replace_var_in_env 'DEFAULT_PROTOCOL' "${DEFAULT_PROTOCOL}"
     add_or_replace_var_in_env 'SVC_BASE_URI' "${SVC_BASE_URI}"
+
+    if [[ "${ADMIN_ENABLED}" == 'yes' ]]; then
+        add_or_replace_var_in_env 'ADMIN_ENABLED' 'true'
+        add_or_replace_var_in_env 'ADMIN_USERNAME' "${ADMIN_USERNAME}"
+        add_or_replace_var_in_env 'ADMIN_PASSWD_FILE' "${ADMIN_PASSWD_FILE}"
+    else
+        add_or_replace_var_in_env 'ADMIN_ENABLED' ''
+        add_or_replace_var_in_env 'ADMIN_USERNAME' ''
+        add_or_replace_var_in_env 'ADMIN_PASSWD_FILE' ''
+    fi
 
     # either OIDC is defined or it is completely wiped
     if [[ -n "${OIDC_ISSUER_URI}" ]]; then
@@ -1212,6 +1358,13 @@ function modify_config() {
         elif [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
             DEFAULT_PROTOCOL='saml'
         fi
+    fi
+    if [[ -n "${ADMIN_PASSWD}" ]]; then
+        # write ADMIN_PASSWD to file named by ADMIN_PASSWD_FILE;
+        # make the ADMIN_PASSWD_FILE file readable only by current user
+        echo "${ADMIN_PASSWD}" > ${ADMIN_PASSWD_FILE}
+        chmod 600 ${ADMIN_PASSWD_FILE}
+        chown --reference=example.env ${ADMIN_PASSWD_FILE}
     fi
     if [[ -n "${OIDC_CLIENT_SECRET}" ]]; then
         # write OIDC_CLIENT_SECRET to file named by OIDC_CLIENT_SECRET_FILE;
@@ -1301,7 +1454,16 @@ EOT
     replaced with genuine certificates, replacing the self-signed certs.
     See the Administration Guide for additional information.
   * Visit the service in a browser to verify it is accessible:
-    ${SVC_BASE_URI}
+        ${SVC_BASE_URI}
+EOT
+    if [[ "${ADMIN_ENABLED}" == 'yes' ]]; then
+        cat <<EOT
+  * Visit the administrative web interface in a browser to finish the
+    configuration of the service:
+        ${SVC_BASE_URI}/admin
+EOT
+    fi
+    cat <<EOT
   * Consult the admin guide for other settings that may need to be changed
     in accordance with the configuration of the identity provider.
   * If using Helix Core server, be sure to install and configure the login
