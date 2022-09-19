@@ -1,13 +1,15 @@
 FROM ubuntu:22.04
 #
-# $ docker build -f test/configure/Dockerfile --tag has_config_test .
-# $ docker run -it --entrypoint /bin/bash has_config_test
+# $ ./build/build_tarball.sh
+# $ docker compose -f test/configure/docker-compose.yml up --build -d ubuntu_22_config_test
+# $ docker exec -it ubuntu_22_config_test /bin/bash
 #
 # # su charlie
 # $ bash
 # [perform manual testing]
 # 
-# $ docker rm has_config_test
+# $ docker stop ubuntu_22_config_test
+# $ docker rm ubuntu_22_config_test
 #
 
 # The docker base images are generally minimal, and our install and configure
@@ -21,13 +23,13 @@ RUN apt-get -q update --fix-missing && \
 # ensuring that user owns everything.
 RUN useradd -m charlie
 RUN echo 'charlie ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/charlie
+RUN echo 'perforce ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/perforce
 WORKDIR /install_sh
 
 # copy and extract the tarball from the previous build stage
 COPY helix-authentication-service.tgz .
 RUN tar zxf helix-authentication-service.tgz && \
     mv helix-authentication-service helix-auth-svc
-COPY test/install/test_install_config.sh .
 RUN chown -R charlie /install_sh
 
 # Start the init daemon (systemd) so that systemctl commands will run properly,
