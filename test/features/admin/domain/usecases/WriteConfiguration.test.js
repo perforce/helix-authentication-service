@@ -152,6 +152,7 @@ describe('WriteConfiguration use case', function () {
       const certFile = settings.get('CA_CERT_FILE')
       const certificate = fs.readFileSync(certFile, 'utf8')
       assert.equal(certificate, '-----BEGIN CERTIFICATE-----')
+      fs.rmSync(certFile)
     })
     // act
     const settings = new Map()
