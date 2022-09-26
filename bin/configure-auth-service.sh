@@ -789,9 +789,7 @@ function prompt_for_auth_inputs() {
     if [[ -n "${PROTOCOLS['saml']}" ]]; then
         prompt_for_saml_idp_metadata_url
         prompt_for_saml_idp_sso_url
-        if [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
-            prompt_for_saml_sp_entity_id
-        fi
+        prompt_for_saml_sp_entity_id
     fi
     # ensure correct default protocol (if read from file)
     if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
