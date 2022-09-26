@@ -1083,6 +1083,7 @@ function modify_eco_config() {
 
 # If not already set, read the value for the named variable from .env file.
 function set_var_from_env() {
+    # would have used 'local -n' but that is not universally available
     local var=$1
     local force_set=false
     [[ -n "$2" ]] && force_set=$2
@@ -1091,10 +1092,8 @@ function set_var_from_env() {
     VALUE=$(grep "^${1}=" .env | cut -d= -f2-)
     if [[ -n "${VALUE}" ]]; then
         VALUE=$(sed -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//' <<<"$VALUE")
-        if $force_set; then
-            eval "$var=\"${VALUE}\""
-        else
-            eval "$var=\"${var:-${VALUE}}\""
+        if $force_set || [[ -z "${!var}" ]]; then
+            eval "$var=\"$VALUE\""
         fi
     fi
 }
