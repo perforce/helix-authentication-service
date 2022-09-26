@@ -44,4 +44,5 @@ jspm_packages/
 tmp
 test/test-dot.env
 cert-or-key-*.pem
+providers.json
 secret-*.txt

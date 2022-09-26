@@ -13,6 +13,13 @@ describe('EnvSettingsRepository', function () {
     assert.isUndefined(sut.get('SETTING_UNDEFINED'))
   })
 
+  it('should return true or false from has()', function () {
+    process.env['SETTING_VALUE'] = 'a_value'
+    const sut = new EnvSettingsRepository()
+    assert.isTrue(sut.has('SETTING_VALUE'))
+    assert.isFalse(sut.has('NO_SUCH_SETTING_BY_THAT_NAME'))
+  })
+
   it('should return true or false from getBool()', function () {
     process.env['SETTING_TRUE'] = 'true'
     process.env['SETTING_NONE'] = 'none'

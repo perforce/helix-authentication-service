@@ -14,6 +14,14 @@ describe('MapSettingsRepository', function () {
     assert.isUndefined(sut.get('SETTING_UNDEFINED'))
   })
 
+  it('should return true or false from has()', function () {
+    const settings = new Map()
+    settings.set('SETTING_VALUE', 'a_value')
+    const sut = new MapSettingsRepository(settings)
+    assert.isTrue(sut.has('SETTING_VALUE'))
+    assert.isFalse(sut.has('NO_SUCH_SETTING_BY_THAT_NAME'))
+  })
+
   it('should return true or false from getBool()', function () {
     const settings = new Map()
     settings.set('SETTING_TRUE', 'true')
