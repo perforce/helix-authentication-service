@@ -20,7 +20,7 @@ RUN yum -q -y install --nogpgcheck -y nodejs
 # (base image has rpmdevtools, rpm-build already)
 # RUN yum -q -y install rpmdevtools rpm-build
 
-ARG ID_REL_BASE=2022.1.0
+ARG ID_REL_BASE=2022.2.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
