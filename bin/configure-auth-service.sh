@@ -1169,6 +1169,9 @@ function modify_env_config() {
         add_or_replace_var_in_env 'SAML_IDP_METADATA_URL' "${SAML_IDP_METADATA_URL}"
         add_or_replace_var_in_env 'SAML_IDP_SSO_URL' "${SAML_IDP_SSO_URL}"
         add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' "${SAML_SP_ENTITY_ID}"
+    elif [[ -n "${SAML_SP_ENTITY_ID}" ]]; then
+        # scenario in which user will configure metadata file later
+        add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' "${SAML_SP_ENTITY_ID}"
     else
         add_or_replace_var_in_env 'SAML_IDP_METADATA_URL' ''
         add_or_replace_var_in_env 'SAML_IDP_SSO_URL' ''
