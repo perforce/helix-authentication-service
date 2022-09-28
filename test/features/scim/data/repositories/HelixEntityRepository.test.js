@@ -465,6 +465,38 @@ describe('HelixEntity repository', function () {
     })
   })
 
+  describe('Missing P4PASSWD', function () {
+    let repository
+    let p4config
+
+    before(async function () {
+      this.timeout(30000)
+      p4config = await runner.startSslServer('./tmp/p4d/ssl-repo')
+      const map = new Map()
+      map.set('P4PORT', p4config.port)
+      map.set('P4USER', p4config.user)
+      const settings = new MapSettingsRepository(map)
+      repository = new HelixEntityRepository({ settingsRepository: settings })
+    })
+
+    after(async function () {
+      this.timeout(30000)
+      helpers.establishTrust(p4config)
+      await runner.stopServer(p4config)
+    })
+
+    it('should report error for missing P4PASSWD', async function () {
+      this.timeout(10000)
+      const query = new Query()
+      try {
+        await repository.getUsers(query)
+        assert.fail('should have raised Error')
+      } catch (err) {
+        assert.include(err.message, 'P4PASSWD not specified')
+      }
+    })
+  })
+
   describe('SSL without trust', function () {
     let repository
     let p4config

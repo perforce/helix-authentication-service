@@ -329,7 +329,7 @@ describe('Service status', function () {
       // act
       const result = await sut.validatePerforce(repository)
       // assert
-      assert.equal(result, 'not ok')
+      assert.include(result, 'Connection refused')
     })
 
     it('should report not ok for wrong user', async function () {
@@ -343,7 +343,7 @@ describe('Service status', function () {
       // act
       const result = await sut.validatePerforce(repository)
       // assert
-      assert.equal(result, 'not ok')
+      assert.include(result, "User nosuchuser doesn't exist")
     })
 
     it('should report not ok for wrong password', async function () {
@@ -357,7 +357,7 @@ describe('Service status', function () {
       // act
       const result = await sut.validatePerforce(repository)
       // assert
-      assert.equal(result, 'not ok')
+      assert.include(result, 'Password invalid')
     })
 
     it('should report ok for working connection', async function () {
