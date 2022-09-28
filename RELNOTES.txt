@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2022.1
+                            Version 2022.2
 
 
 Introduction
@@ -36,7 +36,7 @@ Supported Platforms
     for correction. Any platform not listed above is not actively tested by
     Perforce.
 
-    The 2022.1 release of Helix Authentication Service will be the last one to
+    The 2022.2 release of Helix Authentication Service will be the last one to
     provide a package for Ubuntu 16.04.
 
     Windows (x86_64)
@@ -87,6 +87,38 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2022.2
+
+    HAS-279 (Change #2242671)
+        New setting SENTINEL_CONFIG_FILE to configure support for Redis
+        Sentinel, allowing failover support with multiple Redis instances.
+
+    HAS-282 (Change #2252496)
+        New acsUrls and acsUrlRe settings in the IDP_CONFIG_FILE to allow for
+        multiple Swarm instances connecting with the same SP entity ID.
+
+    HAS-298 (Change #2266157)
+        New setting OIDC_TOKEN_SIGNING_ALGO to specify the signing algorithm
+        used by the identity provider to sign the ID token.
+
+    HAS-300 (Change #2299350)
+        New setting named OIDC_SELECT_ACCOUNT that will enable users logging in
+        via OIDC to select an account with which to authenticate.
+
+----------------------------------------------------------------------
+Bugs fixed in 2022.2
+
+    HAS-339 (Change #2312088)
+        Setting IDP_CONFIG_FILE can now be a relative path.
+
+    HAS-351 (Change #2317348)
+        Configure script is now compatible with CentOS 7.
+
+    HAS-361 (Change #2340090)
+        Perforce user passwords now properly assigned if `password` is
+        provided via user add/update via SCIM user provisioning.
 
 ----------------------------------------------------------------------
 New functionality in 2022.1

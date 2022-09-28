@@ -25,7 +25,7 @@ RUN apt-get -q -y install nodejs
 #
 FROM ubuntu16_pkg_base
 
-ARG ID_REL_BASE=2022.1.0
+ARG ID_REL_BASE=2022.2.0
 ARG ID_PATCH=9999999
 ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
@@ -51,7 +51,7 @@ COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
-RUN sed -e "s/\"2022.1.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+RUN sed -e "s/\"2022.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
         -e "s|+MAIN+|${HAS_VERSION}|" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md

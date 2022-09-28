@@ -887,9 +887,7 @@ function prompt_for_auth_inputs() {
     if [[ -n "${PROTOCOLS['saml']}" ]]; then
         prompt_for_saml_idp_metadata_url
         prompt_for_saml_idp_sso_url
-        if [[ -n "${SAML_IDP_SSO_URL}" || -n "${SAML_IDP_METADATA_URL}" ]]; then
-            prompt_for_saml_sp_entity_id
-        fi
+        prompt_for_saml_sp_entity_id
     fi
     # ensure correct default protocol (if read from file)
     if [[ -n "${DEFAULT_PROTOCOL}" ]]; then
@@ -1317,6 +1315,9 @@ function modify_env_config() {
     if [[ -n "${SAML_IDP_METADATA_URL}" || -n "${SAML_IDP_SSO_URL}" ]]; then
         add_or_replace_var_in_env 'SAML_IDP_METADATA_URL' "${SAML_IDP_METADATA_URL}"
         add_or_replace_var_in_env 'SAML_IDP_SSO_URL' "${SAML_IDP_SSO_URL}"
+        add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' "${SAML_SP_ENTITY_ID}"
+    elif [[ -n "${SAML_SP_ENTITY_ID}" ]]; then
+        # scenario in which user will configure metadata file later
         add_or_replace_var_in_env 'SAML_SP_ENTITY_ID' "${SAML_SP_ENTITY_ID}"
     else
         add_or_replace_var_in_env 'SAML_IDP_METADATA_URL' ''

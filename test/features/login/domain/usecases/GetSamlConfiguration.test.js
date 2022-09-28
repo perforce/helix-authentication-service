@@ -91,13 +91,17 @@ describe('GetSamlConfiguration use case', function () {
     }
   })
 
-  it('should return basic config with minimal settings', async function () {
+  it('should raise error when missing idp cert', async function () {
     // arrange
     settings.set('SAML_IDP_SSO_URL', 'https://example.com/saml/sso')
-    // act
-    const result = await usecase()
-    // assert
-    assert.equal(result.entryPoint, 'https://example.com/saml/sso')
+    try {
+      // act
+      await usecase()
+      assert.fail('should have raised error')
+    } catch (err) {
+      // assert
+      assert.include(err.message, 'certificate is required')
+    }
   })
 
   it('should fetch metadata via URL with settings', async function () {
