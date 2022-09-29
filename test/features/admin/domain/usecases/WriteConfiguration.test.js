@@ -169,6 +169,62 @@ describe('WriteConfiguration use case', function () {
     writeStub.restore()
   })
 
+  it('should convert auth providers to JSON string', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.isTrue(settings.has('AUTH_PROVIDERS'))
+      const providers = settings.get('AUTH_PROVIDERS')
+      assert.isTrue(typeof providers === 'string')
+      assert.include(providers, 'Acme Identity')
+      assert.include(providers, 'saml')
+    })
+    // act
+    const settings = new Map()
+    const providers = [{ label: 'Acme Identity', protocol: 'saml' }]
+    settings.set('AUTH_PROVIDERS', providers)
+    await usecase(settings)
+    // assert
+    assert.isTrue(readStub.calledOnce)
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
+
+  it('should write auth providers configuration into a file', async function () {
+    // arrange
+    const providersFile = temporaryFile({ extension: 'json' })
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const settings = new Map()
+      settings.set('AUTH_PROVIDERS_FILE', providersFile)
+      return settings
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.isTrue(settings.has('AUTH_PROVIDERS_FILE'))
+      const filename = settings.get('AUTH_PROVIDERS_FILE')
+      const config = fs.readFileSync(filename, 'utf8')
+      assert.include(config, 'Acme Identity')
+      assert.include(config, 'saml')
+      fs.rmSync(filename)
+    })
+    // act
+    const settings = new Map()
+    const providers = [{ label: 'Acme Identity', protocol: 'saml' }]
+    settings.set('AUTH_PROVIDERS', providers)
+    await usecase(settings)
+    // assert
+    assert.isTrue(readStub.calledOnce)
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
+
   it('should write IdP configuration into a file', async function () {
     // arrange
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {

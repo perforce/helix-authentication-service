@@ -134,6 +134,56 @@ describe('ReadConfiguration use case', function () {
     readStub.restore()
   })
 
+  it('should read auth providers from setting', async function () {
+    // arrange
+    const providers = {
+      providers: [{ label: 'Acme Identity', protocol: 'saml' }]
+    }
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('AUTH_PROVIDERS', JSON.stringify(providers))
+      return results
+    })
+    // act
+    const settings = await usecase()
+    // assert
+    assert.lengthOf(settings, 1)
+    assert.isTrue(settings.has('AUTH_PROVIDERS'))
+    const actual = settings.get('AUTH_PROVIDERS')
+    assert.lengthOf(actual, 1)
+    assert.property(actual[0], 'label')
+    assert.equal(actual[0].label, 'Acme Identity')
+    assert.equal(actual[0].protocol, 'saml')
+    assert.isTrue(readStub.calledOnce)
+    readStub.restore()
+  })
+
+  it('should read auth providers from file', async function () {
+    // arrange
+    const providersFile = temporaryFile({ extension: 'json' })
+    const providers = {
+      providers: [{ label: 'Acme Identity', protocol: 'saml' }]
+    }
+    fs.writeFileSync(providersFile, JSON.stringify(providers))
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('AUTH_PROVIDERS_FILE', providersFile)
+      return results
+    })
+    // act
+    const settings = await usecase()
+    // assert
+    assert.lengthOf(settings, 2)
+    assert.isTrue(settings.has('AUTH_PROVIDERS'))
+    const actual = settings.get('AUTH_PROVIDERS')
+    assert.lengthOf(actual, 1)
+    assert.property(actual[0], 'label')
+    assert.equal(actual[0].label, 'Acme Identity')
+    assert.equal(actual[0].protocol, 'saml')
+    assert.isTrue(readStub.calledOnce)
+    readStub.restore()
+  })
+
   it('should read IdP configuration into settings', async function () {
     // arrange
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
