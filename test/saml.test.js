@@ -157,10 +157,10 @@ describe('SAML authentication', function () {
   it('should log out of SAML identity provider', async function () {
     this.timeout(30000)
     await driver.get('https://authen.doc/saml/logout')
-    const h1Elem = await driver.wait(until.elementLocated(
-      By.xpath('//section[contains(@class, "Site-content")]/div/h1')))
-    const h1Text = await h1Elem.getText()
-    assert.include(h1Text, 'Logout successful')
+    const divElem = await driver.wait(until.elementLocated(
+      By.xpath('//section[contains(@class, "Site-content")]/div')))
+    const divText = await divElem.getText()
+    assert.include(divText, 'Logout successful')
   })
 
   it('should return valid SAML metadata', function (done) {

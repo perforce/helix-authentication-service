@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2020-2022 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -23,7 +23,12 @@ describe('FindRequest use case', function () {
 
   it('should raise an error for invalid input', function () {
     assert.throws(() => FindRequest({ requestRepository: null }), AssertionError)
-    assert.throws(() => usecase(null), AssertionError)
+  })
+
+  it('should return null for null/undefined requestId', function () {
+    // assert
+    assert.isNull(usecase(undefined))
+    assert.isNull(usecase(null))
   })
 
   it('should return null for a missing request entity', function () {
