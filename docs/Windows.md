@@ -45,18 +45,18 @@ Note, you will need to run the `NET` command as an administrator.
 
 ## Configuration
 
-The configuration of the authentication service is managed through environment variables. An easy method for setting the variables for the service is via a file named `.env` in the directory containing the authentication service. To start, copy the `example.env` file and paste with the name `.env` and then edit with your favorite editor. The `.env` file is a plain text file that contains names and values, separated by an equals (=) sign. For example:
+The configuration of the authentication service is managed through environment variables. An easy method for setting the variables for the service is via a file named `.env` in the directory containing the authentication service. To start, copy the `example.env` file and paste with the name `.env` and then edit using a text editor. The `.env` file is a plain text file that contains names and values, separated by an equals (=) sign. For example:
 
 ```
 SVC_BASE_URI=https://has.example.com
-LOGGING='C:\\helix-auth-svc\\logging.config.cjs'
+LOGGING='file://C:\\helix-auth-svc\\logging.config.cjs'
 ```
 
 See the [Helix Authentication Service Administrator Guide](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html) configuration chapter for all of the available settings.
 
 When modifying the `.env` file, you must stop and start the authentication service for the changes to take effect. See the section above for the commands to stop and start the service.
 
-**Note:** When specifying values in the `.env` configuration file, you can enclose the values in single (') or double (") quotes. For file paths, you can use a single backslash (\\) or double (\\\\), both will be treated the same.
+**Note:** When specifying values in the `.env` configuration file, you can enclose the values in single (') or double (") quotes. For file paths, you can use a single backslash (\\) or double (\\\\), both will be treated the same. The `LOGGING` setting requires the prefix `file://` when running on Windows.
 
 ## Logging
 
@@ -64,7 +64,7 @@ The output of the authentication service will be captured in text files in the `
 
 By default, basic logging of the service executable will be written to the Windows _event_ log in a source named `helixauthentication.exe`, showing when the service starts and stops, or has critical errors. There may also be a second source named `Helix Authentication wrapper` that is created by the program that runs the authentication service as a Windows service.
 
-The authentication service supports writing its own logging to the _events_ log, and this can be enabled by configuring the logging as described in the [Helix Authentication Service Administrator Guide](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html) configuration chapter. To enable logging to the Windows _event_ log, use the `transport` value of `event`, and optionally define additional properties, as described below.
+The authentication service itself also supports writing its own logging to the _events_ log, and this can be enabled by configuring the logging as described in the [Helix Authentication Service Administrator Guide](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html) configuration chapter. To enable logging to the Windows _event_ log, use the `transport` value of `event`, and optionally define additional properties, as described below.
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |

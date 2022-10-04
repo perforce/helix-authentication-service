@@ -29,4 +29,19 @@ module.exports = {
   'http://hth.example.com/account/saml/hth/metadata': {
     acsUrl: 'http://hth.example.com/account/saml/hth/consume'
   }
+  //
+  // Support for Swarm installations configured to connect with multiple Helix
+  // Core Server instances is shown below, in the form of two settings named
+  // `acsUrls` and `acsUrlRe`, which take the place of `acsUrl`.
+  //
+  // acsUrls: [
+  //   'http://swarm.example.com/chicago/api/v10/session',
+  //   'http://swarm.example.com/tokyo/api/v10/session',
+  // ]
+  //
+  // acsUrlRe: 'https://swarm\\.example\\.com/[^/]+/api/v10/session'
+  //
+  // The format for the acsUrlRe regular expression is documented here:
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+  //
 }
