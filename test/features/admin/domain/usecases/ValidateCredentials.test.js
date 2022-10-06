@@ -11,13 +11,13 @@ describe('ValidateCredentials use case', function () {
     assert.throws(() => ValidateCredentials({ credentialsRepository: null }), AssertionError)
     const usecase = ValidateCredentials({ credentialsRepository: 'foobar' })
     try {
-      usecase(null)
+      await usecase(null)
       assert.fail('should have raised error')
     } catch (err) {
       assert.instanceOf(err, AssertionError)
     }
     try {
-      usecase('scott', null)
+      await usecase('scott', null)
       assert.fail('should have raised error')
     } catch (err) {
       assert.instanceOf(err, AssertionError)
@@ -33,7 +33,7 @@ describe('ValidateCredentials use case', function () {
     }
     const usecase = ValidateCredentials({ credentialsRepository: credsRepo })
     // act
-    const result = usecase('scott', 'tiger')
+    const result = await usecase('scott', 'tiger')
     // assert
     assert.isTrue(result)
   })
@@ -47,7 +47,7 @@ describe('ValidateCredentials use case', function () {
     }
     const usecase = ValidateCredentials({ credentialsRepository: credsRepo })
     // act
-    const result = usecase('susan', 'lioness')
+    const result = await usecase('susan', 'lioness')
     // assert
     assert.isFalse(result)
   })

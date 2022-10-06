@@ -35,17 +35,19 @@ describe('WriteConfiguration use case', function () {
       results.set('ADMIN_ENABLED', true)
       results.set('ADMIN_USERNAME', 'scott')
       results.set('ADMIN_PASSWD_FILE', '/etc/passwd')
+      results.set('ADMIN_P4_AUTH', 'false')
       return results
     })
     const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
       assert.isDefined(settings)
-      assert.lengthOf(settings, 6)
+      assert.lengthOf(settings, 7)
       assert.equal(settings.get('NAME1'), 'VALUE1')
       assert.equal(settings.get('NAME2'), 'VALUE2')
       assert.equal(settings.get('NAME3'), 'VALUE#3')
       assert.isTrue(settings.get('ADMIN_ENABLED'))
       assert.equal(settings.get('ADMIN_USERNAME'), 'scott')
       assert.equal(settings.get('ADMIN_PASSWD_FILE'), '/etc/passwd')
+      assert.equal(settings.get('ADMIN_P4_AUTH'), 'false')
     })
     // act
     const settings = new Map()
@@ -54,6 +56,7 @@ describe('WriteConfiguration use case', function () {
     settings.set('ADMIN_ENABLED', false)
     settings.set('ADMIN_USERNAME', 'charlie')
     settings.set('ADMIN_PASSWD_FILE', '/etc/shadow')
+    settings.set('ADMIN_P4_AUTH', 'true')
     await usecase(settings)
     // assert
     assert.isTrue(readStub.calledOnce)

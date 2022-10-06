@@ -51,7 +51,7 @@ function PasswordInput({ name, value, onChange, onBlur }) {
 export const Login = () => {
   const navigate = useNavigate()
   const [error, setError] = useState(null)
-  const [login, { isFetching }] = useLoginMutation()
+  const [login, { isLoading }] = useLoginMutation()
 
   return (
     <Formik
@@ -116,7 +116,7 @@ export const Login = () => {
               <LoadingButton
                 type="submit"
                 variant="contained"
-                loading={isFetching}
+                loading={isLoading}
               >
                 Login
               </LoadingButton>

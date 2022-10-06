@@ -42,6 +42,7 @@ describe('ReadConfiguration use case', function () {
       results.set('ADMIN_ENABLED', true)
       results.set('ADMIN_USERNAME', 'scott')
       results.set('ADMIN_PASSWD_FILE', '/etc/passwd')
+      results.set('ADMIN_P4_AUTH', true)
       return results
     })
     // act
