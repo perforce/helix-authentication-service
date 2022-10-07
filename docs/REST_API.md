@@ -4,38 +4,36 @@
 
 The REST API of the authentication service is intended only for application use,
 it is _not_ meant for end-users to interact with the service. Users should be
-authenticating with the application (e.g. Perforce Server or Helix ALM) which
-will in turn utilize this API.
-
-In the descriptions below, the `${baseUrl}` is the URL configured in the
-`SVC_BASE_URI` setting in the authentication service.
+authenticating with the application (such as Helix Core Server, Hansoft, Helix
+ALM) which will in turn utilize this API.
 
 ### Authentication
 
 The steps involved in processing an authentication event would go something like
 this:
 
-1. Client does a `GET` on `/requests/new/:userId`
-1. Service responds with JSON-formatted request data, including a `request` identifier and a `loginURL`
+1. Client sends a `GET` request to `/requests/new/:userId`
+1. Service responds with JSON-formatted request data, including a `request` identifier and a `loginUrl`
 1. Client directs user to open the provided `loginUrl` in their browser
 1. User authenticates with IdP, with auth service acting as the SP/RP
-1. Meanwhile, client does a `GET` on `/requests/status/:requestId`
+1. Meanwhile, client sends a `GET` request to `/requests/status/:requestId`
 1. Service eventually responds with JSON-formatted user data
 
 ### Administration
 
 The adminstrative (REST) interface to the service consists of two sets of endpoints, one named `/tokens` and the other being `/settings`, with the former providing a JSON Web Token (as described in [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519)) needed by the latter. The steps involved in administering the service would look something like this:
 
-1. Pass the administrative user's credentials to `/tokens/create` and receieve the JWT in the response body.
-1. Retrieve the configurable settings via `/settings/fetch`, passing the JWT as the bearer token.
-1. Update some or all of the settings via `/settings/update`, again providing the JWT.
-1. End the administrative session by deleting the JWT from the in-memory registry by sending a request to `/tokens/remove`
+1. Pass the administrative user's credentials via `POST /tokens` and receieve the JWT in the response body. The remaining operations will require the JWT to be passed as a bearer token.
+1. Retrieve the configurable settings via `GET /settings`
+1. Update some or all of the settings via `POST /settings`
+1. Refresh the service to apply the new settings via `POST /settings/apply`
+1. End the administrative session by deleting the JWT from the in-memory registry via `DELETE /tokens`
 
 ## Routes
 
 ### /requests/new
 
-#### GET ${baseUrl}/requests/new/:userId
+#### GET /requests/new/:userId
 
 This is the starting point for the user authentication process. The **:userId**
 _route parameter_ can be any unique value that the client wishes to use for
@@ -87,7 +85,7 @@ accounts is entirely application and protocol dependent
 
 **Note:** Requests for the `status` should include a query parameter named `instanceId` whose value is the one provided in the response to `/requests/new` as this _may_ be used by a load balancer to route the request to the appropriate instance of the service.
 
-#### GET ${baseUrl}/requests/status/:requestId
+#### GET /requests/status/:requestId
 
 The **:requestId** _route parameter_ is replaced with the identifier given in
 the `request` field of the JSON response from the `/requests/new` endpoint. The
@@ -150,11 +148,11 @@ This example shows what Okta would return when using OpenID Connect:
 }
 ```
 
-### /settings/fetch
+### /settings
 
-#### GET ${baseUrl}/settings/fetch
+#### GET /settings
 
-Retrieve all of the settings that have defined values. The JSON Web Token from `/tokens/create` must be provided as a bearer token (via the `Authorization` header).
+Retrieve all of the settings that have defined values. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header.
 
 Note that certain settings will not be returned via this endpoint, including `ADMIN_ENABLED`, 
 `ADMIN_PASSWD_FILE`, and `ADMIN_USERNAME`.
@@ -163,12 +161,12 @@ Note that certain settings will not be returned via this endpoint, including `AD
 
 | Name | Description |
 | ---- | ----------- |
-| `Authorization` | `Bearer ` plus the JSON web token from `/tokens/create` |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
 
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ.<snip>.glw https://auth-service/settings/fetch
+curl -k --oauth2-bearer eyJ.<snip>.glw https://auth-service/settings
 ```
 
 #### Response Example
@@ -187,11 +185,11 @@ curl -k --oauth2-bearer eyJ.<snip>.glw https://auth-service/settings/fetch
 }
 ```
 
-### /settings/update
+### /settings
 
-#### POST ${baseUrl}/settings/update
+#### POST /settings
 
-Update some or all of the settings with new values. The JSON Web Token from `/tokens/create` must be provided as a bearer token (via the `Authorization` header). The new settings are to be provided via the request body in JSON format.
+Update some or all of the settings with new values. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header. The new settings are to be provided via the request body in JSON format.
 
 Note that certain settings cannot be modified via this endpoint, including `ADMIN_ENABLED`, 
 `ADMIN_PASSWD_FILE`, and `ADMIN_USERNAME`.
@@ -202,24 +200,46 @@ Note that calling this endpoint will overwrite the `.env` file, completely wipin
 
 | Name | Description |
 | ---- | ----------- |
-| `Authorization` | `Bearer ` plus the JSON web token from `/tokens/create` |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
 | `Content-Type` | Always `application/json` |
 
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ.<snip>.glw -X POST -H 'Content-Type: application/json' -d '{"DEFAULT_PROTOCOL":"saml"}' https://auth-service/settings/update
+curl -k --oauth2-bearer eyJ.<snip>.glw -X POST -H 'Content-Type: application/json' -d '{"DEFAULT_PROTOCOL":"saml"}' https://auth-service/settings
 ```
 
 #### Response Example
 
-The response body will be empty.
+The response body will be `{"status": "ok"}` unless an error occurred.
 
-### /tokens/create
+### /settings/apply
 
-#### POST ${baseUrl}/tokens/create
+#### POST /settings/apply
 
-This is the starting point for the user administration process, which taking the admin's credentials and returning a JSON Web Token to be used as "bearer" token as described in [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750). The admin user's credentials must be provided via the URL-encoded request body as described in Section 4.3 of [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749). The response body will be JSON formatted and include the token in the `access_token` property. The JSON web token has an expiration time, but it is still recommended to call `/tokens/remove` when finished.
+Cause the service to gracefully reload such that the modified settings will take effect.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ.<snip>.glw -X POST https://auth-service/settings/apply
+```
+
+#### Response Example
+
+The response body will be `{"status": "ok"}` unless an error occurred.
+
+### /tokens
+
+#### POST /tokens
+
+This is the starting point for the administration process, which taking the admin's credentials and returning a JSON Web Token to be used as bearer token as described in [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750). The admin user's credentials must be provided via the URL-encoded request body as described in Section 4.3 of [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749). The response body will be JSON formatted and include the token in the `access_token` property. The JSON web token has an expiration time, but it is still recommended to send `DELETE /tokens` when finished.
 
 #### Request Parameters
 
@@ -233,7 +253,7 @@ This is the starting point for the user administration process, which taking the
 #### Request Example
 
 ```shell
-$ curl -k -X POST -d grant_type=password -d username=scott -d password=tiger https://auth-service/tokens/create
+$ curl -k -X POST -d grant_type=password -d username=scott -d password=tiger https://auth-service/tokens
 ```
 
 #### Response Example
@@ -246,9 +266,9 @@ $ curl -k -X POST -d grant_type=password -d username=scott -d password=tiger htt
 }
 ```
 
-### /tokens/remove
+### /tokens
 
-#### POST ${baseUrl}/tokens/remove
+#### DELETE /tokens
 
 This will invalidate the registered JSON web token, thus ending the administrative session. The JWT must be provided as a bearer token (via the `Authorization` header). While the JWT already has an expiration time, it is still good practice to "logout" when administration is finished.
 
@@ -256,14 +276,14 @@ This will invalidate the registered JSON web token, thus ending the administrati
 
 | Name | Description |
 | ---- | ----------- |
-| `Authorization` | `Bearer ` plus the JSON web token from `/tokens/create` |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
 
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ.<snip>.glw -X POST https://auth-service/tokens/remove
+curl -k --oauth2-bearer eyJ.<snip>.glw -X DELETE https://auth-service/tokens
 ```
 
 #### Response Example
 
-The response body will be empty.
+The response body will be `{"status": "ok"}` unless an error occurred.
