@@ -32,6 +32,24 @@ describe('Service status', function () {
       const results = ['ok', 'ok', 'not configured', 'ok']
       assert.equal(sut.summarize(results), 'ok')
     })
+
+    it('should report ok if some are objects with all ok', async function () {
+      const object = {
+        'field1': 'ok',
+        'field2': 'ok'
+      }
+      const results = ['ok', 'ok', object, 'ok']
+      assert.equal(sut.summarize(results), 'ok')
+    })
+
+    it('should report not ok if some are objects with any !ok', async function () {
+      const object = {
+        'field1': 'ok',
+        'field2': 'error'
+      }
+      const results = ['ok', 'ok', object, 'ok']
+      assert.equal(sut.summarize(results), 'not ok')
+    })
   })
 
   describe('validateCertAuth', function () {
