@@ -177,6 +177,29 @@ describe('HelixEntity repository', function () {
       assert.equal(user.fullname, 'Joseph User')
     })
 
+    it('should reset password via external identifier', async function () {
+      this.timeout(10000)
+      // arrange
+      const tUser = new User('newpass', 'joe@example.com', 'Joe Q. User')
+      tUser.password = 'secret123'
+      const added = await repository.addUser(tUser)
+      assert.instanceOf(added, UserModel)
+      assert.equal(added.id, 'user-newpass')
+      // act
+      const extUser = new User('user-newpass', 'joe@example.com', 'Joe Q. User')
+      extUser.password = 'p4ssw0rd'
+      const updated = await repository.updateUser(extUser)
+      assert.equal(updated.username, 'newpass')
+      assert.isUndefined(updated.password)
+      // assert
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: 'newpass'
+      })
+      const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
+      assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
+    })
+
     it('should deactivate and reactivate a user entity', async function () {
       this.timeout(10000)
 
@@ -211,7 +234,7 @@ describe('HelixEntity repository', function () {
       added.active = false
       const updated = await repository.updateUser(added)
       assert.instanceOf(updated, UserModel)
-      assert.isNull(updated.password)
+      assert.isUndefined(updated.password)
 
       // ensure user logged out and cannot log in
       const loginCmd2 = p4.cmdSync('login -s')
@@ -223,7 +246,7 @@ describe('HelixEntity repository', function () {
       updated.password = 'p4ssw0rd'
       const onceagain = await repository.updateUser(updated)
       assert.equal(onceagain.username, 'activeuser')
-      assert.isNull(onceagain.password)
+      assert.isUndefined(onceagain.password)
       const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
     })
