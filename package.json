@@ -55,7 +55,7 @@
     "p4api": "^3.4.0",
     "passport": "^0.5.3",
     "passport-http-bearer": "^1.0.1",
-    "passport-saml": "^3.2.0",
+    "passport-saml": "^3.2.2",
     "passport-saml-metadata": "^2.5.0",
     "samlp": "^7.0.0",
     "scim-patch": "^0.6.4",
