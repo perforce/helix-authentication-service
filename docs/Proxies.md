@@ -8,11 +8,30 @@ Placing a reverse proxy server between the client and HAS can serve several purp
 
 ## Configuring HAS
 
+### Common Settings
+
+An example of the settings commonly used when the auth service is sitting behind a load balancer that is performing TLS termination is shown below:
+
+```
+SVC_BASE_URI=https://addr-of-lb.example.com
+PROTOCOL=http
+PORT=3000
+TRUST_PROXY=true
+```
+
+For further explanation of these settings, see the sections below.
+
 ### Trusting the Proxy
 
 In order for HAS to operate effectively when it is behind a reverse proxy, it is necessary to set the `TRUST_PROXY` environment variable. This value is then set in the `trust proxy` application setting, which is used by the Express.js framework to pick up the correct protocol (`http` or `https`). This in turn helps the `session-cookie` middleware correctly set the cookie as `secure` in responses. This is critical for the `SameSite=none` to have the desired effect during the login process -- see [Cookies.md](./Cookies.md) for more information on browser cookies and how they are used by HAS.
 
 For values supported by the `TRUST_PROXY` setting, see [behind proxies](http://expressjs.com/en/guide/behind-proxies.html) on the Express.js web site. In addition to how `trust proxy` is used, the page also describes how the request headers are used by the framework to detect the connection protocol.
+
+### Port and Protocol
+
+When using a load balancer/reverse proxy, you have the option of terminating the TLS connection at the LB, while the connection from the LB to the service can use plain HTTP. In this case, you will want to set the `PROTOCOL` setting to `http`, while at the same time the `SVC_BASE_URI` value will be that of the LB. Since the LB is using HTTPS with the client, the `SVC_BASE_URI` should start with `https://` to indicate the use of HTTPS.
+
+Since the LB is handling the client connections, the service itself is free to use any port value, and this can be set using the `PORT` setting. As with the `PROTOCOL`, this overrides the explicit or implicit port value in the `SVC_BASE_URI` setting.
 
 ### Rule-based Routing
 
