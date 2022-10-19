@@ -33,8 +33,8 @@
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {
-    "@node-saml/node-saml": "^4.0.0-beta.3",
-    "@node-saml/passport-saml": "^4.0.0-beta.1",
+    "@node-saml/node-saml": "^4.0.0-beta.6",
+    "@node-saml/passport-saml": "^4.0.0-beta.4",
     "awilix": "^7.0.3",
     "connect-redis": "^6.1.3",
     "dotenv": "^16.0.0",
