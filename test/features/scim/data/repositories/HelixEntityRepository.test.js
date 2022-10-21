@@ -154,6 +154,26 @@ describe('HelixEntity repository', function () {
       assert.isOk(users.find((e) => e.username === 'joe3'))
     })
 
+    it('should ignore prefix when adding user', async function () {
+      // It would be rather unexpected that the CSP would use our user prefix
+      // when adding a new user, but nonetheless the add and update should
+      // behave consistently.
+      this.timeout(10000)
+      // arrange
+      const tUser = new User('user-preadduser', 'joeu@example.com', 'Joe User')
+      // act
+      const added = await repository.addUser(tUser)
+      assert.equal(added.id, 'user-preadduser')
+      assert.equal(added.username, 'preadduser')
+      // assert
+      const user = await repository.getUser('user-preadduser')
+      assert.instanceOf(user, UserModel)
+      assert.equal(user.id, 'user-preadduser')
+      assert.equal(user.username, 'preadduser')
+      assert.equal(user.email, 'joeu@example.com')
+      assert.equal(user.fullname, 'Joe User')
+    })
+
     it('should update an existing user entity', async function () {
       this.timeout(10000)
       // arrange
@@ -220,7 +240,7 @@ describe('HelixEntity repository', function () {
       const added = await repository.addUser(tUserModel)
       assert.equal(added.id, 'user-activeuser')
       assert.equal(added.username, 'activeuser')
-      assert.isNull(added.password)
+      assert.isUndefined(added.password)
 
       // ensure user login successful
       const p4 = new P4({
@@ -410,10 +430,29 @@ describe('HelixEntity repository', function () {
       assert.isOk(group.members.find((e) => e.value === 'user-susan'))
     })
 
+    it('should add and update an empty group', async function () {
+      this.timeout(10000)
+      // arrange
+      const tGroupAdd = new Group('addupgroup', [])
+      await repository.addGroup(tGroupAdd)
+      // act
+      const tGroupUpdate = new Group('addupgroup', [])
+      const updated = await repository.updateGroup(tGroupUpdate)
+      assert.instanceOf(updated, GroupModel)
+      assert.equal(updated.id, 'group-addupgroup')
+      const group = await repository.getGroup('addupgroup')
+      // assert
+      assert.instanceOf(group, GroupModel)
+      assert.equal(group.displayName, 'addupgroup')
+      assert.lengthOf(group.members, 0)
+    })
+
     it('should update an existing group entity', async function () {
       this.timeout(10000)
       // arrange
-      const tGroupAdd = new Group('updategroup', [])
+      const tGroupAdd = new Group('updategroup', [
+        { value: 'user-joe', display: 'Joe Plumber' }
+      ])
       await repository.addGroup(tGroupAdd)
       // act
       const tGroupUpdate = new Group('updategroup', [

@@ -151,7 +151,7 @@ setTimeout(function () {
         })
         .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -159,7 +159,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'Group')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/Group1DisplayName/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -182,7 +182,7 @@ setTimeout(function () {
           members: []
         })
         .expect(409)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
           if (err) {
@@ -232,7 +232,7 @@ setTimeout(function () {
         })
         .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'GroupDisplayName2')
@@ -243,7 +243,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'Group')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/GroupDisplayName2/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -349,7 +349,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -359,7 +359,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'Group')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/Group1DisplayName/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -377,7 +377,7 @@ setTimeout(function () {
         .set('Authorization', authToken)
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -387,7 +387,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'Group')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/Group1DisplayName/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -414,7 +414,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -472,7 +472,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -483,7 +483,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'Group')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/Group1DisplayName/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -501,7 +501,7 @@ setTimeout(function () {
         .set('Authorization', authToken)
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -512,7 +512,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'Group')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/Group1DisplayName/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -599,7 +599,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Groups\//)
+        .expect('Location', /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'GroupDisplayName2')
