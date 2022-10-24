@@ -119,14 +119,23 @@ describe('HelixEntity repository', function () {
       assert.instanceOf(added, UserModel)
       assert.equal(added.id, 'user-originalJU')
       // act
-      const user = await repository.getUser(userId)
+      const userByEmail = await repository.getUser(userId)
       // assert
-      assert.instanceOf(user, UserModel)
-      assert.equal(user.id, 'user-originalJU')
-      assert.equal(user.username, 'originalJU')
-      assert.equal(user.userName, 'originalJU@work.com')
-      assert.equal(user.email, 'joe@example.com')
-      assert.equal(user.fullname, 'Joe Q. User')
+      assert.instanceOf(userByEmail, UserModel)
+      assert.equal(userByEmail.id, 'user-originalJU')
+      assert.equal(userByEmail.username, 'originalJU')
+      assert.equal(userByEmail.userName, 'originalJU@work.com')
+      assert.equal(userByEmail.email, 'joe@example.com')
+      assert.equal(userByEmail.fullname, 'Joe Q. User')
+      // act
+      const userByName = await repository.getUser('originalJU')
+      // assert
+      assert.instanceOf(userByName, UserModel)
+      assert.equal(userByName.id, 'user-originalJU')
+      assert.equal(userByName.username, 'originalJU')
+      assert.equal(userByName.userName, 'originalJU@work.com')
+      assert.equal(userByName.email, 'joe@example.com')
+      assert.equal(userByName.fullname, 'Joe Q. User')
     })
 
     it('should add and retrieve multiple user entities', async function () {
@@ -210,7 +219,7 @@ describe('HelixEntity repository', function () {
       extUser.password = 'p4ssw0rd'
       const updated = await repository.updateUser(extUser)
       assert.equal(updated.username, 'newpass')
-      assert.isUndefined(updated.password)
+      assert.isNull(updated.password)
       // assert
       const p4 = new P4({
         P4PORT: p4config.port,
@@ -240,7 +249,7 @@ describe('HelixEntity repository', function () {
       const added = await repository.addUser(tUserModel)
       assert.equal(added.id, 'user-activeuser')
       assert.equal(added.username, 'activeuser')
-      assert.isUndefined(added.password)
+      assert.isNull(added.password)
 
       // ensure user login successful
       const p4 = new P4({
@@ -254,7 +263,7 @@ describe('HelixEntity repository', function () {
       added.active = false
       const updated = await repository.updateUser(added)
       assert.instanceOf(updated, UserModel)
-      assert.isUndefined(updated.password)
+      assert.isNull(updated.password)
 
       // ensure user logged out and cannot log in
       const loginCmd2 = p4.cmdSync('login -s')
@@ -266,7 +275,7 @@ describe('HelixEntity repository', function () {
       updated.password = 'p4ssw0rd'
       const onceagain = await repository.updateUser(updated)
       assert.equal(onceagain.username, 'activeuser')
-      assert.isUndefined(onceagain.password)
+      assert.isNull(onceagain.password)
       const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
     })
@@ -341,9 +350,14 @@ describe('HelixEntity repository', function () {
       // assert
       assert.isNotNull(users)
       assert.lengthOf(users, 1)
+      assert.equal(users[0].id, 'user-emailuser')
       assert.equal(users[0].username, 'emailuser')
+      assert.equal(users[0].userName, 'emailuser@example.com')
       assert.equal(users[0].email, 'joeuser@work.com')
+      assert.equal(users[0].name.formatted, 'Joe E. User')
       assert.equal(users[0].fullname, 'Joe E. User')
+      assert.equal(users[0].displayName, 'Joe E. User')
+      assert.isNull(users[0].password)
     })
 
     it('should return null for missing group entity', async function () {
