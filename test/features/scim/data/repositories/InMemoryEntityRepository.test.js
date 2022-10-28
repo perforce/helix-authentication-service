@@ -57,6 +57,7 @@ describe('InMemoryEntity repository', function () {
     await repository.clearAll()
     const userId = 'joeuser'
     const tUser = new User(userId, 'joe@example.com', 'Joe Q. User')
+    tUser.externalId = '00u1esetdqu3kOXZc697'
     const added = await repository.addUser(tUser)
     assert.instanceOf(added, UserModel)
     assert.equal(added.id, 'user-joeuser')
@@ -65,6 +66,7 @@ describe('InMemoryEntity repository', function () {
     // assert
     assert.instanceOf(user, UserModel)
     assert.equal(user.id, 'user-joeuser')
+    assert.equal(user.externalId, '00u1esetdqu3kOXZc697')
     assert.equal(user.username, 'joeuser')
     assert.equal(user.email, 'joe@example.com')
     assert.equal(user.fullname, 'Joe Q. User')
@@ -72,6 +74,7 @@ describe('InMemoryEntity repository', function () {
     const userById = await repository.getUser('user-joeuser')
     assert.instanceOf(userById, UserModel)
     assert.equal(userById.id, 'user-joeuser')
+    assert.equal(userById.externalId, '00u1esetdqu3kOXZc697')
     assert.equal(userById.username, 'joeuser')
   })
 

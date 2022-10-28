@@ -90,6 +90,7 @@ describe('HelixEntity repository', function () {
       this.timeout(10000)
       // arrange
       const tUser = new User('adduser', 'joe@example.com', 'Joe Q. User')
+      tUser.externalId = '00u1esetdqu3kOXZc697'
       tUser.password = 'secret123'
       const added = await repository.addUser(tUser)
       assert.instanceOf(added, UserModel)
@@ -99,15 +100,19 @@ describe('HelixEntity repository', function () {
       // assert
       assert.instanceOf(userById, UserModel)
       assert.equal(userById.id, 'user-adduser')
+      assert.equal(userById.externalId, '00u1esetdqu3kOXZc697')
       assert.equal(userById.username, 'adduser')
       assert.equal(userById.email, 'joe@example.com')
       assert.equal(userById.fullname, 'Joe Q. User')
+      assert.isTrue(userById.active)
       // retrieve by the plain p4d user name
       const userByName = await repository.getUser(userById.username)
       assert.instanceOf(userByName, UserModel)
       assert.equal(userByName.username, 'adduser')
+      assert.equal(userByName.externalId, '00u1esetdqu3kOXZc697')
       assert.equal(userByName.email, 'joe@example.com')
       assert.equal(userByName.fullname, 'Joe Q. User')
+      assert.isTrue(userByName.active)
     })
 
     it('should add and retrieve user using original userName', async function () {
@@ -158,6 +163,7 @@ describe('HelixEntity repository', function () {
       // other users have been added by earlier tests
       // assert.lengthOf(users, 3)
       assert.instanceOf(users[0], UserModel)
+      assert.isTrue(users.every((e) => e.active))
       assert.isOk(users.find((e) => e.username === 'joe1'))
       assert.isOk(users.find((e) => e.username === 'joe2'))
       assert.isOk(users.find((e) => e.username === 'joe3'))
@@ -249,6 +255,8 @@ describe('HelixEntity repository', function () {
       const added = await repository.addUser(tUserModel)
       assert.equal(added.id, 'user-activeuser')
       assert.equal(added.username, 'activeuser')
+      assert.equal(added.externalId, '00u1esetdqu3kOXZc697')
+      assert.isTrue(added.active)
       assert.isNull(added.password)
 
       // ensure user login successful
@@ -263,6 +271,7 @@ describe('HelixEntity repository', function () {
       added.active = false
       const updated = await repository.updateUser(added)
       assert.instanceOf(updated, UserModel)
+      assert.isFalse(updated.active)
       assert.isNull(updated.password)
 
       // ensure user logged out and cannot log in
@@ -271,10 +280,18 @@ describe('HelixEntity repository', function () {
       const loginCmd3 = p4.cmdSync('login', 'p4ssw0rd')
       assert.include(loginCmd3.error[0].data, 'Password invalid.')
 
+      // ensure active flag is returned as 'false'
+      const retrieved = await repository.getUser('user-activeuser')
+      assert.equal(retrieved.username, 'activeuser')
+      assert.equal(retrieved.externalId, '00u1esetdqu3kOXZc697')
+      assert.isFalse(retrieved.active)
+
       // activate user with new password, test login
-      updated.password = 'p4ssw0rd'
-      const onceagain = await repository.updateUser(updated)
+      retrieved.active = true
+      retrieved.password = 'p4ssw0rd'
+      const onceagain = await repository.updateUser(retrieved)
       assert.equal(onceagain.username, 'activeuser')
+      assert.isTrue(onceagain.active)
       assert.isNull(onceagain.password)
       const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')

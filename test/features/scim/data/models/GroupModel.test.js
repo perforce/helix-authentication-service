@@ -103,7 +103,7 @@ describe('Group model', function () {
     // assert
     const expectedJson = {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
-      id: 'staff',
+      id: 'group-staff',
       displayName: 'staff',
       members: [
         { value: 'joe', display: 'Joe Plumber' },

@@ -17,9 +17,12 @@ describe('User entity', function () {
     // arrange
     const tUser = new User('joeuser', 'joeuser@example.com', 'Joe Q. User')
     // assert
+    assert.equal(tUser.id, 'user-joeuser')
     assert.equal(tUser.username, 'joeuser')
     assert.equal(tUser.email, 'joeuser@example.com')
     assert.equal(tUser.fullname, 'Joe Q. User')
+    assert.isTrue(tUser.active)
+    assert.isNull(tUser.password)
   })
 
   it('should convert email usernames to p4 usernames', function () {
@@ -34,11 +37,16 @@ describe('User entity', function () {
   it('should produce identical clones', function () {
     // arrange
     const original = new User('susan', 'susan@example.com', 'Susan Winters')
+    original.active = false
+    original.externalId = 'swinters'
     original.password = 'Secret!23'
     const cloned = original.clone()
     // assert
     assert.isFalse(original === cloned)
     assert.isTrue(original.equals(cloned))
+    assert.isFalse(cloned.active)
+    assert.equal(cloned.password, 'Secret!23')
+    assert.equal(cloned.externalId, 'swinters')
   })
 
   it('should treat identical users as equal', function () {
@@ -79,6 +87,16 @@ describe('User entity', function () {
     const patched = new User('susan', 'susan@example.com', 'Susan B. Winters')
     // assert
     assert.isFalse(original.equals(patched))
+  })
+
+  it('should notice changed active status', function () {
+    // arrange
+    const original = new User('susan', 'susan@example.com', 'Susan Winters')
+    // act
+    const inactive = new User('susan', 'susan@example.com', 'Susan Winters')
+    inactive.active = false
+    // assert
+    assert.isFalse(original.equals(inactive))
   })
 
   it('should notice changed user password', function () {

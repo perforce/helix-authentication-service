@@ -126,6 +126,36 @@ describe('PatchUser use case', function () {
     updateStub.restore()
   })
 
+  it('should permit changing active status', async function () {
+    // arrange
+    const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
+      assert.equal(username, 'joeuser')
+      return new User('joeuser', 'joeuser@example.com', 'Joe Q. User')
+    })
+    const addStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
+      assert.isNotNull(user)
+      return user
+    })
+    // act
+    const patch = {
+      schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+      Operations: [
+        // an actual patch sent by Azure AD
+        { op: 'Replace', path: 'active', value: 'False' }
+      ]
+    }
+    const updated = await usecase('joeuser', patch)
+    // assert
+    assert.equal(updated.username, 'joeuser')
+    assert.equal(updated.email, 'joeuser@example.com')
+    assert.equal(updated.fullname, 'Joe Q. User')
+    assert.isFalse(updated.active)
+    assert.isTrue(getStub.calledOnce)
+    assert.isTrue(addStub.calledOnce)
+    getStub.restore()
+    addStub.restore()
+  })
+
   it('should ignore changes to other properties', async function () {
     // arrange
     const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
@@ -134,13 +164,13 @@ describe('PatchUser use case', function () {
     })
     const addStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
       assert.isNotNull(user)
-      return null
+      return user
     })
     // act
     const patch = {
       schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
       Operations: [
-        { op: 'replace', path: 'active', value: 'false' }
+        { op: 'replace', path: 'ignored', value: 'foobar' }
       ]
     }
     const updated = await usecase('joeuser', patch)
@@ -148,6 +178,7 @@ describe('PatchUser use case', function () {
     assert.equal(updated.username, 'joeuser')
     assert.equal(updated.email, 'joeuser@example.com')
     assert.equal(updated.fullname, 'Joe Q. User')
+    assert.isTrue(updated.active)
     assert.isTrue(getStub.calledOnce)
     assert.isTrue(addStub.notCalled)
     getStub.restore()
