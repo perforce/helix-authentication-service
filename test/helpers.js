@@ -74,7 +74,9 @@ export function findData (command, query) {
 export function establishTrust (config) {
   const p4 = makeP4(config)
   const trustCmd = p4.cmdSync('trust -y -f')
-  assert.include(trustCmd.data, 'Added trust for P4PORT')
+  const added = trustCmd.data.includes('Added trust for P4PORT')
+  const already = trustCmd.data.includes('Trust already established')
+  assert.isTrue(added || already)
 }
 
 export function establishSuper (config) {
