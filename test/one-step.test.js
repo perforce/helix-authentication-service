@@ -118,6 +118,9 @@ describe('1-step SAML validation', function () {
   })
 
   it('should validate SAML response via 1-step', async function () {
+    // assert that the SAML response is available again as mocha will invoke
+    // this test despite the previous one failing
+    assert.isNotEmpty(samlResponse)
     // send SAML response to /validate with POST for validation
     const resolved = await new Promise((resolve, reject) => {
       const cert = fs.readFileSync('test/client.crt')
