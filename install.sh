@@ -325,6 +325,11 @@ function create_user_group() {
     # ensure perforce user can write to the installation path
     INSTALL_PREFIX=$(pwd)
     sudo chown -R perforce:perforce "$INSTALL_PREFIX"
+
+    if ! sudo su - perforce -c "ls ${INSTALLPREFIX}" >/dev/null 2>&1; then
+        error "\n\nUser perforce cannot access ${INSTALLPREFIX}, please fix permissions.\n"
+        echo -e "For example, invoke 'chmod 755 $(dirname ${INSTALLPREFIX})' as the root user.\n"
+    fi
 }
 
 # Create the systemd service unit, enable, and start.
