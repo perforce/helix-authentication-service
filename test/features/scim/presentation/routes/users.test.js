@@ -169,7 +169,7 @@ setTimeout(function () {
         })
         .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName123')
@@ -180,7 +180,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'User')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/UserName123/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName123/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -203,7 +203,7 @@ setTimeout(function () {
           emails: [{ value: 'testing@bob.com' }]
         })
         .expect(409)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
           if (err) {
@@ -274,7 +274,7 @@ setTimeout(function () {
         })
         .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName222/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName222')
@@ -282,6 +282,10 @@ setTimeout(function () {
           assert.equal(res.body.name.formatted, 'Andrew Ryan')
           assert.lengthOf(res.body.emails, 1)
           assert.equal(res.body.emails[0].value, 'testing@bob2.com')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'User')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName222/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -360,7 +364,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName222/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName222')
@@ -368,6 +372,10 @@ setTimeout(function () {
           assert.equal(res.body.name.formatted, 'Drew Ryan')
           assert.lengthOf(res.body.emails, 1)
           assert.equal(res.body.emails[0].value, 'testing@bob2.com')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'User')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName222/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -385,7 +393,7 @@ setTimeout(function () {
         .set('Authorization', authToken)
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName222/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName222')
@@ -396,7 +404,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'User')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/UserName222/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName222/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -465,7 +473,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName123')
@@ -473,6 +481,10 @@ setTimeout(function () {
           assert.equal(res.body.name.formatted, 'Ryan P. Leenay')
           assert.lengthOf(res.body.emails, 1)
           assert.equal(res.body.emails[0].value, 'testingwork@bob.com')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'User')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName123/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -490,7 +502,7 @@ setTimeout(function () {
         .set('Authorization', authToken)
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName123')
@@ -501,7 +513,7 @@ setTimeout(function () {
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'User')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/UserName123/)
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName123/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -615,7 +627,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserNameOne1/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserNameOne1')
@@ -623,6 +635,10 @@ setTimeout(function () {
           assert.equal(res.body.name.formatted, 'Ryan P. Leenay')
           assert.lengthOf(res.body.emails, 1)
           assert.equal(res.body.emails[0].value, 'testingwork@bob.com')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'User')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserNameOne1/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {
@@ -650,7 +666,7 @@ setTimeout(function () {
         })
         .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\//)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserNameTutu/)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserNameTutu')
@@ -658,6 +674,10 @@ setTimeout(function () {
           assert.equal(res.body.name.formatted, 'Drew Ryan')
           assert.lengthOf(res.body.emails, 1)
           assert.equal(res.body.emails[0].value, 'testing@bob2.com')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'User')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserNameTutu/)
         })
         // eslint-disable-next-line no-unused-vars
         .end(function (err, res) {

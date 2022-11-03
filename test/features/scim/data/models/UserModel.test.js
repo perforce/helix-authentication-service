@@ -84,6 +84,7 @@ describe('User model', function () {
     const tUserModel = UserModel.fromJson(rawJson)
     // assert
     assert.equal(tUserModel.username, 'joeuser')
+    assert.equal(tUserModel.externalId, '00u1esetdqu3kOXZc697')
     assert.equal(tUserModel.email, 'juser@work.com')
     assert.equal(tUserModel.fullname, 'Joe Q. User')
     assert.equal(tUserModel.password, 'y+R6KTD')
@@ -106,6 +107,7 @@ describe('User model', function () {
     const tUserModel = UserModel.fromJson(rawJson)
     // assert
     assert.equal(tUserModel.username, 'susan')
+    assert.equal(tUserModel.externalId, 'susan')
     assert.equal(tUserModel.email, 'susan@example.com')
     assert.equal(tUserModel.fullname, 'Susan Winters')
     assert.isTrue(tUserModel.active)
@@ -128,6 +130,7 @@ describe('User model', function () {
     const tUserModel = UserModel.fromJson(rawJson)
     // assert
     assert.equal(tUserModel.username, 'UserName123')
+    assert.equal(tUserModel.externalId, 'c0726250-b78e-4171-a358-b9a0de8fcd96')
     assert.equal(tUserModel.email, 'testing@bob.com')
     assert.equal(tUserModel.fullname, 'Ryan Leenay')
     assert.isFalse(tUserModel.active)
@@ -146,6 +149,7 @@ describe('User model', function () {
     const tUserModel = UserModel.fromJson(rawJson)
     // assert
     assert.equal(tUserModel.username, 'UserName123')
+    assert.equal(tUserModel.externalId, 'c0726250-b78e-4171-a358-b9a0de8fcd96')
     assert.equal(tUserModel.email, 'testing@bob.com')
     assert.equal(tUserModel.fullname, 'Ryan Leenay')
   })
@@ -162,6 +166,7 @@ describe('User model', function () {
     const tUserModel = UserModel.fromJson(rawJson)
     // assert
     assert.equal(tUserModel.username, 'UserName123')
+    assert.equal(tUserModel.externalId, 'c0726250-b78e-4171-a358-b9a0de8fcd96')
     assert.equal(tUserModel.email, 'testing@bob.com')
     assert.equal(tUserModel.fullname, 'UserName123')
   })
@@ -172,7 +177,7 @@ describe('User model', function () {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
       externalId: 'c0726250-b78e-4171-a358-b9a0de8fcd96',
       active: true,
-      userName: 'joeuser',
+      userName: 'joeuser@email.addr',
       name: { formatted: 'Joe Plumber', familyName: 'Plumber', givenName: 'Joe' },
       emails: [
         { value: 'joe@example.com', type: 'work', primary: true },
@@ -186,11 +191,13 @@ describe('User model', function () {
     // assert
     const expectedJson = {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
-      id: 'joeuser',
+      id: 'user-joeuser',
       displayName: 'Joe Plumber',
-      userName: 'joeuser',
+      userName: 'joeuser@email.addr',
+      externalId: 'c0726250-b78e-4171-a358-b9a0de8fcd96',
       name: { formatted: 'Joe Plumber' },
-      emails: [{ value: 'joe@example.com' }]
+      emails: [{ value: 'joe@example.com' }],
+      active: true
     }
     assert.deepEqual(actualJson, expectedJson)
   })

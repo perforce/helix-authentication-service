@@ -169,7 +169,7 @@ describe('OIDC authentication', function () {
   it('should log out of OIDC identity provider', async function () {
     this.timeout(30000)
     await driver.get('https://authen.doc/oidc/logout')
-    // identity server no longer shows a logout form?
+    // where did the consent screen go?
     // const logoutForm = await driver.wait(until.elementLocated(By.css('form')))
     // const logoutButton = await logoutForm.findElement(By.css('button'))
     // await logoutButton.click()

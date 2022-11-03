@@ -90,6 +90,7 @@ describe('HelixEntity repository', function () {
       this.timeout(10000)
       // arrange
       const tUser = new User('adduser', 'joe@example.com', 'Joe Q. User')
+      tUser.externalId = '00u1esetdqu3kOXZc697'
       tUser.password = 'secret123'
       const added = await repository.addUser(tUser)
       assert.instanceOf(added, UserModel)
@@ -99,15 +100,19 @@ describe('HelixEntity repository', function () {
       // assert
       assert.instanceOf(userById, UserModel)
       assert.equal(userById.id, 'user-adduser')
+      assert.equal(userById.externalId, '00u1esetdqu3kOXZc697')
       assert.equal(userById.username, 'adduser')
       assert.equal(userById.email, 'joe@example.com')
       assert.equal(userById.fullname, 'Joe Q. User')
+      assert.isTrue(userById.active)
       // retrieve by the plain p4d user name
       const userByName = await repository.getUser(userById.username)
       assert.instanceOf(userByName, UserModel)
       assert.equal(userByName.username, 'adduser')
+      assert.equal(userByName.externalId, '00u1esetdqu3kOXZc697')
       assert.equal(userByName.email, 'joe@example.com')
       assert.equal(userByName.fullname, 'Joe Q. User')
+      assert.isTrue(userByName.active)
     })
 
     it('should add and retrieve user using original userName', async function () {
@@ -119,14 +124,23 @@ describe('HelixEntity repository', function () {
       assert.instanceOf(added, UserModel)
       assert.equal(added.id, 'user-originalJU')
       // act
-      const user = await repository.getUser(userId)
+      const userByEmail = await repository.getUser(userId)
       // assert
-      assert.instanceOf(user, UserModel)
-      assert.equal(user.id, 'user-originalJU')
-      assert.equal(user.username, 'originalJU')
-      assert.equal(user.userName, 'originalJU@work.com')
-      assert.equal(user.email, 'joe@example.com')
-      assert.equal(user.fullname, 'Joe Q. User')
+      assert.instanceOf(userByEmail, UserModel)
+      assert.equal(userByEmail.id, 'user-originalJU')
+      assert.equal(userByEmail.username, 'originalJU')
+      assert.equal(userByEmail.userName, 'originalJU@work.com')
+      assert.equal(userByEmail.email, 'joe@example.com')
+      assert.equal(userByEmail.fullname, 'Joe Q. User')
+      // act
+      const userByName = await repository.getUser('originalJU')
+      // assert
+      assert.instanceOf(userByName, UserModel)
+      assert.equal(userByName.id, 'user-originalJU')
+      assert.equal(userByName.username, 'originalJU')
+      assert.equal(userByName.userName, 'originalJU@work.com')
+      assert.equal(userByName.email, 'joe@example.com')
+      assert.equal(userByName.fullname, 'Joe Q. User')
     })
 
     it('should add and retrieve multiple user entities', async function () {
@@ -149,9 +163,30 @@ describe('HelixEntity repository', function () {
       // other users have been added by earlier tests
       // assert.lengthOf(users, 3)
       assert.instanceOf(users[0], UserModel)
+      assert.isTrue(users.every((e) => e.active))
       assert.isOk(users.find((e) => e.username === 'joe1'))
       assert.isOk(users.find((e) => e.username === 'joe2'))
       assert.isOk(users.find((e) => e.username === 'joe3'))
+    })
+
+    it('should ignore prefix when adding user', async function () {
+      // It would be rather unexpected that the CSP would use our user prefix
+      // when adding a new user, but nonetheless the add and update should
+      // behave consistently.
+      this.timeout(10000)
+      // arrange
+      const tUser = new User('user-preadduser', 'joeu@example.com', 'Joe User')
+      // act
+      const added = await repository.addUser(tUser)
+      assert.equal(added.id, 'user-preadduser')
+      assert.equal(added.username, 'preadduser')
+      // assert
+      const user = await repository.getUser('user-preadduser')
+      assert.instanceOf(user, UserModel)
+      assert.equal(user.id, 'user-preadduser')
+      assert.equal(user.username, 'preadduser')
+      assert.equal(user.email, 'joeu@example.com')
+      assert.equal(user.fullname, 'Joe User')
     })
 
     it('should update an existing user entity', async function () {
@@ -177,6 +212,29 @@ describe('HelixEntity repository', function () {
       assert.equal(user.fullname, 'Joseph User')
     })
 
+    it('should reset password via external identifier', async function () {
+      this.timeout(10000)
+      // arrange
+      const tUser = new User('newpass', 'joe@example.com', 'Joe Q. User')
+      tUser.password = 'secret123'
+      const added = await repository.addUser(tUser)
+      assert.instanceOf(added, UserModel)
+      assert.equal(added.id, 'user-newpass')
+      // act
+      const extUser = new User('user-newpass', 'joe@example.com', 'Joe Q. User')
+      extUser.password = 'p4ssw0rd'
+      const updated = await repository.updateUser(extUser)
+      assert.equal(updated.username, 'newpass')
+      assert.isNull(updated.password)
+      // assert
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: 'newpass'
+      })
+      const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
+      assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
+    })
+
     it('should deactivate and reactivate a user entity', async function () {
       this.timeout(10000)
 
@@ -197,6 +255,8 @@ describe('HelixEntity repository', function () {
       const added = await repository.addUser(tUserModel)
       assert.equal(added.id, 'user-activeuser')
       assert.equal(added.username, 'activeuser')
+      assert.equal(added.externalId, '00u1esetdqu3kOXZc697')
+      assert.isTrue(added.active)
       assert.isNull(added.password)
 
       // ensure user login successful
@@ -211,6 +271,7 @@ describe('HelixEntity repository', function () {
       added.active = false
       const updated = await repository.updateUser(added)
       assert.instanceOf(updated, UserModel)
+      assert.isFalse(updated.active)
       assert.isNull(updated.password)
 
       // ensure user logged out and cannot log in
@@ -219,10 +280,18 @@ describe('HelixEntity repository', function () {
       const loginCmd3 = p4.cmdSync('login', 'p4ssw0rd')
       assert.include(loginCmd3.error[0].data, 'Password invalid.')
 
+      // ensure active flag is returned as 'false'
+      const retrieved = await repository.getUser('user-activeuser')
+      assert.equal(retrieved.username, 'activeuser')
+      assert.equal(retrieved.externalId, '00u1esetdqu3kOXZc697')
+      assert.isFalse(retrieved.active)
+
       // activate user with new password, test login
-      updated.password = 'p4ssw0rd'
-      const onceagain = await repository.updateUser(updated)
+      retrieved.active = true
+      retrieved.password = 'p4ssw0rd'
+      const onceagain = await repository.updateUser(retrieved)
       assert.equal(onceagain.username, 'activeuser')
+      assert.isTrue(onceagain.active)
       assert.isNull(onceagain.password)
       const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
@@ -298,9 +367,14 @@ describe('HelixEntity repository', function () {
       // assert
       assert.isNotNull(users)
       assert.lengthOf(users, 1)
+      assert.equal(users[0].id, 'user-emailuser')
       assert.equal(users[0].username, 'emailuser')
+      assert.equal(users[0].userName, 'emailuser@example.com')
       assert.equal(users[0].email, 'joeuser@work.com')
+      assert.equal(users[0].name.formatted, 'Joe E. User')
       assert.equal(users[0].fullname, 'Joe E. User')
+      assert.equal(users[0].displayName, 'Joe E. User')
+      assert.isNull(users[0].password)
     })
 
     it('should return null for missing group entity', async function () {
@@ -387,10 +461,29 @@ describe('HelixEntity repository', function () {
       assert.isOk(group.members.find((e) => e.value === 'user-susan'))
     })
 
+    it('should add and update an empty group', async function () {
+      this.timeout(10000)
+      // arrange
+      const tGroupAdd = new Group('addupgroup', [])
+      await repository.addGroup(tGroupAdd)
+      // act
+      const tGroupUpdate = new Group('addupgroup', [])
+      const updated = await repository.updateGroup(tGroupUpdate)
+      assert.instanceOf(updated, GroupModel)
+      assert.equal(updated.id, 'group-addupgroup')
+      const group = await repository.getGroup('addupgroup')
+      // assert
+      assert.instanceOf(group, GroupModel)
+      assert.equal(group.displayName, 'addupgroup')
+      assert.lengthOf(group.members, 0)
+    })
+
     it('should update an existing group entity', async function () {
       this.timeout(10000)
       // arrange
-      const tGroupAdd = new Group('updategroup', [])
+      const tGroupAdd = new Group('updategroup', [
+        { value: 'user-joe', display: 'Joe Plumber' }
+      ])
       await repository.addGroup(tGroupAdd)
       // act
       const tGroupUpdate = new Group('updategroup', [

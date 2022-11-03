@@ -104,6 +104,39 @@ describe('GetSamlConfiguration use case', function () {
     }
   })
 
+  it('should interpret truthy values from settings', async function () {
+    // arrange
+    settings.set('SAML_IDP_METADATA_FILE', 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml')
+    settings.set('SAML_WANT_ASSERTION_SIGNED', 'false')
+    settings.set('SAML_WANT_RESPONSE_SIGNED', 'TRUE')
+    // act
+    const result = await usecase()
+    // assert
+    assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
+    assert.isFalse(result.wantAssertionsSigned)
+    assert.isTrue(result.wantAuthnResponseSigned)
+  })
+
+  it('should interpret truthy values from provider', async function () {
+    // arrange
+    const providers = {
+      providers: [{
+        label: 'Shibboleth',
+        protocol: 'saml',
+        metadataFile: 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml',
+        wantAssertionsSigned: 'false',
+        wantAuthnResponseSigned: 'TRUE'
+      }]
+    }
+    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase('saml-0')
+    // assert
+    assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
+    assert.isFalse(result.wantAssertionsSigned)
+    assert.isTrue(result.wantAuthnResponseSigned)
+  })
+
   it('should fetch metadata via URL with settings', async function () {
     // arrange
     settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
@@ -120,6 +153,8 @@ describe('GetSamlConfiguration use case', function () {
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
     assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
     assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+    assert.isFalse(result.wantAssertionsSigned)
+    assert.isFalse(result.wantAuthnResponseSigned)
   })
 
   it('should fetch metadata via URL with provider', async function () {
@@ -147,6 +182,8 @@ describe('GetSamlConfiguration use case', function () {
     assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
     assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
     assert.isFalse(result.forceAuthn)
+    assert.isFalse(result.wantAssertionsSigned)
+    assert.isFalse(result.wantAuthnResponseSigned)
   })
 
   it('should fetch metadata via file with settings', async function () {
@@ -155,12 +192,7 @@ describe('GetSamlConfiguration use case', function () {
     settings.set('SAML_IDP_METADATA_FILE', 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml')
     settings.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
     // act
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
-    // mute the warning from node about disabling TLS validation
-    const unmute = mute(process.stderr)
     const result = await usecase()
-    unmute()
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     // assert
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
     assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
@@ -180,12 +212,7 @@ describe('GetSamlConfiguration use case', function () {
     }
     settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
-    // mute the warning from node about disabling TLS validation
-    const unmute = mute(process.stderr)
     const result = await usecase('saml-0')
-    unmute()
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     // assert
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
     assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
