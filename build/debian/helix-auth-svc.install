@@ -1,3 +1,4 @@
+defaults.env        opt/perforce/helix-auth-svc
 example.env         opt/perforce/helix-auth-svc
 logging.config.cjs  opt/perforce/helix-auth-svc
 package.json        opt/perforce/helix-auth-svc

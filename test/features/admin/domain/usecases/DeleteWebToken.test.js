@@ -3,7 +3,7 @@
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
-import { before, beforeEach, describe, it } from 'mocha'
+import { before, describe, it } from 'mocha'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { InMemoryTokenRepository } from 'helix-auth-svc/lib/features/admin/data/repositories/InMemoryTokenRepository.js'
 import DeleteWebToken from 'helix-auth-svc/lib/features/admin/domain/usecases/DeleteWebToken.js'
@@ -17,16 +17,13 @@ describe('DeleteWebToken use case', function () {
   let usecase
 
   before(function () {
-    const tokenTtl = 10000
+    settings.set('SVC_BASE_URI', 'https://localhost:3000')
+    settings.set('TOKEN_TTL', '10')
     const settingsRepository = new MapSettingsRepository(settings)
-    const tokenRepository = new InMemoryTokenRepository({ tokenTtl })
+    const tokenRepository = new InMemoryTokenRepository({ settingsRepository })
     usecase = DeleteWebToken({ tokenRepository })
     verifyToken = VerifyWebToken({ settingsRepository, tokenRepository })
-    registerToken = RegisterWebToken({ settingsRepository, tokenRepository, tokenTtl })
-  })
-
-  beforeEach(function () {
-    settings.clear()
+    registerToken = RegisterWebToken({ settingsRepository, tokenRepository })
   })
 
   it('should raise an error for invalid input', async function () {
@@ -41,7 +38,6 @@ describe('DeleteWebToken use case', function () {
 
   it('should remove an existing web token', async function () {
     // arrange
-    settings.set('SVC_BASE_URI', 'https://localhost:3000')
     const token = await registerToken()
     // act
     const found = await verifyToken(token)
@@ -53,7 +49,6 @@ describe('DeleteWebToken use case', function () {
   })
 
   it('should ignore repeated remove operations', async function () {
-    settings.set('SVC_BASE_URI', 'https://localhost:3000')
     const token = await registerToken()
     const found = await verifyToken(token)
     await usecase(found)

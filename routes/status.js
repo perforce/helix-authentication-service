@@ -83,8 +83,8 @@ async function validateCert () {
   if (pfxfile) {
     return status.validatePfxFile(pfxfile, passphrase)
   }
-  const serviceCert = container.resolve('serviceCert')
-  const serviceKey = container.resolve('serviceKey')
+  const serviceCert = settings.get('CERT_FILE')
+  const serviceKey = settings.get('KEY_FILE')
   return status.validateServerCert(serviceCert, serviceKey, passphrase)
 }
 

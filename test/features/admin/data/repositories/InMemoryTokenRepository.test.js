@@ -5,13 +5,17 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, describe, it } from 'mocha'
 import { ulid } from 'ulid'
+import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { InMemoryTokenRepository } from 'helix-auth-svc/lib/features/admin/data/repositories/InMemoryTokenRepository.js'
 
 describe('InMemoryToken repository', function () {
   let repository
 
   before(function () {
-    repository = new InMemoryTokenRepository({ tokenTtl: 2000 })
+    const map = new Map()
+    map.set('TOKEN_TTL', '2')
+    const settings = new MapSettingsRepository(map)
+    repository = new InMemoryTokenRepository({ settingsRepository: settings })
   })
 
   it('should raise an error for invalid input', function () {

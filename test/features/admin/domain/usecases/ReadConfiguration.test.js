@@ -7,6 +7,7 @@ import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
 import { temporaryFile } from 'tempy'
+import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
 import ReadConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/ReadConfiguration.js'
 
@@ -15,6 +16,7 @@ describe('ReadConfiguration use case', function () {
 
   before(function () {
     const configRepository = new ConfigurationRepository()
+    const defaultsRepository = new DefaultsEnvRepository()
     const getIdPConfiguration = () => {
       return {
         'urn:swarm-example:sp': {
@@ -22,7 +24,7 @@ describe('ReadConfiguration use case', function () {
         }
       }
     }
-    usecase = ReadConfiguration({ configRepository, getIdPConfiguration })
+    usecase = ReadConfiguration({ configRepository, defaultsRepository, getIdPConfiguration })
   })
 
   after(function () {
@@ -32,6 +34,7 @@ describe('ReadConfiguration use case', function () {
   it('should raise an error for invalid input', async function () {
     assert.throws(() => ReadConfiguration({ configRepository: null }), AssertionError)
     assert.throws(() => ReadConfiguration({ configRepository: {}, getIdPConfiguration: null }), AssertionError)
+    assert.throws(() => ReadConfiguration({ configRepository: {}, getIdPConfiguration: {}, defaultsRepository: null }), AssertionError)
   })
 
   it('should read values from the repository', async function () {
@@ -48,8 +51,15 @@ describe('ReadConfiguration use case', function () {
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 1)
+    //
+    // Result length is 1 for NAME1, plus the 20 defaults, minus 1 for hidden
+    // admin setting, plus 3 for the CERT/KEY/IDP_CONFIG raw file contents as
+    // settings, resulting in a value of 23.
+    assert.lengthOf(settings, 23)
     assert.equal(settings.get('NAME1'), 'VALUE1')
+    assert.isUndefined(settings.get('ADMIN_USERNAME'))
+    assert.equal(settings.get('OIDC_TOKEN_SIGNING_ALGO'), 'RS256')
+    assert.equal(settings.get('TOKEN_TTL'), '3600')
     assert.isTrue(readStub.calledOnce)
     readStub.restore()
   })
@@ -71,7 +81,43 @@ describe('ReadConfiguration use case', function () {
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 6)
+    assert.lengthOf(settings, 23)
+    assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'spIssuer')
+    assert.equal(settings.get('SAML_IDP_ENTITY_ID'), 'idpIssuer')
+    assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
+    assert.equal(settings.get('CERT_FILE'), certFile)
+    assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
+    assert.equal(settings.get('KEY_FILE'), keyFile)
+    assert.isTrue(readStub.calledOnce)
+    readStub.restore()
+  })
+
+  it('should delete old settings if new names are present', async function () {
+    // arrange
+    const certFile = temporaryFile({ extension: 'crt' })
+    fs.writeFileSync(certFile, '-----BEGIN CERTIFICATE-----')
+    const keyFile = temporaryFile({ extension: 'key' })
+    fs.writeFileSync(keyFile, '-----BEGIN PRIVATE KEY-----')
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('SAML_SP_ENTITY_ID', 'spIssuer')
+      results.set('SAML_IDP_ENTITY_ID', 'idpIssuer')
+      results.set('SAML_SP_ISSUER', 'oldSpIssuer')
+      results.set('SAML_IDP_ISSUER', 'oldIdpIssuer')
+      results.set('CERT_FILE', certFile)
+      results.set('KEY_FILE', keyFile)
+      results.set('SP_CERT_FILE', 'oldcert')
+      results.set('SP_KEY_FILE', 'oldkey')
+      return results
+    })
+    // act
+    const settings = await usecase()
+    // assert
+    assert.lengthOf(settings, 23)
+    assert.isFalse(settings.has('SAML_SP_ISSUER'))
+    assert.isFalse(settings.has('SAML_IDP_ISSUER'))
+    assert.isFalse(settings.has('SP_CERT_FILE'))
+    assert.isFalse(settings.has('SP_KEY_FILE'))
     assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'spIssuer')
     assert.equal(settings.get('SAML_IDP_ENTITY_ID'), 'idpIssuer')
     assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
@@ -97,7 +143,7 @@ describe('ReadConfiguration use case', function () {
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 4)
+    assert.lengthOf(settings, 26)
     assert.equal(settings.get('OIDC_CLIENT_SECRET'), 'tiger')
     assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
     assert.equal(settings.get('KEY_PASSPHRASE'), 'housecat')
@@ -124,7 +170,7 @@ describe('ReadConfiguration use case', function () {
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 6)
+    assert.lengthOf(settings, 24)
     assert.equal(settings.get('CA_CERT'), '-----BEGIN AUTHORITY-----')
     assert.isTrue(settings.has('CA_CERT_FILE'))
     assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
@@ -148,7 +194,7 @@ describe('ReadConfiguration use case', function () {
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 1)
+    assert.lengthOf(settings, 23)
     assert.isTrue(settings.has('AUTH_PROVIDERS'))
     const actual = settings.get('AUTH_PROVIDERS')
     assert.lengthOf(actual, 1)
@@ -174,7 +220,7 @@ describe('ReadConfiguration use case', function () {
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 2)
+    assert.lengthOf(settings, 24)
     assert.isTrue(settings.has('AUTH_PROVIDERS'))
     const actual = settings.get('AUTH_PROVIDERS')
     assert.lengthOf(actual, 1)
@@ -195,7 +241,7 @@ describe('ReadConfiguration use case', function () {
     // act
     const settings = await usecase()
     // assert
-    assert.lengthOf(settings, 2)
+    assert.lengthOf(settings, 22)
     assert.equal(settings.get('IDP_CONFIG_FILE'), 'routes/samlidp.cjs')
     assert.isTrue(settings.has('IDP_CONFIG'))
     const idpConfig = settings.get('IDP_CONFIG')

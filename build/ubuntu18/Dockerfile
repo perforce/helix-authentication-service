@@ -49,6 +49,7 @@ COPY lib lib
 COPY public public
 COPY routes routes
 COPY views views
+COPY defaults.env defaults.env
 COPY example.env example.env
 COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs

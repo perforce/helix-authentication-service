@@ -41,8 +41,10 @@ setTimeout(function () {
             .expect(200)
             .expect('Content-Type', /application\/json/)
             .expect(res => {
-              assert.equal(Object.keys(res.body).length, 1)
+              assert.equal(Object.keys(res.body).length, 23)
               assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
+              assert.equal(res.body.OIDC_TOKEN_SIGNING_ALGO, 'RS256')
+              assert.equal(res.body.TOKEN_TTL, '3600')
             })
             // eslint-disable-next-line no-unused-vars
             .end(function (err, res) {

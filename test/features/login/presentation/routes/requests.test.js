@@ -73,6 +73,7 @@ setTimeout(function () {
             const suffix = `/${res.body.request}?instanceId=none`
             assert.isTrue(res.body.loginUrl.endsWith(suffix))
             assert.isTrue(res.body.baseUrl.startsWith('http'))
+            assert.isFalse(res.body.forceAuthn)
             requestId = res.body.request
           })
           // eslint-disable-next-line no-unused-vars
@@ -96,9 +97,47 @@ setTimeout(function () {
             const suffix = `/${res.body.request}?instanceId=trueU`
             assert.isTrue(res.body.loginUrl.endsWith(suffix))
             assert.isTrue(res.body.baseUrl.startsWith('http'))
+            assert.isFalse(res.body.forceAuthn)
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
+            if (err) {
+              return done(err)
+            }
+            done()
+          })
+      })
+
+      it('should forceAuthn using query parameter', function (done) {
+        agent
+          .get('/requests/new/forceq')
+          .trustLocalhost(true)
+          .query({ forceAuthn: 'yes' })
+          .expect(200)
+          .expect(res => {
+            assert.isTrue(res.body.forceAuthn)
+          })
+          // eslint-disable-next-line no-unused-vars
+          .end(function (err, res) {
+            if (err) {
+              return done(err)
+            }
+            done()
+          })
+      })
+
+      it('should forceAuthn using environment variable', function (done) {
+        process.env.FORCE_AUTHN = 'please'
+        agent
+          .get('/requests/new/forceq')
+          .trustLocalhost(true)
+          .expect(200)
+          .expect(res => {
+            assert.isTrue(res.body.forceAuthn)
+          })
+          // eslint-disable-next-line no-unused-vars
+          .end(function (err, res) {
+            delete process.env.FORCE_AUTHN
             if (err) {
               return done(err)
             }

@@ -298,13 +298,13 @@ describe('Service status', function () {
       // arrange
       const map = new Map()
       map.set('REDIS_URL', 'rediss://rediss.doc:6389')
+      map.set('REDIS_CERT_FILE', './test/client.crt')
+      map.set('REDIS_KEY_FILE', './test/client.key')
       map.set('CA_CERT_FILE', './certs/ca.crt')
       const settingsRepository = new MapSettingsRepository(map)
       const connector = new RedisConnector({
         settingsRepository,
-        loadAuthorityCerts: loadAuthorityCerts({ settingsRepository }),
-        redisCert: './test/client.crt',
-        redisKey: './test/client.key'
+        loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
       })
       // act
       const result = await sut.validateRedis(connector)

@@ -19,6 +19,7 @@ RUN apt-get -q update --fix-missing && \
 WORKDIR /srv
 COPY bin bin
 COPY certs certs
+COPY defaults.env defaults.env
 COPY lib lib
 COPY package.json .
 COPY package-lock.json .

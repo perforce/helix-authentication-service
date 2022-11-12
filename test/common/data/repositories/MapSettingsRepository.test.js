@@ -34,6 +34,15 @@ describe('MapSettingsRepository', function () {
     assert.isFalse(sut.getBool('SETTING_UNDEFINED'))
   })
 
+  it('should return value or fallback from getInt()', function () {
+    const settings = new Map()
+    settings.set('SETTING_3000', '3000')
+    settings.set('SETTING_NONE', 'none')
+    const sut = new MapSettingsRepository(settings)
+    assert.equal(sut.getInt('SETTING_3000', 100), 3000)
+    assert.equal(sut.getInt('SETTING_NONE', 101), 101)
+  })
+
   it('should allow changing values', function () {
     const settings = new Map()
     const sut = new MapSettingsRepository(settings)

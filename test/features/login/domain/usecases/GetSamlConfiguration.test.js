@@ -124,8 +124,8 @@ describe('GetSamlConfiguration use case', function () {
         label: 'Shibboleth',
         protocol: 'saml',
         metadataFile: 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml',
-        wantAssertionsSigned: 'false',
-        wantAuthnResponseSigned: 'TRUE'
+        wantAssertionSigned: 'false',
+        wantResponseSigned: 'TRUE'
       }]
     }
     settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
