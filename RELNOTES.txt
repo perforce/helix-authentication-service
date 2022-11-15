@@ -23,18 +23,13 @@ Important Notes
     starting a Helix Core or Helix ALM client might result with the user being
     logged in again without the user being prompted to provide credentials.
 
-    HAS 2022.2 and earlier require that either the SAML response or the SAML
-    assertion be signed. The release after 2022.2 will require that both be
-    signed. This will address vulnerability CVE-2022-39299 in the third-party
-    library, node-saml. Two new settings are already present in HAS 2022.2. If
-    your identity provider does sign both the response and assertion, we
-    recommend setting SAML_WANT_RESPONSE_SIGNED and SAML_WANT_ASSERTION_SIGNED
-    to "true". If your identity provider only signs the response, set
-    SAML_WANT_RESPONSE_SIGNED=true. If your identity provider only signs the
-    assertion, set SAML_WANT_ASSERTION_SIGNED=true. The 2022.2 release of HAS
-    sets both to false so you can set the appropriate setting to true. Currently
-    most identity providers do not sign both. Be aware that the release that
-    follows 2022.2 will automatically set both settings to true.
+    HAS now requires, by default, that both the SAML response and the SAML
+    assertion be signed by the identity provider. This addresses vulnerability
+    CVE-2022-39299 in the third-party library, node-saml. If your identity
+    provider only signs the response, then set SAML_WANT_ASSERTION_SIGNED=false
+    in the .env file. If your identity provider only signs the assertion, then
+    set SAML_WANT_RESPONSE_SIGNED=false. Currently most identity providers do
+    not sign both unless configured otherwise.
 
 Supported Platforms
 
