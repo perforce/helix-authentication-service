@@ -16,6 +16,7 @@ build/Release
 
 # other build artifacts
 docs/licenses
+public/admin
 README.html
 
 # Dependency directories
@@ -41,3 +42,7 @@ jspm_packages/
 *.rpm
 *.deb
 tmp
+test/test-dot.env
+cert-or-key-*.pem
+providers.json
+secret-*.txt

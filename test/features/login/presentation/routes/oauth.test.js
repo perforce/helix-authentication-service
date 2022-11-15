@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2020-2022 Perforce Software
 //
 import * as http from 'node:http'
 import { assert } from 'chai'
@@ -65,7 +65,7 @@ setTimeout(function () {
           .trustLocalhost(true)
           .expect(401)
           .expect(res => {
-            assert.include(res.text, 'provide JWT via Authorization header')
+            assert.include(res.text, 'Unauthorized')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -81,9 +81,9 @@ setTimeout(function () {
           .get('/oauth/validate')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer notavalidtokenatall')
-          .expect(400)
+          .expect(500)
           .expect(res => {
-            assert.include(res.text, 'no `kid` found in JWT header')
+            assert.include(res.text, 'invalid json web token')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -110,7 +110,7 @@ setTimeout(function () {
             .get('/oauth/validate')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + token)
-            .expect(400)
+            .expect(500)
             .expect(res => {
               assert.include(res.text, 'jwt signature is required')
             })
@@ -135,7 +135,7 @@ setTimeout(function () {
             .get('/oauth/validate')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + token)
-            .expect(400)
+            .expect(500)
             .expect(res => {
               assert.include(res.text, 'invalid algorithm')
             })
@@ -154,9 +154,9 @@ setTimeout(function () {
           .get('/oauth/validate')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.')
-          .expect(400)
+          .expect(500)
           .expect(res => {
-            assert.include(res.text, 'no `kid` found in JWT header')
+            assert.include(res.text, 'malformed json web token')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -173,7 +173,7 @@ setTimeout(function () {
           .get('/oauth/validate')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer ' + token)
-          .expect(400)
+          .expect(500)
           .expect(res => {
             assert.include(res.text, 'Unable to find a signing key')
           })
@@ -197,7 +197,7 @@ setTimeout(function () {
             .get('/oauth/validate')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + token)
-            .expect(403)
+            .expect(500)
             .expect(res => {
               assert.include(res.text, 'tid does not match tenant ID')
             })

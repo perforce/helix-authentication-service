@@ -3,26 +3,18 @@
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
-import { before, beforeEach, describe, it } from 'mocha'
+import { before, describe, it } from 'mocha'
 import mute from 'mute'
-import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import FetchSamlMetadata from 'helix-auth-svc/lib/features/login/domain/usecases/FetchSamlMetadata.js'
 
 describe('FetchSamlMetadata use case', function () {
-  const settings = new Map()
   let usecase
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
-    usecase = FetchSamlMetadata({ settingsRepository })
-  })
-
-  beforeEach(function () {
-    settings.clear()
+    usecase = FetchSamlMetadata()
   })
 
   it('should raise an error for invalid input', function () {
-    assert.throws(() => FetchSamlMetadata({ settingsRepository: null }), AssertionError)
     try {
       usecase(null)
       assert.fail('should have raised error')
@@ -33,10 +25,9 @@ describe('FetchSamlMetadata use case', function () {
 
   it('should raise error if fetching URL fails', async function () {
     // arrange
-    settings.set('SAML_IDP_METADATA_URL', 'https://shibboleth.doc:4443/idp/shibboleth')
     try {
       // act (fails because Node.js rejects self-signed certs)
-      await usecase({})
+      await usecase({}, 'https://shibboleth.doc:4443/idp/shibboleth')
       assert.fail('should have raised error')
     } catch (err) {
       // assert
@@ -46,10 +37,9 @@ describe('FetchSamlMetadata use case', function () {
 
   it('should raise error if reading from file fails', async function () {
     // arrange
-    settings.set('SAML_IDP_METADATA_FILE', 'filesdoesnotexist.xml')
     try {
       // act
-      await usecase({})
+      await usecase({}, 'filesdoesnotexist.xml')
       assert.fail('should have raised error')
     } catch (err) {
       // assert
@@ -57,20 +47,40 @@ describe('FetchSamlMetadata use case', function () {
     }
   })
 
+  it('should raise error if missing IdP entry point', async function () {
+    // arrange
+    const options = {
+      identifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
+    }
+    try {
+      // act
+      await usecase(options)
+      assert.fail('should have raised error')
+    } catch (err) {
+      // assert
+      assert.include(err.message, 'identity provider not configured')
+    }
+  })
+
   it('should use existing configuration if no URL or file', async function () {
     // arrange
-    settings.set('SAML_IDP_SSO_URL', 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
+    const options = {
+      identifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+      entryPoint: 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO'
+    }
     // act
-    const result = await usecase({ field1: 'value1' })
+    const result = await usecase(options)
     // assert
-    assert.deepEqual(result, { field1: 'value1' })
+    assert.property(result, 'identifierFormat')
+    assert.property(result, 'entryPoint')
   })
 
   it('should read metadata from local file', async function () {
     // arrange
-    settings.set('SAML_IDP_METADATA_FILE', 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml')
+    const options = {}
+    const source = 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml'
     // act
-    const result = await usecase({})
+    const result = await usecase(options, source)
     // assert
     assert.property(result, 'entryPoint')
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
@@ -79,12 +89,13 @@ describe('FetchSamlMetadata use case', function () {
 
   it('should fetch metadata via URL', async function () {
     // arrange
-    settings.set('SAML_IDP_METADATA_URL', 'https://shibboleth.doc:4443/idp/shibboleth')
+    const options = {}
+    const source = 'https://shibboleth.doc:4443/idp/shibboleth'
     // act
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
     // mute the warning from node about disabling TLS validation
     const unmute = mute(process.stderr)
-    const result = await usecase({})
+    const result = await usecase(options, source)
     unmute()
     delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     // assert
@@ -95,14 +106,13 @@ describe('FetchSamlMetadata use case', function () {
 
   it('should merge custom settings with fetched metadata', async function () {
     // arrange
-    settings.set('SAML_IDP_METADATA_URL', 'https://shibboleth.doc:4443/idp/shibboleth')
+    const options = { identifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified' }
+    const source = 'https://shibboleth.doc:4443/idp/shibboleth'
     // act
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
     // mute the warning from node about disabling TLS validation
     const unmute = mute(process.stderr)
-    const result = await usecase({
-      identifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-    })
+    const result = await usecase(options, source)
     unmute()
     delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     // assert

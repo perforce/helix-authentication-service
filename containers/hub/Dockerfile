@@ -12,13 +12,14 @@
 #
 # $ docker run -d -p 3000:3000 --name helix-auth-svc helix-auth-svc:latest
 #
-FROM node:16-slim
+FROM node:18-slim
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install git
 WORKDIR /srv
 COPY bin bin
 COPY certs certs
+COPY defaults.env defaults.env
 COPY lib lib
 COPY package.json .
 COPY package-lock.json .

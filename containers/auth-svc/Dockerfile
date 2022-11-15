@@ -1,4 +1,4 @@
-FROM node:16-slim
+FROM node:18-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update --fix-missing && \
@@ -7,6 +7,7 @@ RUN apt-get -q update --fix-missing && \
 WORKDIR /service
 COPY bin bin
 COPY certs certs
+COPY defaults.env defaults.env
 COPY lib lib
 COPY package.json .
 COPY package-lock.json .

@@ -14,6 +14,14 @@ describe('MapSettingsRepository', function () {
     assert.isUndefined(sut.get('SETTING_UNDEFINED'))
   })
 
+  it('should return true or false from has()', function () {
+    const settings = new Map()
+    settings.set('SETTING_VALUE', 'a_value')
+    const sut = new MapSettingsRepository(settings)
+    assert.isTrue(sut.has('SETTING_VALUE'))
+    assert.isFalse(sut.has('NO_SUCH_SETTING_BY_THAT_NAME'))
+  })
+
   it('should return true or false from getBool()', function () {
     const settings = new Map()
     settings.set('SETTING_TRUE', 'true')
@@ -24,5 +32,25 @@ describe('MapSettingsRepository', function () {
     assert.isFalse(sut.getBool('SETTING_NONE'))
     assert.isFalse(sut.getBool('SETTING_FALSE'))
     assert.isFalse(sut.getBool('SETTING_UNDEFINED'))
+  })
+
+  it('should return value or fallback from getInt()', function () {
+    const settings = new Map()
+    settings.set('SETTING_3000', '3000')
+    settings.set('SETTING_NONE', 'none')
+    const sut = new MapSettingsRepository(settings)
+    assert.equal(sut.getInt('SETTING_3000', 100), 3000)
+    assert.equal(sut.getInt('SETTING_NONE', 101), 101)
+  })
+
+  it('should allow changing values', function () {
+    const settings = new Map()
+    const sut = new MapSettingsRepository(settings)
+    sut.set('HAS_TEST_BOOL', 'true')
+    assert.isTrue(sut.getBool('HAS_TEST_BOOL'))
+    sut.set('HAS_TEST_INT', '123')
+    assert.equal(sut.get('HAS_TEST_INT'), '123')
+    sut.set('HAS_TEST_STR', 'abc')
+    assert.equal(sut.get('HAS_TEST_STR'), 'abc')
   })
 })

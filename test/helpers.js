@@ -95,6 +95,14 @@ export function establishSuper (config) {
   assert.equal(configCmd.stat[0].Action, 'set')
 }
 
+export function establishProtects(config) {
+  const p4 = makeP4(config)
+  // by default the calling user will be given super protections
+  const protectOut = p4.cmdSync('protect -o')
+  const protectIn = p4.cmdSync('protect -i', protectOut.stat[0])
+  assert.equal(protectIn.info[0].data, 'Protections saved.')
+}
+
 export function createUser (user, password, config) {
   const p4 = makeP4(config)
   const userIn = p4.cmdSync('user -i -f', user)

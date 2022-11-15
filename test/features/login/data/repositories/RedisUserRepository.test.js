@@ -17,12 +17,13 @@ describe('RedisUser repository', function () {
 
     before(function () {
       const map = new Map()
+      map.set('CACHE_TTL', '2')
       map.set('REDIS_URL', 'redis://redis.doc:6379')
       const settingsRepository = new MapSettingsRepository(map)
       const connector = new RedisConnector({ settingsRepository })
       repository = new RedisUserRepository({
         redisConnector: connector,
-        cacheTtl: 2000
+        settingsRepository
       })
     })
 
@@ -81,17 +82,18 @@ describe('RedisUser repository', function () {
     before(function () {
       const map = new Map()
       map.set('REDIS_URL', 'rediss://rediss.doc:6389')
+      map.set('REDIS_CERT_FILE', './test/client.crt')
+      map.set('REDIS_KEY_FILE', './test/client.key')
+      map.set('CACHE_TTL', '2')
       map.set('CA_CERT_FILE', './certs/ca.crt')
       const settingsRepository = new MapSettingsRepository(map)
       const connector = new RedisConnector({
         settingsRepository,
-        loadAuthorityCerts: loadAuthorityCerts({ settingsRepository }),
-        redisCert: './test/client.crt',
-        redisKey: './test/client.key'
+        loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
       })
       repository = new RedisUserRepository({
         redisConnector: connector,
-        cacheTtl: 2000
+        settingsRepository
       })
     })
 

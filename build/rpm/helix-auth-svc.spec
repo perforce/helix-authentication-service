@@ -56,6 +56,7 @@ cp -pr public/* %{buildroot}%{installprefix}/public
 cp -pr routes/* %{buildroot}%{installprefix}/routes
 cp -pr views/* %{buildroot}%{installprefix}/views
 
+cp defaults.env %{buildroot}%{installprefix}/defaults.env
 cp example.env %{buildroot}%{installprefix}/example.env
 cp logging.config.cjs %{buildroot}%{installprefix}/logging.config.cjs
 cp sentinel.config.cjs %{buildroot}%{installprefix}/sentinel.config.cjs

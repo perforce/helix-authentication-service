@@ -186,6 +186,20 @@ describe('ValidateWebToken use case', function () {
       assert.fail('should have raised error')
     } catch (err) {
       // assert
+      assert.include(err.message, 'invalid json web token')
+    }
+  })
+
+  it('should reject token with missing key id', async function () {
+    // arrange
+    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTg3OTM1NDEsImV4cCI6MTY1ODc5MzU1MSwiYXVkIjoiYmRhNjc0ZWUtY2RmNS00YWJhLWE5NDMtZTRiZmE4YzE3ZTFmIiwiaXNzIjoiaHR0cHM6Ly9oYXMuZXhhbXBsZS5jb20ifQ.XI4vJcJ7sdy9LSOXaJTyeSVNr2A4hXTulpxQ5h8xDxg'
+    try {
+      // act
+      await usecase(token)
+      assert.fail('should have raised error')
+    } catch (err) {
+      // assert
       assert.include(err.message, 'no `kid` found in JWT header')
     }
   })
@@ -244,10 +258,9 @@ describe('ValidateWebToken use case', function () {
       assert.fail('should have raised error')
     } catch (err) {
       // assert
-      assert.include(err.message, 'no `kid` found in JWT header')
+      assert.include(err.message, 'malformed json web token')
     }
   })
-
 
   it('should reject web token signed by another party', async function () {
     // arrange

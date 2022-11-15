@@ -4,34 +4,15 @@
 import { AssertionError } from 'node:assert'
 import * as fs from 'node:fs'
 import { assert } from 'chai'
-import { before, beforeEach, describe, it } from 'mocha'
+import { describe, it } from 'mocha'
 import { temporaryFile } from 'tempy'
-import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import RefreshEnvironment from 'helix-auth-svc/lib/common/domain/usecases/RefreshEnvironment.js'
 
 describe('RefreshEnvironment use case', function () {
-  const settings = new Map()
-  let usecase
-
-  before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
-    usecase = RefreshEnvironment({ settingsRepository })
-  })
-
-  beforeEach(function () {
-    settings.clear()
-  })
-
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => RefreshEnvironment({ settingsRepository: null }), AssertionError)
+    assert.throws(() => RefreshEnvironment({ dotenvFile: null }), AssertionError)
     try {
-      usecase(null)
-      assert.fail('should have raised error')
-    } catch (err) {
-      assert.instanceOf(err, AssertionError)
-    }
-    settings.set('DOTENV_FILE', 'does/not/exist/.env')
-    try {
+      const usecase = RefreshEnvironment({ dotenvFile: 'does/not/exist/.env' })
       await usecase({})
     } catch (err) {
       assert.include(err.code, 'ENOENT')
@@ -45,7 +26,7 @@ describe('RefreshEnvironment use case', function () {
     fs.writeFileSync(dotenvFile, `# comment line
 HAS_TEST_NAME=initialValue
 `)
-    settings.set('DOTENV_FILE', dotenvFile)
+    const usecase = RefreshEnvironment({ dotenvFile })
     const result1 = await usecase(env)
     assert.property(result1, 'HAS_TEST_NAME')
     assert.equal(env['HAS_TEST_NAME'], 'initialValue')

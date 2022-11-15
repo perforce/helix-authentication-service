@@ -31,6 +31,17 @@ describe('GetSamlAuthnContext use case', function () {
     assert.isUndefined(result)
   })
 
+  it('should prefer passed parameter value over configuration', function () {
+    // arrange
+    settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+    // act
+    const result = usecase('urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos')
+    // assert
+    assert.isDefined(result)
+    assert.lengthOf(result, 1)
+    assert.equal(result[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos')
+  })
+
   it('should return a singleton list even with plain string', function () {
     // arrange
     settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')

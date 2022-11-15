@@ -1,7 +1,7 @@
 //
 // Copyright 2022 Perforce Software
 //
-import fs from 'fs-extra'
+import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as process from 'node:process'
 import { exec, spawn } from 'node:child_process'
@@ -60,7 +60,8 @@ export async function startServer (p4root) {
   const port = `localhost:${portnum}`
   const config = Object.assign({}, defaultConfig, { port, p4root })
   // ensure an empty test directory exists
-  fs.emptyDirSync(config.p4root)
+  fs.rmSync(config.p4root, { force: true, recursive: true })
+  fs.mkdirSync(config.p4root, { recursive: true })
   return startServerGeneric(config, null)
 }
 
@@ -69,10 +70,12 @@ export async function startSslServer (p4root) {
   const port = `ssl:localhost:${portnum}`
   const config = Object.assign({}, defaultSslConfig, { port, p4root })
   // ensure an empty test directory exists
-  fs.emptyDirSync(config.p4root)
+  fs.rmSync(config.p4root, { force: true, recursive: true })
+  fs.mkdirSync(config.p4root, { recursive: true })
   // set up everything for the SSL server
   const ssldir = path.join(config.p4root, 'ssl')
-  fs.ensureDirSync(ssldir)
+  fs.rmSync(ssldir, { force: true, recursive: true })
+  fs.mkdirSync(ssldir, { recursive: true })
   fs.chmodSync(ssldir, 0o700)
   const certfile = path.join(ssldir, 'certificate.txt')
   fs.copyFileSync('test/fixtures/certificate.txt', certfile)

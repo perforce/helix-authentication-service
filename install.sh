@@ -177,7 +177,7 @@ This script will install the requirements for the Authentication Service.
 The operations involved are as follows:
 
   * Install OS packages for build dependencies
-  * Download and install Node.js v16 (https://nodejs.org)
+  * Download and install Node.js v18 (https://nodejs.org)
   * Download and build the service dependencies
 EOT
 
@@ -237,12 +237,12 @@ function check_nodejs() {
         fi
         if ! $UPGRADABLE; then
             error 'Found a version of Node.js that cannot be upgraded automatically.'
-            error 'Please upgrade Node.js to v14 or v16 before proceeding.'
+            error 'Please upgrade Node.js to v14, v16, or v18 before proceeding.'
             exit 1
         fi
         if $INTERACTIVE; then
             echo ''
-            echo 'Found a version of Node.js that is not the required v14 or v16.'
+            echo 'Found a version of Node.js that is not the required v14/v16/v18.'
             echo 'Do you wish to upgrade the Node.js installation?'
             select yn in 'Yes' 'No'; do
                 case $yn in
@@ -251,7 +251,7 @@ function check_nodejs() {
                 esac
             done
         elif ! $UPGRADE_NODE; then
-            die 'Node.js v14 or v16 is required, please upgrade.'
+            die 'Node.js v14, v16, or v18 is required, please upgrade.'
         fi
         # else the script will automatically install the required version
     fi
@@ -279,7 +279,7 @@ function install_nodejs() {
             # directly from the vendor. This includes npm as well.
             #
             # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+            curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
             sudo apt-get -q -y install nodejs
         elif [ $PLATFORM == "redhat" ]; then
             # In the upgrade scenario, need to remove the repository package first.
@@ -294,7 +294,7 @@ function install_nodejs() {
             # directly from the vendor. This includes npm as well.
             #
             # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://rpm.nodesource.com/setup_16.x | sudo -E bash -
+            curl -sL https://rpm.nodesource.com/setup_18.x | sudo -E bash -
             sudo yum clean all
             sudo yum -q -y install nodejs
         fi

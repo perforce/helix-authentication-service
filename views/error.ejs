@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html>
 <%- include('title') %>
-<body class="Site">
-  <%- include('header', {subtitle: 'Error'}) %>
-  <section class="section Site-content">
-    <div class="container">
-      <h1><%= message %></h1>
-      <h2><%= error.status %></h2>
-    </div>
-  </section>
-  <%- include('footer') %>
-</body>
+
+  <body class="Site">
+    <%- include('header', {subtitle: 'Error' }) %>
+      <section class="section Site-content">
+        <div class="notification is-warning">
+          <p>
+            <%= message %>
+          </p>
+          <p>
+            <%= details %>
+          </p>
+        </div>
+      </section>
+      <%- include('footer') %>
+  </body>
+
 </html>

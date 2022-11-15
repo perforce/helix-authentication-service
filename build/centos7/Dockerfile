@@ -14,8 +14,8 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 # install build and packaging prerequisites
 #
 RUN yum -q -y install curl gcc-c++ git make rpm-build rpmdevtools
-ADD https://rpm.nodesource.com/setup_16.x setup_16.x
-RUN bash setup_16.x
+ADD https://rpm.nodesource.com/setup_18.x setup_18.x
+RUN bash setup_18.x
 RUN yum -q -y install nodejs
 
 ARG ID_REL_BASE=2022.2.0
@@ -39,6 +39,7 @@ COPY lib lib
 COPY public public
 COPY routes routes
 COPY views views
+COPY defaults.env defaults.env
 COPY example.env example.env
 COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs

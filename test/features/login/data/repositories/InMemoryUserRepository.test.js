@@ -6,13 +6,17 @@ import { assert } from 'chai'
 import { before, describe, it } from 'mocha'
 import { ulid } from 'ulid'
 import { User } from 'helix-auth-svc/lib/features/login/domain/entities/User.js'
+import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { InMemoryUserRepository } from 'helix-auth-svc/lib/features/login/data/repositories/InMemoryUserRepository.js'
 
 describe('InMemoryUser repository', function () {
   let repository
 
   before(function () {
-    repository = new InMemoryUserRepository({ cacheTtl: 2000 })
+    const map = new Map()
+    map.set('CACHE_TTL', '2')
+    const settings = new MapSettingsRepository(map)
+    repository = new InMemoryUserRepository({ settingsRepository: settings })
   })
 
   it('should raise an error for invalid input', function () {
