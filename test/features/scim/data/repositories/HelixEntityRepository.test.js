@@ -564,7 +564,7 @@ describe('HelixEntity repository', function () {
 
     before(async function () {
       this.timeout(30000)
-      p4config = await runner.startSslServer('./tmp/p4d/ssl-repo')
+      p4config = await runner.startSslServer('./tmp/p4d/ssl-passwd')
       const map = new Map()
       map.set('P4PORT', p4config.port)
       map.set('P4USER', p4config.user)
@@ -596,7 +596,7 @@ describe('HelixEntity repository', function () {
 
     before(async function () {
       this.timeout(30000)
-      p4config = await runner.startSslServer('./tmp/p4d/ssl-repo')
+      p4config = await runner.startSslServer('./tmp/p4d/ssl-untrust')
       const map = new Map()
       map.set('P4PORT', p4config.port)
       map.set('P4USER', p4config.user)
@@ -629,7 +629,7 @@ describe('HelixEntity repository', function () {
 
     before(async function () {
       this.timeout(30000)
-      p4config = await runner.startSslServer('./tmp/p4d/ssl-repo')
+      p4config = await runner.startSslServer('./tmp/p4d/ssl-trust')
       helpers.establishTrust(p4config)
       helpers.establishSuper(p4config)
       const map = new Map()
