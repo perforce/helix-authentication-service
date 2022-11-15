@@ -18,8 +18,8 @@ RUN sed -i '/path-exclude=\/usr\/share\/doc\/*/d' /etc/dpkg/dpkg.cfg.d/excludes
 #
 RUN apt-get update && \
     apt-get install -q -y build-essential curl debhelper devscripts git
-ADD https://deb.nodesource.com/setup_16.x setup_16.x
-RUN bash setup_16.x
+ADD https://deb.nodesource.com/setup_18.x setup_18.x
+RUN bash setup_18.x
 RUN apt-get -q -y install nodejs
 
 FROM ubuntu22_pkg_base

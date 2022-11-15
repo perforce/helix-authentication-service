@@ -12,8 +12,8 @@ RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl iputils-ping sudo systemd
 
 # install the previous LTS version of Node.js via package
-ADD https://deb.nodesource.com/setup_14.x setup_14.x
-RUN bash setup_14.x
+ADD https://deb.nodesource.com/setup_16.x setup_16.x
+RUN bash setup_16.x
 RUN apt-get -q -y install nodejs
 RUN test -f /usr/bin/node
 
@@ -34,7 +34,7 @@ RUN tar zxf helix-authentication-service.tgz && \
 RUN ./helix-auth-svc/install.sh -n --no-create-user --pm2 --upgrade
 
 # ensure latest version of node has been installed as expected
-RUN node --version | grep -Eq '^v16\.'
+RUN node --version | grep -Eq '^v18\.'
 # and pm2 is installed
 RUN test -f /usr/bin/pm2
 

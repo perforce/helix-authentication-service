@@ -10,8 +10,8 @@ FROM has-build:centos8
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
 
-ADD https://rpm.nodesource.com/setup_16.x setup_16.x
-RUN bash setup_16.x
+ADD https://rpm.nodesource.com/setup_18.x setup_18.x
+RUN bash setup_18.x
 # Skip gpg key check because it fails on some systems, and how that can happen
 # in a docker container is beyond my comprehension.
 RUN yum -q -y install --nogpgcheck -y nodejs

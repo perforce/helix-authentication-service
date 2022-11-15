@@ -431,8 +431,10 @@ function ensure_readiness() {
     if ! touch .env >/dev/null 2>&1; then
         die 'You do not have permission to write to this directory.'
     fi
-    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6)\.'; then
-        die 'Node.js v14 or v16 is required. Please run install.sh to install dependencies.'
+    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6|8)\.'; then
+        error 'Node.js v14, v16, or v18 is required to run the service.'
+        error 'Please run install.sh to install dependencies.'
+        exit 1
     fi
     if [[ ! -d node_modules ]]; then
         die 'Module dependencies are missing. Please run install.sh before proceeding.'
