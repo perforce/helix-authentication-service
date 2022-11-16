@@ -138,52 +138,60 @@ describe('GetSamlConfiguration use case', function () {
   })
 
   it('should fetch metadata via URL with settings', async function () {
-    // arrange
-    settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
-    settings.set('SAML_IDP_METADATA_URL', 'https://shibboleth.doc:4443/idp/shibboleth')
-    settings.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
-    // act
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
-    // mute the warning from node about disabling TLS validation
-    const unmute = mute(process.stderr)
-    const result = await usecase()
-    unmute()
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
-    // assert
-    assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
-    assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
-    assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
-    assert.isFalse(result.wantAssertionsSigned)
-    assert.isFalse(result.wantAuthnResponseSigned)
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      // arrange
+      settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+      settings.set('SAML_IDP_METADATA_URL', 'https://shibboleth.doc:4443/idp/shibboleth')
+      settings.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+      // act
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+      // mute the warning from node about disabling TLS validation
+      const unmute = mute(process.stderr)
+      const result = await usecase()
+      unmute()
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      // assert
+      assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
+      assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+      assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+      assert.isFalse(result.wantAssertionsSigned)
+      assert.isFalse(result.wantAuthnResponseSigned)
+    }
   })
 
   it('should fetch metadata via URL with provider', async function () {
-    // arrange
-    const providers = {
-      providers: [{
-        label: 'Shibboleth',
-        protocol: 'saml',
-        metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth',
-        nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
-        authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
-        forceAuthn: false
-      }]
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      // arrange
+      const providers = {
+        providers: [{
+          label: 'Shibboleth',
+          protocol: 'saml',
+          metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth',
+          nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+          authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
+          forceAuthn: false
+        }]
+      }
+      settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+      // act
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+      // mute the warning from node about disabling TLS validation
+      const unmute = mute(process.stderr)
+      const result = await usecase('saml-0')
+      unmute()
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      // assert
+      assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
+      assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+      assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+      assert.isFalse(result.forceAuthn)
+      assert.isFalse(result.wantAssertionsSigned)
+      assert.isFalse(result.wantAuthnResponseSigned)
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
-    // act
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
-    // mute the warning from node about disabling TLS validation
-    const unmute = mute(process.stderr)
-    const result = await usecase('saml-0')
-    unmute()
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
-    // assert
-    assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
-    assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
-    assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
-    assert.isFalse(result.forceAuthn)
-    assert.isFalse(result.wantAssertionsSigned)
-    assert.isFalse(result.wantAuthnResponseSigned)
   })
 
   it('should fetch metadata via file with settings', async function () {

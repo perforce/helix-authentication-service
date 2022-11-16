@@ -30,26 +30,32 @@ describe('1-step SAML validation', function () {
   let samlResponse
 
   before(function () {
-    // starting the web driver may take longer than mocha would prefer
-    this.timeout(30000)
-    const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
-    // fyi, going headless makes firefox 10x slower
-    const opts = new Options().headless()
-    // For the 1-step test, need to control the page flow explicitly so disable
-    // the form auto-submit code in the client. Without this, attempting to find
-    // and collect page elements will sometimes fail due to the auto-submit code
-    // causing a page transition.
-    opts.setPreference('javascript.enabled', false)
-    driver = new Builder()
-      .forBrowser('firefox')
-      .withCapabilities(caps)
-      .setFirefoxOptions(opts)
-      .build()
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      // starting the web driver may take longer than mocha would prefer
+      this.timeout(30000)
+      const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
+      // fyi, going headless makes firefox 10x slower
+      const opts = new Options().headless()
+      // For the 1-step test, need to control the page flow explicitly so disable
+      // the form auto-submit code in the client. Without this, attempting to find
+      // and collect page elements will sometimes fail due to the auto-submit code
+      // causing a page transition.
+      opts.setPreference('javascript.enabled', false)
+      driver = new Builder()
+        .forBrowser('firefox')
+        .withCapabilities(caps)
+        .setFirefoxOptions(opts)
+        .build()
+    }
   })
 
   after(async function () {
-    this.timeout(30000)
-    await driver.quit()
+    if (process.env.UNIT_ONLY === undefined) {
+      this.timeout(30000)
+      await driver.quit()
+    }
   })
 
   it('should produce a login URL', async function () {

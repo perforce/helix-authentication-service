@@ -11,7 +11,11 @@ describe('FetchSamlMetadata use case', function () {
   let usecase
 
   before(function () {
-    usecase = FetchSamlMetadata()
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      usecase = FetchSamlMetadata()
+    }
   })
 
   it('should raise an error for invalid input', function () {

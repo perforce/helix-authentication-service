@@ -17,8 +17,12 @@ describe('ValidateWebToken use case', function () {
   let usecase
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
-    usecase = ValidateWebToken({ settingsRepository })
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      const settingsRepository = new MapSettingsRepository(settings)
+      usecase = ValidateWebToken({ settingsRepository })
+    }
   })
 
   beforeEach(function () {

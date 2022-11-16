@@ -37,19 +37,27 @@ describe('SAML connector', function () {
   })
 
   it('should return not ok for non-SAML URL', async function () {
-    this.timeout(10000)
-    const connector = new SamlConnector({ metadataUrl: 'https://oidc.doc:8843' })
-    try {
-      await connector.ping()
-      assert.fail('should have raised an error')
-    } catch (err) {
-      assert.include(err.toString(), 'missing identityProviderUrl')
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      this.timeout(10000)
+      const connector = new SamlConnector({ metadataUrl: 'https://oidc.doc:8843' })
+      try {
+        await connector.ping()
+        assert.fail('should have raised an error')
+      } catch (err) {
+        assert.include(err.toString(), 'missing identityProviderUrl')
+      }
     }
   })
 
   it('should return ok for working SAML connection', async function () {
-    this.timeout(10000)
-    const connector = new SamlConnector({ metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth' })
-    await connector.ping()
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      this.timeout(10000)
+      const connector = new SamlConnector({ metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth' })
+      await connector.ping()
+    }
   })
 })

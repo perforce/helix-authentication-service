@@ -37,19 +37,27 @@ describe('OpenID connector', function () {
   })
 
   it('should return not ok for non-OIDC URI', async function () {
-    this.timeout(10000)
-    const connector = new OpenIDConnector({ issuerUri: 'https://shibboleth.doc:4443' })
-    try {
-      await connector.ping()
-      assert.fail('should have raised an error')
-    } catch (err) {
-      assert.include(err.toString(), 'expected 200 OK')
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      this.timeout(10000)
+      const connector = new OpenIDConnector({ issuerUri: 'https://shibboleth.doc:4443' })
+      try {
+        await connector.ping()
+        assert.fail('should have raised an error')
+      } catch (err) {
+        assert.include(err.toString(), 'expected 200 OK')
+      }
     }
   })
 
   it('should return ok for working OIDC connection', async function () {
-    this.timeout(10000)
-    const connector = new OpenIDConnector({ issuerUri: 'https://oidc.doc:8843' })
-    await connector.ping()
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      this.timeout(10000)
+      const connector = new OpenIDConnector({ issuerUri: 'https://oidc.doc:8843' })
+      await connector.ping()
+    }
   })
 })

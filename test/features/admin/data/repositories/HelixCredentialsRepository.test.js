@@ -13,18 +13,24 @@ describe('helix credentials repository', function () {
   let p4config
 
   before(async function () {
-    this.timeout(30000)
-    p4config = await runner.startServer('./tmp/p4d/creds-repo')
-    helpers.establishSuper(p4config)
-    const map = new Map()
-    map.set('P4PORT', p4config.port)
-    const settings = new MapSettingsRepository(map)
-    repository = new HelixCredentialsRepository({ settingsRepository: settings })
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      this.timeout(30000)
+      p4config = await runner.startServer('./tmp/p4d/creds-repo')
+      helpers.establishSuper(p4config)
+      const map = new Map()
+      map.set('P4PORT', p4config.port)
+      const settings = new MapSettingsRepository(map)
+      repository = new HelixCredentialsRepository({ settingsRepository: settings })
+    }
   })
 
   after(async function () {
-    this.timeout(30000)
-    await runner.stopServer(p4config)
+    if (process.env.UNIT_ONLY === undefined) {
+      this.timeout(30000)
+      await runner.stopServer(p4config)
+    }
   })
 
   it('should raise an error for invalid input', async function () {

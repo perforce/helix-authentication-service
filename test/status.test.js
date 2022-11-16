@@ -210,14 +210,18 @@ describe('Service status', function () {
     })
 
     it('should return ok for working OIDC connection', async function () {
-      this.timeout(10000)
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
-      // mute the warning from node about disabling TLS validation
-      const unmute = mute(process.stderr)
-      const result = await sut.validateOpenID('https://oidc.doc:8843')
-      assert.equal(result, 'ok')
-      unmute()
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        this.timeout(10000)
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+        // mute the warning from node about disabling TLS validation
+        const unmute = mute(process.stderr)
+        const result = await sut.validateOpenID('https://oidc.doc:8843')
+        assert.equal(result, 'ok')
+        unmute()
+        delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      }
     })
   })
 
@@ -234,14 +238,18 @@ describe('Service status', function () {
     })
 
     it('should return ok for working SAML connection', async function () {
-      this.timeout(10000)
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
-      // mute the warning from node about disabling TLS validation
-      const unmute = mute(process.stderr)
-      const result = await sut.validateSaml('https://shibboleth.doc:4443/idp/shibboleth')
-      assert.equal(result, 'ok')
-      unmute()
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        this.timeout(10000)
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+        // mute the warning from node about disabling TLS validation
+        const unmute = mute(process.stderr)
+        const result = await sut.validateSaml('https://shibboleth.doc:4443/idp/shibboleth')
+        assert.equal(result, 'ok')
+        unmute()
+        delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
+      }
     })
   })
 
@@ -279,37 +287,45 @@ describe('Service status', function () {
     })
 
     it('should report ok for working non-TLS connection', async function () {
-      // this test can take a randomly long time to run
-      this.timeout(30000)
-      // arrange
-      const map = new Map()
-      map.set('REDIS_URL', 'redis://redis.doc:6379')
-      const settingsRepository = new MapSettingsRepository(map)
-      const connector = new RedisConnector({ settingsRepository })
-      // act
-      const result = await sut.validateRedis(connector)
-      // assert
-      assert.equal(result, 'ok')
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        // this test can take a randomly long time to run
+        this.timeout(30000)
+        // arrange
+        const map = new Map()
+        map.set('REDIS_URL', 'redis://redis.doc:6379')
+        const settingsRepository = new MapSettingsRepository(map)
+        const connector = new RedisConnector({ settingsRepository })
+        // act
+        const result = await sut.validateRedis(connector)
+        // assert
+        assert.equal(result, 'ok')
+      }
     })
 
     it('should report ok for working TLS connection', async function () {
-      // this test can take a randomly long time to run
-      this.timeout(30000)
-      // arrange
-      const map = new Map()
-      map.set('REDIS_URL', 'rediss://rediss.doc:6389')
-      map.set('REDIS_CERT_FILE', './test/client.crt')
-      map.set('REDIS_KEY_FILE', './test/client.key')
-      map.set('CA_CERT_FILE', './certs/ca.crt')
-      const settingsRepository = new MapSettingsRepository(map)
-      const connector = new RedisConnector({
-        settingsRepository,
-        loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
-      })
-      // act
-      const result = await sut.validateRedis(connector)
-      // assert
-      assert.equal(result, 'ok')
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        // this test can take a randomly long time to run
+        this.timeout(30000)
+        // arrange
+        const map = new Map()
+        map.set('REDIS_URL', 'rediss://rediss.doc:6389')
+        map.set('REDIS_CERT_FILE', './test/client.crt')
+        map.set('REDIS_KEY_FILE', './test/client.key')
+        map.set('CA_CERT_FILE', './certs/ca.crt')
+        const settingsRepository = new MapSettingsRepository(map)
+        const connector = new RedisConnector({
+          settingsRepository,
+          loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
+        })
+        // act
+        const result = await sut.validateRedis(connector)
+        // assert
+        assert.equal(result, 'ok')
+      }
     })
   })
 
@@ -317,17 +333,23 @@ describe('Service status', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
-      p4config = await runner.startServer('./tmp/p4d/status-unit')
-      helpers.establishSuper(p4config)
-      // logout so we can test every case
-      const p4 = helpers.makeP4(p4config)
-      p4.cmdSync('logout')
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        this.timeout(30000)
+        p4config = await runner.startServer('./tmp/p4d/status-unit')
+        helpers.establishSuper(p4config)
+        // logout so we can test every case
+        const p4 = helpers.makeP4(p4config)
+        p4.cmdSync('logout')
+      }
     })
 
     after(async function () {
-      this.timeout(30000)
-      await runner.stopServer(p4config)
+      if (process.env.UNIT_ONLY === undefined) {
+        this.timeout(30000)
+        await runner.stopServer(p4config)
+      }
     })
 
     it('should report not configured', async function () {

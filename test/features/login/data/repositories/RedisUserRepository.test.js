@@ -16,15 +16,19 @@ describe('RedisUser repository', function () {
     let repository
 
     before(function () {
-      const map = new Map()
-      map.set('CACHE_TTL', '2')
-      map.set('REDIS_URL', 'redis://redis.doc:6379')
-      const settingsRepository = new MapSettingsRepository(map)
-      const connector = new RedisConnector({ settingsRepository })
-      repository = new RedisUserRepository({
-        redisConnector: connector,
-        settingsRepository
-      })
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        const map = new Map()
+        map.set('CACHE_TTL', '2')
+        map.set('REDIS_URL', 'redis://redis.doc:6379')
+        const settingsRepository = new MapSettingsRepository(map)
+        const connector = new RedisConnector({ settingsRepository })
+        repository = new RedisUserRepository({
+          redisConnector: connector,
+          settingsRepository
+        })
+      }
     })
 
     it('should raise an error for invalid input', function () {
@@ -80,21 +84,25 @@ describe('RedisUser repository', function () {
     let repository
 
     before(function () {
-      const map = new Map()
-      map.set('REDIS_URL', 'rediss://rediss.doc:6389')
-      map.set('REDIS_CERT_FILE', './test/client.crt')
-      map.set('REDIS_KEY_FILE', './test/client.key')
-      map.set('CACHE_TTL', '2')
-      map.set('CA_CERT_FILE', './certs/ca.crt')
-      const settingsRepository = new MapSettingsRepository(map)
-      const connector = new RedisConnector({
-        settingsRepository,
-        loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
-      })
-      repository = new RedisUserRepository({
-        redisConnector: connector,
-        settingsRepository
-      })
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        const map = new Map()
+        map.set('REDIS_URL', 'rediss://rediss.doc:6389')
+        map.set('REDIS_CERT_FILE', './test/client.crt')
+        map.set('REDIS_KEY_FILE', './test/client.key')
+        map.set('CACHE_TTL', '2')
+        map.set('CA_CERT_FILE', './certs/ca.crt')
+        const settingsRepository = new MapSettingsRepository(map)
+        const connector = new RedisConnector({
+          settingsRepository,
+          loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
+        })
+        repository = new RedisUserRepository({
+          redisConnector: connector,
+          settingsRepository
+        })
+      }
     })
 
     it('should find an existing user entity once', async function () {

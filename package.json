@@ -30,6 +30,7 @@
   "scripts": {
     "start": "node ./bin/www.js",
     "test": "mocha --recursive --delay --exit",
+    "unit": "UNIT_ONLY=true mocha --recursive --delay --exit",
     "licenses": "license-checker --production --direct --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {

@@ -19,6 +19,12 @@ import p4pkg from 'p4api'
 const { P4 } = p4pkg
 
 describe('HelixEntity repository', function () {
+  before(function () {
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    }
+  })
+
   describe('Non-SSL', function () {
     let repository
     let p4config

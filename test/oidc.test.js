@@ -29,21 +29,27 @@ describe('OIDC authentication', function () {
   let loginUrl
 
   before(function () {
-    // starting the web driver may take longer than mocha would prefer
-    this.timeout(30000)
-    const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
-    // fyi, going headless makes firefox 10x slower
-    const opts = new Options().headless()
-    driver = new Builder()
-      .forBrowser('firefox')
-      .withCapabilities(caps)
-      .setFirefoxOptions(opts)
-      .build()
+    if (process.env.UNIT_ONLY) {
+      this.skip()
+    } else {
+      // starting the web driver may take longer than mocha would prefer
+      this.timeout(30000)
+      const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
+      // fyi, going headless makes firefox 10x slower
+      const opts = new Options().headless()
+      driver = new Builder()
+        .forBrowser('firefox')
+        .withCapabilities(caps)
+        .setFirefoxOptions(opts)
+        .build()
+    }
   })
 
   after(async function () {
-    this.timeout(30000)
-    await driver.quit()
+    if (process.env.UNIT_ONLY === undefined) {
+      this.timeout(30000)
+      await driver.quit()
+    }
   })
 
   it('should return an OIDC request identifier', async function () {

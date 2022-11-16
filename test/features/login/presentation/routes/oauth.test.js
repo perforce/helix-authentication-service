@@ -3,7 +3,7 @@
 //
 import * as http from 'node:http'
 import { assert } from 'chai'
-import { describe, it, run } from 'mocha'
+import { before, describe, it, run } from 'mocha'
 import jwt from 'jsonwebtoken'
 import request from 'supertest'
 // Load the test environment before the bulk of our code initializes, otherwise
@@ -29,6 +29,12 @@ const agent = request.agent(server)
 //
 setTimeout(function () {
   describe('OAuth requests', function () {
+    before(function () {
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      }
+    })
+
     describe('Success cases', function () {
       it('should approve a valid JSON web token', function (done) {
         const payload = {
