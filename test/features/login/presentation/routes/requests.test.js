@@ -61,6 +61,27 @@ setTimeout(function () {
   describe('Login requests', function () {
     let requestId
 
+    it('should reject no such request with terse response', function (done) {
+      const cert = fs.readFileSync('test/client.crt')
+      const key = fs.readFileSync('test/client.key')
+      agent
+        .get('/requests/status/nine3two')
+        .trustLocalhost(true)
+        .key(key)
+        .cert(cert)
+        .expect(404)
+        .expect(res => {
+          assert.equal(res.text, 'no such request')
+        })
+        // eslint-disable-next-line no-unused-vars
+        .end(function (err, res) {
+          if (err) {
+            return done(err)
+          }
+          done()
+        })
+    })
+
     describe('request login identifier', function () {
       it('should return a URL', function (done) {
         agent
