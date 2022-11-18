@@ -237,9 +237,9 @@ Description:
 
     Configuration script for Helix Authentication Service.
 
-    This script will modify the ecosystem.config.cjs or .env file according
-    to the values provided via arguments or interactive input, and then
-    restart the service via pm2 or systemd.
+    This script will modify the .env file according to the values provided
+    via arguments or interactive input, and then restart the service using
+    the systemctl command.
 
     -h / --help
         Display this help message.
@@ -293,9 +293,6 @@ Description:
 
     --p4port <p4port>
         The P4PORT for the Helix Core server for user provisioning.
-
-    --pm2
-        Configure for the pm2 process manager instead of systemd.
 
     --saml-idp-metadata-url <metdata-url>
         URL for the SAML identity provider configuration metadata.
@@ -446,16 +443,6 @@ function ensure_readiness() {
     fi
 }
 
-# If user elected to configure for pm2, make sure that the system is
-# sufficiently ready for doing so.
-function ensure_pm2_readiness() {
-    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.cjs" ]]; then
-        if ! which node >/dev/null 2>&1; then
-            die 'Node.js is required for pm2. Please run install.sh to install dependencies.'
-        fi
-    fi
-}
-
 # Source selected P4 settings by use of the p4 set command.
 function source_enviro() {
     if $FOUND_P4; then
@@ -474,7 +461,7 @@ function read_arguments() {
     ARGS+=(admin-user: admin-passwd: enable-admin)
     ARGS+=(oidc-issuer-uri: oidc-client-id: oidc-client-secret:)
     ARGS+=(saml-idp-sso-url: saml-sp-entityid: saml-idp-metadata-url:)
-    ARGS+=(default-protocol: pm2 allow-root debug help)
+    ARGS+=(default-protocol: allow-root debug help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
         -l "$(join_by , ${ARGS[@]})" -- "$@")
@@ -559,10 +546,6 @@ function read_arguments() {
             --default-protocol)
                 DEFAULT_PROTOCOL=$2
                 shift 2
-                ;;
-            --pm2)
-                CONFIG_FILE_NAME='ecosystem.config.cjs'
-                shift
                 ;;
             --allow-root)
                 ALLOW_ROOT=true
@@ -1189,26 +1172,6 @@ function prompt_to_proceed() {
     done
 }
 
-# Make the prescribed changes to the ecosystem configuration file.
-function modify_eco_config() {
-    # make a backup of the ecosystem file one time and leave it untouched as a
-    # record of the original contents
-    if [[ ! -f ecosystem.config.orig && -e ecosystem.config.cjs ]]; then
-        cp ecosystem.config.cjs ecosystem.config.orig
-    fi
-    # use Node.js to update the configuration file in place since the format is
-    # a bit too complex for simple sed/awk scripting to handle
-    env DEFAULT_PROTOCOL="${DEFAULT_PROTOCOL}" \
-        SVC_BASE_URI="${SVC_BASE_URI}" \
-        OIDC_ISSUER_URI="${OIDC_ISSUER_URI}" \
-        OIDC_CLIENT_ID="${OIDC_CLIENT_ID}" \
-        OIDC_CLIENT_SECRET_FILE="${OIDC_CLIENT_SECRET_FILE}" \
-        SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}" \
-        SAML_IDP_SSO_URL="${SAML_IDP_SSO_URL}" \
-        SAML_SP_ENTITY_ID="${SAML_SP_ENTITY_ID}" \
-        node ./bin/writeconf.cjs
-}
-
 # If not already set, read the value for the named variable from .env file.
 function set_var_from_env() {
     # would have used 'local -n' but that is not universally available
@@ -1378,8 +1341,6 @@ function modify_config() {
     fi
     if [[ "${CONFIG_FILE_NAME}" == ".env" ]]; then
         modify_env_config
-    elif [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.cjs" ]]; then
-        modify_eco_config
     else
         echo 'WARNING: configuration changes not written to file!'
     fi
@@ -1394,30 +1355,14 @@ function modify_config() {
 function restart_service() {
     # ignore errors when attempting to stop the service
     set +e
-    # Stop the existing service, if it is running.
-    if [[ -f ecosystem.config.cjs ]] && which pm2 >/dev/null 2>&1; then
-        # If pm2 is present then presumably HAS is managed using it, in which
-        # case we use the pm2 commands to stop and delete the old application
-        # before starting again (possibly via systemctl). This likely also helps
-        # reload the settings properly without having kill the pm2 daemon.
-        PM2_USER=${SUDO_USER:-${USER}}
-        sudo -u $PM2_USER pm2 delete ecosystem.config.cjs
-        sudo -u $PM2_USER pm2 save
-    fi
-    # Just in case pm2 was installed but not being used to manage the HAS
-    # process, also try stopping HAS using systemctl if the service unit is
-    # present.
+    # Try stopping HAS using systemctl if the service unit is present.
     if [[ -f /etc/systemd/system/helix-auth.service ]]; then
         sudo systemctl stop helix-auth
     fi
     set -e
 
     # Start the service using the preferred process manager.
-    if [[ "${CONFIG_FILE_NAME}" == "ecosystem.config.cjs" ]]; then
-        PM2_USER=${SUDO_USER:-${USER}}
-        sudo -u $PM2_USER pm2 start ecosystem.config.cjs
-        SVC_RESTARTED=true
-    elif [[ -f /etc/systemd/system/helix-auth.service ]]; then
+    if [[ -f /etc/systemd/system/helix-auth.service ]]; then
         sudo systemctl start helix-auth
         SVC_RESTARTED=true
     fi
@@ -1487,7 +1432,6 @@ function main() {
     set -e
     read_arguments "$@"
     ensure_readiness
-    ensure_pm2_readiness
     source_enviro
     if $INTERACTIVE || $DEBUG; then
         display_arguments

@@ -20,7 +20,6 @@ COPY routes routes
 COPY views views
 COPY CHANGELOG.md CHANGELOG.md
 COPY CODE_OF_CONDUCT.md CODE_OF_CONDUCT.md
-COPY ecosystem.config.cjs ecosystem.config.cjs
 COPY defaults.env defaults.env
 COPY example.env example.env
 COPY install.sh install.sh

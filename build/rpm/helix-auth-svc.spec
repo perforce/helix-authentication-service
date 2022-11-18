@@ -38,7 +38,6 @@ install -d %{buildroot}%{installprefix}/routes
 install -d %{buildroot}%{installprefix}/views
 
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
-cp -p bin/writeconf.cjs %{buildroot}%{installprefix}/bin/writeconf.cjs
 install -m 0755 bin/node %{buildroot}%{installprefix}/bin/node
 install -m 0755 bin/www.js %{buildroot}%{installprefix}/bin/www.js
 cp -pr certs/* %{buildroot}%{installprefix}/certs

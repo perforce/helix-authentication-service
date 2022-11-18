@@ -35,7 +35,6 @@ getent passwd perforce
 echo -e '\nTesting for presence of certain files...\n'
 test -f /opt/perforce/helix-auth-svc/README.html
 test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
-test -f /opt/perforce/helix-auth-svc/bin/writeconf.cjs
 test -x /opt/perforce/helix-auth-svc/bin/node
 
 # ensure the systemd service is running

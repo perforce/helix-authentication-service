@@ -10,7 +10,8 @@ CREATE_USER=true
 ALLOW_ROOT=false
 HOMEDIR=/opt/perforce
 UPGRADE_NODE=false
-INSTALL_PM2=false
+NODE_VERSION=18
+INSTALL_SERVICE=true
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -52,8 +53,8 @@ Description:
         Do _not_ create the perforce user and group that will own the
         systemd service.
 
-    --pm2
-        Install and use the pm2 process manager instead of systemd.
+    --no-systemd
+        Do _not_ install the systemd service unit.
 
     --upgrade
         Upgrade an existing package-based installation of Node.js with
@@ -90,8 +91,8 @@ function read_arguments() {
             CREATE_USER=false
             shift
             ;;
-        --pm2)
-            INSTALL_PM2=true
+        --no-systemd)
+            INSTALL_SERVICE=false
             shift
             ;;
         --upgrade)
@@ -126,6 +127,40 @@ function read_arguments() {
     done
 }
 
+# Determine the platform version and packaging system.
+function detect_platform() {
+    #
+    # Based on the apparent OS release determine which packaging system to use
+    # and which version of Node.js can be installed. Older releases do not have
+    # support for the latest Node.js from the nodesource.com repository.
+    #
+    # Looking for /etc/os-release is assuming that systemd is installed, which
+    # should be a given for the platforms that HAS supports.
+    #
+    ID=$(awk -F= '/^ID=/ {print $2}' /etc/os-release | tr -d '"')
+    if [[ "$ID" == 'amzn' ]]; then
+        # For now, all Amazon Linux releases only support Node.js v16.
+        PLATFORM=redhat
+        NODE_VERSION=16
+    elif [[ "$ID" == 'centos' ]]; then
+        PLATFORM=redhat
+        VERSION_ID=$(awk -F= '/VERSION_ID/ {print $2}' /etc/os-release | tr -d '"')
+        if [[ "$VERSION_ID" == '7' ]]; then
+            NODE_VERSION=16
+        fi
+    elif [[ "$ID" == 'rocky' ]]; then
+        # For now, all Rocky releases support Node.js v18, otherwise examine the
+        # VERSION_ID value and compare to something like "8.5" to decide.
+        PLATFORM=redhat
+    elif [[ "$ID" == 'ubuntu' ]]; then
+        PLATFORM=debian
+        CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
+        if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
+            NODE_VERSION=16
+        fi
+    fi
+}
+
 # Check that prerequisites are met before starting installation.
 function ensure_readiness() {
     # This prevents a particular kind of error caused by npm trying to reduce
@@ -143,25 +178,7 @@ function ensure_readiness() {
     fi
 
     # Ensure this system is supported by the installation script.
-    if [ -e "/etc/redhat-release" ]; then
-        PLATFORM=redhat
-    elif [ -e "/etc/debian_version" ]; then
-        PLATFORM=debian
-    elif [ -e "/etc/os-release" ]; then
-        # read os-release to find out what this system is like
-        ID_LIKE=$(awk -F= '/ID_LIKE/ {print $2}' /etc/os-release | tr -d '"')
-        read -r -a LIKES <<< "$ID_LIKE"
-        for like in "${LIKES[@]}"; do
-            if [[ "$like" == 'centos' || "$like" == 'rhel' || "$like" == 'fedora' ]]; then
-                PLATFORM=redhat
-                break
-            fi
-            if [[ "$like" == 'debian' ]]; then
-                PLATFORM=debian
-                break
-            fi
-        done
-    fi
+    detect_platform
     if [ -z "$PLATFORM" ]; then
         die "Could not determine OS distribution"
     fi
@@ -177,25 +194,8 @@ This script will install the requirements for the Authentication Service.
 The operations involved are as follows:
 
   * Install OS packages for build dependencies
-  * Download and install Node.js v18 (https://nodejs.org)
+  * Download and install Node.js v${NODE_VERSION} (https://nodejs.org)
   * Download and build the service dependencies
-EOT
-
-    if $INSTALL_PM2; then
-        cat <<EOT
-  * Download and install the pm2 process manager (http://pm2.keymetrics.io)
-
-This script will only install software on this machine. After this script is
-finished, you will need to:
-
-  1) Configure the service by editing the ecosystem.config.cjs file.
-  2) Restart the service by invoking the following commands:
-     $ pm2 kill
-     $ pm2 start ecosystem.config.cjs
-
-EOT
-    else
-        cat <<EOT
   * Create and start the systemd service unit to manage the service
 
 This script will only install software on this machine. After this script is
@@ -206,7 +206,6 @@ finished, you will need to:
      $ systemctl restart helix-auth
 
 EOT
-    fi
     highlight_off
 }
 
@@ -279,7 +278,7 @@ function install_nodejs() {
             # directly from the vendor. This includes npm as well.
             #
             # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
             sudo apt-get -q -y install nodejs
         elif [ $PLATFORM == "redhat" ]; then
             # In the upgrade scenario, need to remove the repository package first.
@@ -294,7 +293,7 @@ function install_nodejs() {
             # directly from the vendor. This includes npm as well.
             #
             # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://rpm.nodesource.com/setup_18.x | sudo -E bash -
+            curl -sL https://rpm.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
             sudo yum clean all
             sudo yum -q -y install nodejs
         fi
@@ -381,49 +380,10 @@ function install_modules() {
     fi
 }
 
-# Install pm2 globally and install into system start-up procedure.
-function install_pm2() {
-    if ! which pm2 >/dev/null 2>&1; then
-        echo "Installing pm2 globally..."
-        sudo npm install -q -g pm2
-    fi
-    echo "Starting the auth service with default configuration..."
-    # For consistency with the configure script, assume that the service will be
-    # run as the unprivileged user, rather than root.
-    pm2 start ecosystem.config.cjs
-    echo "Installing pm2 startup script..."
-    STARTUP=$(pm2 startup | awk '/\[PM2\] Init System found:/ { print $5 }')
-    sudo pm2 startup ${STARTUP} -u ${USER} --hp ${HOME}
-    pm2 save
-}
-
 # Print a summary of what was done and any next steps.
 function print_summary() {
     highlight_on
-    if $INSTALL_PM2; then
-        cat <<EOT
-
-===============================================================================
-Automated install complete! Now a few final bits to do manually.
-===============================================================================
-
-The Helix Authentication Service is now running via the pm2 process manager.
-Use the command 'pm2 status' to get the status of the service.
-
-To configure the service, edit the file shown below, and then restart the
-service: pm2 reload ${INSTALLPREFIX}/ecosystem.config.cjs
-
-    ${INSTALLPREFIX}/ecosystem.config.cjs
-
-The configure-auth-service.sh script can be used to make changes to the
-configuration in both an interactive and automated fashion.
-
-    ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
-
-For assistance, please contact support@perforce.com
-EOT
-    else
-        cat <<EOT
+    cat <<EOT
 
 ===============================================================================
 Automated install complete! Now a few final bits to do manually.
@@ -446,7 +406,6 @@ helpful for this purpose.
 
 For assistance, please contact support@perforce.com
 EOT
-    fi
     highlight_off
 }
 
@@ -464,12 +423,10 @@ function main() {
     fi
     install_nodejs
     install_modules
-    if $INSTALL_PM2; then
-        install_pm2
-    else
-        if $CREATE_USER; then
-            create_user_group
-        fi
+    if $CREATE_USER; then
+        create_user_group
+    fi
+    if $INSTALL_SERVICE; then
         install_service_unit
     fi
     print_summary

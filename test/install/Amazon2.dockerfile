@@ -6,7 +6,12 @@ FROM amazonlinux:2
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
-RUN yum -q -y install shadow-utils sudo tar which
+RUN yum -q -y install shadow-utils sudo tar util-linux which
+
+# install a version of Node.js that is compatible with this system
+ADD https://rpm.nodesource.com/setup_16.x setup_16.x
+RUN bash setup_16.x
+RUN yum -q -y install nodejs
 
 # install (and configure) script(s) want to run as non-root user, and npm
 # expects a home directory that the user has permissions to write to
@@ -22,18 +27,15 @@ RUN tar zxf helix-authentication-service.tgz && \
     mv helix-authentication-service helix-auth-svc
 
 # run the install script non-interactively
-RUN ./helix-auth-svc/install.sh -n --pm2
+RUN ./helix-auth-svc/install.sh -n --no-create-user --no-systemd
 
-# ensure node and pm2 have been installed as expected
+# ensure node has been installed as expected
 RUN test -f /usr/bin/node
-RUN test -f /usr/bin/pm2
-
-# pm2 is not running during the build, but there is evidence that the service
-# was started during the build
-RUN test -f .pm2/logs/auth-svc-out.log
+# ensure expected version of node was installed
+RUN node --version | grep -Eq '^v16\.'
 
 # run the configure script and set up OIDC
-RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
+RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --oidc-issuer-uri https://oidc.issuer \
     --oidc-client-id client_id \
@@ -42,12 +44,12 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
 # ensure configure script created the OIDC client secret file
 RUN test -f helix-auth-svc/client-secret.txt && \
     grep -q 'client_secret' helix-auth-svc/client-secret.txt && \
-    grep -q 'https://localhost:3000' helix-auth-svc/ecosystem.config.cjs && \
-    grep -q 'https://oidc.issuer' helix-auth-svc/ecosystem.config.cjs
+    grep -q 'https://localhost:3000' helix-auth-svc/.env && \
+    grep -q 'https://oidc.issuer' helix-auth-svc/.env
 
 # run the configure script and set up SAML
-RUN ./helix-auth-svc/bin/configure-auth-service.sh -n --pm2 \
+RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --saml-idp-metadata-url https://saml.idp/metadata
 
-RUN grep -q 'https://saml.idp/metadata' helix-auth-svc/ecosystem.config.cjs
+RUN grep -q 'https://saml.idp/metadata' helix-auth-svc/.env
