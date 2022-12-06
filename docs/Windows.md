@@ -14,9 +14,9 @@ Installing the module dependencies for the authentication service is done from a
 
 ```
 > cd helix-authentication-service
-> npm ci --only=prod --no-optional
+> npm ci --omit=dev --omit=optional
 > npm -g install node-windows
-> npm link node-windows
+> npm link --omit=dev --omit=optional node-windows
 > node .\bin\install-windows-service.js
 ```
 
@@ -84,7 +84,7 @@ export default {
 }
 ```
 
-**Note:** The 1.0.0-beta.5 version of `node-windows` seems to send all logging to the _Application_ category in the event viewer, despite the value of the `eventLog` setting above.
+**Note:** Certain versions of `node-windows` seem to send all logging to the _Application_ category in the event viewer, despite the value of the `eventLog` setting above.
 
 ## Removal
 
