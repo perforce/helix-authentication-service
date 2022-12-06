@@ -6,7 +6,7 @@ import { Service } from 'node-windows'
 import { fileURLToPath } from 'node:url'
 
 const bindir = path.dirname(fileURLToPath(import.meta.url))
-const scriptPath = path.join(bindir, 'www')
+const scriptPath = path.join(bindir, 'www.js')
 const svc = new Service({
   name: 'Helix Authentication',
   description: 'Helix Authentication Service',
