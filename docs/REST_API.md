@@ -239,7 +239,7 @@ The response body will be `{"status": "ok"}` unless an error occurred.
 
 #### POST /tokens
 
-This is the starting point for the administration process, which taking the admin's credentials and returning a JSON Web Token to be used as bearer token as described in [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750). The admin user's credentials must be provided via the URL-encoded request body as described in Section 4.3 of [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749). The response body will be JSON formatted and include the token in the `access_token` property. The JSON web token has an expiration time, but it is still recommended to send `DELETE /tokens` when finished.
+This is the starting point for the administration process, which takes the admin credentials and returns a JSON Web Token to be used as bearer token as described in [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750). The admin user's credentials must be provided via the URL-encoded request body as described in Section 4.3 of [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749). The response body will be JSON formatted and include the token in the `access_token` property. The JSON web token has an expiration time, but it is still recommended to send `DELETE /tokens` when finished.
 
 #### Request Parameters
 

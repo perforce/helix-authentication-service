@@ -1,31 +1,14 @@
 # Design
 
-This document is intended for developers who are interested in the inner
-workings of the Helix Authentication Service.
+This document is intended for developers who are interested in the inner workings of the Helix Authentication Service.
 
 ## Overview
 
-The application is largely made up of protocol handlers, and thus is not all
-that interesting in terms of "design". However, to make the business logic
-easier to discover and test effectively, the application design follows that of
-Robert Martin's [Clean
-Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
-More specifically, the directory structure resembles that described in the
-excellent
-[tutorial](https://resocoder.com/2019/08/27/flutter-tdd-clean-architecture-course-1-explanation-project-structure/)
-series by Matt Rešetá, which is written using Dart and Flutter, but explains the
-practical application of the Clean Architecture and the benefits of
-test-driven-development.
+The application consists of several related features, with each feature set broken into layers. The design follows that of Robert Martin's [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). In particular, the directory structure resembles that described in a [tutorial](https://resocoder.com/2019/08/27/flutter-tdd-clean-architecture-course-1-explanation-project-structure/) series by Matt Rešetá, which is written using Dart and Flutter, and explains the practical application of the Clean Architecture and benefits of test-driven-development.
 
 ## Clean Architecture
 
-In terms of "features", the application has two: `login` for authentication
-integration, and `scim` for user provisioning. All of the application related
-code is defined within the `lib/features/login` and `lib/features/scim`
-directories. Everything outside of that directory is essentially "scaffolding",
-primarily concerned with setting up the [Express.js](https://expressjs.com) web
-framework and logging. Within the `login` and `scim` directories, the code is
-divided into three layers.
+In terms of features, the application has three: `admin` for the web-based administrative interface, `login` for authentication integration, and `scim` for user provisioning. All of the application related code is defined within the `lib/features/admin`, `lib/features/login`, and `lib/features/scim` directories. Everything outside of those directories is essentially scaffolding, primarily concerned with setting up the [Express.js](https://expressjs.com) web framework and logging. Within each of the `features` subdirectories, the code is divided into three layers.
 
 ### Presentation
 
