@@ -5,6 +5,17 @@ FROM ubuntu:20.04
 #
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+#
+# install build prerequisites for admin interface
+#
+RUN apt-get update && \
+    apt-get install -q -y build-essential curl debhelper devscripts git
+ADD https://deb.nodesource.com/setup_18.x setup_18.x
+RUN bash setup_18.x
+RUN apt-get -q -y install nodejs
 
 WORKDIR /build/helix-authentication-service
 
@@ -13,6 +24,7 @@ WORKDIR /build/helix-authentication-service
 #
 COPY bin bin
 COPY certs certs
+COPY client client
 COPY docs docs
 COPY lib lib
 COPY public public
@@ -30,5 +42,10 @@ COPY package-lock.json package-lock.json
 COPY package.json package.json
 COPY README.md README.md
 COPY RELNOTES.txt RELNOTES.txt
+
+#
+# build the admin interface static files
+#
+RUN cd client && npm -q ci && BUILD_PATH=../public/admin npm run build
 
 RUN cd .. && tar zcf helix-authentication-service.tgz helix-authentication-service

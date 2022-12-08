@@ -32,6 +32,7 @@ WORKDIR /build/${DIRNAME}
 #
 COPY bin bin
 COPY certs certs
+COPY client client
 COPY docs docs
 COPY lib lib
 COPY public public
@@ -58,9 +59,14 @@ RUN mkdir -p docs/licenses/nodejs && \
 RUN rm -rf node_modules
 
 #
+# build the admin interface static files
+#
+RUN cd client && npm -q ci && BUILD_PATH=../public/admin npm run build
+
+#
 # build only what is needed for deployment
 #
-RUN npm ci -q --only=production --no-optional
+RUN npm -q ci --omit=dev --omit=optional
 RUN cp /usr/bin/node ./bin
 
 #
