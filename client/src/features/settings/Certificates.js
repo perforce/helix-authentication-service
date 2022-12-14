@@ -19,7 +19,35 @@ export const serialize = (values, outgoing) => {
   outgoing['KEY_PASSPHRASE'] = values['c_password']
 }
 
-export const validate = (values, errors) => {}
+export const validate = (values, errors) => {
+  if (values.c_ca_cert) {
+    const lines = values.c_ca_cert.split('\n')
+    if (lines.length < 3) {
+      errors.c_ca_cert = 'Certificates must have 3+ lines'
+    }
+    if (!hasValidCertArmor(lines)) {
+      errors.c_ca_cert = 'Certificates must have BEGIN/END armor'
+    }
+  }
+  if (values.c_cert) {
+    const lines = values.c_cert.split('\n')
+    if (lines.length < 3) {
+      errors.c_ca_cert = 'Certificates must have 3+ lines'
+    }
+    if (!hasValidCertArmor(lines)) {
+      errors.c_ca_cert = 'Certificates must have BEGIN/END armor'
+    }
+  }
+  if (values.c_key) {
+    const lines = values.c_key.split('\n')
+    if (lines.length < 3) {
+      errors.c_ca_cert = 'Private keys must have 3+ lines'
+    }
+    if (!hasValidKeyArmor(lines)) {
+      errors.c_key = 'Private keys must have BEGIN/END armor'
+    }
+  }
+}
 
 export const Component = ({ props }) => {
   return (
@@ -72,4 +100,31 @@ export const Component = ({ props }) => {
       </Stack>
     </Container>
   )
+}
+
+function hasValidCertArmor(lines) {
+  const firstLine = lines[0]
+  const lastLine = lines[lines.length - 1]
+  if (firstLine === '-----BEGIN CERTIFICATE-----' && lastLine === '-----END CERTIFICATE-----') {
+    return true
+  }
+  if (firstLine === '-----BEGIN PUBLIC KEY-----' && lastLine === '-----END PUBLIC KEY-----') {
+    return true
+  }
+  return false
+}
+
+function hasValidKeyArmor(lines) {
+  const firstLine = lines[0]
+  const lastLine = lines[lines.length - 1]
+  if (firstLine === '-----BEGIN PRIVATE KEY-----' && lastLine === '-----END PRIVATE KEY-----') {
+    return true
+  }
+  if (firstLine === '-----BEGIN RSA PRIVATE KEY-----' && lastLine === '-----END RSA PRIVATE KEY-----') {
+    return true
+  }
+  if (firstLine === '-----BEGIN ENCRYPTED PRIVATE KEY-----' && lastLine === '-----END ENCRYPTED PRIVATE KEY-----') {
+    return true
+  }
+  return false
 }
