@@ -71,18 +71,18 @@
   "devDependencies": {
     "chai": "^4.3.7",
     "eslint": "^8.29.0",
-    "eslint-plugin-unicorn": "^45.0.1",
+    "eslint-plugin-unicorn": "^45.0.2",
     "geckodriver": "^3.0.1",
     "get-port": "^6.0.0",
     "license-checker": "^25.0.1",
-    "mocha": "^10.0.0",
+    "mocha": "^10.2.0",
     "mute": "^2.0.6",
     "node-rsa": "^1.1.1",
     "saml2-js": "^4.0.1",
-    "selenium-webdriver": "^4.7.0",
+    "selenium-webdriver": "^4.7.1",
     "showdown": "^2.1.0",
-    "sinon": "^15.0.0",
-    "supertest": "^6.3.2",
+    "sinon": "^15.0.1",
+    "supertest": "^6.3.3",
     "tempy": "^3.0.0",
     "xid-js": "^1.0.1"
   }
