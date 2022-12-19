@@ -11,10 +11,10 @@ import {
 import {
   createServer,
   getPort,
-  logEnvironment,
   normalizePort
 } from 'helix-auth-svc/lib/server.js'
 const logger = container.resolve('logger')
+const loadEnvironment = container.resolve('loadEnvironment')
 const refreshEnvironment = container.resolve('refreshEnvironment')
 const settings = container.resolve('settingsRepository')
 
@@ -62,6 +62,11 @@ function startServer () {
     }
   })
 
+  loadEnvironment().then((envConfig) => {
+    const scrubbed = scrubSecrets(envConfig)
+    logger.debug('www: dotenv results: %o', scrubbed)
+  })
+
   server.on('listening', () => {
     // After successfully binding to the port, switch user/group if possible and
     // if configured to do so (set the group first lest we lose the privilege to
@@ -92,9 +97,8 @@ function startServer () {
       // the enviornment and start another server instance; probably not really
       // necessary but probably safer this way.
       setTimeout(() => {
-        refreshEnvironment(process.env).then((envConfig) => {
+        refreshEnvironment(process.env).then(() => {
           logger.info('www: reloaded configuration from .env')
-          logEnvironment(envConfig)
           registerLateBindings()
         }).catch((err) => {
           // log the non-fatal error and pretend nothing happened
@@ -128,3 +132,28 @@ process.on('uncaughtException', (err, origin) => {
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('www: unhandled rejection at: %s, reason: %s', promise, reason);
 });
+
+function scrubSecrets(env) {
+  const keys = Object.keys(env)
+  const obj = {}
+  for (const name of keys) {
+    if (name.match(/secret_file/i)) {
+      // the "secret_file" entries are safe
+      obj[name] = env[name]
+    } else if (name.match(/secret/i)) {
+      // but the other "secret" settings are not safe
+      obj[name] = '[hidden]'
+    } else if (name.match(/passphrase_file/i)) {
+      // the "passphrase_file" entries are safe
+      obj[name] = env[name]
+    } else if (name.match(/passphrase/i)) {
+      // but the other "passphrase" settings are not safe
+      obj[name] = '[hidden]'
+    } else if (name.match(/passwd/i)) {
+      obj[name] = '[hidden]'
+    } else {
+      obj[name] = env[name]
+    }
+  }
+  return obj
+}
