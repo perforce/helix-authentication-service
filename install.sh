@@ -318,8 +318,10 @@ function create_user_group() {
     fi
 
     # create home directory and set ownership as needed
-    [ ! -d "$HOMEDIR" ] && sudo mkdir -p "$HOMEDIR"
-    sudo chown -R perforce:perforce "$HOMEDIR"
+    if [ ! -d "$HOMEDIR" ]; then
+        sudo mkdir -p "$HOMEDIR"
+        sudo chown -R perforce:perforce "$HOMEDIR"
+    fi
 
     # ensure perforce user can write to the installation path
     INSTALL_PREFIX=$(pwd)

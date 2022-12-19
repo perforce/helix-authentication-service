@@ -88,8 +88,10 @@ if ! getent passwd perforce >/dev/null; then
 fi
 
 # create home directory and set ownership as needed
-[ ! -d "$HOMEDIR" ] && mkdir -p "$HOMEDIR"
-chown -R perforce:perforce "$HOMEDIR"
+if [ ! -d "$HOMEDIR" ]; then
+    mkdir -p "$HOMEDIR"
+    chown -R perforce:perforce "$HOMEDIR"
+fi
 
 if [ ! -f "%{installprefix}/.env" ]; then
     PRINT="print \"LOGGING=%{installprefix}/logging.config.cjs\""
