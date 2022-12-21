@@ -204,6 +204,33 @@ describe('IsClientAuthorized use case', function () {
       })
   })
 
+  it('should return true with one of multiple fingerprints', function (done) {
+    settings.set('PROTOCOL', 'https')
+    settings.set('serviceCert', 'certs/server.crt')
+    settings.set('serviceKey', 'certs/server.key')
+    settings.set('CA_CERT_FILE', 'certs/ca.crt')
+    settings.set('CLIENT_CERT_FP', '[xxx,yyy,39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E,zzz]')
+    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt')
+    const key = fs.readFileSync('test/client.key')
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .key(key)
+      .cert(cert)
+      .expect(200)
+      .expect(res => {
+        assert.equal(res.text, 'success')
+      })
+      // eslint-disable-next-line no-unused-vars
+      .end(function (err, res) {
+        if (err) {
+          return done(err)
+        }
+        done()
+      })
+  })
+
   it('should return true for https and authorized client cert', function (done) {
     settings.set('PROTOCOL', 'https')
     settings.set('serviceCert', 'certs/server.crt')
@@ -263,6 +290,33 @@ describe('IsClientAuthorized use case', function () {
     settings.set('serviceKey', 'certs/server.key')
     settings.set('CA_CERT_FILE', 'certs/ca.crt')
     settings.set('CLIENT_CERT_CN', 'LoginExtension')
+    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt')
+    const key = fs.readFileSync('test/client.key')
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .key(key)
+      .cert(cert)
+      .expect(200)
+      .expect(res => {
+        assert.equal(res.text, 'success')
+      })
+      // eslint-disable-next-line no-unused-vars
+      .end(function (err, res) {
+        if (err) {
+          return done(err)
+        }
+        done()
+      })
+  })
+
+  it('should return true with one of multiple common names', function (done) {
+    settings.set('PROTOCOL', 'https')
+    settings.set('serviceCert', 'certs/server.crt')
+    settings.set('serviceKey', 'certs/server.key')
+    settings.set('CA_CERT_FILE', 'certs/ca.crt')
+    settings.set('CLIENT_CERT_CN', '[xxx,LoginExtension,yyy]')
     const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')

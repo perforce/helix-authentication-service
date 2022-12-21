@@ -27,6 +27,8 @@ certificates to those whose _Common Name_ matches the pattern given by
 `CLIENT_CERT_CN`. In a similar way, the `CLIENT_CERT_FP` setting can be used to
 compare with the SHA256 fingerprint of the client certificate.
 
+Both the `CLIENT_CERT_CN` and `CLIENT_CERT_FP` values can have multiple entries, separated by commas and wrapped in square brackets (like so: `[value1, value2, ...]`).
+
 ## Other Applications
 
 ### Helix Core Extension
