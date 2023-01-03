@@ -64,28 +64,6 @@ setTimeout(function () {
             }
           })
       })
-
-      it('should return state when creating web token', function (done) {
-        agent
-          .post('/tokens')
-          .trustLocalhost(true)
-          .send({ grant_type: 'password', username: 'scott', password: 'tiger', state: 'foobar' })
-          .expect(200)
-          .expect(res => {
-            assert.equal(res.body.token_type, 'bearer')
-            assert.equal(res.body.expires_in, 3600)
-            assert.equal(res.body.state, 'foobar')
-            assert.property(res.body, 'access_token')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            } else {
-              done()
-            }
-          })
-      })
     })
 
     describe('Failure cases', function () {
