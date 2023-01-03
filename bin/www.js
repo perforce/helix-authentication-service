@@ -65,6 +65,9 @@ function startServer () {
   loadEnvironment().then((envConfig) => {
     const scrubbed = scrubSecrets(envConfig)
     logger.debug('www: dotenv results: %o', scrubbed)
+  }).catch((err) => {
+    // a missing .env file is not an error
+    logger.debug('www: .env file not loaded: %s', err.message)
   })
 
   server.on('listening', () => {

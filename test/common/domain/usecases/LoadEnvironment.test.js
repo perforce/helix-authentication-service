@@ -9,14 +9,17 @@ import { temporaryFile } from 'tempy'
 import LoadEnvironment from 'helix-auth-svc/lib/common/domain/usecases/LoadEnvironment.js'
 
 describe('LoadEnvironment use case', function () {
-  it('should raise an error for invalid input', async function () {
+  it('should raise an error for invalid input', function () {
     assert.throws(() => LoadEnvironment({ dotenvFile: null }), AssertionError)
-    try {
-      const usecase = LoadEnvironment({ dotenvFile: 'does/not/exist/.env' })
-      await usecase({})
-    } catch (err) {
+  })
+
+  it('should raise an error for missing file', function () {
+    const usecase = LoadEnvironment({ dotenvFile: 'does/not/exist/.env' })
+    usecase().then(() => {
+      assert.fail('should have failed')
+    }).catch((err) => {
       assert.include(err.code, 'ENOENT')
-    }
+    })
   })
 
   it('should read values from configuration', async function () {
