@@ -36,7 +36,7 @@ RUN apt-get update && \
 FROM node:18-slim
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update --fix-missing && \
-    apt-get -q -y install git
+    apt-get -q -y install curl git
 WORKDIR /srv
 COPY bin bin
 COPY certs certs
@@ -56,8 +56,9 @@ ENV CA_CERT_FILE certs/ca.crt
 ENV DEBUG "yes"
 ENV NODE_ENV development
 ENV PORT 3000
+ENV PROTOCOL http
 ENV SVC_BASE_URI "https://localhost:3000"
 EXPOSE ${PORT}
-HEALTHCHECK CMD curl -k -f -s -I http://localhost:${PORT}/ || exit 1
+HEALTHCHECK CMD curl --insecure --fail --silent --head ${PROTOCOL}://localhost:${PORT}/ || exit 1
 
 ENTRYPOINT [ "node", "bin/www" ]
