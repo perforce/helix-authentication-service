@@ -57,7 +57,6 @@ ENV DEBUG "yes"
 ENV NODE_ENV development
 ENV PORT 3000
 ENV PROTOCOL http
-ENV SVC_BASE_URI "https://localhost:3000"
 EXPOSE ${PORT}
 HEALTHCHECK CMD curl --insecure --fail --silent --head ${PROTOCOL}://localhost:${PORT}/ || exit 1
 
