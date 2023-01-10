@@ -25,6 +25,65 @@ describe('HelixEntity repository', function () {
     }
   })
 
+  describe('Connect using ticket', function () {
+    let repository
+    let p4config
+    let settings
+
+    before(async function () {
+      this.timeout(30000)
+      p4config = await runner.startServer('./tmp/p4d/tickets')
+      helpers.establishSuper(p4config)
+      settings = new Map()
+      settings.set('P4PORT', p4config.port)
+      settings.set('P4USER', p4config.user)
+      settings.set('P4PASSWD', p4config.password)
+      repository = new MapSettingsRepository(settings)
+    })
+
+    after(async function () {
+      this.timeout(30000)
+      await runner.stopServer(p4config)
+    })
+
+    it('should detect expired ticket and fail', async function () {
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user
+      })
+      const logoutCmd = await p4.cmd('logout -a')
+      assert.isOk(logoutCmd.info[0].data)
+      settings.set('P4PASSWD', 'CD9FC48D2F36752258C11CDBBD094EBC')
+      const sut = new HelixEntityRepository({ settingsRepository: repository })
+      try {
+        await sut.getUsers()
+        assert.fail('should have raised Error')
+      } catch (err) {
+        assert.include(err.message, 'Password invalid')
+      }
+      settings.set('P4PASSWD', p4config.password)
+    })
+
+    it('should accept ticket with authenticated session', async function () {
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user
+      })
+      // First run 'login -p' in order to get a ticket, but then log in again to
+      // get an authenticated connection. Somehow an admin will do this but it
+      // is extremely difficult if not impossible to do this programmatically.
+      const ticketCmd = await p4.cmd('login -p', 'p8ssword')
+      assert.isOk(ticketCmd.info[0].data)
+      settings.set('P4PASSWD', ticketCmd.info[0].data)
+      const loginCmd = await p4.cmd('login', 'p8ssword')
+      assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+      const sut = new HelixEntityRepository({ settingsRepository: repository })
+      const users = await sut.getUsers()
+      assert.isNotNull(users)
+      settings.set('P4PASSWD', p4config.password)
+    })
+  })
+
   describe('Non-SSL', function () {
     let repository
     let p4config
@@ -237,7 +296,7 @@ describe('HelixEntity repository', function () {
         P4PORT: p4config.port,
         P4USER: 'newpass'
       })
-      const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
+      const loginCmd4 = await p4.cmd('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
     })
 
@@ -270,7 +329,7 @@ describe('HelixEntity repository', function () {
         P4PORT: p4config.port,
         P4USER: 'activeuser'
       })
-      const loginCmd1 = p4.cmdSync('login', 'p4ssw0rd')
+      const loginCmd1 = await p4.cmd('login', 'p4ssw0rd')
       assert.equal(loginCmd1.stat[0].TicketExpiration, '43200')
 
       // update user with active == false
@@ -281,9 +340,9 @@ describe('HelixEntity repository', function () {
       assert.isNull(updated.password)
 
       // ensure user logged out and cannot log in
-      const loginCmd2 = p4.cmdSync('login -s')
+      const loginCmd2 = await p4.cmd('login -s')
       assert.include(loginCmd2.error[0].data, 'invalid or unset')
-      const loginCmd3 = p4.cmdSync('login', 'p4ssw0rd')
+      const loginCmd3 = await p4.cmd('login', 'p4ssw0rd')
       assert.include(loginCmd3.error[0].data, 'Password invalid.')
 
       // ensure active flag is returned as 'false'
@@ -299,7 +358,7 @@ describe('HelixEntity repository', function () {
       assert.equal(onceagain.username, 'activeuser')
       assert.isTrue(onceagain.active)
       assert.isNull(onceagain.password)
-      const loginCmd4 = p4.cmdSync('login', 'p4ssw0rd')
+      const loginCmd4 = await p4.cmd('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
     })
 
