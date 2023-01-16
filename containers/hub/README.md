@@ -28,9 +28,8 @@ $ docker run -d --env-file .env -p 3000:3000 --name auth-svc perforce/helix-auth
 The `.env` file referenced in the above command would look something like this:
 
 ```shell
-NODE_ENV=development
-DEBUG=true
 SVC_BASE_URI=https://192.168.24.20:3000
+PROTOCOL=https
 DEFAULT_PROTOCOL=saml
 SAML_IDP_METADATA_URL=https://dev-123456.okta.com/app/abc123xyz456/sso/saml/metadata
 SAML_SP_ENTITY_ID=urn:example:sp
@@ -46,9 +45,8 @@ services:
     image: perforce/helix-auth-svc:latest
     container_name: helix-auth-svc
     environment:
-      NODE_ENV: development
-      DEBUG: "1"
       SVC_BASE_URI: "https://192.168.24.20:3000"
+      PROTOCOL: "https"
       DEFAULT_PROTOCOL: "saml"
       SAML_IDP_METADATA_URL: "https://dev-123456.okta.com/app/abc123xyz456/sso/saml/metadata"
       SAML_SP_ENTITY_ID: "urn:example:sp"
@@ -70,6 +68,23 @@ When starting the container, you can set environment variables using the `-e`,
 the `env` section of a Docker Compose file.
 
 See the documentation for the complete list of available settings.
+
+The docker container has several default environment variables defined that
+may affect its usage:
+
+```
+ENV CA_CERT_FILE certs/ca.crt
+ENV DEBUG "yes"
+ENV NODE_ENV development
+ENV PORT 3000
+ENV PROTOCOL http
+```
+
+Note that the `PROTOCOL` is `http`, which will override any scheme present in
+the `SVC_BASE_URI` setting. This works fine if the service is run from behind a
+reverse proxy that is performing TLS termination, but if not, then it will be
+necessary to set `PROTOCOL` to `https` as shown in the examples in the section
+above.
 
 ### SSL certificates
 
