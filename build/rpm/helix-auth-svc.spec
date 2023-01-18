@@ -42,6 +42,7 @@ install -m 0755 bin/node %{buildroot}%{installprefix}/bin/node
 install -m 0755 bin/www.js %{buildroot}%{installprefix}/bin/www.js
 cp -pr certs/* %{buildroot}%{installprefix}/certs
 cp -p docs/Administrator-Guide.md %{buildroot}%{installprefix}/docs/Administrator-Guide.md
+cp -p docs/Certificates.md %{buildroot}%{installprefix}/docs/Certificates.md
 cp -p docs/Cookies.md %{buildroot}%{installprefix}/docs/Cookies.md
 cp -p docs/Failover.md %{buildroot}%{installprefix}/docs/Failover.md
 cp -p docs/Proxies.md %{buildroot}%{installprefix}/docs/Proxies.md

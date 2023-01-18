@@ -11,6 +11,7 @@ bin/                opt/perforce/helix-auth-svc
 certs/              opt/perforce/helix-auth-svc
 docs/Administrator-Guide.md	opt/perforce/helix-auth-svc/docs
 docs/Cookies.md     opt/perforce/helix-auth-svc/docs
+docs/Certificates.md opt/perforce/helix-auth-svc/docs
 docs/Failover.md    opt/perforce/helix-auth-svc/docs
 docs/Proxies.md     opt/perforce/helix-auth-svc/docs
 docs/REST_API.md    opt/perforce/helix-auth-svc/docs
