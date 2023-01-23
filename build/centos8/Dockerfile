@@ -32,7 +32,12 @@ WORKDIR /build/${DIRNAME}
 #
 COPY bin bin
 COPY certs certs
-COPY client client
+COPY client/jsconfig.json client/jsconfig.json
+COPY client/package-lock.json client/package-lock.json
+COPY client/package.json client/package.json
+COPY client/public client/public
+COPY client/README.md client/README.md
+COPY client/src client/src
 COPY docs docs
 COPY lib lib
 COPY public public
@@ -66,7 +71,7 @@ RUN cd client && npm -q ci && BUILD_PATH=../public/admin npm run build
 #
 # build only what is needed for deployment
 #
-RUN npm -q ci --omit=dev --omit=optional
+RUN npm -q ci --omit=dev
 RUN cp /usr/bin/node ./bin
 
 #

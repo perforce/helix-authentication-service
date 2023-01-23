@@ -47,6 +47,10 @@ COPY package-lock.json .
 COPY public public
 COPY routes routes
 COPY views views
+# Use npm ci for a predictable install. Only install the production dependencies
+# to save space. Avoid the optional dependencies, especially unix-dgram which
+# requires node-gyp, which in turn requires Python, which would make this image
+# much larger (note unix-dgram is only needed by winston-syslog).
 RUN npm ci -q --only=prod --no-optional
 
 # SCIM support requires a p4 client binary to be present

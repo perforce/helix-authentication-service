@@ -17,7 +17,7 @@ COPY views views
 # Use npm ci for a predictable install. Only install the production dependencies
 # to save space. Avoid the optional dependencies, especially unix-dgram which
 # requires node-gyp, which in turn requires Python, which would make this image
-# much larger without any benefit.
+# much larger (note unix-dgram is only needed by winston-syslog).
 RUN npm ci -q --only=prod --no-optional
 
 COPY containers/auth-svc/saml_idp.conf.cjs routes

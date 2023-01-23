@@ -24,7 +24,12 @@ WORKDIR /build/helix-authentication-service
 #
 COPY bin bin
 COPY certs certs
-COPY client client
+COPY client/jsconfig.json client/jsconfig.json
+COPY client/package-lock.json client/package-lock.json
+COPY client/package.json client/package.json
+COPY client/public client/public
+COPY client/README.md client/README.md
+COPY client/src client/src
 COPY docs docs
 COPY lib lib
 COPY public public
@@ -47,5 +52,6 @@ COPY RELNOTES.txt RELNOTES.txt
 # build the admin interface static files
 #
 RUN cd client && npm -q ci && BUILD_PATH=../public/admin npm run build
+RUN rm -rf client/node_modules
 
 RUN cd .. && tar zcf helix-authentication-service.tgz helix-authentication-service
