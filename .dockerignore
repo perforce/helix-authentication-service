@@ -1,6 +1,13 @@
-*.tgz
-*.rpm
-*.deb
+#
+# cannot ignore build artifacts as they are needed to test the packages
+#
+# *.tgz
+# *.rpm
+# *.deb
+
+#
+# these are safe to ignore and take up a lot of space
+#
 .git
 node_modules
 client/node_modules
