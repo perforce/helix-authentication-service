@@ -51,6 +51,40 @@ from the service into the `x509cert` setting in Swarm, with the `BEGIN` and
 
 ## Validating Certificates
 
+### Verifying certificate was signed by authority
+
+The client certificate used to connect to the authentication service must be validating using the configured certificate authority (the `CA_CERT_FILE` or `CA_CERT_PATH` settings). To ensure that a client certificate can be validated using the expected CA certificate, use the `openssl` command as shown below:
+
+```shell
+$ openssl verify -CAfile ca.crt client.crt
+client.crt: OK
+```
+
+The example shows that this client certificate is `OK` when validated using the `ca.crt` certificate. The next example shows what the output might look like when a certificate _cannot_ be validated.
+
+```shell
+$ openssl verify -CAfile ca.crt client.crt
+CN = authen.doc
+error 20 at 0 depth lookup:unable to get local issuer certificate
+client.crt: verification failed: 20 (unable to get local issuer certificate)
+```
+
+### Verifying the purpose of a certificate
+
+A certificate has one or more assigned purposes, such as acting as a certificate authority, or for acting as a client when connecting to a server, and so on. To ensure that a certificate has the purpose for which it was intended, use the `openssl` command as shown below:
+
+```shell
+$ openssl x509 -in client.crt -noout -purpose
+Certificate purposes:
+SSL client : Yes
+SSL client CA : No
+SSL server : Yes
+SSL server CA : No
+...
+```
+
+This example shows that the `client.crt` certificate is able to be used on either the client (`SSL client : Yes`) or server side (`SSL server : Yes`) of a connection.
+
 ### Matching public certificate with private key
 
 To verify that a public certificate and a private key match each other, use the
