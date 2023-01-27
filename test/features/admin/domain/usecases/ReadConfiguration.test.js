@@ -249,4 +249,25 @@ describe('ReadConfiguration use case', function () {
     assert.isTrue(readStub.calledOnce)
     readStub.restore()
   })
+
+  it('should read IdP metadata from file', async function () {
+    // arrange
+    const metadataFile = temporaryFile({ extension: 'xml' })
+    const providers = "<xml><something/></xml>"
+    fs.writeFileSync(metadataFile, providers)
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('SAML_IDP_METADATA_FILE', metadataFile)
+      return results
+    })
+    // act
+    const settings = await usecase()
+    // assert
+    assert.lengthOf(settings, 24)
+    assert.isTrue(settings.has('SAML_IDP_METADATA'))
+    const actual = settings.get('SAML_IDP_METADATA')
+    assert.include(actual, '<something/>')
+    assert.isTrue(readStub.calledOnce)
+    readStub.restore()
+  })
 })

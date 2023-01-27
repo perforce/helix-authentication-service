@@ -255,4 +255,29 @@ describe('WriteConfiguration use case', function () {
     readStub.restore()
     writeStub.restore()
   })
+
+  it('should write IdP metadata into a file', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.isTrue(settings.has('SAML_IDP_METADATA_FILE'))
+      const filename = settings.get('SAML_IDP_METADATA_FILE')
+      const config = fs.readFileSync(filename, 'utf8')
+      assert.include(config, '<something/>')
+      fs.rmSync(filename)
+    })
+    // act
+    const settings = new Map()
+    settings.set('SAML_IDP_METADATA', '<xml><something/></xml>')
+    await usecase(settings)
+    // assert
+    assert.isTrue(readStub.calledOnce)
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
 })

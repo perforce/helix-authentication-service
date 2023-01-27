@@ -10,9 +10,11 @@ export const deserialize = (incoming, values) => {
   values['s_issuer'] = incoming['SAML_SP_ENTITY_ID'] || ''
   values['s_idpIssuer'] = incoming['SAML_IDP_ENTITY_ID'] || ''
   values['s_entryPoint'] = incoming['SAML_IDP_SSO_URL'] || ''
+  values['s_idpMetadata'] = incoming['SAML_IDP_METADATA'] || ''
 }
 
 export const serialize = (values, outgoing) => {
+  outgoing['SAML_IDP_METADATA'] = values['s_idpMetadata']
   outgoing['SAML_IDP_METADATA_URL'] = values['s_url']
   outgoing['SAML_SP_ENTITY_ID'] = values['s_issuer']
   outgoing['SAML_IDP_ENTITY_ID'] = values['s_idpIssuer']
@@ -46,6 +48,19 @@ export const Component = ({ props }) => {
           label="IdP Metadata URL"
           onChange={props.handleChange}
           onBlur={props.handleBlur}
+        />
+        <Typography>
+          If the identity provider offers a metadata as text only, provide that below.
+        </Typography>
+        <TextInputField
+          name="s_idpMetadata"
+          values={props.values}
+          errors={props.errors}
+          touched={props.touched}
+          label="IdP Metadata"
+          onChange={props.handleChange}
+          onBlur={props.handleBlur}
+          rows={6}
         />
         <Typography>
           Identifier for this service as registered with the IdP, this is typically the URL for service.
