@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -13,9 +13,8 @@ describe('InMemoryUser repository', function () {
   let repository
 
   before(function () {
-    const map = new Map()
-    map.set('CACHE_TTL', '2')
-    const settings = new MapSettingsRepository(map)
+    const settings = new MapSettingsRepository()
+    settings.set('CACHE_TTL', '2')
     repository = new InMemoryUserRepository({ settingsRepository: settings })
   })
 

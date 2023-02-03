@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -11,15 +11,14 @@ import RegisterWebToken from 'helix-auth-svc/lib/features/admin/domain/usecases/
 import VerifyWebToken from 'helix-auth-svc/lib/features/admin/domain/usecases/VerifyWebToken.js'
 
 describe('DeleteWebToken use case', function () {
-  const settings = new Map()
   let registerToken
   let verifyToken
   let usecase
 
   before(function () {
-    settings.set('SVC_BASE_URI', 'https://localhost:3000')
-    settings.set('TOKEN_TTL', '10')
-    const settingsRepository = new MapSettingsRepository(settings)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('SVC_BASE_URI', 'https://localhost:3000')
+    settingsRepository.set('TOKEN_TTL', '10')
     const tokenRepository = new InMemoryTokenRepository({ settingsRepository })
     usecase = DeleteWebToken({ tokenRepository })
     verifyToken = VerifyWebToken({ settingsRepository, tokenRepository })

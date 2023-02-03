@@ -16,9 +16,8 @@ describe('GetIdPConfiguration use case', function () {
 
   it('should fail when loading a missing file', async function () {
     // arrange
-    const map = new Map()
-    map.set('IDP_CONFIG_FILE', 'filedoesnot.exist')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('IDP_CONFIG_FILE', 'filedoesnot.exist')
     const usecase = GetIdPConfiguration({ settingsRepository })
     try {
       // act
@@ -32,9 +31,8 @@ describe('GetIdPConfiguration use case', function () {
 
   it('should fail when loading a misnamed file', async function () {
     // arrange
-    const map = new Map()
-    map.set('IDP_CONFIG_FILE', 'helix-auth-svc/test/dot.env')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('IDP_CONFIG_FILE', 'helix-auth-svc/test/dot.env')
     const usecase = GetIdPConfiguration({ settingsRepository })
     try {
       // act
@@ -50,9 +48,8 @@ describe('GetIdPConfiguration use case', function () {
     // arrange
     const notjavascript = temporaryFile({ extension: 'cjs' })
     fs.writeFileSync(notjavascript, 'this is not valid')
-    const map = new Map()
-    map.set('IDP_CONFIG_FILE', notjavascript)
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('IDP_CONFIG_FILE', notjavascript)
     const usecase = GetIdPConfiguration({ settingsRepository })
     try {
       // act
@@ -66,9 +63,8 @@ describe('GetIdPConfiguration use case', function () {
 
   it('should succesfully load a valid file', async function () {
     // arrange
-    const map = new Map()
-    map.set('IDP_CONFIG_FILE', 'helix-auth-svc/routes/saml_idp.conf.cjs')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('IDP_CONFIG_FILE', 'helix-auth-svc/routes/saml_idp.conf.cjs')
     const usecase = GetIdPConfiguration({ settingsRepository })
     // act
     const result = await usecase()
@@ -78,9 +74,8 @@ describe('GetIdPConfiguration use case', function () {
 
   it('should succesfully load from a relative path', async function () {
     // arrange
-    const map = new Map()
-    map.set('IDP_CONFIG_FILE', './routes/saml_idp.conf.cjs')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('IDP_CONFIG_FILE', './routes/saml_idp.conf.cjs')
     const usecase = GetIdPConfiguration({ settingsRepository })
     // act
     const result = await usecase()
@@ -98,9 +93,8 @@ module.exports = {
     acsUrl: 'http://swarm.example.com/api/v10/session'
   }
 }`)
-    const map = new Map()
-    map.set('IDP_CONFIG_FILE', commonjs)
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('IDP_CONFIG_FILE', commonjs)
     const usecase = GetIdPConfiguration({ settingsRepository })
     // act
     const result = await usecase()

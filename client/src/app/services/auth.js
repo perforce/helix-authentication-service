@@ -63,6 +63,59 @@ export const auth = createApi({
         }
       },
     }),
+    testChanges: builder.mutation({
+      // perform both the temp update and apply as a single redux action
+      async queryFn(arg, queryApi, extraOptions, baseQuery) {
+        const update = await baseQuery({
+          url: 'settings/temp',
+          method: 'POST',
+          body: arg
+        })
+        if (update.error) {
+          return { error: update.error }
+        }
+        const apply = await baseQuery({
+          url: 'settings/apply',
+          method: 'POST'
+        })
+        if (apply.data) {
+          // Grab the updated Location for the service. Note that the value in
+          // apply.meta.request.url will be that of the local CRA server when
+          // running in development mode.
+          const location = apply.meta.response.headers.get('Location')
+          const data = Object.assign({}, apply.data, { location })
+          return { data }
+        } else {
+          return { error: apply.error }
+        }
+      },
+    }),
+    resetChanges: builder.mutation({
+      // perform both the temp delete and apply as a single redux action
+      async queryFn(arg, queryApi, extraOptions, baseQuery) {
+        const update = await baseQuery({
+          url: 'settings/temp',
+          method: 'DELETE'
+        })
+        if (update.error) {
+          return { error: update.error }
+        }
+        const apply = await baseQuery({
+          url: 'settings/apply',
+          method: 'POST'
+        })
+        if (apply.data) {
+          // Grab the updated Location for the service. Note that the value in
+          // apply.meta.request.url will be that of the local CRA server when
+          // running in development mode.
+          const location = apply.meta.response.headers.get('Location')
+          const data = Object.assign({}, apply.data, { location })
+          return { data }
+        } else {
+          return { error: apply.error }
+        }
+      },
+    }),
   }),
 })
 
@@ -71,4 +124,6 @@ export const {
   useLogoutMutation,
   useGetSettingsQuery,
   useSendChangesMutation,
+  useTestChangesMutation,
+  useResetChangesMutation,
 } = auth

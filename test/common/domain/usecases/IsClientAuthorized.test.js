@@ -14,18 +14,17 @@ import IsClientAuthorized from 'helix-auth-svc/lib/common/domain/usecases/IsClie
 import LoadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
 
 describe('IsClientAuthorized use case', function () {
-  const settings = new Map()
+  const settingsRepository = new MapSettingsRepository()
   let usecase
   let loadAuthorityCerts
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
     usecase = IsClientAuthorized({ settingsRepository })
     loadAuthorityCerts = LoadAuthorityCerts({ settingsRepository })
   })
 
   beforeEach(function () {
-    settings.clear()
+    settingsRepository.clear()
   })
 
   it('should raise an error for invalid input', function () {
@@ -39,7 +38,7 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should return true for plain http connection', function (done) {
-    const agent = createAgent(usecase, 'http', settings, loadAuthorityCerts)
+    const agent = createAgent(usecase, 'http', settingsRepository, loadAuthorityCerts)
     agent
       .get('/')
       .trustLocalhost(true)
@@ -57,10 +56,10 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should raise an error for https w/o client certificate', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     agent
       .get('/')
       .trustLocalhost(true)
@@ -78,11 +77,11 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should return true for https and assume=true', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('ASSUME_CLIENT_AUTHORIZED', 'true')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('ASSUME_CLIENT_AUTHORIZED', 'true')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     agent
       .get('/')
       .trustLocalhost(true)
@@ -100,10 +99,10 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should raise an error for https without cert authority', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -125,11 +124,11 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should raise an error for https and unauthorized client cert', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'test/ca.crt')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'test/ca.crt')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -151,12 +150,12 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should raise an error for https and mismatched client cert', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'certs/ca.crt')
-    settings.set('CLIENT_CERT_FP', 'AA:BB:CC:DD:EE:FF')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
+    settingsRepository.set('CLIENT_CERT_FP', 'AA:BB:CC:DD:EE:FF')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -178,12 +177,12 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should return true for https and matching fingerprint', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'certs/ca.crt')
-    settings.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
+    settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -205,12 +204,12 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should return true with one of multiple fingerprints', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'certs/ca.crt')
-    settings.set('CLIENT_CERT_FP', '[xxx,yyy,39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E,zzz]')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
+    settingsRepository.set('CLIENT_CERT_FP', '[xxx,yyy,39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E,zzz]')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -232,11 +231,11 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should return true for https and authorized client cert', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'certs/ca.crt')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -258,12 +257,12 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should raise an error for https and mismatched common name', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'certs/ca.crt')
-    settings.set('CLIENT_CERT_CN', 'NotMatchingCommonName')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
+    settingsRepository.set('CLIENT_CERT_CN', 'NotMatchingCommonName')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -285,12 +284,12 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should return true for https and matching common name', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'certs/ca.crt')
-    settings.set('CLIENT_CERT_CN', 'LoginExtension')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
+    settingsRepository.set('CLIENT_CERT_CN', 'LoginExtension')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent
@@ -312,12 +311,12 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should return true with one of multiple common names', function (done) {
-    settings.set('PROTOCOL', 'https')
-    settings.set('serviceCert', 'certs/server.crt')
-    settings.set('serviceKey', 'certs/server.key')
-    settings.set('CA_CERT_FILE', 'certs/ca.crt')
-    settings.set('CLIENT_CERT_CN', '[xxx,LoginExtension,yyy]')
-    const agent = createAgent(usecase, 'https', settings, loadAuthorityCerts)
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
+    settingsRepository.set('CLIENT_CERT_CN', '[xxx,LoginExtension,yyy]')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     agent

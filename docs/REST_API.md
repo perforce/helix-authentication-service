@@ -29,11 +29,23 @@ The adminstrative (REST) interface to the service consists of two sets of endpoi
 1. Refresh the service to apply the new settings via `POST /settings/apply`
 1. End the administrative session by deleting the JWT from the in-memory registry via `DELETE /tokens`
 
+#### Temporary Settings
+
+The REST API provides a means of making changes to the setttings in a temporary fashion, allowing an administrator to try the changes before committing them to the configuration file. If the changes are discarded, or the service is restarted, then the service will use the configuration as defined by the environment variables (typically with the `.env` file).
+
+To define settings changes temporarily:
+
+1. Update some or all of the settings via `POST /settings/temp`
+1. Refresh the service to apply the new settings via `POST /settings/apply`
+
+To remove the temporary settings and return to the saved configuration:
+
+1. Clear all of the temporary settings via `DELETE /settings/temp`
+1. Refresh the service to reload the previous settings via `POST /settings/apply`
+
 ## Routes
 
-### /requests/new
-
-#### GET /requests/new/:userId
+### GET /requests/new/:userId
 
 This is the starting point for the user authentication process. The **:userId**
 _route parameter_ can be any unique value that the client wishes to use for
@@ -76,7 +88,7 @@ In this example, the **:userId** route parameter is given as `repoman`, and the
 }
 ```
 
-### /requests/status
+### GET /requests/status/:requestId
 
 The `/requests/status` route returns the user profile data. Accessing this
 endpoint requires client certificates, which prevents unauthorized access to
@@ -84,8 +96,6 @@ user data. How the client maps the user data returned from the service to user
 accounts is entirely application and protocol dependent
 
 **Note:** Requests for the `status` should include a query parameter named `instanceId` whose value is the one provided in the response to `/requests/new` as this _may_ be used by a load balancer to route the request to the appropriate instance of the service.
-
-#### GET /requests/status/:requestId
 
 The **:requestId** _route parameter_ is replaced with the identifier given in
 the `request` field of the JSON response from the `/requests/new` endpoint. The
@@ -148,9 +158,7 @@ This example shows what Okta would return when using OpenID Connect:
 }
 ```
 
-### /settings
-
-#### GET /settings
+### GET /settings
 
 Retrieve all of the settings that have defined values. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header.
 
@@ -185,9 +193,7 @@ curl -k --oauth2-bearer eyJ.<snip>.glw https://auth-service/settings
 }
 ```
 
-### /settings
-
-#### POST /settings
+### POST /settings
 
 Update some or all of the settings with new values. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header. The new settings are to be provided via the request body in JSON format.
 
@@ -213,9 +219,7 @@ curl -k --oauth2-bearer eyJ.<snip>.glw -X POST -H 'Content-Type: application/jso
 
 The response body will be `{"status": "ok"}` unless an error occurred.
 
-### /settings/apply
-
-#### POST /settings/apply
+### POST /settings/apply
 
 Cause the service to gracefully reload such that the modified settings will take effect.
 
@@ -235,9 +239,51 @@ curl -k --oauth2-bearer eyJ.<snip>.glw -X POST https://auth-service/settings/app
 
 The response body will be `{"status": "ok"}` unless an error occurred.
 
-### /tokens
+### POST /settings/temp
 
-#### POST /tokens
+Update some or all of the settings with new values, saving them temporarily. Any settings defined in this way will override the stored configuration and any defaults. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header. The new settings are to be provided via the request body in JSON format.
+
+Note that certain settings cannot be modified via this endpoint, including `ADMIN_ENABLED`, 
+`ADMIN_PASSWD_FILE`, and `ADMIN_USERNAME`.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
+| `Content-Type` | Always `application/json` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ.<snip>.glw -X POST -H 'Content-Type: application/json' -d '{"DEFAULT_PROTOCOL":"saml"}' https://auth-service/settings/temp
+```
+
+#### Response Example
+
+The response body will be `{"status": "ok"}` unless an error occurred.
+
+### DELETE /settings/temp
+
+This will remove the temporary settings, if any, as provided via `POST /settings/temp`. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ.<snip>.glw -X DELETE https://auth-service/settings/temp
+```
+
+#### Response Example
+
+The response body will be `{"status": "ok"}` unless an error occurred.
+
+### POST /tokens
 
 This is the starting point for the administration process, which takes the admin credentials and returns a JSON Web Token to be used as bearer token as described in [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750). The admin user's credentials must be provided via the URL-encoded request body as described in Section 4.3 of [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749). The response body will be JSON formatted and include the token in the `access_token` property. The JSON web token has an expiration time, but it is still recommended to send `DELETE /tokens` when finished.
 
@@ -266,9 +312,7 @@ $ curl -k -X POST -d grant_type=password -d username=scott -d password=tiger htt
 }
 ```
 
-### /tokens
-
-#### DELETE /tokens
+### DELETE /tokens
 
 This will invalidate the registered JSON web token, thus ending the administrative session. The JWT must be provided as a bearer token (via the `Authorization` header). While the JWT already has an expiration time, it is still good practice to "logout" when administration is finished.
 

@@ -19,9 +19,8 @@ describe('helix credentials repository', function () {
       this.timeout(30000)
       p4config = await runner.startServer('./tmp/p4d/creds-repo')
       helpers.establishSuper(p4config)
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      const settings = new MapSettingsRepository(map)
+      const settings = new MapSettingsRepository()
+      settings.set('P4PORT', p4config.port)
       repository = new HelixCredentialsRepository({ settingsRepository: settings })
     }
   })

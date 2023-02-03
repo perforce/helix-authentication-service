@@ -45,4 +45,5 @@ tmp
 test/test-dot.env
 cert-or-key-*.pem
 providers.json
+data-*.xml
 secret-*.txt

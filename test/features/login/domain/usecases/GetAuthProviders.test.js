@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import * as fs from 'node:fs'
 import { AssertionError } from 'node:assert'
@@ -10,16 +10,15 @@ import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositori
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
 
 describe('GenerateLoginUrl use case', function () {
-  const settings = new Map()
+  const settingsRepository = new MapSettingsRepository()
   let usecase
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
     usecase = GetAuthProviders({ settingsRepository })
   })
 
   beforeEach(function () {
-    settings.clear()
+    settingsRepository.clear()
   })
 
   it('should raise an error for invalid input', async function () {
@@ -29,7 +28,7 @@ describe('GenerateLoginUrl use case', function () {
   it('should raise error for malformed input', async function () {
     // arrange
     const providers = '["not_valid": "json"]'
-    settings.set('AUTH_PROVIDERS', providers)
+    settingsRepository.set('AUTH_PROVIDERS', providers)
     try {
       // act
       await usecase()
@@ -53,7 +52,7 @@ describe('GenerateLoginUrl use case', function () {
     const providers = {
       providers: [{ label: 'Acme Identity', protocol: 'saml' }]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase()
     // assert
@@ -68,7 +67,7 @@ describe('GenerateLoginUrl use case', function () {
     const providers = {
       providers: [{ label: 'Acme Identity', issuerUri: 'https://example.com' }]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase()
     // assert
@@ -87,7 +86,7 @@ describe('GenerateLoginUrl use case', function () {
         { label: 'Auth0', protocol: 'saml' }
       ]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase()
     // assert
@@ -106,7 +105,7 @@ describe('GenerateLoginUrl use case', function () {
       providers: [{ label: 'Acme Identity', protocol: 'saml' }]
     }
     fs.writeFileSync(providersFile, JSON.stringify(providers))
-    settings.set('AUTH_PROVIDERS_FILE', providersFile)
+    settingsRepository.set('AUTH_PROVIDERS_FILE', providersFile)
     // act
     const result = await usecase()
     // assert

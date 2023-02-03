@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -19,10 +19,9 @@ describe('RedisRequest repository', function () {
       if (process.env.UNIT_ONLY) {
         this.skip()
       } else {
-        const map = new Map()
-        map.set('CACHE_TTL', '2')
-        map.set('REDIS_URL', 'redis://redis.doc:6379')
-        const settingsRepository = new MapSettingsRepository(map)
+        const settingsRepository = new MapSettingsRepository()
+        settingsRepository.set('CACHE_TTL', '2')
+        settingsRepository.set('REDIS_URL', 'redis://redis.doc:6379')
         const connector = new RedisConnector({ settingsRepository })
         repository = new RedisRequestRepository({
           redisConnector: connector,
@@ -88,13 +87,12 @@ describe('RedisRequest repository', function () {
       if (process.env.UNIT_ONLY) {
         this.skip()
       } else {
-        const map = new Map()
-        map.set('REDIS_URL', 'rediss://rediss.doc:6389')
-        map.set('REDIS_CERT_FILE', './test/client.crt')
-        map.set('REDIS_KEY_FILE', './test/client.key')
-        map.set('CACHE_TTL', '2')
-        map.set('CA_CERT_FILE', './certs/ca.crt')
-        const settingsRepository = new MapSettingsRepository(map)
+        const settingsRepository = new MapSettingsRepository()
+        settingsRepository.set('REDIS_URL', 'rediss://rediss.doc:6389')
+        settingsRepository.set('REDIS_CERT_FILE', './test/client.crt')
+        settingsRepository.set('REDIS_KEY_FILE', './test/client.key')
+        settingsRepository.set('CACHE_TTL', '2')
+        settingsRepository.set('CA_CERT_FILE', './certs/ca.crt')
         const connector = new RedisConnector({
           settingsRepository,
           loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })

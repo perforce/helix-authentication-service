@@ -13,20 +13,19 @@ import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositori
 import ValidateWebToken from 'helix-auth-svc/lib/features/login/domain/usecases/ValidateWebToken.js'
 
 describe('ValidateWebToken use case', function () {
-  const settings = new Map()
+  const settingsRepository = new MapSettingsRepository()
   let usecase
 
   before(function () {
     if (process.env.UNIT_ONLY) {
       this.skip()
     } else {
-      const settingsRepository = new MapSettingsRepository(settings)
       usecase = ValidateWebToken({ settingsRepository })
     }
   })
 
   beforeEach(function () {
-    settings.clear()
+    settingsRepository.clear()
   })
 
   it('should raise an error for invalid input', async function () {
@@ -41,11 +40,11 @@ describe('ValidateWebToken use case', function () {
 
   it('should approve a valid JSON web token', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
-    settings.set('OAUTH_AUDIENCE', 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1')
-    settings.set('OAUTH_ISSUER', 'http://jwt.doc:3000/')
-    settings.set('OAUTH_ALGORITHM', 'RS256')
-    settings.set('OAUTH_TENANT_ID', '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_AUDIENCE', 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1')
+    settingsRepository.set('OAUTH_ISSUER', 'http://jwt.doc:3000/')
+    settingsRepository.set('OAUTH_ALGORITHM', 'RS256')
+    settingsRepository.set('OAUTH_TENANT_ID', '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9')
     const payload = {
       sub: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',
       tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
@@ -62,8 +61,8 @@ describe('ValidateWebToken use case', function () {
 
   it('should approve a valid JWT with minimal conditions', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
-    settings.set('OAUTH_ALGORITHM', 'RS256')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_ALGORITHM', 'RS256')
     const payload = {
       sub: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',
       tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
@@ -84,8 +83,8 @@ describe('ValidateWebToken use case', function () {
     const keydata = await getSigningKey()
     const keyfile = temporaryFile({ extension: 'key' })
     fs.writeFileSync(keyfile, keydata)
-    settings.set('OAUTH_SIGNING_KEY_FILE', keyfile)
-    settings.set('OAUTH_ALGORITHM', 'RS256')
+    settingsRepository.set('OAUTH_SIGNING_KEY_FILE', keyfile)
+    settingsRepository.set('OAUTH_ALGORITHM', 'RS256')
     const payload = {
       sub: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',
       tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
@@ -103,9 +102,9 @@ describe('ValidateWebToken use case', function () {
   it('should approve token with expected keyid', async function () {
     // arrange
     const keyid = await getKeyId()
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
-    settings.set('OAUTH_JWKS_KEYID', keyid)
-    settings.set('OAUTH_ALGORITHM', 'RS256')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_KEYID', keyid)
+    settingsRepository.set('OAUTH_ALGORITHM', 'RS256')
     const payload = {
       sub: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',
       tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
@@ -122,8 +121,8 @@ describe('ValidateWebToken use case', function () {
 
   it('should fail if OAUTH_JWKS_KEYID does not match', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
-    settings.set('OAUTH_JWKS_KEYID', 'notthekeyiwasexpecting')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_KEYID', 'notthekeyiwasexpecting')
     const payload = {
       sub: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',
       tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
@@ -160,7 +159,7 @@ describe('ValidateWebToken use case', function () {
 
   it('should fail if missing OAUTH_ALGORITHM setting', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
     const payload = {
       sub: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',
       tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
@@ -182,7 +181,7 @@ describe('ValidateWebToken use case', function () {
 
   it('should reject malformed web token', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
     const token = 'notavalidtokenatall'
     try {
       // act
@@ -196,7 +195,7 @@ describe('ValidateWebToken use case', function () {
 
   it('should reject token with missing key id', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTg3OTM1NDEsImV4cCI6MTY1ODc5MzU1MSwiYXVkIjoiYmRhNjc0ZWUtY2RmNS00YWJhLWE5NDMtZTRiZmE4YzE3ZTFmIiwiaXNzIjoiaHR0cHM6Ly9oYXMuZXhhbXBsZS5jb20ifQ.XI4vJcJ7sdy9LSOXaJTyeSVNr2A4hXTulpxQ5h8xDxg'
     try {
       // act
@@ -220,7 +219,7 @@ describe('ValidateWebToken use case', function () {
       aud: 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1'
     })
     const token = header + '.' + payload + '.'
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
     try {
       // act
       await usecase(token)
@@ -239,8 +238,8 @@ describe('ValidateWebToken use case', function () {
       aud: 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1'
     }
     const token = await forgedToken(JSON.stringify(payload))
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
-    settings.set('OAUTH_ALGORITHM', 'RS256')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_ALGORITHM', 'RS256')
     try {
       // act
       await usecase(token)
@@ -254,7 +253,7 @@ describe('ValidateWebToken use case', function () {
 
   it('should reject JWT header with bad JSON', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
     const token = 'dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.'
     try {
       // act
@@ -268,7 +267,7 @@ describe('ValidateWebToken use case', function () {
 
   it('should reject web token signed by another party', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
     const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCIsImtpZCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCJ9.eyJhdWQiOiJhcGk6Ly8yNWIxN2NkYi00YzhkLTQzNGMtOWEyMS04NmQ2N2FjNTAxZDEiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MTlkODhmMy1mOTU3LTQ0Y2YtOWFhNS0wYTFhM2E0NGY3YjkvIiwiaWF0IjoxNjQwMDM4OTY2LCJuYmYiOjE2NDAwMzg5NjYsImV4cCI6MTY0MDEyNTY2NiwiYWlvIjoiRTJaZ1lLaStuWnA3NmQ0TDdRc0Y2Zzk1TGF3NUFBPT0iLCJhcHBpZCI6ImYzNjRmZjE3LTllNDItNGY3ZS1iNzAwLTExZTE5YmEyYWM2ZiIsImFwcGlkYWNyIjoiMiIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcxOWQ4OGYzLWY5NTctNDRjZi05YWE1LTBhMWEzYTQ0ZjdiOS8iLCJvaWQiOiI0ZGJkZjQ1MC05NThkLTRjNjQtODhiMi1hYmJhMmU0NmYxZmYiLCJyaCI6IjAuQVN3QTg0aWRjVmY1ejBTYXBRb2FPa1QzdVJmX1pQTkNubjVQdHdBUjRadWlyRzhzQUFBLiIsInJvbGVzIjpbIlBlcmZvcmNlLkNhbGwiXSwic3ViIjoiNGRiZGY0NTAtOTU4ZC00YzY0LTg4YjItYWJiYTJlNDZmMWZmIiwidGlkIjoiNzE5ZDg4ZjMtZjk1Ny00NGNmLTlhYTUtMGExYTNhNDRmN2I5IiwidXRpIjoiNm5XeVVFbjJGMC00OVlVNG02bDBBQSIsInZlciI6IjEuMCJ9.fS2f3IoYxr2VlJd4BCxT4o3ikqdyjJY1AGVRe7-tBWmpZSbyKOAs39WIYReWp5vMShW1JKv_r37bYSMbIHhz0bfKM-OkQELEdOsfVoBbywkXSoxCoGXAj5q1RxuCPUEnX59UlgCNa2_Z6Rc765O9BSz7BbYBlaW2Bh6OIzTywBW2Lyn987PxiewsIECSUCP_v4lY9VsS5PUo3iQgAygQ1qUQQf3FKunZhL8SOYuz-PcGpkZqC9F8FCah3wMbyekfLu5Tjhujg7lL_RiBgQqkRjXc5WZDft0md4j-4zGQDmPCE73NP2Xh-9mkpu8cZFw-lz-wOZ8SXF43yjfpy1CxSQ'
     try {
       // act
@@ -282,9 +281,9 @@ describe('ValidateWebToken use case', function () {
 
   it('should reject web token with incorrect tid', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
-    settings.set('OAUTH_ALGORITHM', 'RS256')
-    settings.set('OAUTH_TENANT_ID', '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_ALGORITHM', 'RS256')
+    settingsRepository.set('OAUTH_TENANT_ID', '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9')
     const payload = {
       sub: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
       tid: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',
@@ -303,10 +302,10 @@ describe('ValidateWebToken use case', function () {
 
   it('should reject web token with incorrect aud', async function () {
     // arrange
-    settings.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
-    settings.set('OAUTH_ALGORITHM', 'RS256')
-    settings.set('OAUTH_AUDIENCE', 'http://oauth.example.com')
-    settings.set('OAUTH_TENANT_ID', '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9')
+    settingsRepository.set('OAUTH_JWKS_URI', 'http://jwt.doc:3000/.well-known/jwks.json')
+    settingsRepository.set('OAUTH_ALGORITHM', 'RS256')
+    settingsRepository.set('OAUTH_AUDIENCE', 'http://oauth.example.com')
+    settingsRepository.set('OAUTH_TENANT_ID', '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9')
     const payload = {
       sub: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
       tid: '8e7341ad-cba6-4f6f-8061-88b8b18d3885',

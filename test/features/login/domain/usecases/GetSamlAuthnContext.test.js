@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -8,16 +8,15 @@ import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositori
 import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 
 describe('GetSamlAuthnContext use case', function () {
-  const settings = new Map()
+  const settingsRepository = new MapSettingsRepository()
   let usecase
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
     usecase = GetSamlAuthnContext({ settingsRepository })
   })
 
   beforeEach(function () {
-    settings.clear()
+    settingsRepository.clear()
   })
 
   it('should raise an error for invalid input', function () {
@@ -33,7 +32,7 @@ describe('GetSamlAuthnContext use case', function () {
 
   it('should prefer passed parameter value over configuration', function () {
     // arrange
-    settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+    settingsRepository.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
     // act
     const result = usecase('urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos')
     // assert
@@ -44,7 +43,7 @@ describe('GetSamlAuthnContext use case', function () {
 
   it('should return a singleton list even with plain string', function () {
     // arrange
-    settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+    settingsRepository.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
     // act
     const result = usecase()
     // assert
@@ -55,7 +54,7 @@ describe('GetSamlAuthnContext use case', function () {
 
   it('should return a list if multiple values inside brackets', function () {
     // arrange
-    settings.set('SAML_AUTHN_CONTEXT', `"[ ' urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password' ]"`)
+    settingsRepository.set('SAML_AUTHN_CONTEXT', `"[ ' urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password' ]"`)
     // act
     const result = usecase()
     // assert
@@ -67,7 +66,7 @@ describe('GetSamlAuthnContext use case', function () {
 
   it('should leave an array value as-is', function () {
     // arrange
-    settings.set('SAML_AUTHN_CONTEXT', [
+    settingsRepository.set('SAML_AUTHN_CONTEXT', [
       'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
       'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
     ])
@@ -82,7 +81,7 @@ describe('GetSamlAuthnContext use case', function () {
 
   it('should ignore empty list entries', function () {
     // arrange
-    settings.set('SAML_AUTHN_CONTEXT', `"[urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos,,'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',]"`)
+    settingsRepository.set('SAML_AUTHN_CONTEXT', `"[urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos,,'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',]"`)
     // act
     const result = usecase()
     // assert
@@ -94,7 +93,7 @@ describe('GetSamlAuthnContext use case', function () {
 
   it('should trim mismatched quotes and brackets from list entries', function () {
     // arrange
-    settings.set('SAML_AUTHN_CONTEXT', `"['urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos,'urn:oasis:names:tc:SAML:2.0:ac:classes:Password']`)
+    settingsRepository.set('SAML_AUTHN_CONTEXT', `"['urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos,'urn:oasis:names:tc:SAML:2.0:ac:classes:Password']`)
     // act
     const result = usecase()
     // assert

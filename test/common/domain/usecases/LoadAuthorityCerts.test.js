@@ -14,9 +14,8 @@ describe('LoadAuthorityCerts use case', function () {
 
   it('should return undefined when missing file', function () {
     // arrange
-    const map = new Map()
-    map.set('CA_CERT_FILE', 'filedoesnot.exist')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('CA_CERT_FILE', 'filedoesnot.exist')
     const usecase = LoadAuthorityCerts({ settingsRepository })
     // act
     const result = usecase()
@@ -26,9 +25,8 @@ describe('LoadAuthorityCerts use case', function () {
 
   it('should succesfully load a single file', function () {
     // arrange
-    const map = new Map()
-    map.set('CA_CERT_FILE', './certs/ca.crt')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('CA_CERT_FILE', './certs/ca.crt')
     const usecase = LoadAuthorityCerts({ settingsRepository })
     // act
     const result = usecase()
@@ -40,9 +38,8 @@ describe('LoadAuthorityCerts use case', function () {
 
   it('should succesfully load a single file via glob', function () {
     // arrange
-    const map = new Map()
-    map.set('CA_CERT_FILE', './certs/c*.crt')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('CA_CERT_FILE', './certs/c*.crt')
     const usecase = LoadAuthorityCerts({ settingsRepository })
     // act
     const result = usecase()
@@ -54,9 +51,8 @@ describe('LoadAuthorityCerts use case', function () {
 
   it('should succesfully load multiple files via glob', function () {
     // arrange
-    const map = new Map()
-    map.set('CA_CERT_FILE', './certs/*.crt')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('CA_CERT_FILE', './certs/*.crt')
     const usecase = LoadAuthorityCerts({ settingsRepository })
     // act
     const result = usecase()
@@ -69,9 +65,8 @@ describe('LoadAuthorityCerts use case', function () {
 
   it('should succesfully load multiple files from path', function () {
     // arrange
-    const map = new Map()
-    map.set('CA_CERT_PATH', './certs')
-    const settingsRepository = new MapSettingsRepository(map)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('CA_CERT_PATH', './certs')
     const usecase = LoadAuthorityCerts({ settingsRepository })
     // act
     const result = usecase()

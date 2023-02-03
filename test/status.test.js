@@ -293,9 +293,8 @@ describe('Service status', function () {
         // this test can take a randomly long time to run
         this.timeout(30000)
         // arrange
-        const map = new Map()
-        map.set('REDIS_URL', 'redis://redis.doc:6379')
-        const settingsRepository = new MapSettingsRepository(map)
+        const settingsRepository = new MapSettingsRepository()
+        settingsRepository.set('REDIS_URL', 'redis://redis.doc:6379')
         const connector = new RedisConnector({ settingsRepository })
         // act
         const result = await sut.validateRedis(connector)
@@ -311,12 +310,11 @@ describe('Service status', function () {
         // this test can take a randomly long time to run
         this.timeout(30000)
         // arrange
-        const map = new Map()
-        map.set('REDIS_URL', 'rediss://rediss.doc:6389')
-        map.set('REDIS_CERT_FILE', './test/client.crt')
-        map.set('REDIS_KEY_FILE', './test/client.key')
-        map.set('CA_CERT_FILE', './certs/ca.crt')
-        const settingsRepository = new MapSettingsRepository(map)
+        const settingsRepository = new MapSettingsRepository()
+        settingsRepository.set('REDIS_URL', 'rediss://rediss.doc:6389')
+        settingsRepository.set('REDIS_CERT_FILE', './test/client.crt')
+        settingsRepository.set('REDIS_KEY_FILE', './test/client.key')
+        settingsRepository.set('CA_CERT_FILE', './certs/ca.crt')
         const connector = new RedisConnector({
           settingsRepository,
           loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
@@ -359,12 +357,11 @@ describe('Service status', function () {
 
     it('should report not ok for bad p4port', async function () {
       // arrange
-      const map = new Map()
+      const settingsRepository = new MapSettingsRepository()
       // assumes gopher (port 70) is not running on localhost
-      map.set('P4PORT', 'ssl:localhost:70')
-      map.set('P4USER', 'bruno')
-      map.set('P4PASSWD', 'secret123')
-      const settingsRepository = new MapSettingsRepository(map)
+      settingsRepository.set('P4PORT', 'ssl:localhost:70')
+      settingsRepository.set('P4USER', 'bruno')
+      settingsRepository.set('P4PASSWD', 'secret123')
       const repository = new HelixEntityRepository({ settingsRepository })
       // act
       const result = await sut.validatePerforce(repository)
@@ -374,11 +371,10 @@ describe('Service status', function () {
 
     it('should report not ok for wrong user', async function () {
       // arrange
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      map.set('P4USER', 'nosuchuser')
-      map.set('P4PASSWD', 'secret123')
-      const settingsRepository = new MapSettingsRepository(map)
+      const settingsRepository = new MapSettingsRepository()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', 'nosuchuser')
+      settingsRepository.set('P4PASSWD', 'secret123')
       const repository = new HelixEntityRepository({ settingsRepository })
       // act
       const result = await sut.validatePerforce(repository)
@@ -388,11 +384,10 @@ describe('Service status', function () {
 
     it('should report not ok for wrong password', async function () {
       // arrange
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      map.set('P4USER', p4config.user)
-      map.set('P4PASSWD', 'wrongpassword')
-      const settingsRepository = new MapSettingsRepository(map)
+      const settingsRepository = new MapSettingsRepository()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', 'wrongpassword')
       const repository = new HelixEntityRepository({ settingsRepository })
       // act
       const result = await sut.validatePerforce(repository)
@@ -402,11 +397,10 @@ describe('Service status', function () {
 
     it('should report ok for working connection', async function () {
       // arrange
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      map.set('P4USER', p4config.user)
-      map.set('P4PASSWD', p4config.password)
-      const settingsRepository = new MapSettingsRepository(map)
+      const settingsRepository = new MapSettingsRepository()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', p4config.password)
       const repository = new HelixEntityRepository({ settingsRepository })
       // act
       const result = await sut.validatePerforce(repository)

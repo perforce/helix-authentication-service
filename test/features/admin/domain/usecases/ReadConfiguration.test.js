@@ -8,10 +8,12 @@ import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
 import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
+import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
 import ReadConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/ReadConfiguration.js'
 
 describe('ReadConfiguration use case', function () {
+  const temporaryRepository = new MapSettingsRepository()
   let usecase
 
   before(function () {
@@ -24,7 +26,7 @@ describe('ReadConfiguration use case', function () {
         }
       }
     }
-    usecase = ReadConfiguration({ configRepository, defaultsRepository, getIdPConfiguration })
+    usecase = ReadConfiguration({ configRepository, temporaryRepository, defaultsRepository, getIdPConfiguration })
   })
 
   after(function () {
@@ -33,8 +35,9 @@ describe('ReadConfiguration use case', function () {
 
   it('should raise an error for invalid input', async function () {
     assert.throws(() => ReadConfiguration({ configRepository: null }), AssertionError)
-    assert.throws(() => ReadConfiguration({ configRepository: {}, getIdPConfiguration: null }), AssertionError)
-    assert.throws(() => ReadConfiguration({ configRepository: {}, getIdPConfiguration: {}, defaultsRepository: null }), AssertionError)
+    assert.throws(() => ReadConfiguration({ configRepository: {}, temporaryRepository: null }), AssertionError)
+    assert.throws(() => ReadConfiguration({ configRepository: {}, temporaryRepository: {}, getIdPConfiguration: null }), AssertionError)
+    assert.throws(() => ReadConfiguration({ configRepository: {}, temporaryRepository: {}, getIdPConfiguration: {}, defaultsRepository: null }), AssertionError)
   })
 
   it('should read values from the repository', async function () {
@@ -62,6 +65,27 @@ describe('ReadConfiguration use case', function () {
     assert.equal(settings.get('TOKEN_TTL'), '3600')
     assert.isTrue(readStub.calledOnce)
     readStub.restore()
+  })
+
+  it('should merge with temporary repository', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('NAME1', 'VALUE1')
+      results.set('NAME2', 'VALUE2')
+      return results
+    })
+    temporaryRepository.set('NAME1', 'TVALUE1')
+    temporaryRepository.set('NAME3', 'TVALUE3')
+    // act
+    const settings = await usecase()
+    // assert
+    assert.equal(settings.get('NAME1'), 'TVALUE1')
+    assert.equal(settings.get('NAME2'), 'VALUE2')
+    assert.equal(settings.get('NAME3'), 'TVALUE3')
+    assert.isTrue(readStub.calledOnce)
+    readStub.restore()
+    temporaryRepository.clear()
   })
 
   it('should rename old settings to new names', async function () {

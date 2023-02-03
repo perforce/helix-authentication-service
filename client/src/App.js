@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import React, { useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
@@ -57,6 +57,23 @@ function ButtonAppBar() {
     window.open('https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html', '_blank')
   }
 
+  const handleTestLogin = () => {
+    setAnchorEl(null)
+    fetch('/requests/new/test')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Unable to get login URL (status ${response.status})`)
+        }
+        return response.json()
+      })
+      .then((response) => {
+        window.open(response.loginTestUrl, '_blank')
+      })
+      .catch((err) => {
+        console.error(err.message)
+      })
+  }
+
   const handleEditSettings = () => {
     setAnchorEl(null)
     navigate('/')
@@ -97,6 +114,7 @@ function ButtonAppBar() {
   // the "Menu component doesn't accept a Fragment as a child" error.
   const menuItems = auth.token ? [
     { onClick: handleOpenDocs, label: 'Documentation' },
+    { onClick: handleTestLogin, label: 'Test Login' },
     { onClick: handleEditSettings, label: 'Edit Settings' },
     { onClick: handleShowSettings, label: 'View Settings' },
     { onClick: handleStatus, label: 'Status' },

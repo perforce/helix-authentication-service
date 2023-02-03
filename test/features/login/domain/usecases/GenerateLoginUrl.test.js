@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -9,17 +9,16 @@ import GenerateLoginUrl from 'helix-auth-svc/lib/features/login/domain/usecases/
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
 
 describe('GenerateLoginUrl use case', function () {
-  const settings = new Map()
+  const settingsRepository = new MapSettingsRepository()
   let usecase
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
     const getAuthProviders = GetAuthProviders({ settingsRepository })
     usecase = GenerateLoginUrl({ settingsRepository, getAuthProviders })
   })
 
   beforeEach(function () {
-    settings.clear()
+    settingsRepository.clear()
   })
 
   it('should raise an error for invalid input', async function () {
@@ -63,7 +62,7 @@ describe('GenerateLoginUrl use case', function () {
 
   it('should produce OIDC URL with only OIDC_ISSUER_URI', async function () {
     // arrange
-    settings.set('OIDC_ISSUER_URI', 'https://example.com')
+    settingsRepository.set('OIDC_ISSUER_URI', 'https://example.com')
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
@@ -72,7 +71,7 @@ describe('GenerateLoginUrl use case', function () {
 
   it('should produce SAML URL with only SAML_IDP_SSO_URL', async function () {
     // arrange
-    settings.set('SAML_IDP_SSO_URL', 'https://example.com/saml/sso')
+    settingsRepository.set('SAML_IDP_SSO_URL', 'https://example.com/saml/sso')
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
@@ -81,7 +80,7 @@ describe('GenerateLoginUrl use case', function () {
 
   it('should produce special URL with DEFAULT_PROTOCOL', async function () {
     // arrange
-    settings.set('DEFAULT_PROTOCOL', 'pigeon')
+    settingsRepository.set('DEFAULT_PROTOCOL', 'pigeon')
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
@@ -96,7 +95,7 @@ describe('GenerateLoginUrl use case', function () {
         protocol: 'saml'
       }]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert

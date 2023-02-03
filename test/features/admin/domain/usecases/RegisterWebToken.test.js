@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -10,12 +10,11 @@ import { TokenRepository } from 'helix-auth-svc/lib/features/admin/domain/reposi
 import RegisterWebToken from 'helix-auth-svc/lib/features/admin/domain/usecases/RegisterWebToken.js'
 
 describe('RegisterWebToken use case', function () {
-  const settings = new Map()
   let usecase
 
   before(function () {
-    settings.set('TOKEN_TTL', '10')
-    const settingsRepository = new MapSettingsRepository(settings)
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('TOKEN_TTL', '10')
     const tokenRepository = new TokenRepository()
     usecase = RegisterWebToken({ settingsRepository, tokenRepository })
   })

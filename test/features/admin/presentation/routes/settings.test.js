@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import * as fs from 'node:fs'
 import { assert } from 'chai'
@@ -17,6 +17,7 @@ import container from 'helix-auth-svc/lib/container.js'
 // mocha no longer exits after the tests complete.
 
 const settings = container.resolve('settingsRepository')
+const temporary = container.resolve('temporaryRepository')
 const app = createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
@@ -78,6 +79,97 @@ setTimeout(function () {
       })
 
       it('should fetch modified settings', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
+              assert.equal(res.body.HAS_UNIT_NEW1, 'newvalue')
+            })
+            // eslint-disable-next-line no-unused-vars
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              // verify new setting not yet applied to environment
+              assert.notProperty(process.env, 'HAS_UNIT_NEW1')
+              done()
+            })
+        })
+      })
+
+      it('should modify temporary configuration settings', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/temp')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ HAS_UNIT_NEW1: 'tempvalue' })
+            .expect(200)
+            .expect(res => {
+              assert.equal(res.body.status, 'ok')
+            })
+            // eslint-disable-next-line no-unused-vars
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              assert.isTrue(temporary.has('HAS_UNIT_NEW1'))
+              assert.equal(temporary.get('HAS_UNIT_NEW1'), 'tempvalue')
+              done()
+            })
+        })
+      })
+
+      it('should fetch modified temporary settings', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
+              assert.equal(res.body.HAS_UNIT_NEW1, 'tempvalue')
+            })
+            // eslint-disable-next-line no-unused-vars
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              // verify new setting not yet applied to environment
+              assert.notProperty(process.env, 'HAS_UNIT_NEW1')
+              done()
+            })
+        })
+      })
+
+      it('should delete temporary configuration settings', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .delete('/settings/temp')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect(res => {
+              assert.equal(res.body.status, 'ok')
+            })
+            // eslint-disable-next-line no-unused-vars
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              done()
+            })
+        })
+      })
+
+      it('should fetch modified settings (w/o temporary)', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings')

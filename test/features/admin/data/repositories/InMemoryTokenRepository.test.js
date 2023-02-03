@@ -12,9 +12,8 @@ describe('InMemoryToken repository', function () {
   let repository
 
   before(function () {
-    const map = new Map()
-    map.set('TOKEN_TTL', '2')
-    const settings = new MapSettingsRepository(map)
+    const settings = new MapSettingsRepository()
+    settings.set('TOKEN_TTL', '2')
     repository = new InMemoryTokenRepository({ settingsRepository: settings })
   })
 

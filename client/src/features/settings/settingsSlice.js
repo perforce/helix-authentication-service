@@ -24,9 +24,22 @@ const slice = createSlice({
       }
     )
     builder.addMatcher(
-      // auth.endpoints.sendChanges.matchFulfilled,
       auth.endpoints.sendChanges.matchFulfilled,
       (state, { payload }) => {
+        state.modified = null
+      }
+    )
+    builder.addMatcher(
+      auth.endpoints.testChanges.matchFulfilled,
+      (state, { payload }) => {
+        state.fetched = payload
+        state.modified = null
+      }
+    )
+    builder.addMatcher(
+      auth.endpoints.resetChanges.matchFulfilled,
+      (state, { payload }) => {
+        state.fetched = payload
         state.modified = null
       }
     )

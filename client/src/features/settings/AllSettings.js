@@ -1,12 +1,17 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import React, { useState } from 'react'
 import { Form, Formik } from 'formik'
-import { Alert, Button, Container, Stack } from '@mui/material'
+import { Alert, Container, Stack } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { useDispatch, useSelector } from 'react-redux'
-import { useGetSettingsQuery, useSendChangesMutation } from 'app/services/auth'
+import {
+  useGetSettingsQuery,
+  useSendChangesMutation,
+  useTestChangesMutation,
+  useResetChangesMutation
+} from 'app/services/auth'
 import { discardChanges, selectModified } from 'features/settings/settingsSlice'
 import AutoApplyChanges from './AutoApplyChanges'
 import * as Certificates from './Certificates'
@@ -43,10 +48,12 @@ const validate = (values) => {
 
 export const AllSettings = () => {
   const dispatch = useDispatch()
-  const { data, error, refetch } = useGetSettingsQuery()
+  const { data, error } = useGetSettingsQuery()
   const [applyStatus, setApplyStatus] = useState(null)
   const [applyError, setApplyError] = useState(null)
-  const [sendChanges, { isFetching }] = useSendChangesMutation()
+  const [sendChanges, { isSendFetching }] = useSendChangesMutation()
+  const [testChanges, { isTestFetching }] = useTestChangesMutation()
+  const [resetChanges, { isResetFetching }] = useResetChangesMutation()
   const modified = useSelector(selectModified)
 
   const handleSendChanges = (event) => {
@@ -71,21 +78,46 @@ export const AllSettings = () => {
     }, 100)
   }
 
-  const openLoginPage = (event) => {
+  const handleTestChanges = (event) => {
     event.preventDefault()
-    fetch('/requests/new/test')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Unable to get login URL (status ${response.status})`)
-        }
-        return response.json()
-      })
-      .then((response) => {
-        window.open(response.loginTestUrl, '_blank')
-      })
-      .catch((err) => {
-        setApplyError(err.message)
-      })
+    setTimeout(() => {
+      if (modified) {
+        testChanges(modified).unwrap()
+          .then((data) => {
+            const href = `${data.location}/admin`
+            setApplyStatus(<div>
+              Temporary settings updated successfully. Open the new <a href={href}>location</a> if it has been changed.
+            </div>)
+          })
+          .catch((err) => {
+            if (err.data) {
+              setApplyError(JSON.stringify(err.data))
+            } else {
+              setApplyError('Oh no, there was an error!')
+            }
+          })
+      }
+    }, 100)
+  }
+
+  const handleResetChanges = (event) => {
+    event.preventDefault()
+    setTimeout(() => {
+      resetChanges().unwrap()
+        .then((data) => {
+          const href = `${data.location}/admin`
+          setApplyStatus(<div>
+            Temporary settings removed. Open the new <a href={href}>location</a> if it has been changed.
+          </div>)
+        })
+        .catch((err) => {
+          if (err.data) {
+            setApplyError(JSON.stringify(err.data))
+          } else {
+            setApplyError('Oh no, there was an error!')
+          }
+        })
+    }, 100)
   }
 
   return data ? (
@@ -115,28 +147,26 @@ export const AllSettings = () => {
                 onClick={handleSendChanges}
                 type="submit"
                 variant="contained"
-                disabled={modified === null || Object.entries(modified).length === 0}
-                loading={isFetching}
+                loading={isSendFetching}
               >
                 Apply Changes
               </LoadingButton>
-              <Button
-                onClick={openLoginPage}
+              <LoadingButton
+                onClick={handleTestChanges}
+                type="submit"
                 variant="outlined"
-                disabled={modified !== null && Object.entries(modified).length > 0}
+                loading={isTestFetching}
               >
-                Test login
-              </Button>
+                Test Changes
+              </LoadingButton>
               <LoadingButton
                 onClick={(event) => {
-                  event.preventDefault()
+                  handleResetChanges(event)
                   dispatch(discardChanges())
-                  refetch()
                   props.resetForm()
                 }}
                 variant="contained"
-                disabled={modified === null || Object.entries(modified).length === 0}
-                loading={isFetching}
+                loading={isResetFetching}
               >
                 Discard Changes
               </LoadingButton>

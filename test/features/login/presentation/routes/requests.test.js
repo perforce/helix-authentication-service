@@ -90,11 +90,13 @@ setTimeout(function () {
           .expect(200)
           .expect(res => {
             assert.equal(res.body.request.length, 26)
-            assert.isTrue(res.body.loginUrl.startsWith('http'))
+            assert.isTrue(res.body.loginUrl.startsWith('https://localhost:3333/'))
             const suffix = `/${res.body.request}?instanceId=none`
             assert.isTrue(res.body.loginUrl.endsWith(suffix))
-            assert.isTrue(res.body.baseUrl.startsWith('http'))
+            assert.equal(res.body.baseUrl, 'https://localhost:3333')
             assert.isFalse(res.body.forceAuthn)
+            assert.equal(res.body.userId, 'fakeuser')
+            assert.equal(res.body.instanceId, 'none')
             requestId = res.body.request
           })
           // eslint-disable-next-line no-unused-vars
@@ -114,11 +116,12 @@ setTimeout(function () {
           .expect(200)
           .expect(res => {
             assert.equal(res.body.request.length, 26)
-            assert.isTrue(res.body.loginUrl.startsWith('http'))
+            assert.isTrue(res.body.loginUrl.startsWith('https://localhost:3333/'))
             const suffix = `/${res.body.request}?instanceId=trueU`
             assert.isTrue(res.body.loginUrl.endsWith(suffix))
-            assert.isTrue(res.body.baseUrl.startsWith('http'))
             assert.isFalse(res.body.forceAuthn)
+            assert.equal(res.body.userId, 'realuser')
+            assert.equal(res.body.instanceId, 'trueU')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -148,7 +151,7 @@ setTimeout(function () {
       })
 
       it('should forceAuthn using environment variable', function (done) {
-        process.env.FORCE_AUTHN = 'please'
+        process.env.FORCE_AUTHN = 'true'
         agent
           .get('/requests/new/forceq')
           .trustLocalhost(true)

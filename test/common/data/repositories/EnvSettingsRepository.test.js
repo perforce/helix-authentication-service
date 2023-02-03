@@ -1,14 +1,12 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
-import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { EnvSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/EnvSettingsRepository.js'
 
 describe('EnvSettingsRepository', function () {
-  const defaultsRepository = new DefaultsEnvRepository()
-  const sut = new EnvSettingsRepository({ defaultsRepository })
+  const sut = new EnvSettingsRepository()
 
   it('should return string or undefined from get()', function () {
     process.env['SETTING_VALUE'] = 'a_value'
@@ -36,12 +34,6 @@ describe('EnvSettingsRepository', function () {
     process.env['SETTING_3000'] = '3000'
     assert.equal(sut.getInt('SETTING_3000', 100), 3000)
     assert.equal(sut.getInt('SETTING_NONE', 101), 101)
-  })
-
-  it('should fall back to using default values', function () {
-    assert.equal(sut.get('SESSION_SECRET'), 'keyboard cat')
-    assert.isTrue(sut.has('OIDC_SELECT_ACCOUNT'))
-    assert.isFalse(sut.getBool('OIDC_SELECT_ACCOUNT'))
   })
 
   it('should allow changing values', function () {

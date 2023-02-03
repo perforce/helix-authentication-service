@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -26,19 +26,16 @@ describe('HelixEntity repository', function () {
   })
 
   describe('Connect using ticket', function () {
-    let repository
+    const settings = new MapSettingsRepository()
     let p4config
-    let settings
 
     before(async function () {
       this.timeout(30000)
       p4config = await runner.startServer('./tmp/p4d/tickets')
       helpers.establishSuper(p4config)
-      settings = new Map()
       settings.set('P4PORT', p4config.port)
       settings.set('P4USER', p4config.user)
       settings.set('P4PASSWD', p4config.password)
-      repository = new MapSettingsRepository(settings)
     })
 
     after(async function () {
@@ -54,7 +51,7 @@ describe('HelixEntity repository', function () {
       const logoutCmd = await p4.cmd('logout -a')
       assert.isOk(logoutCmd.info[0].data)
       settings.set('P4PASSWD', 'CD9FC48D2F36752258C11CDBBD094EBC')
-      const sut = new HelixEntityRepository({ settingsRepository: repository })
+      const sut = new HelixEntityRepository({ settingsRepository: settings })
       try {
         await sut.getUsers()
         assert.fail('should have raised Error')
@@ -77,7 +74,7 @@ describe('HelixEntity repository', function () {
       settings.set('P4PASSWD', ticketCmd.info[0].data)
       const loginCmd = await p4.cmd('login', 'p8ssword')
       assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
-      const sut = new HelixEntityRepository({ settingsRepository: repository })
+      const sut = new HelixEntityRepository({ settingsRepository: settings })
       const users = await sut.getUsers()
       assert.isNotNull(users)
       settings.set('P4PASSWD', p4config.password)
@@ -92,11 +89,10 @@ describe('HelixEntity repository', function () {
       this.timeout(30000)
       p4config = await runner.startServer('./tmp/p4d/non-ssl-repo')
       helpers.establishSuper(p4config)
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      map.set('P4USER', p4config.user)
-      map.set('P4PASSWD', p4config.password)
-      const settings = new MapSettingsRepository(map)
+      const settings = new MapSettingsRepository()
+      settings.set('P4PORT', p4config.port)
+      settings.set('P4USER', p4config.user)
+      settings.set('P4PASSWD', p4config.password)
       repository = new HelixEntityRepository({ settingsRepository: settings })
     })
 
@@ -630,10 +626,9 @@ describe('HelixEntity repository', function () {
     before(async function () {
       this.timeout(30000)
       p4config = await runner.startSslServer('./tmp/p4d/ssl-passwd')
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      map.set('P4USER', p4config.user)
-      const settings = new MapSettingsRepository(map)
+      const settings = new MapSettingsRepository()
+      settings.set('P4PORT', p4config.port)
+      settings.set('P4USER', p4config.user)
       repository = new HelixEntityRepository({ settingsRepository: settings })
     })
 
@@ -662,11 +657,10 @@ describe('HelixEntity repository', function () {
     before(async function () {
       this.timeout(30000)
       p4config = await runner.startSslServer('./tmp/p4d/ssl-untrust')
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      map.set('P4USER', p4config.user)
-      map.set('P4PASSWD', p4config.password)
-      const settings = new MapSettingsRepository(map)
+      const settings = new MapSettingsRepository()
+      settings.set('P4PORT', p4config.port)
+      settings.set('P4USER', p4config.user)
+      settings.set('P4PASSWD', p4config.password)
       repository = new HelixEntityRepository({ settingsRepository: settings })
     })
 
@@ -697,11 +691,10 @@ describe('HelixEntity repository', function () {
       p4config = await runner.startSslServer('./tmp/p4d/ssl-trust')
       helpers.establishTrust(p4config)
       helpers.establishSuper(p4config)
-      const map = new Map()
-      map.set('P4PORT', p4config.port)
-      map.set('P4USER', p4config.user)
-      map.set('P4PASSWD', p4config.password)
-      const settings = new MapSettingsRepository(map)
+      const settings = new MapSettingsRepository()
+      settings.set('P4PORT', p4config.port)
+      settings.set('P4USER', p4config.user)
+      settings.set('P4PASSWD', p4config.password)
       repository = new HelixEntityRepository({ settingsRepository: settings })
     })
 

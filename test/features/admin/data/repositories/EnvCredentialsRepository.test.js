@@ -10,10 +10,9 @@ import { EnvCredentialsRepository } from 'helix-auth-svc/lib/features/admin/data
 
 describe('env credentials repository', function () {
   it('should raise an error for invalid input', async function () {
-    const map = new Map()
-    map.set('ADMIN_USERNAME', 'scott')
-    map.set('ADMIN_PASSWD_FILE', '')
-    const settings = new MapSettingsRepository(map)
+    const settings = new MapSettingsRepository()
+    settings.set('ADMIN_USERNAME', 'scott')
+    settings.set('ADMIN_PASSWD_FILE', '')
     const repository = new EnvCredentialsRepository({ settingsRepository: settings })
     try {
       await repository.verify(null, 'foobar')
@@ -31,10 +30,9 @@ describe('env credentials repository', function () {
 
   it('should raise error for missing password file', async function () {
     // arrange
-    const map = new Map()
-    map.set('ADMIN_USERNAME', 'scott')
-    map.set('ADMIN_PASSWD_FILE', 'doesnotexist')
-    const settings = new MapSettingsRepository(map)
+    const settings = new MapSettingsRepository()
+    settings.set('ADMIN_USERNAME', 'scott')
+    settings.set('ADMIN_PASSWD_FILE', 'doesnotexist')
     const repository = new EnvCredentialsRepository({ settingsRepository: settings })
     try {
       // act
@@ -49,10 +47,9 @@ describe('env credentials repository', function () {
     // arrange
     const passwdFile = temporaryFile({ extension: '.txt' })
     fs.writeFileSync(passwdFile, 'tiger')
-    const map = new Map()
-    map.set('ADMIN_USERNAME', 'scott')
-    map.set('ADMIN_PASSWD_FILE', passwdFile)
-    const settings = new MapSettingsRepository(map)
+    const settings = new MapSettingsRepository()
+    settings.set('ADMIN_USERNAME', 'scott')
+    settings.set('ADMIN_PASSWD_FILE', passwdFile)
     const repository = new EnvCredentialsRepository({ settingsRepository: settings })
     // act
     const result = await repository.verify('susan', 'foobar')
@@ -64,10 +61,9 @@ describe('env credentials repository', function () {
     // arrange
     const passwdFile = temporaryFile({ extension: '.txt' })
     fs.writeFileSync(passwdFile, 'tiger')
-    const map = new Map()
-    map.set('ADMIN_USERNAME', 'scott')
-    map.set('ADMIN_PASSWD_FILE', passwdFile)
-    const settings = new MapSettingsRepository(map)
+    const settings = new MapSettingsRepository()
+    settings.set('ADMIN_USERNAME', 'scott')
+    settings.set('ADMIN_PASSWD_FILE', passwdFile)
     const repository = new EnvCredentialsRepository({ settingsRepository: settings })
     // act
     const result = await repository.verify('scott', 'tiger')

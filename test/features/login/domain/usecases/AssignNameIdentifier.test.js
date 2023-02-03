@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -8,16 +8,15 @@ import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositori
 import AssignNameIdentifier from 'helix-auth-svc/lib/features/login/domain/usecases/AssignNameIdentifier.js'
 
 describe('AssignNameIdentifier use case', function () {
-  const settings = new Map()
+  const settingsRepository = new MapSettingsRepository()
   let usecase
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
     usecase = AssignNameIdentifier({ settingsRepository })
   })
 
   beforeEach(function () {
-    settings.clear()
+    settingsRepository.clear()
   })
 
   it('should raise an error for invalid input', function () {
@@ -100,7 +99,7 @@ describe('AssignNameIdentifier use case', function () {
       sub: '1234567890',
       myNameId: 'actualNameId'
     }
-    settings.set('SAML_NAMEID_FIELD', 'myNameId')
+    settingsRepository.set('SAML_NAMEID_FIELD', 'myNameId')
     // act
     const result = usecase(input)
     // assert
@@ -116,7 +115,7 @@ describe('AssignNameIdentifier use case', function () {
       email: 'user@example.com',
       sub: '1234567890'
     }
-    settings.set('SAML_NAMEID_FIELD', 'myNameId')
+    settingsRepository.set('SAML_NAMEID_FIELD', 'myNameId')
     // act
     const result = usecase(input)
     // assert

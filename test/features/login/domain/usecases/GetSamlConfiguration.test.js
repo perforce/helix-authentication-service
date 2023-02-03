@@ -12,11 +12,10 @@ import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecas
 import GetSamlConfiguration from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlConfiguration.js'
 
 describe('GetSamlConfiguration use case', function () {
-  const settings = new Map()
+  const settingsRepository = new MapSettingsRepository()
   let usecase
 
   before(function () {
-    const settingsRepository = new MapSettingsRepository(settings)
     const fetchSamlMetadata = FetchSamlMetadata()
     const getSamlAuthnContext = GetSamlAuthnContext({ settingsRepository })
     const getAuthProviders = GetAuthProviders({ settingsRepository })
@@ -29,7 +28,7 @@ describe('GetSamlConfiguration use case', function () {
   })
 
   beforeEach(function () {
-    settings.clear()
+    settingsRepository.clear()
   })
 
   it('should raise an error for invalid input', async function () {
@@ -62,7 +61,7 @@ describe('GetSamlConfiguration use case', function () {
   it('should raise error when no providers configured', async function () {
     // arrange
     const providers = { providers: [] }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     try {
       await usecase('saml-0')
@@ -81,7 +80,7 @@ describe('GetSamlConfiguration use case', function () {
         signonUrl: 'https://example.com/saml/sso'
       }]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     try {
       await usecase('oidc-10')
@@ -93,7 +92,7 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should raise error when missing idp cert', async function () {
     // arrange
-    settings.set('SAML_IDP_SSO_URL', 'https://example.com/saml/sso')
+    settingsRepository.set('SAML_IDP_SSO_URL', 'https://example.com/saml/sso')
     try {
       // act
       await usecase()
@@ -106,9 +105,9 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should interpret truthy values from settings', async function () {
     // arrange
-    settings.set('SAML_IDP_METADATA_FILE', 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml')
-    settings.set('SAML_WANT_ASSERTION_SIGNED', 'false')
-    settings.set('SAML_WANT_RESPONSE_SIGNED', 'TRUE')
+    settingsRepository.set('SAML_IDP_METADATA_FILE', 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml')
+    settingsRepository.set('SAML_WANT_ASSERTION_SIGNED', 'false')
+    settingsRepository.set('SAML_WANT_RESPONSE_SIGNED', 'TRUE')
     // act
     const result = await usecase()
     // assert
@@ -128,7 +127,7 @@ describe('GetSamlConfiguration use case', function () {
         wantResponseSigned: 'TRUE'
       }]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase('saml-0')
     // assert
@@ -142,9 +141,9 @@ describe('GetSamlConfiguration use case', function () {
       this.skip()
     } else {
       // arrange
-      settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
-      settings.set('SAML_IDP_METADATA_URL', 'https://shibboleth.doc:4443/idp/shibboleth')
-      settings.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+      settingsRepository.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+      settingsRepository.set('SAML_IDP_METADATA_URL', 'https://shibboleth.doc:4443/idp/shibboleth')
+      settingsRepository.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
       // act
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
       // mute the warning from node about disabling TLS validation
@@ -176,7 +175,7 @@ describe('GetSamlConfiguration use case', function () {
           forceAuthn: false
         }]
       }
-      settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+      settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
       // act
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
       // mute the warning from node about disabling TLS validation
@@ -196,9 +195,9 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should fetch metadata via file with settings', async function () {
     // arrange
-    settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
-    settings.set('SAML_IDP_METADATA_FILE', 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml')
-    settings.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+    settingsRepository.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
+    settingsRepository.set('SAML_IDP_METADATA_FILE', 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml')
+    settingsRepository.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
     // act
     const result = await usecase()
     // assert
@@ -218,7 +217,7 @@ describe('GetSamlConfiguration use case', function () {
         authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
       }]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase('saml-0')
     // assert
@@ -229,8 +228,8 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should read IdP cert file via settings', async function () {
     // arrange
-    settings.set('IDP_CERT_FILE', 'certs/server.crt')
-    settings.set('SAML_IDP_SSO_URL', 'https://example.com/saml/sso')
+    settingsRepository.set('IDP_CERT_FILE', 'certs/server.crt')
+    settingsRepository.set('SAML_IDP_SSO_URL', 'https://example.com/saml/sso')
     // act
     const result = await usecase()
     // assert
@@ -250,7 +249,7 @@ describe('GetSamlConfiguration use case', function () {
         idpCertFile: 'certs/server.crt'
       }]
     }
-    settings.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase('saml-0')
     // assert
