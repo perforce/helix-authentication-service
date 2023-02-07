@@ -133,7 +133,32 @@ describe('WriteConfiguration use case', function () {
     writeStub.restore()
   })
 
-  it('should write certs and secrets into files', async function () {
+  it('should write certs and keys into files', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.isTrue(settings.has('CA_CERT_FILE'))
+      const certFile = settings.get('CA_CERT_FILE')
+      const certificate = fs.readFileSync(certFile, 'utf8')
+      assert.equal(certificate, '-----BEGIN CERTIFICATE-----')
+      fs.rmSync(certFile)
+    })
+    // act
+    const settings = new Map()
+    settings.set('CA_CERT', '-----BEGIN CERTIFICATE-----')
+    await usecase(settings)
+    // assert
+    assert.isTrue(readStub.calledOnce)
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
+
+  it('should write secrets to files if appropriate', async function () {
     // arrange
     const secretFile = temporaryFile({ extension: 'txt' })
     fs.writeFileSync(secretFile, 'lioness')
@@ -144,28 +169,48 @@ describe('WriteConfiguration use case', function () {
     })
     const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
       assert.isDefined(settings)
-      assert.lengthOf(settings, 3)
+      assert.lengthOf(settings, 2)
+      assert.isFalse(settings.has('KEY_PASSPHRASE_FILE'))
+      assert.equal(settings.get('KEY_PASSPHRASE'), 'housecat')
       assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
-      assert.isTrue(settings.has('KEY_PASSPHRASE_FILE'))
-      const secretFile = settings.get('KEY_PASSPHRASE_FILE')
-      const secret = fs.readFileSync(secretFile, 'utf8')
-      assert.equal(secret, 'housecat')
-      fs.rmSync(secretFile)
-      assert.isTrue(settings.has('CA_CERT_FILE'))
-      const certFile = settings.get('CA_CERT_FILE')
-      const certificate = fs.readFileSync(certFile, 'utf8')
-      assert.equal(certificate, '-----BEGIN CERTIFICATE-----')
-      fs.rmSync(certFile)
+      assert.isFalse(settings.has('OIDC_CLIENT_SECRET'))
     })
     // act
     const settings = new Map()
     settings.set('OIDC_CLIENT_SECRET', 'tiger')
     settings.set('KEY_PASSPHRASE', 'housecat')
-    settings.set('CA_CERT', '-----BEGIN CERTIFICATE-----')
     await usecase(settings)
     // assert
     const secret = fs.readFileSync(secretFile, 'utf8')
     assert.equal(secret, 'tiger')
+    assert.isTrue(readStub.calledOnce)
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
+
+  it('should write secrets only if different', async function () {
+    // arrange
+    const secretFile = temporaryFile({ extension: 'txt' })
+    fs.writeFileSync(secretFile, 'lioness\n')
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      const results = new Map()
+      results.set('OIDC_CLIENT_SECRET_FILE', secretFile)
+      return results
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
+      assert.isFalse(settings.has('OIDC_CLIENT_SECRET'))
+    })
+    // act
+    const settings = new Map()
+    settings.set('OIDC_CLIENT_SECRET', 'lioness') // note missing trailing newline
+    await usecase(settings)
+    // assert
+    const secret = fs.readFileSync(secretFile, 'utf8')
+    assert.equal(secret, 'lioness\n')
     assert.isTrue(readStub.calledOnce)
     assert.isTrue(writeStub.calledOnce)
     readStub.restore()
