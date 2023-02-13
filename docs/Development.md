@@ -43,8 +43,8 @@ system. Additionally, the [Docker](#docker) containers defined in
 `docker-compose.yml` must be built and running.
 
 ```shell
-$ docker compose build
-$ docker compose up -d
+$ docker compose build auth-svc1.doc
+$ docker compose up --build -d
 $ npm test
 ```
 
