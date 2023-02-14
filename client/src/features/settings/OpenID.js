@@ -1,10 +1,12 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import React, { useState } from 'react'
+import { useFormContext } from 'react-hook-form'
 import {
   Container,
   FormControl,
+  FormHelperText,
   IconButton,
   InputAdornment,
   InputLabel,
@@ -13,7 +15,6 @@ import {
   Typography,
 } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-import TextInputField from './TextInputField'
 
 export const deserialize = (incoming, values) => {
   values['o_issuer'] = incoming['OIDC_ISSUER_URI'] || ''
@@ -22,18 +23,19 @@ export const deserialize = (incoming, values) => {
 }
 
 export const serialize = (values, outgoing) => {
-  outgoing['OIDC_ISSUER_URI'] = values['o_issuer']
-  outgoing['OIDC_CLIENT_ID'] = values['o_client']
-  outgoing['OIDC_CLIENT_SECRET'] = values['o_secret']
-}
-
-export const validate = (values, errors) => {
-  if (values.issuer && !/^https?:\/\/.+/.test(values.issuer)) {
-    errors.issuer = 'Must start with http:// or https://'
+  // only output serialized values if they were modified
+  if ('o_issuer' in values) {
+    outgoing['OIDC_ISSUER_URI'] = values['o_issuer']
+  }
+  if ('o_client' in values) {
+    outgoing['OIDC_CLIENT_ID'] = values['o_client']
+  }
+  if ('o_secret' in values) {
+    outgoing['OIDC_CLIENT_SECRET'] = values['o_secret']
   }
 }
 
-function SecretInput({ name, value, label, onChange, onBlur }) {
+function SecretInput({ name, label, register }) {
   const [show, setShow] = useState(false)
   const handleClick = () => setShow(!show)
   const handleMouseDown = (event) => event.preventDefault()
@@ -45,11 +47,8 @@ function SecretInput({ name, value, label, onChange, onBlur }) {
       <OutlinedInput
         type={show ? 'text' : 'password'}
         id={inputId}
-        name={name}
-        value={value}
         label={label}
-        onChange={onChange}
-        onBlur={onBlur}
+        {...register(name)}
         endAdornment={
           <InputAdornment position="end">
             <IconButton
@@ -67,37 +66,41 @@ function SecretInput({ name, value, label, onChange, onBlur }) {
   )
 }
 
-export const Component = ({ props }) => {
+export const Component = () => {
+  const { register, formState: { errors, touchedFields } } = useFormContext()
   return (
     <Container>
       <Stack spacing={2}>
         <Typography variant="h4" sx={{ borderTop: 1, borderColor: 'grey.500' }}>
           OpenID Connect
         </Typography>
-        <TextInputField
-          name="o_issuer"
-          values={props.values}
-          errors={props.errors}
-          touched={props.touched}
-          label="Issuer URI"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
-        />
-        <TextInputField
-          name="o_client"
-          values={props.values}
-          errors={props.errors}
-          touched={props.touched}
-          label="Client identifier"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
-        />
+        <FormControl error={errors["o_issuer"] && touchedFields["o_issuer"]}>
+          <InputLabel htmlFor="o_issuer-field">Issuer URI</InputLabel>
+          <OutlinedInput
+            type="text"
+            id="o_issuer-field"
+            name="o_issuer"
+            label="Issuer URI"
+            {...register("o_issuer", { pattern: /^https?:\/\/.+/ })}
+          />
+          <FormHelperText>{
+            errors.o_issuer?.type === 'pattern' && 'URL must begin with http:// or https://'
+          }</FormHelperText>
+        </FormControl>
+        <FormControl error={errors["o_client"] && touchedFields["o_client"]}>
+          <InputLabel htmlFor="o_client-field">Client identifier</InputLabel>
+          <OutlinedInput
+            type="text"
+            id="o_client-field"
+            name="o_client"
+            label="Client identifier"
+            {...register("o_client")}
+          />
+        </FormControl>
         <SecretInput
           name="o_secret"
-          value={props.values.o_secret}
           label="Client secret"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
+          register={register}
         />
       </Stack>
     </Container>

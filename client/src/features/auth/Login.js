@@ -1,8 +1,8 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import React, { useState } from 'react'
-import { Formik } from 'formik'
+import { useForm } from "react-hook-form"
 import {
   Alert,
   Container,
@@ -19,7 +19,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useLoginMutation } from 'app/services/auth'
 
-function PasswordInput({ name, value, onChange, onBlur }) {
+function PasswordInput({ register }) {
   const [show, setShow] = useState(false)
   const handleClick = () => setShow(!show)
   const handleMouseDown = (event) => event.preventDefault()
@@ -28,10 +28,7 @@ function PasswordInput({ name, value, onChange, onBlur }) {
     <OutlinedInput
       type={show ? 'text' : 'password'}
       placeholder="Enter password"
-      name={name}
-      value={value}
-      onChange={onChange}
-      onBlur={onBlur}
+      {...register("password", { required: true })}
       endAdornment={
         <InputAdornment position="end">
           <IconButton
@@ -49,82 +46,52 @@ function PasswordInput({ name, value, onChange, onBlur }) {
 }
 
 export const Login = () => {
+  const { register, handleSubmit, formState: { errors, touchedFields } } = useForm({ mode: 'onBlur' })
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [login, { isLoading }] = useLoginMutation()
 
   return (
-    <Formik
-      initialValues={{ username: '', password: '' }}
-      validate={values => {
-        const errors = {}
-        if (!values.username) {
-          errors.username = 'Required'
-        } else if (!values.password) {
-          errors.password = 'Required'
-        }
-        return errors
-      }}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          login(values).unwrap()
-            .then(() => {
-              navigate('/')
-            })
-            .catch((err) => {
-              setError(err.data || 'Oh no, there was an error!')
-            })
-          setSubmitting(false)
-        }, 400)
-      }}
-    >
-      {({
-        values,
-        errors,
-        touched,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-      }) => (
-        <form onSubmit={handleSubmit}>
-          <Container maxWidth="sm" sx={{ my: 2 }}>
-            <Stack spacing={4}>
-              {error && <Alert severity="error">{error}</Alert>}
-              <Typography variant="h4" component="div">
-                Administrator login
-              </Typography>
-              <FormControl error={errors.username && touched.username}>
-                <OutlinedInput
-                  onChange={handleChange}
-                  name="username"
-                  type="text"
-                  onBlur={handleBlur}
-                  value={values.username}
-                  placeholder="Enter username"
-                />
-                <FormHelperText id="component-error-text">{errors.username}</FormHelperText>
-              </FormControl>
-              <FormControl error={errors.password && touched.password}>
-                <PasswordInput
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  name="password"
-                  value={values.password}
-                />
-                <FormHelperText id="component-error-text">{errors.password}</FormHelperText>
-              </FormControl>
-              <LoadingButton
-                type="submit"
-                variant="contained"
-                loading={isLoading}
-              >
-                Login
-              </LoadingButton>
-            </Stack>
-          </Container>
-        </form>
-      )}
-    </Formik>
+    <form onSubmit={handleSubmit((data) => {
+      login(data).unwrap()
+        .then(() => {
+          navigate('/')
+        }).catch((err) => {
+          setError(err.data.message || 'Oh no, there was an error!')
+        })
+    })}>
+      <Container maxWidth="sm" sx={{ my: 2 }}>
+        <Stack spacing={4}>
+          {error && <Alert severity="error">{error}</Alert>}
+          <Typography variant="h4" component="div">
+            Administrator login
+          </Typography>
+          <FormControl error={errors.username && touchedFields.username}>
+            <OutlinedInput
+              type="text"
+              placeholder="Enter username"
+              {...register("username", { required: true })}
+            />
+            <FormHelperText>{
+              errors.username?.type === 'required' && 'Username is required'
+            }</FormHelperText>
+          </FormControl>
+          <FormControl error={errors.password && touchedFields.password}>
+            <PasswordInput register={register} />
+            <FormHelperText>{
+              errors.password?.type === 'required' && 'Password is required'
+            }</FormHelperText>
+          </FormControl>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            loading={isLoading}
+          >
+            Login
+          </LoadingButton>
+        </Stack>
+      </Container>
+    </form>
   )
 }
 

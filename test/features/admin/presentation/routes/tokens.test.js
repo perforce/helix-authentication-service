@@ -73,7 +73,8 @@ setTimeout(function () {
           .trustLocalhost(true)
           .expect(400)
           .expect(res => {
-            assert.include(res.text, 'grant_type invalid')
+            assert.equal(res.body.status, 400)
+            assert.include(res.body.message, 'grant_type is invalid')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -91,7 +92,8 @@ setTimeout(function () {
           .send({ grant_type: 'password' })
           .expect(401)
           .expect(res => {
-            assert.include(res.text, 'Unauthorized')
+            assert.equal(res.body.status, 401)
+            assert.include(res.body.message, 'Unauthorized')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {
@@ -109,7 +111,8 @@ setTimeout(function () {
           .send({ grant_type: 'password', username: 'susan', password: 'lioness' })
           .expect(401)
           .expect(res => {
-            assert.include(res.text, 'Unauthorized')
+            assert.equal(res.body.status, 401)
+            assert.include(res.body.message, 'Unauthorized')
           })
           // eslint-disable-next-line no-unused-vars
           .end(function (err, res) {

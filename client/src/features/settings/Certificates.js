@@ -1,9 +1,17 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import React from 'react'
-import { Container, Stack, Typography } from '@mui/material'
-import TextInputField from './TextInputField'
+import { useFormContext } from 'react-hook-form'
+import {
+  Container,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  OutlinedInput,
+  Stack,
+  Typography
+} from '@mui/material'
 
 export const deserialize = (incoming, values) => {
   values['c_ca_cert'] = incoming['CA_CERT'] || ''
@@ -13,96 +21,28 @@ export const deserialize = (incoming, values) => {
 }
 
 export const serialize = (values, outgoing) => {
-  outgoing['CA_CERT'] = values['c_ca_cert']
-  outgoing['CERT'] = values['c_cert']
-  outgoing['KEY'] = values['c_key']
-  outgoing['KEY_PASSPHRASE'] = values['c_password']
-}
-
-export const validate = (values, errors) => {
-  if (values.c_ca_cert) {
-    const lines = values.c_ca_cert.split('\n')
-    if (lines.length < 3) {
-      errors.c_ca_cert = 'Certificates must have 3+ lines'
-    }
-    if (!hasValidCertArmor(lines)) {
-      errors.c_ca_cert = 'Certificates must have BEGIN/END armor'
-    }
+  // only output serialized values if they were modified
+  if ('c_ca_cert' in values) {
+    outgoing['CA_CERT'] = values['c_ca_cert']
   }
-  if (values.c_cert) {
-    const lines = values.c_cert.split('\n')
-    if (lines.length < 3) {
-      errors.c_ca_cert = 'Certificates must have 3+ lines'
-    }
-    if (!hasValidCertArmor(lines)) {
-      errors.c_ca_cert = 'Certificates must have BEGIN/END armor'
-    }
+  if ('c_cert' in values) {
+    outgoing['CERT'] = values['c_cert']
   }
-  if (values.c_key) {
-    const lines = values.c_key.split('\n')
-    if (lines.length < 3) {
-      errors.c_ca_cert = 'Private keys must have 3+ lines'
-    }
-    if (!hasValidKeyArmor(lines)) {
-      errors.c_key = 'Private keys must have BEGIN/END armor'
-    }
+  if ('c_key' in values) {
+    outgoing['KEY'] = values['c_key']
+  }
+  if ('c_password' in values) {
+    outgoing['KEY_PASSPHRASE'] = values['c_password']
   }
 }
 
-export const Component = ({ props }) => {
-  return (
-    <Container>
-      <Stack spacing={2}>
-        <Typography variant="h4" sx={{ borderTop: 1, borderColor: 'grey.500' }}>
-          Certificates
-        </Typography>
-        <Typography>The certificates and keys below should be in PEM format.</Typography>
-        <TextInputField
-          name="c_ca_cert"
-          values={props.values}
-          errors={props.errors}
-          touched={props.touched}
-          label="Certificate Authority"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
-          rows={6}
-        />
-        <TextInputField
-          name="c_cert"
-          values={props.values}
-          errors={props.errors}
-          touched={props.touched}
-          label="Public key"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
-          rows={6}
-        />
-        <TextInputField
-          name="c_key"
-          values={props.values}
-          errors={props.errors}
-          touched={props.touched}
-          label="Private key"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
-          rows={6}
-        />
-        <Typography>If the private key is encrypted, provide the passphrase below.</Typography>
-        <TextInputField
-          name="c_password"
-          values={props.values}
-          errors={props.errors}
-          touched={props.touched}
-          label="Private key passphrase"
-          onChange={props.handleChange}
-          onBlur={props.handleBlur}
-        />
-      </Stack>
-    </Container>
-  )
+function hasThreeOrMoreLines(v) {
+  const lines = v.split('\n')
+  return lines.length >= 3
 }
 
-function hasValidCertArmor(lines) {
+function hasValidCertArmor(v) {
+  const lines = v.split('\n')
   const firstLine = lines[0]
   const lastLine = lines[lines.length - 1]
   if (firstLine === '-----BEGIN CERTIFICATE-----' && lastLine === '-----END CERTIFICATE-----') {
@@ -114,7 +54,8 @@ function hasValidCertArmor(lines) {
   return false
 }
 
-function hasValidKeyArmor(lines) {
+function hasValidKeyArmor(v) {
+  const lines = v.split('\n')
   const firstLine = lines[0]
   const lastLine = lines[lines.length - 1]
   if (firstLine === '-----BEGIN PRIVATE KEY-----' && lastLine === '-----END PRIVATE KEY-----') {
@@ -127,4 +68,89 @@ function hasValidKeyArmor(lines) {
     return true
   }
   return false
+}
+
+export const Component = () => {
+  const { register, formState: { errors, touchedFields } } = useFormContext()
+  return (
+    <Container>
+      <Stack spacing={2}>
+        <Typography variant="h4" sx={{ borderTop: 1, borderColor: 'grey.500' }}>
+          Certificates
+        </Typography>
+        <Typography>The certificates and keys below should be in PEM format.</Typography>
+        <FormControl error={errors["c_ca_cert"] && touchedFields["c_ca_cert"]}>
+          <InputLabel htmlFor="c_ca_cert-field">Certificate Authority</InputLabel>
+          <OutlinedInput
+            type="text"
+            id="c_ca_cert-field"
+            name="c_ca_cert"
+            label="Certificate Authority"
+            multiline={true}
+            rows={6}
+            {...register("c_ca_cert", {
+              validate: {
+                length: hasThreeOrMoreLines, armor: hasValidCertArmor
+              }
+            })}
+          />
+          <FormHelperText>{
+            (errors.c_ca_cert?.type === 'length' && 'Certificates must have 3+ lines') ||
+            (errors.c_ca_cert?.type === 'armor' && 'Certificates must have BEGIN/END armor')
+          }</FormHelperText>
+        </FormControl>
+        <FormControl error={errors["c_cert"] && touchedFields["c_cert"]}>
+          <InputLabel htmlFor="c_cert-field">Public key</InputLabel>
+          <OutlinedInput
+            type="text"
+            id="c_cert-field"
+            name="c_cert"
+            label="Public key"
+            multiline={true}
+            rows={6}
+            {...register("c_cert", {
+              validate: {
+                length: hasThreeOrMoreLines, armor: hasValidCertArmor
+              }
+            })}
+          />
+          <FormHelperText>{
+            (errors.c_cert?.type === 'length' && 'Certificates must have 3+ lines') ||
+            (errors.c_cert?.type === 'armor' && 'Certificates must have BEGIN/END armor')
+          }</FormHelperText>
+        </FormControl>
+        <FormControl error={errors["c_key"] && touchedFields["c_key"]}>
+          <InputLabel htmlFor="c_key-field">Private key</InputLabel>
+          <OutlinedInput
+            type="text"
+            id="c_key-field"
+            name="c_key"
+            label="Private key"
+            multiline={true}
+            rows={6}
+            {...register("c_key", {
+              validate: {
+                length: hasThreeOrMoreLines, armor: hasValidKeyArmor
+              }
+            })}
+          />
+          <FormHelperText>{
+            (errors.c_key?.type === 'length' && 'Private keys must have 3+ lines') ||
+            (errors.c_key?.type === 'armor' && 'Private keys must have BEGIN/END armor')
+          }</FormHelperText>
+        </FormControl>
+        <Typography>If the private key is encrypted, provide the passphrase below.</Typography>
+        <FormControl error={errors["c_password"] && touchedFields["c_password"]}>
+          <InputLabel htmlFor="c_password-field">Private key passphrase</InputLabel>
+          <OutlinedInput
+            type="text"
+            id="c_password-field"
+            name="c_password"
+            label="Private key passphrase"
+            {...register("c_password")}
+          />
+        </FormControl>
+      </Stack>
+    </Container>
+  )
 }
