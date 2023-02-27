@@ -51,7 +51,7 @@
     "jwks-rsa": "^3.0.1",
     "lokijs": "^1.5.12",
     "memorystore": "^1.6.6",
-    "minimatch": "^6.2.0",
+    "minimatch": "^7.3.0",
     "morgan": "^1.10.0",
     "openid-client": "^5.4.0",
     "p4api": "^3.4.0",
