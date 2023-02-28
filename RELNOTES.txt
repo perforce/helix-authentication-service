@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2022.2
+                            Version 2023.1
 
 
 Introduction
@@ -30,6 +30,7 @@ Important Notes
     in the .env file. If your identity provider only signs the assertion, then
     set SAML_WANT_RESPONSE_SIGNED=false. Currently most identity providers do
     not sign both unless configured otherwise.
+
 
 Supported Platforms
 
@@ -79,6 +80,11 @@ Upgrade
     in releases prior to 2022.1 ended with the .js extension. With release
     2022.1 the names must now be changed to end with the .cjs extension.
 
+    Package upgrades from releases prior to 2022.1 on CentOS/RHEL systems
+    will result in a missing systemd service definition file. To avoid this
+    problem, it is necessary to remove the old package and then install the
+    new package. After the 2022.1 release, this will not be necessary.
+
 
 Known Limitations
 
@@ -91,6 +97,31 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2023.1 (2023.1/???) (2023/??/??)
+
+    HAS-216 (Change #2387345)
+        New setting PROMPT_FOR_AUTHORIZATION that when set to any value will
+        prompt the user during the authentication process before proceeding
+        to the configured identity provider. This prevents phishing attacks.
+
+----------------------------------------------------------------------
+Other changes in 2023.1 (2023.1/???) (2023/??/??)
+
+    HAS-249 (Change #2373094)
+        Support for the pm2 process manager was removed from the install
+        and configure scripts. The use of pm2 is still possible by writing
+        your own ecosystem configuration file.
+
+    HAS-314 (Change #2373224)
+        Packages for Ubuntu 16.04 are no longer provided.
+
+    HAS-377 (Change #2371506)
+        The SAML_WANT_RESPONSE_SIGNED and SAML_WANT_ASSERTION_SIGNED settings
+        will now default to `true` such that the SAML response and assertion
+        from the identity provider must be signed. Previous releases only
+        required that one of these was signed.
 
 ----------------------------------------------------------------------
 New functionality in 2022.2 (2022.2/2369727) (2022/11/14)
