@@ -16,6 +16,8 @@ build/Release
 
 # other build artifacts
 docs/licenses
+public/admin
+README.html
 
 # Dependency directories
 node_modules/
@@ -37,3 +39,11 @@ jspm_packages/
 .env
 
 .vscode
+*.rpm
+*.deb
+tmp
+test/test-dot.env
+cert-or-key-*.pem
+providers.json
+data-*.xml
+secret-*.txt
