@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { spawn } from 'node:child_process'
 import { temporaryFile } from 'tempy'
@@ -136,15 +136,21 @@ describe('Service status', function () {
     })
 
     it('should report mismatch public/private parts', async function () {
-        const result = await sut.validateServerCert('certs/server.crt', 'certs/ca.key')
-        assert.equal(result, 'mismatch')
+      const result = await sut.validateServerCert('certs/server.crt', 'certs/ca.key')
+      assert.equal(result, 'mismatch')
     })
 
     it('should report failure to read encrypted key', async function () {
       const result = await sut.validateServerCert(
         'certs/server.crt', 'certs/encrypted.key', 'foobar'
       )
-      assert.include(result.toString(), 'unable to load Private Key')
+      const resultStr = result.toString()
+      // Sometimes, seemingly at random, there are commas in the error messages
+      // coming from openssl, because that's what makes life interesting.
+      const failedLoad = resultStr.includes('Could not read private key from') ||
+        resultStr.includes('Could not read, private key, from') ||
+        resultStr.includes('unable to load Private Key')
+      assert.isTrue(failedLoad, 'key should have failed to load')
     })
 
     it('should successfully validate encrypted key', async function () {
@@ -273,7 +279,7 @@ describe('Service status', function () {
       // arrange
       const stub = sinon.stub(DummyRedisConnector.prototype, 'client').callsFake(() => {
         return {
-          ping () {
+          ping() {
             throw new Error('not working')
           }
         }
@@ -420,7 +426,7 @@ describe('Service status', function () {
 
 // Generate a new self-signed certificate that expires in less time than the
 // system under test will tolerate.
-function makeExpiringCert (keyfile, certfile) {
+function makeExpiringCert(keyfile, certfile) {
   const params = [
     'req', '-sha256', '-x509', '-nodes', '-days', '5',
     '-newkey', 'rsa:4096', '-keyout', keyfile, '-out', certfile,
@@ -439,7 +445,7 @@ function makeExpiringCert (keyfile, certfile) {
   })
 }
 
-function convertToPfx (keyfile, certfile, pfxfile) {
+function convertToPfx(keyfile, certfile, pfxfile) {
   const params = [
     'pkcs12', '-export', '-inkey', keyfile, '-in', certfile, '-out', pfxfile,
     '-passin', 'pass:', '-passout', 'pass:'
@@ -457,7 +463,7 @@ function convertToPfx (keyfile, certfile, pfxfile) {
   })
 }
 
-function invokeOpenssl (params, cb) {
+function invokeOpenssl(params, cb) {
   const stdout = []
   const stderr = []
   const proc = spawn('openssl', params);

@@ -51,7 +51,7 @@ $ openssl x509 -sha256 -req -in server.csr -CA ca.crt -CAkey ca.key -out server.
 #
 # remove the server.csr
 #
-$ openssl pkcs12 -export -inkey server.key -in server.crt -out server.p12
+$ openssl pkcs12 -export -macalg sha256 -inkey server.key -in server.crt -out server.p12
 #
 # enter the passphrase mentioned above
 #
