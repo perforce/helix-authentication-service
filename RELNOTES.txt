@@ -103,16 +103,26 @@ New functionality in 2023.1 (2023.1/???) (2023/??/??)
 
     HAS-216 (Change #2387345)
         New setting PROMPT_FOR_AUTHORIZATION that when set to any value will
-        prompt the user during the authentication process before proceeding
-        to the configured identity provider. This prevents phishing attacks.
+        prompt the user during the authentication process before proceeding to
+        the configured identity provider. This prevents phishing attacks.
+
+----------------------------------------------------------------------
+Bugs fixed in 2023.1 (2023.1/???) (2023/??/??)
+
+    HAS-420 (Change #2415543)
+        Replace UNLINK Redis command usage with DEL to support older releases of
+        Redis, such as on CentOS 7.4 when installing Redis from the EPEL
+        repository. This fixes an issue in which the cached user object would
+        remain in the Redis store for up to 5 minutes rather than being removed
+        immediately.
 
 ----------------------------------------------------------------------
 Other changes in 2023.1 (2023.1/???) (2023/??/??)
 
     HAS-249 (Change #2373094)
-        Support for the pm2 process manager was removed from the install
-        and configure scripts. The use of pm2 is still possible by writing
-        your own ecosystem configuration file.
+        Support for the pm2 process manager was removed from the install and
+        configure scripts. The use of pm2 is still possible by writing your own
+        ecosystem configuration file.
 
     HAS-314 (Change #2373224)
         Packages for Ubuntu 16.04 are no longer provided.
