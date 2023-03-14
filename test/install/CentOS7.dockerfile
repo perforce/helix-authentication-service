@@ -19,10 +19,11 @@ WORKDIR /install_sh
 
 # copy and extract the tarball from the previous build stage
 COPY helix-authentication-service.tgz .
-RUN tar zxf helix-authentication-service.tgz && \
+RUN chown charlie:charlie .
+RUN sudo -u charlie tar zxf helix-authentication-service.tgz && \
     mv helix-authentication-service helix-auth-svc
 COPY test/install/test_install_config.sh .
-RUN chown -R charlie /install_sh
+RUN chown charlie:charlie *
 
 # Start the init daemon (systemd) so that systemctl commands will run properly,
 # and thus our installation script will be successful.
