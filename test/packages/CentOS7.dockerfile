@@ -6,6 +6,10 @@ FROM centos:7
 # $ docker rm centos_7_test
 #
 
+# update systemd so that cgroup v2 will work properly
+ADD https://copr.fedorainfracloud.org/coprs/jsynacek/systemd-backports-for-centos-7/repo/epel-7/jsynacek-systemd-backports-for-centos-7-epel-7.repo /etc/yum.repos.d/jsynacek-systemd-centos-7.repo
+RUN yum -q -y update systemd
+
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
 RUN yum -q -y install sudo

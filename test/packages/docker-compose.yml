@@ -3,6 +3,12 @@ version: '3.7'
 # Setup to run docker containers in such a way that systemd is satisfied,
 # allowing us to test our package un/install properly.
 #
+# Newer versions of docker (after 20.10) which support cgroup v2 no longer need
+# the /sys/fs/cgroup volume mapping as that will be handled automatically. In
+# fact, having the mapping causes errors when starting the containers. As such
+# the containers defined below no longer map that volume. This means that they
+# _must_ be run on a host that is using version 20.10 or higher.
+#
 services:
   centos_7_test:
     build:
@@ -19,8 +25,7 @@ services:
     tmpfs:
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /tmp
 
   centos_8_test:
     build:
@@ -37,8 +42,7 @@ services:
     tmpfs:
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /tmp
 
   ubuntu_16_test:
     build:
@@ -55,8 +59,7 @@ services:
     tmpfs:
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /tmp
 
   ubuntu_18_test:
     build:
@@ -73,8 +76,7 @@ services:
     tmpfs:
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /tmp
 
   ubuntu_20_test:
     build:
@@ -91,8 +93,7 @@ services:
     tmpfs:
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /tmp
 
   ubuntu_22_test:
     build:
@@ -109,5 +110,4 @@ services:
     tmpfs:
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /tmp
