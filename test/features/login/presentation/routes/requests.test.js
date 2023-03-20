@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import * as fs from 'node:fs'
 import { assert } from 'chai'
@@ -69,17 +69,7 @@ setTimeout(function () {
         .trustLocalhost(true)
         .key(key)
         .cert(cert)
-        .expect(404)
-        .expect(res => {
-          assert.equal(res.text, 'no such request')
-        })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(404, 'no such request', done)
     })
 
     describe('request login identifier', function () {
@@ -99,13 +89,7 @@ setTimeout(function () {
             assert.equal(res.body.instanceId, 'none')
             requestId = res.body.request
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
 
       it('should return a URL with instanceId', function (done) {
@@ -123,13 +107,7 @@ setTimeout(function () {
             assert.equal(res.body.userId, 'realuser')
             assert.equal(res.body.instanceId, 'trueU')
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
 
       it('should forceAuthn using query parameter', function (done) {
@@ -141,13 +119,7 @@ setTimeout(function () {
           .expect(res => {
             assert.isTrue(res.body.forceAuthn)
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
 
       it('should forceAuthn using environment variable', function (done) {
@@ -159,14 +131,7 @@ setTimeout(function () {
           .expect(res => {
             assert.isTrue(res.body.forceAuthn)
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            delete process.env.FORCE_AUTHN
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
     })
 
@@ -175,14 +140,7 @@ setTimeout(function () {
         agent
           .get('/requests/status/' + requestId)
           .trustLocalhost(true)
-          .expect(401)
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(401, done)
       })
     })
 
@@ -193,17 +151,7 @@ setTimeout(function () {
           .post('/requests/insert/' + requestId)
           .trustLocalhost(true)
           .send({ name: 'Test User', email: 'test@example.com' })
-          .expect(200)
-          .expect(res => {
-            assert.equal(res.body.status, 'ok')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(200, { status: 'ok' }, done)
       })
     })
 
@@ -216,14 +164,7 @@ setTimeout(function () {
           .trustLocalhost(true)
           .key(key2)
           .cert(cert2)
-          .expect(403)
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(403, done)
       })
 
       it('should accept matching common name', function (done) {
@@ -239,13 +180,7 @@ setTimeout(function () {
             assert.equal(res.body.name, 'Test User')
             assert.equal(res.body.email, 'test@example.com')
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
     })
   })

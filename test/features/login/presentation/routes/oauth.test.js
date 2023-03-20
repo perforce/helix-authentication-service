@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import * as http from 'node:http'
 import { assert } from 'chai'
@@ -53,13 +53,7 @@ setTimeout(function () {
               assert.equal(res.body.sub, payload.sub)
               assert.equal(res.body.tid, payload.tid)
             })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .end(done)
         })
       })
     })
@@ -69,17 +63,7 @@ setTimeout(function () {
         agent
           .get('/oauth/validate')
           .trustLocalhost(true)
-          .expect(401)
-          .expect(res => {
-            assert.include(res.text, 'Unauthorized')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(401, /Unauthorized/, done)
       })
 
       it('should reject malformed web token', function (done) {
@@ -87,17 +71,7 @@ setTimeout(function () {
           .get('/oauth/validate')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer notavalidtokenatall')
-          .expect(500)
-          .expect(res => {
-            assert.include(res.text, 'invalid json web token')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(500, /invalid json web token/, done)
       })
 
       it('should reject JWT with missing signature', function (done) {
@@ -116,17 +90,7 @@ setTimeout(function () {
             .get('/oauth/validate')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + token)
-            .expect(500)
-            .expect(res => {
-              assert.include(res.text, 'jwt signature is required')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .expect(500, /jwt signature is required/, done)
         })
       })
 
@@ -141,17 +105,7 @@ setTimeout(function () {
             .get('/oauth/validate')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + token)
-            .expect(500)
-            .expect(res => {
-              assert.include(res.text, 'invalid algorithm')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .expect(500, /invalid algorithm/, done)
         })
       })
 
@@ -160,17 +114,7 @@ setTimeout(function () {
           .get('/oauth/validate')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.')
-          .expect(500)
-          .expect(res => {
-            assert.include(res.text, 'malformed json web token')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(500, /malformed json web token/, done)
       })
 
       it('should reject web token signed by another party', function (done) {
@@ -179,17 +123,7 @@ setTimeout(function () {
           .get('/oauth/validate')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer ' + token)
-          .expect(500)
-          .expect(res => {
-            assert.include(res.text, 'Unable to find a signing key')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(500, /Unable to find a signing key/, done)
       })
 
       it('should reject web token with incorrect tid', function (done) {
@@ -203,17 +137,7 @@ setTimeout(function () {
             .get('/oauth/validate')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + token)
-            .expect(500)
-            .expect(res => {
-              assert.include(res.text, 'tid does not match tenant ID')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .expect(500, /tid does not match tenant ID/, done)
         })
       })
     })

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import * as fs from 'node:fs'
@@ -42,17 +42,7 @@ describe('IsClientAuthorized use case', function () {
     agent
       .get('/')
       .trustLocalhost(true)
-      .expect(200)
-      .expect(res => {
-        assert.equal(res.text, 'success')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(200, 'success', done)
   })
 
   it('should raise an error for https w/o client certificate', function (done) {
@@ -63,17 +53,7 @@ describe('IsClientAuthorized use case', function () {
     agent
       .get('/')
       .trustLocalhost(true)
-      .expect(401)
-      .expect(res => {
-        assert.equal(res.text, 'client certificate required')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(401, 'client certificate required', done)
   })
 
   it('should return true for https and assume=true', function (done) {
@@ -85,17 +65,7 @@ describe('IsClientAuthorized use case', function () {
     agent
       .get('/')
       .trustLocalhost(true)
-      .expect(200)
-      .expect(res => {
-        assert.equal(res.text, 'success')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(200, 'success', done)
   })
 
   it('should raise an error for https without cert authority', function (done) {
@@ -110,17 +80,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(403)
-      .expect(res => {
-        assert.include(res.text, 'is not authorized')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(403, /is not authorized/, done)
   })
 
   it('should raise an error for https and unauthorized client cert', function (done) {
@@ -136,17 +96,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(403)
-      .expect(res => {
-        assert.include(res.text, 'is not authorized')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(403, /is not authorized/, done)
   })
 
   it('should raise an error for https and mismatched client cert', function (done) {
@@ -163,17 +113,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(403)
-      .expect(res => {
-        assert.include(res.text, 'does not match fingerprint')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(403, /does not match fingerprint/, done)
   })
 
   it('should return true for https and matching fingerprint', function (done) {
@@ -190,17 +130,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(200)
-      .expect(res => {
-        assert.equal(res.text, 'success')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(200, 'success', done)
   })
 
   it('should return true with one of multiple fingerprints', function (done) {
@@ -217,17 +147,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(200)
-      .expect(res => {
-        assert.equal(res.text, 'success')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(200, 'success', done)
   })
 
   it('should return true for https and authorized client cert', function (done) {
@@ -243,17 +163,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(200)
-      .expect(res => {
-        assert.equal(res.text, 'success')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(200, 'success', done)
   })
 
   it('should raise an error for https and mismatched common name', function (done) {
@@ -270,17 +180,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(403)
-      .expect(res => {
-        assert.include(res.text, 'is not permitted')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(403, /is not permitted/, done)
   })
 
   it('should return true for https and matching common name', function (done) {
@@ -297,17 +197,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(200)
-      .expect(res => {
-        assert.equal(res.text, 'success')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(200, 'success', done)
   })
 
   it('should return true with one of multiple common names', function (done) {
@@ -324,17 +214,7 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .key(key)
       .cert(cert)
-      .expect(200)
-      .expect(res => {
-        assert.equal(res.text, 'success')
-      })
-      // eslint-disable-next-line no-unused-vars
-      .end(function (err, res) {
-        if (err) {
-          return done(err)
-        }
-        done()
-      })
+      .expect(200, 'success', done)
   })
 })
 

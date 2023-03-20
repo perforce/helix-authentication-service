@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it, run } from 'mocha'
@@ -50,17 +50,7 @@ setTimeout(function () {
                 .delete('/tokens')
                 .trustLocalhost(true)
                 .set('Authorization', 'Bearer ' + accessToken)
-                .expect(200)
-                .expect(res => {
-                  assert.equal(res.body.status, 'ok')
-                })
-                // eslint-disable-next-line no-unused-vars
-                .end(function (err, res) {
-                  if (err) {
-                    return done(err)
-                  }
-                  done()
-                })
+                .expect(200, { status: 'ok' }, done)
             }
           })
       })
@@ -76,13 +66,7 @@ setTimeout(function () {
             assert.equal(res.body.status, 400)
             assert.include(res.body.message, 'grant_type is invalid')
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
 
       it('should reject create with missing credentials', function (done) {
@@ -95,13 +79,7 @@ setTimeout(function () {
             assert.equal(res.body.status, 401)
             assert.include(res.body.message, 'Unauthorized')
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
 
       it('should reject create with invalid credentials', function (done) {
@@ -114,30 +92,14 @@ setTimeout(function () {
             assert.equal(res.body.status, 401)
             assert.include(res.body.message, 'Unauthorized')
           })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .end(done)
       })
 
       it('should reject remove without Authorization', function (done) {
         agent
           .delete('/tokens')
           .trustLocalhost(true)
-          .expect(401)
-          .expect(res => {
-            assert.include(res.text, 'Unauthorized')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(401, /Unauthorized/, done)
       })
 
       it('should reject malformed web token', function (done) {
@@ -145,17 +107,7 @@ setTimeout(function () {
           .delete('/tokens')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer notavalidtokenatall')
-          .expect(500)
-          .expect(res => {
-            assert.include(res.text, 'invalid json web token')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(500, /invalid json web token/, done)
       })
 
       it('should reject JWT header with bad JSON', function (done) {
@@ -163,17 +115,7 @@ setTimeout(function () {
           .delete('/tokens')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer dGhpc2lzbm90anNvbg.eyJ1c2VyIjogImpvaG4ifQ.')
-          .expect(500)
-          .expect(res => {
-            assert.include(res.text, 'malformed json web token')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(500, /malformed json web token/, done)
       })
 
       it('should reject web token signed by another party', function (done) {
@@ -182,17 +124,7 @@ setTimeout(function () {
           .delete('/tokens')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer ' + token)
-          .expect(401)
-          .expect(res => {
-            assert.include(res.text, 'Unauthorized')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(401, /Unauthorized/, done)
       })
     })
   })

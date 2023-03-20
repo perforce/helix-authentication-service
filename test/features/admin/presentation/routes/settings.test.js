@@ -47,13 +47,7 @@ setTimeout(function () {
               assert.equal(res.body.OIDC_TOKEN_SIGNING_ALGO, 'RS256')
               assert.equal(res.body.TOKEN_TTL, '3600')
             })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .end(done)
         })
       })
 
@@ -64,17 +58,7 @@ setTimeout(function () {
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .send({ HAS_UNIT_NEW1: 'newvalue' })
-            .expect(200)
-            .expect(res => {
-              assert.equal(res.body.status, 'ok')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .expect(200, { status: 'ok' }, done)
         })
       })
 
@@ -109,10 +93,7 @@ setTimeout(function () {
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .send({ HAS_UNIT_NEW1: 'tempvalue' })
-            .expect(200)
-            .expect(res => {
-              assert.equal(res.body.status, 'ok')
-            })
+            .expect(200, { status: 'ok' })
             // eslint-disable-next-line no-unused-vars
             .end(function (err, res) {
               if (err) {
@@ -155,17 +136,7 @@ setTimeout(function () {
             .delete('/settings/temp')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
-            .expect(200)
-            .expect(res => {
-              assert.equal(res.body.status, 'ok')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .expect(200, { status: 'ok' }, done)
         })
       })
 
@@ -200,24 +171,12 @@ setTimeout(function () {
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .expect('Location', /localhost/)
-            .expect(200)
-            .expect(res => {
-              assert.equal(res.body.status, 'ok')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              // We could try to verify that the setting has _now_ been applied
-              // to environment, however, to test this properly we would need a
-              // means of allowing the Node.js server instance to be rebuilt and
-              // wrapped by superagent, which is probably more difficult than
-              // it's worth for automated testing.
-              //
-              // assert.equal(process.env.HAS_UNIT_NEW1, 'newvalue')
-              done()
-            })
+            .expect(200, { status: 'ok' }, done)
+            // We could try to verify that the setting has _now_ been applied to
+            // environment, however, to test this properly we would need a means
+            // of allowing the Node.js server instance to be rebuilt and wrapped
+            // by superagent, which is probably more difficult than it's worth
+            // for automated testing.
         })
       })
     })
@@ -227,17 +186,7 @@ setTimeout(function () {
         agent
           .get('/settings')
           .trustLocalhost(true)
-          .expect(401)
-          .expect(res => {
-            assert.include(res.text, 'Unauthorized')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(401, /Unauthorized/, done)
       })
 
       it('should reject malformed web token', function (done) {
@@ -245,17 +194,7 @@ setTimeout(function () {
           .get('/settings')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer notavalidtokenatall')
-          .expect(500)
-          .expect(res => {
-            assert.include(res.text, 'invalid json web token')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(500, /invalid json web token/, done)
       })
 
       it('should reject web token signed by another party', function (done) {
@@ -264,17 +203,7 @@ setTimeout(function () {
           .get('/settings')
           .trustLocalhost(true)
           .set('Authorization', 'Bearer ' + token)
-          .expect(401)
-          .expect(res => {
-            assert.include(res.text, 'Unauthorized')
-          })
-          // eslint-disable-next-line no-unused-vars
-          .end(function (err, res) {
-            if (err) {
-              return done(err)
-            }
-            done()
-          })
+          .expect(401, /Unauthorized/, done)
       })
 
       it('should reject request of wrong content-type', function (done) {
@@ -284,17 +213,7 @@ setTimeout(function () {
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .send('plain text request body')
-            .expect(400)
-            .expect(res => {
-              assert.include(res.text, 'Content-Type must be application/json')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              done()
-            })
+            .expect(400, /Content-Type must be application\/json/, done)
         })
       })
     })

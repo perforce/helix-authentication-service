@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it, run } from 'mocha'
@@ -27,14 +27,7 @@ setTimeout(function () {
       agent
         .get('/scim/v2/Users')
         .trustLocalhost(true)
-        .expect(401)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(401, done)
     })
 
     it('should return 401 when wrong Bearer token', function (done) {
@@ -42,14 +35,7 @@ setTimeout(function () {
         .get('/scim/v2/Users')
         .trustLocalhost(true)
         .set('Authorization', 'Bearer d3JvbmcgdG9rZW4=')
-        .expect(401)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(401, done)
     })
 
     it('should return 404 for no such user', function (done) {
@@ -57,20 +43,14 @@ setTimeout(function () {
         .get('/scim/v2/Users/does-not-exist')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(404)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(404)
         .expect(res => {
           assert.equal(res.body.status, '404')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.equal(res.body.detail, 'Resource does-not-exist not found')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return an empty list when no users', function (done) {
@@ -78,20 +58,14 @@ setTimeout(function () {
         .get('/scim/v2/Users')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 0)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
           assert.lengthOf(res.body.Resources, 0)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should reject bad content-type when creating user', function (done) {
@@ -100,17 +74,7 @@ setTimeout(function () {
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .send('plain text request body')
-        .expect(400)
-        .expect(res => {
-          assert.include(res.text, 'Content-Type must be (scim+)json')
-        })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(400, /Content-Type must be \(scim\+\)json/, done)
     })
 
     it('should reject user creation without schemas', function (done) {
@@ -129,13 +93,7 @@ setTimeout(function () {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.include(res.body.detail, 'schemas must be defined')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should create a user when inputs are valid', function (done) {
@@ -167,9 +125,9 @@ setTimeout(function () {
             }
           ]
         })
-        .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
+        .expect(201)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName123')
@@ -182,13 +140,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName123/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should reject creating the same user again', function (done) {
@@ -202,15 +154,8 @@ setTimeout(function () {
           name: { formatted: 'Ryan Leenay' },
           emails: [{ value: 'testing@bob.com' }]
         })
-        .expect(409)
         .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(409, done)
     })
 
     it('should return the one user created so far', function (done) {
@@ -218,8 +163,8 @@ setTimeout(function () {
         .get('/scim/v2/Users')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 1)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
@@ -227,13 +172,7 @@ setTimeout(function () {
           assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.include(res.body.Resources[0].userName, 'UserName123')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should create an enterprise user as a normal user', function (done) {
@@ -272,9 +211,9 @@ setTimeout(function () {
             Manager: { Value: 'SuzzyQ' }
           }
         })
-        .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserName222/)
+        .expect(201)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName222')
@@ -287,13 +226,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName222/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return the two users created so far', function (done) {
@@ -301,8 +234,8 @@ setTimeout(function () {
         .get('/scim/v2/Users')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 2)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
@@ -313,13 +246,7 @@ setTimeout(function () {
           assert.isOk(res.body.Resources.find((e) => e.userName === 'UserName123'))
           assert.isOk(res.body.Resources.find((e) => e.userName === 'UserName222'))
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return 404 when patching no such user', function (done) {
@@ -331,20 +258,14 @@ setTimeout(function () {
           schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
           Operations: [{ op: 'replace', path: 'foobar', value: 'quux' }]
         })
-        .expect(404)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(404)
         .expect(res => {
           assert.equal(res.body.status, '404')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.equal(res.body.detail, 'Resource does-not-exist not found')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should allow patching an existing user', function (done) {
@@ -362,9 +283,9 @@ setTimeout(function () {
             }
           ]
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserName222/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName222')
@@ -377,13 +298,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName222/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return the patched user', function (done) {
@@ -391,9 +306,9 @@ setTimeout(function () {
         .get('/scim/v2/Users/UserName222')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserName222/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName222')
@@ -406,13 +321,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName222/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return 404 when updating no such user', function (done) {
@@ -426,20 +335,14 @@ setTimeout(function () {
           name: { formatted: 'Dwain Letrain' },
           emails: [{ value: 'ltrain@example.com' }]
         })
-        .expect(404)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(404)
         .expect(res => {
           assert.equal(res.body.status, '404')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.equal(res.body.detail, 'Resource does-not-exist not found')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should update a user with all new information', function (done) {
@@ -471,9 +374,9 @@ setTimeout(function () {
           externalId: '00u817r7wlQHRQFTB357',
           groups: []
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName123')
@@ -486,13 +389,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName123/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return the updated user', function (done) {
@@ -500,9 +397,9 @@ setTimeout(function () {
         .get('/scim/v2/Users/UserName123')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName123')
@@ -515,13 +412,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName123/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     //
@@ -534,21 +425,15 @@ setTimeout(function () {
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .query({ attributes: 'userName' })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 2)
           assert.lengthOf(res.body.Resources, 2)
           assert.isOk(res.body.Resources.find((e) => e.userName === 'UserName123'))
           assert.isOk(res.body.Resources.find((e) => e.userName === 'UserName222'))
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     //
@@ -560,8 +445,8 @@ setTimeout(function () {
     //     .trustLocalhost(true)
     //     .set('Authorization', authToken)
     //     .query({ excludedAttributes: 'emails' })
-    //     .expect(200)
     //     .expect('Content-Type', /application\/scim\+json/)
+    //     .expect(200)
     //     .expect(res => {
     //       assert.equal(res.body.totalResults, 2)
     //       assert.lengthOf(res.body.Resources, 2)
@@ -571,13 +456,7 @@ setTimeout(function () {
     //       assert.isOk(res.body.Resources.find((e) => e.userName === 'UserName123'))
     //       assert.isOk(res.body.Resources.find((e) => e.userName === 'UserName222'))
     //     })
-    //     // eslint-disable-next-line no-unused-vars
-    //     .end(function (err, res) {
-    //       if (err) {
-    //         return done(err)
-    //       }
-    //       done()
-    //     })
+    //     .end(done)
     // })
 
     it('should return users based on given attribute values', function (done) {
@@ -586,8 +465,8 @@ setTimeout(function () {
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .query({ filter: 'emails[value eq "testingwork@bob.com"]' })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 1)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
@@ -595,13 +474,7 @@ setTimeout(function () {
           assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.Resources[0].userName, 'UserName123')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should rename a user via PUT', function (done) {
@@ -625,9 +498,9 @@ setTimeout(function () {
             { Primary: false, type: 'home', value: 'testinghome@bob.com' }
           ]
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserNameOne1/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserNameOne1')
@@ -640,13 +513,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserNameOne1/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should rename a user via PATCH', function (done) {
@@ -664,9 +531,9 @@ setTimeout(function () {
             }
           ]
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Users\/user-UserNameTutu/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserNameTutu')
@@ -679,13 +546,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'User')
           assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserNameTutu/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should delete the first user', function (done) {
@@ -693,14 +554,7 @@ setTimeout(function () {
         .delete('/scim/v2/Users/UserNameOne1')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(204)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(204, done)
     })
 
     it('should delete the second user', function (done) {
@@ -708,14 +562,7 @@ setTimeout(function () {
         .delete('/scim/v2/Users/UserNameTutu')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(204)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(204, done)
     })
 
     it('should return an empty list once all users deleted', function (done) {
@@ -723,20 +570,14 @@ setTimeout(function () {
         .get('/scim/v2/Users')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 0)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
           assert.lengthOf(res.body.Resources, 0)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
   })
 

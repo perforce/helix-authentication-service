@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it, run } from 'mocha'
@@ -38,17 +38,7 @@ setTimeout(function () {
       agent
         .get('/multi/login/fakereq123')
         .trustLocalhost(true)
-        .expect(200)
-        .expect(res => {
-          assert.include(res.text, 'requires AUTH_PROVIDERS setting')
-        })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(200, /requires AUTH_PROVIDERS setting/, done)
     })
 
     it('should return a page with multiple login URLs', function (done) {
@@ -69,13 +59,7 @@ setTimeout(function () {
           assert.include(res.text, 'Acme Identity')
           assert.include(res.text, 'Federated Enterprises')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
   })
 

@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it, run } from 'mocha'
@@ -27,14 +27,7 @@ setTimeout(function () {
       agent
         .get('/scim/v2/Groups')
         .trustLocalhost(true)
-        .expect(401)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(401, done)
     })
 
     it('should return 401 when wrong Bearer token', function (done) {
@@ -42,14 +35,7 @@ setTimeout(function () {
         .get('/scim/v2/Groups')
         .trustLocalhost(true)
         .set('Authorization', 'Bearer d3JvbmcgdG9rZW4=')
-        .expect(401)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(401, done)
     })
 
     it('should return 404 for no such group', function (done) {
@@ -57,20 +43,14 @@ setTimeout(function () {
         .get('/scim/v2/Groups/does-not-exist')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(404)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(404)
         .expect(res => {
           assert.equal(res.body.status, '404')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.equal(res.body.detail, 'Resource does-not-exist not found')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return an empty list when no groups', function (done) {
@@ -78,20 +58,14 @@ setTimeout(function () {
         .get('/scim/v2/Groups')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 0)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
           assert.lengthOf(res.body.Resources, 0)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should reject bad content-type when creating group', function (done) {
@@ -100,17 +74,7 @@ setTimeout(function () {
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .send('plain text request body')
-        .expect(400)
-        .expect(res => {
-          assert.include(res.text, 'Content-Type must be (scim+)json')
-        })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(400, /Content-Type must be \(scim\+\)json/, done)
     })
 
     it('should reject group creation without schemas', function (done) {
@@ -129,13 +93,7 @@ setTimeout(function () {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.include(res.body.detail, 'schemas must be defined')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should create a group when inputs are valid', function (done) {
@@ -149,9 +107,9 @@ setTimeout(function () {
           displayName: 'Group1DisplayName',
           members: []
         })
-        .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
+        .expect(201)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -161,13 +119,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'Group')
           assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should reject creating the same group again', function (done) {
@@ -181,15 +133,8 @@ setTimeout(function () {
           displayName: 'Group1DisplayName',
           members: []
         })
-        .expect(409)
         .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(409, done)
     })
 
     it('should return the one group created so far', function (done) {
@@ -197,8 +142,8 @@ setTimeout(function () {
         .get('/scim/v2/Groups')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 1)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
@@ -206,13 +151,7 @@ setTimeout(function () {
           assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.include(res.body.Resources[0].displayName, 'Group1DisplayName')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should create a populated group', function (done) {
@@ -230,9 +169,9 @@ setTimeout(function () {
               { value: 'UserName222', display: 'Jane Houston' }
             ]
         })
-        .expect(201)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
+        .expect(201)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'GroupDisplayName2')
@@ -245,13 +184,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'Group')
           assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return the two groups created so far', function (done) {
@@ -259,8 +192,8 @@ setTimeout(function () {
         .get('/scim/v2/Groups')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 2)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
@@ -271,13 +204,7 @@ setTimeout(function () {
           assert.isOk(res.body.Resources.find((e) => e.displayName === 'Group1DisplayName'))
           assert.isOk(res.body.Resources.find((e) => e.displayName === 'GroupDisplayName2'))
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return groups based on given attribute values', function (done) {
@@ -286,8 +213,8 @@ setTimeout(function () {
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .query({ filter: 'displayName eq "Group1DisplayName"' })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 1)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
@@ -295,13 +222,7 @@ setTimeout(function () {
           assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.Resources[0].displayName, 'Group1DisplayName')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return 404 when patching no such group', function (done) {
@@ -313,20 +234,14 @@ setTimeout(function () {
           schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
           Operations: [{ op: 'replace', path: 'foobar', value: 'quux' }]
         })
-        .expect(404)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(404)
         .expect(res => {
           assert.equal(res.body.status, '404')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.equal(res.body.detail, 'Resource does-not-exist not found')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should allow adding a user to a group', function (done) {
@@ -347,9 +262,9 @@ setTimeout(function () {
             }
           ]
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -361,13 +276,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'Group')
           assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return the modified group', function (done) {
@@ -375,9 +284,9 @@ setTimeout(function () {
         .get('/scim/v2/Groups/Group1DisplayName')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -389,13 +298,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'Group')
           assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should allow removing a user from a group', function (done) {
@@ -412,21 +315,15 @@ setTimeout(function () {
             }
           ]
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
           assert.lengthOf(res.body.members, 0)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return 404 when updating no such group', function (done) {
@@ -439,20 +336,14 @@ setTimeout(function () {
           displayName: 'NoSuchGroupName',
           members: []
         })
-        .expect(404)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(404)
         .expect(res => {
           assert.equal(res.body.status, '404')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.equal(res.body.detail, 'Resource does-not-exist not found')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should update a group with all new information', function (done) {
@@ -470,9 +361,9 @@ setTimeout(function () {
             { value: 'UserName222', display: 'Jane Houston' }
           ]
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -485,13 +376,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'Group')
           assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should return the updated group', function (done) {
@@ -499,9 +384,9 @@ setTimeout(function () {
         .get('/scim/v2/Groups/Group1DisplayName')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-Group1DisplayName/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'Group1DisplayName')
@@ -514,13 +399,7 @@ setTimeout(function () {
           assert.equal(res.body.meta.resourceType, 'Group')
           assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should reject attempts to rename a group via PUT', function (done) {
@@ -543,13 +422,7 @@ setTimeout(function () {
           assert.equal(res.body.scimType, 'mutability')
           assert.equal(res.body.detail, 'Cannot change property displayName')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should reject attempts to rename a group via PATCH', function (done) {
@@ -574,13 +447,7 @@ setTimeout(function () {
           assert.equal(res.body.scimType, 'mutability')
           assert.equal(res.body.detail, 'Cannot change property displayName')
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should allow removing all users from a group', function (done) {
@@ -597,21 +464,15 @@ setTimeout(function () {
             }
           ]
         })
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
         .expect('Location', /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
+        .expect(200)
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.equal(res.body.displayName, 'GroupDisplayName2')
           assert.lengthOf(res.body.members, 0)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
 
     it('should delete the first group', function (done) {
@@ -619,14 +480,7 @@ setTimeout(function () {
         .delete('/scim/v2/Groups/Group1DisplayName')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(204)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(204, done)
     })
 
     it('should delete the second group', function (done) {
@@ -634,14 +488,7 @@ setTimeout(function () {
         .delete('/scim/v2/Groups/GroupDisplayName2')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(204)
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .expect(204, done)
     })
 
     it('should return an empty list once all groups deleted', function (done) {
@@ -649,20 +496,14 @@ setTimeout(function () {
         .get('/scim/v2/Groups')
         .trustLocalhost(true)
         .set('Authorization', authToken)
-        .expect(200)
         .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
         .expect(res => {
           assert.equal(res.body.totalResults, 0)
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
           assert.lengthOf(res.body.Resources, 0)
         })
-        // eslint-disable-next-line no-unused-vars
-        .end(function (err, res) {
-          if (err) {
-            return done(err)
-          }
-          done()
-        })
+        .end(done)
     })
   })
 
