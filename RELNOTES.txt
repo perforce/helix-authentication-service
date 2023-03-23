@@ -99,7 +99,7 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in 2023.1 (2023.1/???) (2023/??/??)
+New functionality in 2023.1 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
 
     HAS-216 (Change #2387345)
         New setting PROMPT_FOR_AUTHORIZATION that when set to any value will
@@ -107,7 +107,7 @@ New functionality in 2023.1 (2023.1/???) (2023/??/??)
         the configured identity provider. This prevents phishing attacks.
 
 ----------------------------------------------------------------------
-Bugs fixed in 2023.1 (2023.1/???) (2023/??/??)
+Bugs fixed in 2023.1 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
 
     HAS-420 (Change #2415543)
         Replace UNLINK Redis command usage with DEL to support older releases of
@@ -117,7 +117,7 @@ Bugs fixed in 2023.1 (2023.1/???) (2023/??/??)
         immediately.
 
 ----------------------------------------------------------------------
-Other changes in 2023.1 (2023.1/???) (2023/??/??)
+Other changes in 2023.1 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
 
     HAS-249 (Change #2373094)
         Support for the pm2 process manager was removed from the install and
