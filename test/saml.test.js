@@ -37,6 +37,11 @@ describe('SAML authentication', function () {
       const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
       // fyi, going headless makes firefox 10x slower
       const opts = new Options().headless()
+      // For the SAML test, need to control the page flow explicitly so disable
+      // the form auto-submit code in the client. Without this, attempting to
+      // find and collect page elements will sometimes fail due to the
+      // auto-submit code causing a page transition.
+      opts.setPreference('javascript.enabled', false)
       driver = new Builder()
         .forBrowser('firefox')
         .withCapabilities(caps)
@@ -61,17 +66,23 @@ describe('SAML authentication', function () {
     // opening the browser (especially headless) can take a long time
     this.timeout(30000)
     await driver.get(loginUrl)
-    const searchForm = await driver.wait(until.elementLocated(By.css('form')))
-    const usernameBox = await searchForm.findElement(By.name('j_username'))
+    // activate the "loading session" form to get the login screen; with
+    // JavaScript disabled, shibboleth requires the user to click a button
+    const submitButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))
+    await submitButton.click()
+    // fill in the credentials on the login screen
+    const loginForm = await driver.wait(until.elementLocated(By.css('form')))
+    const usernameBox = await loginForm.findElement(By.name('j_username'))
     usernameBox.sendKeys('jackson')
-    const passwordBox = await searchForm.findElement(By.name('j_password'))
+    const passwordBox = await loginForm.findElement(By.name('j_password'))
     passwordBox.sendKeys('password123')
     // .submit() resulted in "WebDriverError: HTTP method not allowed"
     // await passwordBox.submit()
-    const submitButton = await searchForm.findElement(By.name('_eventId_proceed'))
-    await submitButton.click()
+    const continueButton = await loginForm.findElement(By.name('_eventId_proceed'))
+    await continueButton.click()
+    // <p class="output-message output--error">The password you entered was incorrect.</p>
     const errorElem = await driver.wait(until.elementLocated(
-      By.xpath('//p[contains(@class, "form-error")]')), 10000)
+      By.xpath('//p[contains(@class, "output--error")]')), 10000)
     const errorText = await errorElem.getText()
     assert.include(errorText, 'password you entered was incorrect')
   })
@@ -115,14 +126,21 @@ describe('SAML authentication', function () {
   it('should authenticate via SAML identity provider', async function () {
     this.timeout(30000)
     await driver.get(loginUrl)
-    const searchForm = await driver.wait(until.elementLocated(By.css('form')))
-    const usernameBox = await searchForm.findElement(By.name('j_username'))
+    // no need for this the second time apparently
+    // const submitButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))
+    // await submitButton.click()
+    // fill in the credentials on the login screen
+    const loginForm = await driver.wait(until.elementLocated(By.css('form')))
+    const usernameBox = await loginForm.findElement(By.name('j_username'))
     usernameBox.sendKeys('jackson')
-    const passwordBox = await searchForm.findElement(By.name('j_password'))
+    const passwordBox = await loginForm.findElement(By.name('j_password'))
     passwordBox.sendKeys('Passw0rd!')
     // .submit() resulted in "WebDriverError: HTTP method not allowed"
     // await passwordBox.submit()
-    const submitButton = await searchForm.findElement(By.name('_eventId_proceed'))
+    const continueButton = await loginForm.findElement(By.name('_eventId_proceed'))
+    await continueButton.click()
+    // wait for the SAML response submit form
+    const submitButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))
     await submitButton.click()
     await driver.wait(until.urlContains('authen.doc'), 10000)
     const subtitleH2 = await driver.wait(until.elementLocated(By.className('subtitle')))
@@ -163,6 +181,9 @@ describe('SAML authentication', function () {
   it('should log out of SAML identity provider', async function () {
     this.timeout(30000)
     await driver.get('https://authen.doc/saml/logout')
+    // wait for the SAML response submit form
+    const submitButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))
+    await submitButton.click()
     const divElem = await driver.wait(until.elementLocated(
       By.xpath('//section[contains(@class, "Site-content")]/div')))
     const divText = await divElem.getText()

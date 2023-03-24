@@ -105,12 +105,17 @@ describe('1-step SAML validation', function () {
   it('should authenticate via SAML identity provider', async function () {
     this.timeout(30000)
     await driver.get(loginUrl)
-    const searchForm = await driver.wait(until.elementLocated(By.css('form')))
-    const usernameBox = await searchForm.findElement(By.name('j_username'))
+    // activate the "loading session" form to get the login screen; with
+    // JavaScript disabled, shibboleth requires the user to click a button
+    const submitButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))
+    await submitButton.click()
+    // fill in the credentials on the login screen
+    const loginForm = await driver.wait(until.elementLocated(By.css('form')))
+    const usernameBox = await loginForm.findElement(By.name('j_username'))
     usernameBox.sendKeys('jackson')
-    const passwordBox = await searchForm.findElement(By.name('j_password'))
+    const passwordBox = await loginForm.findElement(By.name('j_password'))
     passwordBox.sendKeys('Passw0rd!')
-    const loginButton = await searchForm.findElement(By.name('_eventId_proceed'))
+    const loginButton = await loginForm.findElement(By.name('_eventId_proceed'))
     await loginButton.click()
     // with JavaScript disabled, shibboleth requires the user to click a button
     const continueButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))

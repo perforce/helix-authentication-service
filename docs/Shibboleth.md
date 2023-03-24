@@ -1,16 +1,6 @@
 # Shibboleth
 
-This document is intended for developers who are setting up an instance of
-the Shibboleth SAML IdP for testing the Helix Authentication Service.
-
-## Overview
-
-[Shibboleth](https://www.shibboleth.net) is one of the oldest SAML 2.0
-implementations, and freely available under an open source license. This
-document describes how the Docker container for Shibboleth was created and
-configured for testing with the authentication service. It may also be helpful
-as a guide for the configuration changes that are needed to use the
-authentication service.
+This document is intended for developers who are setting up an instance of the Shibboleth SAML IdP for testing the Helix Authentication Service. [Shibboleth](https://www.shibboleth.net) is one of the oldest SAML 2.0 implementations, and freely available under an open source license.
 
 ## Requirements
 
@@ -21,95 +11,12 @@ are not Linux will likely need Docker Desktop as well.
 
 ## Initial Setup
 
-This section documents how the Docker container and its customization was
-initially created. To start the container, skip to the next section.
-
-Use the [docker image](https://hub.docker.com/r/unicon/shibboleth-idp) to create
-the initial IdP configuration/customization files. This includes creating the
-self-signed certificate to be presented to the client web browser.
-
-```shell
-$ cd containers/shibboleth
-$ chmod 777 .
-$ docker run -it -v $(pwd):/ext-mount --rm unicon/shibboleth-idp init-idp.sh
-$ chmod 755 .
-$ sudo chmod -R u+rw,g+rw customized-shibboleth-idp
-$ mv customized-shibboleth-idp shibboleth-idp
-$ mv shibboleth-idp/conf/attribute-resolver-ldap.xml shibboleth-idp/conf/attribute-resolver.xml
-$ openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout key.pem -out certificate.pem -subj "/CN=Shibboleth"
-$ openssl pkcs12 -inkey key.pem -in certificate.pem -export -out shibboleth-idp/credentials/idp-browser.p12
-$ rm key.pem certificate.pem
-$ cp ../../certs/server.crt shibboleth-idp/credentials/metaroot.pem
-```
-
-The passwords entered for the certificates must match those defined in the
-`docker-compose.yml` file (or vice versa) in order for the Docker container to
-function properly.
-
-### Configuring Shibboleth
-
-#### LDAP Configuration
-
-Edit the `shibboleth-idp/conf/ldap.properties` file, ensuring the following are
-set like so (this configures how Shibboleth connects to the OpenLDAP container):
-
-```conf
-idp.authn.LDAP.authenticator                   = bindSearchAuthenticator
-
-idp.authn.LDAP.ldapURL                         = ldap://ldap.doc:389
-idp.authn.LDAP.useStartTLS                     = false
-idp.authn.LDAP.useSSL                          = false
-
-idp.authn.LDAP.returnAttributes                 = *
-
-idp.authn.LDAP.baseDN                           = ou=people,dc=example,dc=org
-idp.authn.LDAP.userFilter                       = (uid={user})
-idp.authn.LDAP.bindDN                           = cn=admin,dc=example,dc=org
-idp.authn.LDAP.bindDNCredential                 = admin
-
-idp.authn.LDAP.dnFormat                         = uid=%s,ou=people,dc=example,dc=org
-
-idp.attribute.resolver.LDAP.authenticator       = %{idp.authn.LDAP.authenticator}
-idp.attribute.resolver.LDAP.ldapURL             = %{idp.authn.LDAP.ldapURL}
-idp.attribute.resolver.LDAP.baseDN              = %{idp.authn.LDAP.baseDN:undefined}
-idp.attribute.resolver.LDAP.bindDN              = %{idp.authn.LDAP.bindDN:undefined}
-idp.attribute.resolver.LDAP.bindDNCredential    = %{idp.authn.LDAP.bindDNCredential:undefined}
-idp.attribute.resolver.LDAP.searchFilter        = (uid=$resolutionContext.principal)
-idp.attribute.resolver.LDAP.useStartTLS         = false
-```
-
-#### Metadata
-
-Edit the `shibboleth-idp/conf/metadata-providers.xml` file, adding the following:
-
-```xml
-    <MetadataProvider id="LocalMetadata"
-                      xsi:type="FilesystemMetadataProvider"
-                      metadataFile="%{idp.home}/metadata/has-metadata.xml"/>
-```
-
-This directs Shibboleth to fetch the service provider SAML metadata from a named
-file, verifying it using the certificate we copied in earlier (i.e.
-`shibboleth-idp/credentials/metaroot.pem`).
-
-To produce the SP metadata, start HAS and get the `/saml/metadata` to a file,
-moving it to the `shibboleth-idp/metadata` directory.
-
-#### SAML NameID
-
-Edit the `shibboleth-idp/conf/saml-nameid.xml` file as follows:
-
-1. Uncomment the `<ref bean="shibboleth.SAML2TransientGenerator" />` in the
-   `<util:list id="shibboleth.SAML2NameIDGenerators">` block.
-1. Uncomment the block that defines `SAML2AttributeSourcedGenerator`,
-   and add the attribute `p:useUnfilteredAttributes="true"` (because trying
-   to get the attribute filter set correctly is tricky).
+See the comments in `containers/shibboleth/Dockerfile` as to how the image was built, which should offer some guidance when the time comes to update to a newer version of Shibboleth.
 
 ## Build and Start
 
 ```shell
-$ docker compose build
-$ docker compose up -d
+$ docker compose up --build -d
 ```
 
 ### Testing Shibboleth
