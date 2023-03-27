@@ -82,7 +82,7 @@ describe('FetchSamlMetadata use case', function () {
   it('should read metadata from local file', async function () {
     // arrange
     const options = {}
-    const source = 'containers/shibboleth/shibboleth-idp/metadata/idp-metadata.xml'
+    const source = 'test/fixtures/idp-metadata.xml'
     // act
     const result = await usecase(options, source)
     // assert
