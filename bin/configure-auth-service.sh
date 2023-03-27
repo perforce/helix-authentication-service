@@ -280,7 +280,8 @@ Description:
 
     --enable-admin
         Enable the administrative web interface. Requires the --admin-user
-        and --admin-passwd options to complete the configuration.
+        and --admin-passwd options to complete the configuration. This feature
+        is incomplete and untested, use with caution.
 
     --oidc-issuer-uri <issuer-uri>
         Issuer URI for the OpenID Connect identity provider.
@@ -919,7 +920,8 @@ EOT
 # Prompt for inputs.
 function prompt_for_inputs() {
     prompt_for_svc_base_uri
-    prompt_for_gui_or_cli
+    # turn off administrative ui prompt for now
+    # prompt_for_gui_or_cli
     if [[ "${ADMIN_ENABLED}" == 'yes' ]]; then
         prompt_for_admin_creds
     else

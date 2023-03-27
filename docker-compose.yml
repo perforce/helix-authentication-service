@@ -192,7 +192,8 @@ services:
       context: containers/shibboleth
     container_name: shibboleth.doc
     depends_on:
-      - ldap.doc
+      ldap.doc:
+        condition: service_healthy
     networks:
       - authen
     ports:

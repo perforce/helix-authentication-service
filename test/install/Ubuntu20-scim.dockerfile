@@ -41,9 +41,10 @@ RUN mkdir /install_sh
 WORKDIR /install_sh
 COPY test/install/test_scim_config.sh .
 COPY helix-authentication-service.tgz .
-RUN tar zxf helix-authentication-service.tgz && \
+RUN chown perforce:perforce .
+RUN sudo -u perforce tar zxf helix-authentication-service.tgz && \
     mv helix-authentication-service helix-auth-svc
-RUN chown -R perforce:perforce /install_sh
+RUN chown perforce:perforce *
 
 ENV USER=perforce
 
