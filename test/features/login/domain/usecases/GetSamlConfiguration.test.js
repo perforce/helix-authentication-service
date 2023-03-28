@@ -108,6 +108,7 @@ describe('GetSamlConfiguration use case', function () {
     settingsRepository.set('SAML_IDP_METADATA_FILE', 'test/fixtures/idp-metadata.xml')
     settingsRepository.set('SAML_WANT_ASSERTION_SIGNED', 'false')
     settingsRepository.set('SAML_WANT_RESPONSE_SIGNED', 'TRUE')
+    settingsRepository.set('SAML_DISABLE_CONTEXT', undefined)
     // act
     const result = await usecase()
     // assert
