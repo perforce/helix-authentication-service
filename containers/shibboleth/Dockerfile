@@ -35,7 +35,7 @@ RUN apt-get update --fix-missing && \
     apt-get -y install curl jetty9
 
 WORKDIR /build
-ADD https://shibboleth.net/downloads/identity-provider/latest4/shibboleth-identity-provider-4.3.0.tar.gz .
+ADD https://shibboleth.net/downloads/identity-provider/4.3.0/shibboleth-identity-provider-4.3.0.tar.gz .
 RUN tar zxf shibboleth-identity-provider-4.3.0.tar.gz
 ADD idp.properties .
 RUN cd shibboleth-identity-provider-4.3.0 && \
