@@ -3,8 +3,8 @@
 //
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
 import { auth } from './services/auth'
-import authReducer from 'features/auth/authSlice'
-import settingsReducer from 'features/settings/settingsSlice'
+import authReducer from '~/features/auth/authSlice'
+import settingsReducer from '~/features/settings/settingsSlice'
 
 const persistMiddleware = createListenerMiddleware()
 

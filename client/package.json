@@ -1,51 +1,33 @@
 {
   "name": "client",
-  "version": "0.1.0",
   "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "@emotion/react": "^11.10.0",
-    "@emotion/styled": "^11.10.0",
-    "@mui/icons-material": "^5.8.4",
-    "@mui/lab": "^5.0.0-alpha.94",
-    "@mui/material": "^5.10.0",
-    "@reduxjs/toolkit": "^1.8.3",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.4.3",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/lab": "^5.0.0-alpha.125",
+    "@mui/material": "^5.11.16",
+    "@reduxjs/toolkit": "^1.9.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.43.1",
-    "react-icons": "^3.11.0",
-    "react-redux": "^8.0.2",
-    "react-router-dom": "^6.3.0",
-    "react-scripts": "5.0.1"
-  },
-  "scripts": {
-    "analyze": "source-map-explorer build/static/js/*.js",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "proxy": "https://localhost:3000",
-  "homepage": "/admin",
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "react-hook-form": "^7.43.9",
+    "react-redux": "^8.0.5",
+    "react-router-dom": "^6.10.0"
   },
   "devDependencies": {
-    "jest-fetch-mock": "^3.0.3",
-    "source-map-explorer": "^2.5.2"
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^3.1.0",
+    "eslint": "^8.37.0",
+    "eslint-config-react-app": "^7.0.1",
+    "vite": "^4.2.0",
+    "vite-plugin-eslint": "^1.8.1"
   }
 }

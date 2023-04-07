@@ -53,7 +53,7 @@ export const auth = createApi({
         })
         if (apply.data) {
           // Grab the updated Location for the service. Note that the value in
-          // apply.meta.request.url will be that of the local CRA server when
+          // apply.meta.request.url will be that of the frontend server when
           // running in development mode.
           const location = apply.meta.response.headers.get('Location')
           const data = Object.assign({}, apply.data, { location })
@@ -80,7 +80,7 @@ export const auth = createApi({
         })
         if (apply.data) {
           // Grab the updated Location for the service. Note that the value in
-          // apply.meta.request.url will be that of the local CRA server when
+          // apply.meta.request.url will be that of the frontend server when
           // running in development mode.
           const location = apply.meta.response.headers.get('Location')
           const data = Object.assign({}, apply.data, { location })
@@ -106,7 +106,7 @@ export const auth = createApi({
         })
         if (apply.data) {
           // Grab the updated Location for the service. Note that the value in
-          // apply.meta.request.url will be that of the local CRA server when
+          // apply.meta.request.url will be that of the frontend server when
           // running in development mode.
           const location = apply.meta.response.headers.get('Location')
           const data = Object.assign({}, apply.data, { location })

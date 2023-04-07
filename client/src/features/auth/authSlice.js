@@ -2,7 +2,7 @@
 // Copyright 2022 Perforce Software
 //
 import { createSlice } from '@reduxjs/toolkit'
-import { auth } from '../../app/services/auth'
+import { auth } from '~/app/services/auth'
 
 const slice = createSlice({
   name: 'auth',

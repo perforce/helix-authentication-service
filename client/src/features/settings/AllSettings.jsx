@@ -10,8 +10,8 @@ import {
   useGetSettingsQuery,
   useSendChangesMutation,
   useResetChangesMutation
-} from 'app/services/auth'
-import { discardChanges } from 'features/settings/settingsSlice'
+} from '~/app/services/auth'
+import { discardChanges } from '~/features/settings/settingsSlice'
 import * as Certificates from './Certificates'
 import * as General from './General'
 import * as OpenID from './OpenID'

@@ -7,12 +7,12 @@ import {
   AppBar, Box, IconButton, Menu, MenuItem, Toolbar, Typography
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu';
-import { useLogoutMutation } from 'app/services/auth'
-import { Login } from 'features/auth/Login'
-import { AllSettings } from 'features/settings/AllSettings'
-import { ShowAll } from 'features/settings/ShowAll'
-import { useAuth } from 'hooks/useAuth'
-import { PrivateOutlet } from 'utils/PrivateOutlet'
+import { useLogoutMutation } from '~/app/services/auth'
+import { Login } from '~/features/auth/Login'
+import { AllSettings } from '~/features/settings/AllSettings'
+import { ShowAll } from '~/features/settings/ShowAll'
+import { useAuth } from '~/hooks/useAuth'
+import { PrivateOutlet } from '~/utils/PrivateOutlet'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -94,7 +94,7 @@ function ButtonAppBar() {
     event.preventDefault()
     setAnchorEl(null)
     // fetch the login test packet to get the base URL, otherwise the request
-    // ends up going to the CRA server
+    // ends up going to the frontend server
     fetch('/requests/new/test')
       .then((response) => {
         if (!response.ok) {

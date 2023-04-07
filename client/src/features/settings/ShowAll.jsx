@@ -7,7 +7,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useGetSettingsQuery } from 'app/services/auth'
+import { useGetSettingsQuery } from '~/app/services/auth'
 
 function stringify (data) {
   const keys = Object.keys(data).sort()
