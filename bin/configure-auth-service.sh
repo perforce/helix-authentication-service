@@ -2,7 +2,7 @@
 #
 # Configuration script for Helix Authentication Service.
 #
-# Copyright 2022, Perforce Software Inc. All rights reserved.
+# Copyright 2023, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -429,8 +429,8 @@ function ensure_readiness() {
     if ! touch CHANGELOG.md >/dev/null 2>&1; then
         die 'You do not have permission to write to this directory.'
     fi
-    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v1(4|6|8)\.'; then
-        error 'Node.js v14, v16, or v18 is required to run the service.'
+    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v(16|18|20)\.'; then
+        error 'Node.js v16, v18, or v20 is required to run the service.'
         error 'Please run install.sh to install dependencies.'
         exit 1
     fi

@@ -5,7 +5,7 @@ import * as fs from 'node:fs'
 import { assert } from 'chai'
 import { describe, it, run } from 'mocha'
 import request from 'supertest'
-import minimatch from 'minimatch'
+import { minimatch } from 'minimatch'
 // Load the test environment before the bulk of our code initializes, otherwise
 // it will be too late due to the `import` early-binding behavior.
 import 'helix-auth-svc/test/env.js'

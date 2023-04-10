@@ -2,7 +2,7 @@
 #
 # Authentication service installation script for Linux systems.
 #
-# Copyright 2022, Perforce Software Inc. All rights reserved.
+# Copyright 2023, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -222,7 +222,7 @@ function prompt_to_proceed() {
 
 # If Node.js is installed, ensure that the version is supported.
 function check_nodejs() {
-    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v1(4|6)\.'; then
+    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(16|18|20)\.'; then
         # check if Node.js came from the package 'nodejs' package or not
         UPGRADABLE=true
         if [ $PLATFORM == "debian" ]; then
@@ -236,12 +236,12 @@ function check_nodejs() {
         fi
         if ! $UPGRADABLE; then
             error 'Found a version of Node.js that cannot be upgraded automatically.'
-            error 'Please upgrade Node.js to v14, v16, or v18 before proceeding.'
+            error 'Please upgrade Node.js to v16, v18, or v20 before proceeding.'
             exit 1
         fi
         if $INTERACTIVE; then
             echo ''
-            echo 'Found a version of Node.js that is not the required v14/v16/v18.'
+            echo 'Found a version of Node.js that is not the required v16/v18/v20.'
             echo 'Do you wish to upgrade the Node.js installation?'
             select yn in 'Yes' 'No'; do
                 case $yn in
@@ -250,7 +250,7 @@ function check_nodejs() {
                 esac
             done
         elif ! $UPGRADE_NODE; then
-            die 'Node.js v14, v16, or v18 is required, please upgrade.'
+            die 'Node.js v16, v18, or v20 is required, please upgrade.'
         fi
         # else the script will automatically install the required version
     fi
