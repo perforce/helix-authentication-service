@@ -24,12 +24,13 @@ WORKDIR /build/helix-authentication-service
 #
 COPY bin bin
 COPY certs certs
-COPY client/jsconfig.json client/jsconfig.json
+COPY client/index.html client/index.html
 COPY client/package-lock.json client/package-lock.json
 COPY client/package.json client/package.json
 COPY client/public client/public
 COPY client/README.md client/README.md
 COPY client/src client/src
+COPY client/vite.config.js client/vite.config.js
 COPY docs docs
 COPY lib lib
 COPY public public

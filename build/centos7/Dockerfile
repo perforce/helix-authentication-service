@@ -34,12 +34,14 @@ WORKDIR /build/${DIRNAME}
 #
 COPY bin bin
 COPY certs certs
-COPY client/jsconfig.json client/jsconfig.json
+COPY client/.eslintrc.json client/.eslintrc.json
+COPY client/index.html client/index.html
 COPY client/package-lock.json client/package-lock.json
 COPY client/package.json client/package.json
 COPY client/public client/public
 COPY client/README.md client/README.md
 COPY client/src client/src
+COPY client/vite.config.js client/vite.config.js
 COPY docs docs
 COPY lib lib
 COPY public public
@@ -68,7 +70,7 @@ RUN rm -rf node_modules
 #
 # build the admin interface static files
 #
-RUN cd client && npm -q ci && BUILD_PATH=../public/admin npm run build
+RUN cd client && npm -q ci && npx vite build --outDir ../public/admin --emptyOutDir
 
 #
 # build only what is needed for deployment
