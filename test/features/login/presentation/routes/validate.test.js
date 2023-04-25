@@ -110,7 +110,7 @@ MZXNWXiBpf4CRHvtHBOD7Jae4d7mlqAZp9JUHbVxTv4lHT3fcw==
         .expect(res => {
           assert.equal(res.body.status, 'results')
           assert.lengthOf(res.body.results, 2)
-          assert.isTrue(res.body.results.some((e) => e.includes('saml.sp.assertionConsumerService.url should be')))
+          assert.isTrue(res.body.results.some((e) => e.includes('saml.sp.assertionConsumerService.url must be')))
           assert.isTrue(res.body.results.some((e) => e.includes('saml.idp.singleSignOnService.url must be')))
         })
         .end(done)
@@ -125,7 +125,7 @@ MZXNWXiBpf4CRHvtHBOD7Jae4d7mlqAZp9JUHbVxTv4lHT3fcw==
         .expect(res => {
           assert.equal(res.body.status, 'results')
           assert.lengthOf(res.body.results, 2)
-          assert.isTrue(res.body.results.some((e) => e.includes('saml.sp.assertionConsumerService.url should be')))
+          assert.isTrue(res.body.results.some((e) => e.includes('saml.sp.assertionConsumerService.url must be')))
           assert.isTrue(res.body.results.some((e) => e.includes('saml.idp.singleSignOnService.url must be')))
         })
         .end(done)

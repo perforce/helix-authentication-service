@@ -178,7 +178,7 @@ return array(
     // assert
     assert.equal(result.status, 'results')
     assert.lengthOf(result.results, 3)
-    assert.isTrue(result.results.some((e) => e.includes('saml.sp.assertionConsumerService.url should be')))
+    assert.isTrue(result.results.some((e) => e.includes('saml.sp.assertionConsumerService.url must be')))
   })
 
   it('should return errors if saml.idp.entityId does not match', async function () {
