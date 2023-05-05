@@ -61,7 +61,7 @@ cp example.env %{buildroot}%{installprefix}/example.env
 cp logging.config.cjs %{buildroot}%{installprefix}/logging.config.cjs
 cp sentinel.config.cjs %{buildroot}%{installprefix}/sentinel.config.cjs
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
-sed -e "s/\"2023.1.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+sed -e "s/\"2023.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
 cp README.md %{buildroot}%{installprefix}/README.md
