@@ -8,6 +8,7 @@ import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
 import { temporaryFile } from 'tempy'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
+import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertFromProviders.js'
 import WriteConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/WriteConfiguration.js'
 
 describe('WriteConfiguration use case', function () {
@@ -15,7 +16,8 @@ describe('WriteConfiguration use case', function () {
 
   before(function () {
     const configRepository = new ConfigurationRepository()
-    usecase = WriteConfiguration({ configRepository })
+    const convertFromProviders = ConvertFromProviders()
+    usecase = WriteConfiguration({ configRepository, convertFromProviders })
   })
 
   after(function () {
@@ -23,7 +25,8 @@ describe('WriteConfiguration use case', function () {
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => WriteConfiguration({ configRepository: null }), AssertionError)
+    assert.throws(() => WriteConfiguration({ configRepository: null, convertFromProviders: {} }), AssertionError)
+    assert.throws(() => WriteConfiguration({ configRepository: {}, convertFromProviders: null }), AssertionError)
   })
 
   it('should write values to the repository', async function () {
@@ -217,23 +220,36 @@ describe('WriteConfiguration use case', function () {
     writeStub.restore()
   })
 
-  it('should convert auth providers to JSON string', async function () {
+  it('should convert auth providers to original settings', async function () {
     // arrange
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      return new Map()
+      const settings = new Map()
+      // incoming providers will wipe out these settings
+      settings.set('SAML_IDP_SLO_URL', 'https://saml/logout')
+      return settings
     })
     const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
       assert.isDefined(settings)
-      assert.lengthOf(settings, 1)
-      assert.isTrue(settings.has('AUTH_PROVIDERS'))
-      const providers = settings.get('AUTH_PROVIDERS')
-      assert.isTrue(typeof providers === 'string')
-      assert.include(providers, 'Acme Identity')
-      assert.include(providers, 'saml')
+      assert.lengthOf(settings, 4)
+      // raw IdP cert is converted to a file
+      assert.isTrue(settings.has('IDP_CERT_FILE'))
+      const certFile = settings.get('IDP_CERT_FILE')
+      const certificate = fs.readFileSync(certFile, 'utf8')
+      assert.equal(certificate, '-----BEGIN CERTIFICATE-----')
+      assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.acme.net')
+      assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
+      assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'urn:example:sp')
+      fs.rmSync(certFile)
     })
     // act
     const settings = new Map()
-    const providers = [{ label: 'Acme Identity', protocol: 'saml' }]
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      metadataUrl: 'https://saml.acme.net',
+      spEntityId: 'urn:example:sp',
+      idpCert: '-----BEGIN CERTIFICATE-----'
+    }]
     settings.set('AUTH_PROVIDERS', providers)
     await usecase(settings)
     // assert
@@ -255,22 +271,32 @@ describe('WriteConfiguration use case', function () {
       assert.isDefined(settings)
       assert.lengthOf(settings, 1)
       assert.isTrue(settings.has('AUTH_PROVIDERS_FILE'))
-      const filename = settings.get('AUTH_PROVIDERS_FILE')
-      const config = fs.readFileSync(filename, 'utf8')
-      assert.include(config, 'Acme Identity')
-      assert.include(config, 'saml')
-      fs.rmSync(filename)
     })
     // act
     const settings = new Map()
-    const providers = [{ label: 'Acme Identity', protocol: 'saml' }]
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+    }, {
+      label: 'Coyote Security',
+      protocol: 'saml'
+    }]
     settings.set('AUTH_PROVIDERS', providers)
     await usecase(settings)
     // assert
-    assert.isTrue(readStub.calledOnce)
-    assert.isTrue(writeStub.calledOnce)
-    readStub.restore()
-    writeStub.restore()
+    try {
+      assert.isTrue(readStub.calledOnce)
+      assert.isTrue(writeStub.calledOnce)
+      const config = fs.readFileSync(providersFile, 'utf8')
+      assert.include(config, '"providers":[{')
+      assert.include(config, '"label":"Acme Identity"')
+      assert.include(config, '"protocol":"saml"')
+      assert.include(config, '"label":"Coyote Security"')
+    } finally {
+      fs.rmSync(providersFile)
+      readStub.restore()
+      writeStub.restore()
+    }
   })
 
   it('should write IdP configuration into a file', async function () {

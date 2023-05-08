@@ -3,7 +3,7 @@
 //
 import * as fs from 'node:fs'
 import { assert } from 'chai'
-import { describe, it, run } from 'mocha'
+import { beforeEach, describe, it, run } from 'mocha'
 import request from 'supertest'
 import { minimatch } from 'minimatch'
 // Load the test environment before the bulk of our code initializes, otherwise
@@ -21,6 +21,7 @@ const settings = container.resolve('settingsRepository')
 const app = createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
+const temporaryRepository = container.resolve('temporaryRepository')
 //
 // Would have used the ca function but that made no difference,
 // still rejected with "Error: self signed certificate" in Node.
@@ -61,6 +62,10 @@ setTimeout(function () {
   describe('Login requests', function () {
     let requestId
 
+    beforeEach(function () {
+      temporaryRepository.clear()
+    })
+
     it('should reject no such request with terse response', function (done) {
       const cert = fs.readFileSync('test/client.crt')
       const key = fs.readFileSync('test/client.key')
@@ -93,7 +98,7 @@ setTimeout(function () {
       })
 
       it('should return a URL with instanceId', function (done) {
-        process.env.INSTANCE_ID = 'trueU'
+        temporaryRepository.set('INSTANCE_ID', 'trueU')
         agent
           .get('/requests/new/realuser')
           .trustLocalhost(true)
@@ -106,6 +111,30 @@ setTimeout(function () {
             assert.isFalse(res.body.forceAuthn)
             assert.equal(res.body.userId, 'realuser')
             assert.equal(res.body.instanceId, 'trueU')
+          })
+          .end(done)
+      })
+
+      it('should return a URL with providerId', function (done) {
+        // auto-converted SAML provider will have an id of 'saml'
+        temporaryRepository.set('SAML_IDP_SSO_URL', 'https://saml.example.com/signon')
+        agent
+          .get('/requests/new/realuser?providerId=saml')
+          .trustLocalhost(true)
+          .expect(200)
+          .expect(res => {
+            assert.include(res.body.loginUrl, '&providerId=saml')
+          })
+          .end(done)
+      })
+
+      it('should return multi URL with unknown providerId', function (done) {
+        agent
+          .get('/requests/new/realuser?providerId=foobar')
+          .trustLocalhost(true)
+          .expect(200)
+          .expect(res => {
+            assert.include(res.body.loginUrl, '/multi/login/')
           })
           .end(done)
       })
@@ -123,7 +152,7 @@ setTimeout(function () {
       })
 
       it('should forceAuthn using environment variable', function (done) {
-        process.env.FORCE_AUTHN = 'true'
+        temporaryRepository.set('FORCE_AUTHN', 'true')
         agent
           .get('/requests/new/forceq')
           .trustLocalhost(true)

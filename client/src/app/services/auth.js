@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
@@ -36,12 +36,36 @@ export const auth = createApi({
     getSettings: builder.query({
       query: () => 'settings',
     }),
-    sendChanges: builder.mutation({
+    getAllProviders: builder.query({
+      query: () => `settings/providers`,
+    }),
+    getOneProvider: builder.query({
+      query: (providerId) => `settings/providers/${providerId}`,
+    }),
+    postProvider: builder.mutation({
+      // perform both the addition and apply as a single redux action
+      async queryFn(arg, queryApi, extraOptions, baseQuery) {
+        const update = await baseQuery({
+          url: 'settings/providers',
+          method: 'POST',
+          body: arg
+        })
+        if (update.error) {
+          return { error: update.error }
+        }
+        const apply = await baseQuery({
+          url: 'settings/apply',
+          method: 'POST'
+        })
+        return apply
+      },
+    }),
+    putProvider: builder.mutation({
       // perform both the update and apply as a single redux action
       async queryFn(arg, queryApi, extraOptions, baseQuery) {
         const update = await baseQuery({
-          url: 'settings',
-          method: 'POST',
+          url: `settings/providers/${arg.id}`,
+          method: 'PUT',
           body: arg
         })
         if (update.error) {
@@ -51,69 +75,7 @@ export const auth = createApi({
           url: 'settings/apply',
           method: 'POST'
         })
-        if (apply.data) {
-          // Grab the updated Location for the service. Note that the value in
-          // apply.meta.request.url will be that of the frontend server when
-          // running in development mode.
-          const location = apply.meta.response.headers.get('Location')
-          const data = Object.assign({}, apply.data, { location })
-          return { data }
-        } else {
-          return { error: apply.error }
-        }
-      },
-    }),
-    testChanges: builder.mutation({
-      // perform both the temp update and apply as a single redux action
-      async queryFn(arg, queryApi, extraOptions, baseQuery) {
-        const update = await baseQuery({
-          url: 'settings/temp',
-          method: 'POST',
-          body: arg
-        })
-        if (update.error) {
-          return { error: update.error }
-        }
-        const apply = await baseQuery({
-          url: 'settings/apply',
-          method: 'POST'
-        })
-        if (apply.data) {
-          // Grab the updated Location for the service. Note that the value in
-          // apply.meta.request.url will be that of the frontend server when
-          // running in development mode.
-          const location = apply.meta.response.headers.get('Location')
-          const data = Object.assign({}, apply.data, { location })
-          return { data }
-        } else {
-          return { error: apply.error }
-        }
-      },
-    }),
-    resetChanges: builder.mutation({
-      // perform both the temp delete and apply as a single redux action
-      async queryFn(arg, queryApi, extraOptions, baseQuery) {
-        const update = await baseQuery({
-          url: 'settings/temp',
-          method: 'DELETE'
-        })
-        if (update.error) {
-          return { error: update.error }
-        }
-        const apply = await baseQuery({
-          url: 'settings/apply',
-          method: 'POST'
-        })
-        if (apply.data) {
-          // Grab the updated Location for the service. Note that the value in
-          // apply.meta.request.url will be that of the frontend server when
-          // running in development mode.
-          const location = apply.meta.response.headers.get('Location')
-          const data = Object.assign({}, apply.data, { location })
-          return { data }
-        } else {
-          return { error: apply.error }
-        }
+        return apply
       },
     }),
   }),
@@ -122,8 +84,9 @@ export const auth = createApi({
 export const {
   useLoginMutation,
   useLogoutMutation,
+  useGetAllProvidersQuery,
+  useGetOneProviderQuery,
   useGetSettingsQuery,
-  useSendChangesMutation,
-  useTestChangesMutation,
-  useResetChangesMutation,
+  usePostProviderMutation,
+  usePutProviderMutation,
 } = auth

@@ -1,12 +1,16 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { createSlice } from '@reduxjs/toolkit'
 import { auth } from '~/app/services/auth'
 
 const slice = createSlice({
   name: 'settings',
-  initialState: { fetched: null, modified: null },
+  initialState: {
+    providers: null,
+    fetched: null,
+    modified: null
+  },
   reducers: {
     applyChanges(state, action) {
       state.modified = Object.assign({}, state.modified, action.payload)
@@ -24,22 +28,14 @@ const slice = createSlice({
       }
     )
     builder.addMatcher(
-      auth.endpoints.sendChanges.matchFulfilled,
+      auth.endpoints.getAllProviders.matchFulfilled,
       (state, { payload }) => {
-        state.modified = null
+        state.providers = payload.providers
       }
     )
     builder.addMatcher(
-      auth.endpoints.testChanges.matchFulfilled,
+      auth.endpoints.putProvider.matchFulfilled,
       (state, { payload }) => {
-        state.fetched = payload
-        state.modified = null
-      }
-    )
-    builder.addMatcher(
-      auth.endpoints.resetChanges.matchFulfilled,
-      (state, { payload }) => {
-        state.fetched = payload
         state.modified = null
       }
     )
@@ -51,5 +47,6 @@ export const { applyChanges, discardChanges } = slice.actions
 
 export default slice.reducer
 
+export const selectProviders = (state) => state.settings.providers
 export const selectFetched = (state) => state.settings.fetched
 export const selectModified = (state) => state.settings.modified

@@ -20,7 +20,6 @@ describe('GetSamlConfiguration use case', function () {
     const getSamlAuthnContext = GetSamlAuthnContext({ settingsRepository })
     const getAuthProviders = GetAuthProviders({ settingsRepository })
     usecase = GetSamlConfiguration({
-      settingsRepository,
       fetchSamlMetadata,
       getSamlAuthnContext,
       getAuthProviders
@@ -33,25 +32,16 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should raise an error for invalid input', async function () {
     assert.throws(() => GetSamlConfiguration({
-      settingsRepository: null,
-      fetchSamlMetadata: {},
-      getSamlAuthnContext: {},
-      getAuthProviders: {}
-    }), AssertionError)
-    assert.throws(() => GetSamlConfiguration({
-      settingsRepository: {},
       fetchSamlMetadata: null,
       getSamlAuthnContext: {},
       getAuthProviders: {}
     }), AssertionError)
     assert.throws(() => GetSamlConfiguration({
-      settingsRepository: {},
       fetchSamlMetadata: {},
       getSamlAuthnContext: null,
       getAuthProviders: {}
     }), AssertionError)
     assert.throws(() => GetSamlConfiguration({
-      settingsRepository: {},
       fetchSamlMetadata: {},
       getSamlAuthnContext: {},
       getAuthProviders: null

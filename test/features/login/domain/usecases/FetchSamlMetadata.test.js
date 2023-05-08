@@ -31,7 +31,7 @@ describe('FetchSamlMetadata use case', function () {
     // arrange
     try {
       // act (fails because Node.js rejects self-signed certs)
-      await usecase({}, 'https://shibboleth.doc:4443/idp/shibboleth')
+      await usecase({}, { metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth' })
       assert.fail('should have raised error')
     } catch (err) {
       // assert
@@ -43,7 +43,7 @@ describe('FetchSamlMetadata use case', function () {
     // arrange
     try {
       // act
-      await usecase({}, 'filesdoesnotexist.xml')
+      await usecase({}, { metadataFile: 'filesdoesnotexist.xml' })
       assert.fail('should have raised error')
     } catch (err) {
       // assert
@@ -82,9 +82,9 @@ describe('FetchSamlMetadata use case', function () {
   it('should read metadata from local file', async function () {
     // arrange
     const options = {}
-    const source = 'test/fixtures/idp-metadata.xml'
+    const metadataFile = 'test/fixtures/idp-metadata.xml' 
     // act
-    const result = await usecase(options, source)
+    const result = await usecase(options, { metadataFile })
     // assert
     assert.property(result, 'entryPoint')
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
@@ -94,12 +94,12 @@ describe('FetchSamlMetadata use case', function () {
   it('should fetch metadata via URL', async function () {
     // arrange
     const options = {}
-    const source = 'https://shibboleth.doc:4443/idp/shibboleth'
+    const metadataUrl = 'https://shibboleth.doc:4443/idp/shibboleth'
     // act
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
     // mute the warning from node about disabling TLS validation
     const unmute = mute(process.stderr)
-    const result = await usecase(options, source)
+    const result = await usecase(options, { metadataUrl })
     unmute()
     delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     // assert
@@ -111,12 +111,12 @@ describe('FetchSamlMetadata use case', function () {
   it('should merge custom settings with fetched metadata', async function () {
     // arrange
     const options = { identifierFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified' }
-    const source = 'https://shibboleth.doc:4443/idp/shibboleth'
+    const metadataUrl = 'https://shibboleth.doc:4443/idp/shibboleth'
     // act
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
     // mute the warning from node about disabling TLS validation
     const unmute = mute(process.stderr)
-    const result = await usecase(options, source)
+    const result = await usecase(options, { metadataUrl })
     unmute()
     delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
     // assert

@@ -4,7 +4,7 @@
 import fetchMock from 'jest-fetch-mock'
 import { store } from './store'
 import { auth } from './services/auth'
-import { applyChanges } from '../features/settings/settingsSlice'
+import { applyChanges } from './reducers/settingsSlice'
 
 beforeEach(() => {
   fetchMock.resetMocks()
@@ -73,14 +73,14 @@ describe('auth redux state tests', () => {
     // sending changes to the backend
     store.dispatch(applyChanges({ setting1: 'newvalue' }))
     fetchMock.mockResponse(JSON.stringify({ status: 'ok' }))
-    store.dispatch(auth.endpoints.sendChanges.initiate({
+    store.dispatch(auth.endpoints.putProvider.initiate({
       setting3: 'value3', setting4: 'value4'
     })).then(() => {
       expect(fetchMock).toBeCalledTimes(2)
       const request1 = fetchMock.mock.calls[0][0]
       const authorization1 = request1.headers.get('Authorization')
-      expect(request1.method).toBe('POST')
-      expect(request1.url).toBe(`/settings`)
+      expect(request1.method).toBe('PUT')
+      expect(request1.url).toBe(`/settings/provider/foo`)
       expect(authorization1).toEqual('Bearer honest.bearer.token')
       request1.json().then((data) => {
         expect(data).toEqual({ setting3: 'value3', setting4: 'value4' })

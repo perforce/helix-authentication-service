@@ -31,6 +31,12 @@ describe('GenerateLoginUrl use case', function () {
       assert.instanceOf(err, AssertionError)
     }
     try {
+      await usecase('')
+      assert.fail('should have raised error')
+    } catch (err) {
+      assert.instanceOf(err, AssertionError)
+    }
+    try {
       await usecase('not-null', null)
       assert.fail('should have raised error')
     } catch (err) {
@@ -44,20 +50,12 @@ describe('GenerateLoginUrl use case', function () {
     }
   })
 
-  it('should produce sensible value without service URI', async function () {
-    // arrange
-    // act
-    const result = await usecase('', 'request123', 'none')
-    // assert
-    assert.equal(result, '/saml/login/request123?instanceId=none')
-  })
-
   it('should produce sensible value with minimal config', async function () {
     // arrange
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
-    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar')
+    assert.equal(result, 'http://host/multi/login/request123?instanceId=foobar')
   })
 
   it('should produce OIDC URL with only OIDC_ISSUER_URI', async function () {
@@ -66,7 +64,7 @@ describe('GenerateLoginUrl use case', function () {
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
-    assert.equal(result, 'http://host/oidc/login/request123?instanceId=foobar')
+    assert.equal(result, 'http://host/oidc/login/request123?instanceId=foobar&providerId=oidc')
   })
 
   it('should produce SAML URL with only SAML_IDP_SSO_URL', async function () {
@@ -75,16 +73,23 @@ describe('GenerateLoginUrl use case', function () {
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
-    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar')
+    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml')
   })
 
   it('should produce special URL with DEFAULT_PROTOCOL', async function () {
     // arrange
-    settingsRepository.set('DEFAULT_PROTOCOL', 'pigeon')
+    const providers = {
+      providers: [{
+        label: 'Acme Identity',
+        protocol: 'pigeon',
+        default: true
+      }]
+    }
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
-    assert.equal(result, 'http://host/pigeon/login/request123?instanceId=foobar')
+    assert.equal(result, 'http://host/pigeon/login/request123?instanceId=foobar&providerId=pigeon-0')
   })
 
   it('should produce multi URL with AUTH_PROVIDERS', async function () {
@@ -93,6 +98,9 @@ describe('GenerateLoginUrl use case', function () {
       providers: [{
         label: 'Acme Identity',
         protocol: 'saml'
+      }, {
+        label: 'Maximum Security',
+        protocol: 'saml'
       }]
     }
     settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
@@ -100,5 +108,45 @@ describe('GenerateLoginUrl use case', function () {
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
     assert.equal(result, 'http://host/multi/login/request123?instanceId=foobar')
+  })
+
+  it('should produce multi URL if specified provider not found', async function () {
+    // arrange
+    const providers = {
+      providers: [{
+        label: 'Acme Identity',
+        protocol: 'saml',
+        id: 'saml-1'
+      }, {
+        label: 'Maximum Security',
+        protocol: 'saml',
+        id: 'saml-2'
+      }]
+    }
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase('http://host', 'request123', 'foobar', 'oidc-1')
+    // assert
+    assert.equal(result, 'http://host/multi/login/request123?instanceId=foobar')
+  })
+
+  it('should produce specific URL if specified provider found', async function () {
+    // arrange
+    const providers = {
+      providers: [{
+        label: 'Acme Identity',
+        protocol: 'saml',
+        id: 'saml-1'
+      }, {
+        label: 'Maximum Security',
+        protocol: 'saml',
+        id: 'saml-2'
+      }]
+    }
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase('http://host', 'request123', 'foobar', 'saml-2')
+    // assert
+    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml-2')
   })
 })

@@ -3,7 +3,7 @@
 //
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
-import { selectCurrentToken } from '../features/auth/authSlice'
+import { selectCurrentToken } from '~/app/reducers/authSlice'
 
 export const useAuth = () => {
   const token = useSelector(selectCurrentToken)

@@ -42,9 +42,9 @@ setTimeout(function () {
             .expect(200)
             .expect('Content-Type', /application\/json/)
             .expect(res => {
-              assert.equal(Object.keys(res.body).length, 23)
+              assert.equal(Object.keys(res.body).length, 13)
               assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
-              assert.equal(res.body.OIDC_TOKEN_SIGNING_ALGO, 'RS256')
+              assert.equal(res.body.SESSION_SECRET, 'keyboard cat')
               assert.equal(res.body.TOKEN_TTL, '3600')
             })
             .end(done)
@@ -86,79 +86,153 @@ setTimeout(function () {
         })
       })
 
-      it('should modify temporary configuration settings', function (done) {
+      it('should fetch all auth providers', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
           agent
-            .post('/settings/temp')
+            .get('/settings/providers')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
-            .send({ HAS_UNIT_NEW1: 'tempvalue' })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.lengthOf(providers, 2)
+              const oidcProvider = providers.find((e) => e.protocol === 'oidc')
+              assert.exists(oidcProvider)
+              assert.propertyVal(oidcProvider, 'signingAlgo', 'RS256')
+            })
+            .end(done)
+        })
+      })
+
+      it('should fetch a specific auth provider', function (done) {
+        temporary.set('AUTH_PROVIDERS', JSON.stringify({
+          providers: [
+            {
+              clientId: 'unique-client-identifier',
+              clientSecret: 'shared secrets are bad',
+              issuerUri: 'https://oidc.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'oidc.example.com',
+              protocol: 'oidc',
+              id: 'oidc-1'
+            }
+          ]
+        }))
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers/oidc-1')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.propertyVal(res.body, 'clientId', 'unique-client-identifier')
+            })
+            .end(function (err) {
+              temporary.delete('AUTH_PROVIDERS')
+              done(err)
+            })
+        })
+      })
+
+      it('should post new auth provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: 'client-id',
+              clientSecret: 'client-secret',
+              issuerUri: 'https://oidc.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'Provider',
+              protocol: 'oidc',
+              id: 'this-will-be-assigned'
+            })
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              assert.equal(res.body.status, 'ok')
+              assert.equal(res.body.id, 'oidc-2')
+              const testenv = fs.readFileSync('test/test-dot.env', 'utf8')
+              assert.include(testenv, 'https://oidc.example.com')
+              done()
+            })
+        })
+      })
+
+      it('should update an existing auth provider', function (done) {
+        temporary.set('AUTH_PROVIDERS', JSON.stringify({
+          providers: [
+            {
+              clientId: 'unique-client-identifier',
+              clientSecret: 'shared secrets are bad',
+              issuerUri: 'https://oidc.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'oidc.example.com',
+              protocol: 'oidc',
+              id: 'oidc-1'
+            }
+          ]
+        }))
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .put('/settings/providers/oidc-1')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: 'client-id',
+              clientSecret: 'updated-client-secret',
+              issuerUri: 'https://oidc.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'Provider',
+              protocol: 'oidc',
+              id: 'oidc-1'
+            })
             .expect(200, { status: 'ok' })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
+            .end(function (err) {
+              temporary.delete('AUTH_PROVIDERS')
               if (err) {
                 return done(err)
               }
-              assert.isTrue(temporary.has('HAS_UNIT_NEW1'))
-              assert.equal(temporary.get('HAS_UNIT_NEW1'), 'tempvalue')
+              const testenv = fs.readFileSync('test/test-dot.env', 'utf8')
+              assert.include(testenv, 'updated-client-secret')
               done()
             })
         })
       })
 
-      it('should fetch modified temporary settings', function (done) {
+      it('should allow PUT of a new auth provider', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
           agent
-            .get('/settings')
+            .put('/settings/providers/oidc-1')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
-            .expect(200)
-            .expect('Content-Type', /application\/json/)
-            .expect(res => {
-              assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
-              assert.equal(res.body.HAS_UNIT_NEW1, 'tempvalue')
+            .send({
+              clientId: 'client-id-3',
+              clientSecret: 'client-secret-3',
+              issuerUri: 'https://oidc3.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'Provider',
+              protocol: 'oidc'
             })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
+            .expect(200, { status: 'ok' })
+            .end(function (err) {
               if (err) {
                 return done(err)
               }
-              // verify new setting not yet applied to environment
-              assert.notProperty(process.env, 'HAS_UNIT_NEW1')
-              done()
-            })
-        })
-      })
-
-      it('should delete temporary configuration settings', function (done) {
-        getToken('scott', 'tiger').then((webToken) => {
-          agent
-            .delete('/settings/temp')
-            .trustLocalhost(true)
-            .set('Authorization', 'Bearer ' + webToken)
-            .expect(200, { status: 'ok' }, done)
-        })
-      })
-
-      it('should fetch modified settings (w/o temporary)', function (done) {
-        getToken('scott', 'tiger').then((webToken) => {
-          agent
-            .get('/settings')
-            .trustLocalhost(true)
-            .set('Authorization', 'Bearer ' + webToken)
-            .expect(200)
-            .expect('Content-Type', /application\/json/)
-            .expect(res => {
-              assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
-              assert.equal(res.body.HAS_UNIT_NEW1, 'newvalue')
-            })
-            // eslint-disable-next-line no-unused-vars
-            .end(function (err, res) {
-              if (err) {
-                return done(err)
-              }
-              // verify new setting not yet applied to environment
-              assert.notProperty(process.env, 'HAS_UNIT_NEW1')
+              const testenv = fs.readFileSync('test/test-dot.env', 'utf8')
+              assert.include(testenv, 'client-secret-3')
               done()
             })
         })
@@ -172,11 +246,11 @@ setTimeout(function () {
             .set('Authorization', 'Bearer ' + webToken)
             .expect('Location', /localhost/)
             .expect(200, { status: 'ok' }, done)
-            // We could try to verify that the setting has _now_ been applied to
-            // environment, however, to test this properly we would need a means
-            // of allowing the Node.js server instance to be rebuilt and wrapped
-            // by superagent, which is probably more difficult than it's worth
-            // for automated testing.
+          // We could try to verify that the setting has _now_ been applied to
+          // environment, however, to test this properly we would need a means
+          // of allowing the Node.js server instance to be rebuilt and wrapped
+          // by superagent, which is probably more difficult than it's worth
+          // for automated testing.
         })
       })
     })
@@ -216,13 +290,42 @@ setTimeout(function () {
             .expect(400, /Content-Type must be application\/json/, done)
         })
       })
+
+      it('should return 404 for missing provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers/foobar')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(404, /Not Found/, done)
+        })
+      })
+
+      it('should return 400 for an invalid auth provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: 'client-id',
+              clientSecret: 'client-secret',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'Provider',
+              protocol: 'oidc',
+              id: 'oidc-2'
+            })
+            .expect(400, done)
+        })
+      })
     })
   })
 
   run()
 }, 500)
 
-function getToken (username, password) {
+function getToken(username, password) {
   return new Promise((resolve, reject) => {
     agent
       .post('/tokens')

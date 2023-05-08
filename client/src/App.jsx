@@ -164,11 +164,13 @@ function App() {
   return (
     <ErrorBoundary>
       <Box>
-        <ButtonAppBar />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/settings" element={<PrivateOutlet />}>
             <Route index element={<ShowAll />} />
+          </Route>
+          <Route path="/saml" element={<PrivateOutlet />}>
+            <Route path="/:id" lazy={() => import("~/features/settings/SamlEditor")} />
           </Route>
           <Route path="/" element={<PrivateOutlet />}>
             <Route index element={<AllSettings />} />

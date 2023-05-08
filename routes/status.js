@@ -36,10 +36,6 @@ router.get('/', async (req, res, next) => {
 })
 
 async function validateOpenID () {
-  const issuerUri = settings.get('OIDC_ISSUER_URI')
-  if (issuerUri) {
-    return status.validateOpenID(issuerUri)
-  }
   const getAuthProviders = container.resolve('getAuthProviders')
   const providers = await getAuthProviders()
   if (providers) {
@@ -57,10 +53,6 @@ async function validateOpenID () {
 }
 
 async function validateSaml () {
-  const metadataUrl = settings.get('SAML_IDP_METADATA_URL')
-  if (metadataUrl) {
-    return await status.validateSaml(metadataUrl)
-  }
   const getAuthProviders = container.resolve('getAuthProviders')
   const providers = await getAuthProviders()
   if (providers) {
