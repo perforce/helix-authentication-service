@@ -78,6 +78,23 @@ export const auth = createApi({
         return apply
       },
     }),
+    deleteProvider: builder.mutation({
+      // perform both the delete and apply as a single redux action
+      async queryFn(arg, queryApi, extraOptions, baseQuery) {
+        const update = await baseQuery({
+          url: `settings/providers/${arg}`,
+          method: 'DELETE'
+        })
+        if (update.error) {
+          return { error: update.error }
+        }
+        const apply = await baseQuery({
+          url: 'settings/apply',
+          method: 'POST'
+        })
+        return apply
+      },
+    }),
   }),
 })
 
@@ -89,4 +106,5 @@ export const {
   useGetSettingsQuery,
   usePostProviderMutation,
   usePutProviderMutation,
+  useDeleteProviderMutation,
 } = auth

@@ -10,6 +10,7 @@ import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/reposit
 import AddAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/AddAuthProvider.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
+import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('AddAuthProvider use case', function () {
   const temporaryRepository = new MapSettingsRepository()
@@ -22,9 +23,11 @@ describe('AddAuthProvider use case', function () {
     processEnvRepository,
     defaultsRepository
   })
+  const tidyAuthProviders = TidyAuthProviders()
   const usecase = AddAuthProvider({
-    getAuthProviders: GetAuthProviders({ settingsRepository }),
-    validateAuthProvider: ValidateAuthProvider()
+    getAuthProviders: GetAuthProviders({ settingsRepository, tidyAuthProviders }),
+    validateAuthProvider: ValidateAuthProvider(),
+    tidyAuthProviders
   })
 
   beforeEach(function () {
@@ -32,8 +35,21 @@ describe('AddAuthProvider use case', function () {
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => AddAuthProvider({ getAuthProviders: null, validateAuthProvider: {} }), AssertionError)
-    assert.throws(() => AddAuthProvider({ getAuthProviders: {}, validateAuthProvider: null }), AssertionError)
+    assert.throws(() => AddAuthProvider({
+      getAuthProviders: null,
+      validateAuthProvider: {},
+      tidyAuthProviders: {}
+    }), AssertionError)
+    assert.throws(() => AddAuthProvider({
+      getAuthProviders: {},
+      validateAuthProvider: null,
+      tidyAuthProviders: {}
+    }), AssertionError)
+    assert.throws(() => AddAuthProvider({
+      getAuthProviders: {},
+      validateAuthProvider: {},
+      tidyAuthProviders: null
+    }), AssertionError)
     try {
       await usecase(null)
       assert.fail('should have raised error')

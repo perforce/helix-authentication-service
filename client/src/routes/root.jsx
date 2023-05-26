@@ -9,12 +9,17 @@ import {
   Stack
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { useGetAllProvidersQuery } from '~/app/services/auth'
+import { useGetAllProvidersQuery, useDeleteProviderMutation } from '~/app/services/auth'
 import Providers from '~/components/Providers'
 
 export default function Root() {
   const navigate = useNavigate()
   const { data, error, isLoading } = useGetAllProvidersQuery()
+  const [deleteProvider] = useDeleteProviderMutation()
+
+  const handleDelete = (providerId) => {
+    deleteProvider(providerId)
+  }
 
   if (isLoading) {
     return <Alert severity='info'>Fetching providers...</Alert>
@@ -29,7 +34,7 @@ export default function Root() {
         <Container maxWidth='lg' sx={{ my: 2 }}>
           <Stack spacing={4}>
             <Button onClick={() => navigate('/new')} variant='contained'>Add Authentication</Button>
-            <Providers providers={providers} />
+            <Providers providers={providers} onDelete={handleDelete} />
           </Stack>
         </Container >
       )

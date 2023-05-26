@@ -13,6 +13,7 @@ import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/reposit
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
 import ReadConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/ReadConfiguration.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
+import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('ReadConfiguration use case', function () {
   const temporaryRepository = new MapSettingsRepository()
@@ -25,6 +26,7 @@ describe('ReadConfiguration use case', function () {
     processEnvRepository,
     defaultsRepository
   })
+  const tidyAuthProviders = TidyAuthProviders()
   let usecase
 
   before(function () {
@@ -36,7 +38,7 @@ describe('ReadConfiguration use case', function () {
         }
       }
     }
-    const getAuthProviders = GetAuthProviders({ settingsRepository })
+    const getAuthProviders = GetAuthProviders({ settingsRepository, tidyAuthProviders })
     usecase = ReadConfiguration({
       configRepository,
       temporaryRepository,

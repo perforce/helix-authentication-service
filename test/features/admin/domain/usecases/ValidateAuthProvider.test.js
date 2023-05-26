@@ -83,6 +83,30 @@ describe('ValidateAuthProvider use case', function () {
     assert.isNull(result)
   })
 
+  it('should prune empty, null, undefined properties', async function () {
+    // arrange
+    const provider = {
+      metadataUrl: "https://saml.example.com",
+      signingAlgo: null,
+      codeChallenge: undefined,
+      spEntityId: '',
+      label: "Provider",
+      protocol: "saml",
+      id: "saml-1"
+    }
+    // act
+    const result = await usecase(provider)
+    // assert
+    assert.isNull(result)
+    assert.notProperty(provider, 'codeChallenge')
+    assert.notProperty(provider, 'signingAlgo')
+    assert.notProperty(provider, 'spEntityId')
+    assert.equal(provider.protocol, 'saml')
+    assert.equal(provider.id, 'saml-1')
+    assert.equal(provider.label, 'Provider')
+    assert.equal(provider.metadataUrl, 'https://saml.example.com')
+  })
+
   it('should reject provider missing protocol property', async function () {
     // arrange
     const provider = {
@@ -116,6 +140,42 @@ describe('ValidateAuthProvider use case', function () {
     const result = await usecase(provider)
     // assert
     assert.equal(result, 'unsupported protocol: foobar')
+  })
+
+  it('should reject provider with id of "undefined"', async function () {
+    // arrange
+    const provider = {
+      clientId: "client-id",
+      clientSecret: "client-secret",
+      issuerUri: "https://oidc.example.com",
+      selectAccount: "false",
+      signingAlgo: "RS256",
+      label: "Provider",
+      protocol: 'oidc',
+      id: "undefined"
+    }
+    // act
+    const result = await usecase(provider)
+    // assert
+    assert.equal(result, 'must provide a valid identifier')
+  })
+
+  it('should reject provider with id of "null"', async function () {
+    // arrange
+    const provider = {
+      clientId: "client-id",
+      clientSecret: "client-secret",
+      issuerUri: "https://oidc.example.com",
+      selectAccount: "false",
+      signingAlgo: "RS256",
+      label: "Provider",
+      protocol: 'oidc',
+      id: "null"
+    }
+    // act
+    const result = await usecase(provider)
+    // assert
+    assert.equal(result, 'must provide a valid identifier')
   })
 
   it('should reject oidc provider missing isserUri property', async function () {

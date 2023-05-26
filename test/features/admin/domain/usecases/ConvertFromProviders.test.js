@@ -36,9 +36,10 @@ describe('ConvertFromProviders use case', function () {
     assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'urn:example:sp')
   })
 
-  it('should do nothing if more than two auth providers', async function () {
+  it('should remove classic settings if auth providers', async function () {
     // arrange
     const settings = new Map()
+    settings.set('OIDC_ISSUER_URI', 'https://oidc/issuer')
     settings.set('SAML_IDP_SLO_URL', 'https://saml/logout')
     const providers = [{
       label: 'Acme Identity',
@@ -58,7 +59,8 @@ describe('ConvertFromProviders use case', function () {
     await usecase(settings)
     // assert
     assert.isDefined(settings.get('AUTH_PROVIDERS'))
-    assert.isDefined(settings.get('SAML_IDP_SLO_URL'))
+    assert.isUndefined(settings.get('OIDC_ISSUER_URI'))
+    assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
     assert.isUndefined(settings.get('IDP_CERT'))
     assert.isUndefined(settings.get('SAML_IDP_METADATA_URL'))
     assert.isUndefined(settings.get('SAML_INFO_LABEL'))

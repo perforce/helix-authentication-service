@@ -18,17 +18,25 @@ import {
 import * as icons from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom'
 
-const ActionsButton = ({ provider }) => {
+const ActionsButton = ({ provider, onDelete }) => {
   const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
+  const editUrl = `/${provider.protocol}/${provider.id}`
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
   }
+
   const handleClose = () => {
     setAnchorEl(null)
   }
-  const editUrl = `/${provider.protocol}/${provider.id}`
+
+  const handleDelete = () => {
+    onDelete(provider.id)
+    setAnchorEl(null)
+  }
+
   return (
     <React.Fragment>
       <Tooltip title="Actions">
@@ -93,7 +101,7 @@ const ActionsButton = ({ provider }) => {
           </ListItemIcon>
           Download settings file
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleDelete}>
           <ListItemIcon>
             <icons.Delete fontSize="small" />
           </ListItemIcon>
@@ -104,7 +112,7 @@ const ActionsButton = ({ provider }) => {
   )
 }
 
-const OidcProviderCard = ({ provider }) => {
+const OidcProviderCard = ({ provider, onDelete }) => {
   return (
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
@@ -125,13 +133,13 @@ const OidcProviderCard = ({ provider }) => {
         </Typography>
       </CardContent>
       <CardActions>
-        <ActionsButton provider={provider} />
+        <ActionsButton provider={provider} onDelete={onDelete} />
       </CardActions>
     </Card>
   )
 }
 
-const SamlProviderCard = ({ provider }) => {
+const SamlProviderCard = ({ provider, onDelete }) => {
   return (
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
@@ -152,26 +160,30 @@ const SamlProviderCard = ({ provider }) => {
         </Typography>
       </CardContent>
       <CardActions>
-        <ActionsButton provider={provider} />
+        <ActionsButton provider={provider} onDelete={onDelete} />
       </CardActions>
     </Card>
   )
 }
 
-const ProviderCard = ({ provider }) => {
+const ProviderCard = ({ provider, onDelete }) => {
   return provider.protocol === 'oidc' ?
-    OidcProviderCard(provider = { provider }) :
-    SamlProviderCard(provider = { provider })
+    OidcProviderCard({ provider, onDelete }) :
+    SamlProviderCard({ provider, onDelete })
 }
 
-export default function Providers({ providers }) {
+export default function Providers({ providers, onDelete }) {
   return (
     <Box>
       <Typography>
         Authentication Integrations
       </Typography>
       <Grid container spacing={2}>
-        {providers.map((p) => <Grid item xs={4} key={p.id}><ProviderCard provider={p} /></Grid>)}
+        {providers.map((p) => (
+          <Grid item xs={4} key={p.id}>
+            <ProviderCard provider={p} onDelete={onDelete} />
+          </Grid>
+        ))}
       </Grid>
     </Box>
   )

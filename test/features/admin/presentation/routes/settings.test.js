@@ -211,28 +211,42 @@ setTimeout(function () {
         })
       })
 
-      it('should allow PUT of a new auth provider', function (done) {
-        getToken('scott', 'tiger').then((webToken) => {
-          agent
-            .put('/settings/providers/oidc-1')
-            .trustLocalhost(true)
-            .set('Authorization', 'Bearer ' + webToken)
-            .send({
-              clientId: 'client-id-3',
-              clientSecret: 'client-secret-3',
-              issuerUri: 'https://oidc3.example.com',
+      it('should delete an existing auth provider', function (done) {
+        temporary.set('AUTH_PROVIDERS', JSON.stringify({
+          providers: [
+            {
+              clientId: 'unique-client-identifier',
+              clientSecret: 'shared secrets are bad',
+              issuerUri: 'https://oidc.example.com',
               selectAccount: 'false',
               signingAlgo: 'RS256',
-              label: 'Provider',
-              protocol: 'oidc'
-            })
+              label: 'oidc.example.com',
+              protocol: 'oidc',
+              id: 'oidc-1'
+            },
+            {
+              metadataUrl: 'https://saml.example.com/metadata',
+              spEntityId: 'urn:example:sp',
+              label: 'saml.example.com',
+              protocol: 'saml',
+              id: 'saml-1'
+            }
+          ]
+        }))
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .delete('/settings/providers/oidc-1')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
             .expect(200, { status: 'ok' })
             .end(function (err) {
+              temporary.delete('AUTH_PROVIDERS')
               if (err) {
                 return done(err)
               }
               const testenv = fs.readFileSync('test/test-dot.env', 'utf8')
-              assert.include(testenv, 'client-secret-3')
+              assert.include(testenv, 'urn:example:sp')
+              assert.notInclude(testenv, 'unique-client-identifier')
               done()
             })
         })
@@ -291,10 +305,20 @@ setTimeout(function () {
         })
       })
 
-      it('should return 404 for missing provider', function (done) {
+      it('should return 404 for missing provider on GET', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings/providers/foobar')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(404, /Not Found/, done)
+        })
+      })
+
+      it('should return 404 for missing provider on DELETE', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .delete('/settings/providers/foobar')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .expect(404, /Not Found/, done)
@@ -317,6 +341,25 @@ setTimeout(function () {
               id: 'oidc-2'
             })
             .expect(400, done)
+        })
+      })
+
+      it('should reject PUT of a new auth provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .put('/settings/providers/oidc-1')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: 'client-id-3',
+              clientSecret: 'client-secret-3',
+              issuerUri: 'https://oidc3.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'Provider',
+              protocol: 'oidc'
+            })
+            .expect(404, done)
         })
       })
     })

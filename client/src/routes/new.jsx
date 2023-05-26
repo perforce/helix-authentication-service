@@ -19,7 +19,7 @@ import {
 } from '@mui/material'
 import { useForm, FormProvider } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { usePutProviderMutation } from '~/app/services/auth'
+import { usePostProviderMutation } from '~/app/services/auth'
 import OidcEditor from '~/components/OidcEditor'
 import SamlEditor from '~/components/SamlEditor'
 
@@ -40,12 +40,12 @@ export default function Wizard() {
   const [provider, setProvider] = React.useState(null)
   const [protocol, setProtocol] = React.useState('saml')
   const [applyError, setApplyError] = React.useState(null)
-  const [putProvider] = usePutProviderMutation()
+  const [postProvider] = usePostProviderMutation()
   const methods = useForm({ mode: 'onBlur', values: {} })
 
   const onSubmit = (data) => {
     data.protocol = protocol
-    putProvider(data).unwrap()
+    postProvider(data).unwrap()
       .then(() => {
         navigate('/')
       })
@@ -70,6 +70,13 @@ export default function Wizard() {
     setActiveStep((prevActiveStep) => prevActiveStep + 1)
   }
 
+  const handleSubmit = (event) => {
+    // The form would always auto-submit when reaching the last step, for some
+    // unknown reason, but doing it this way prevents that behavior.
+    event.preventDefault()
+    methods.handleSubmit(onSubmit)()
+  }
+
   const stepContents = () => {
     if (activeStep === 0) {
       return (
@@ -81,65 +88,63 @@ export default function Wizard() {
       )
     } else if (activeStep === 2) {
       return (
-        <Container maxWidth='lg' sx={{ my: 2 }}>
+        <Stack spacing={2}>
           {applyError && <Alert severity='error'>{applyError}</Alert>}
           {protocol === 'saml' ? <SamlEditor /> : <OidcEditor />}
-        </Container>
+        </Stack>
       )
     }
   }
 
   return (
     <Container maxWidth='lg' sx={{ my: 2 }}>
-      <Stepper activeStep={activeStep}>
-        {steps.map((label, index) => {
-          return (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          )
-        })}
-      </Stepper>
-      {activeStep === steps.length ? (
-        <Typography sx={{ mt: 2, mb: 1 }}>
-          All steps completed - owari da!
-        </Typography>
-      ) : (
+      <Stack spacing={2}>
+        <Stepper activeStep={activeStep}>
+          {steps.map((label, index) => {
+            return (
+              <Step key={`step-${index}`}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            )
+          })}
+        </Stepper>
         <FormProvider {...methods} >
-          <form onSubmit={methods.handleSubmit(onSubmit)}>
-            {stepContents()}
-            <Stack direction="row" spacing={2}>
-              <Button
-                onClick={handleCancel}
-                variant={activeStep === 0 ? 'outlined' : 'text'}
-              >
-                Cancel
-              </Button>
-              {activeStep > 0 &&
+          <form>
+            <Stack spacing={2}>
+              {stepContents()}
+              <Stack direction="row" spacing={2}>
                 <Button
-                  variant='outlined'
-                  onClick={handleBack}
+                  onClick={handleCancel}
+                  variant={activeStep === 0 ? 'outlined' : 'text'}
                 >
-                  Back
+                  Cancel
                 </Button>
-              }
-              {
-                activeStep === steps.length - 1 ?
-                  <Button type='submit' variant='contained'>Save</Button> :
-                  <Button onClick={handleNext} variant='contained'>Next</Button>
-              }
+                {activeStep > 0 &&
+                  <Button
+                    variant='outlined'
+                    onClick={handleBack}
+                  >
+                    Back
+                  </Button>
+                }
+                {
+                  activeStep === steps.length - 1 ?
+                    <Button onClick={handleSubmit} variant='contained'>Save</Button> :
+                    <Button onClick={handleNext} variant='contained'>Next</Button>
+                }
+              </Stack>
             </Stack>
           </form>
         </FormProvider>
-      )}
+      </Stack>
     </Container>
-  );
+  )
 }
 
 // value will be the provider `id` as defined in the providers list
 function ProviderChooser({ onSelect, value }) {
   return (
-    <Container>
+    <Stack spacing={2}>
       <Typography>
         Select an identity provider
       </Typography>
@@ -155,14 +160,14 @@ function ProviderChooser({ onSelect, value }) {
           </Grid>
         ))}
       </Grid>
-    </Container>
+    </Stack>
   )
 }
 
 // value will be either 'oidc' or 'saml'
 function ProtocolChooser({ onSelect, value }) {
   return (
-    <Container>
+    <Stack spacing={2}>
       <Typography>
         Choose a security protocol
       </Typography>
@@ -172,6 +177,6 @@ function ProtocolChooser({ onSelect, value }) {
           <FormControlLabel value='saml' control={<Radio />} label='SAML' />
         </RadioGroup>
       </FormControl>
-    </Container>
+    </Stack>
   )
 }

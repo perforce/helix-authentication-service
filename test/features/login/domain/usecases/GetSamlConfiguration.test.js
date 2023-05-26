@@ -10,15 +10,17 @@ import FetchSamlMetadata from 'helix-auth-svc/lib/features/login/domain/usecases
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
 import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 import GetSamlConfiguration from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlConfiguration.js'
+import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('GetSamlConfiguration use case', function () {
   const settingsRepository = new MapSettingsRepository()
+  const tidyAuthProviders = TidyAuthProviders()
   let usecase
 
   before(function () {
     const fetchSamlMetadata = FetchSamlMetadata()
     const getSamlAuthnContext = GetSamlAuthnContext({ settingsRepository })
-    const getAuthProviders = GetAuthProviders({ settingsRepository })
+    const getAuthProviders = GetAuthProviders({ settingsRepository, tidyAuthProviders })
     usecase = GetSamlConfiguration({
       fetchSamlMetadata,
       getSamlAuthnContext,

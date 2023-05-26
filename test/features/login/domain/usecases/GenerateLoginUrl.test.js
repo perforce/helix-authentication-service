@@ -7,13 +7,15 @@ import { before, beforeEach, describe, it } from 'mocha'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import GenerateLoginUrl from 'helix-auth-svc/lib/features/login/domain/usecases/GenerateLoginUrl.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
+import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('GenerateLoginUrl use case', function () {
   const settingsRepository = new MapSettingsRepository()
+  const tidyAuthProviders = TidyAuthProviders()
   let usecase
 
   before(function () {
-    const getAuthProviders = GetAuthProviders({ settingsRepository })
+    const getAuthProviders = GetAuthProviders({ settingsRepository, tidyAuthProviders })
     usecase = GenerateLoginUrl({ settingsRepository, getAuthProviders })
   })
 

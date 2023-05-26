@@ -10,6 +10,7 @@ import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositori
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
+import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('GetAuthProviders use case', function () {
   const temporaryRepository = new MapSettingsRepository()
@@ -25,7 +26,8 @@ describe('GetAuthProviders use case', function () {
   let usecase
 
   before(function () {
-    usecase = GetAuthProviders({ settingsRepository })
+    const tidyAuthProviders = TidyAuthProviders()
+    usecase = GetAuthProviders({ settingsRepository, tidyAuthProviders })
   })
 
   beforeEach(function () {
@@ -33,7 +35,8 @@ describe('GetAuthProviders use case', function () {
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => GetAuthProviders({ settingsRepository: null }), AssertionError)
+    assert.throws(() => GetAuthProviders({ settingsRepository: null, tidyAuthProviders: {} }), AssertionError)
+    assert.throws(() => GetAuthProviders({ settingsRepository: {}, tidyAuthProviders: null }), AssertionError)
   })
 
   it('should raise error for malformed input', async function () {
