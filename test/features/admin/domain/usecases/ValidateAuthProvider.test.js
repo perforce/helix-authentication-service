@@ -41,7 +41,7 @@ describe('ValidateAuthProvider use case', function () {
     const provider = {
       clientId: "client-id",
       // name a clientSecretFile that actually exists
-      clientSecretFile: "README.md",
+      clientSecretFile: "package.json",
       issuerUri: "https://oidc.example.com",
       selectAccount: "false",
       signingAlgo: "RS256",
@@ -72,7 +72,7 @@ describe('ValidateAuthProvider use case', function () {
   it('should approve a valid saml(file) auth provider', async function () {
     // arrange
     const provider = {
-      metadataFile: "README.md",
+      metadataFile: "package.json",
       label: "Provider",
       protocol: "saml",
       id: "saml-1"
