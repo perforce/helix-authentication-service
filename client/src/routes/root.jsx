@@ -6,7 +6,8 @@ import {
   Alert,
   Button,
   Container,
-  Stack
+  Stack,
+  Typography
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { useGetAllProvidersQuery, useDeleteProviderMutation } from '~/app/services/auth'
@@ -28,7 +29,14 @@ export default function Root() {
   } else {
     const providers = deserialize(data)
     if (providers.length === 0) {
-      return <div>no providers configured</div>
+      return (
+        <Container maxWidth='sm' sx={{ my: 2 }}>
+          <Stack spacing={4}>
+            <Typography variant="h5">No Authentication Integrated</Typography>
+            <Button onClick={() => navigate('/new')} variant='contained'>Add Authentication</Button>
+          </Stack>
+        </Container >
+      )
     } else {
       return (
         <Container maxWidth='lg' sx={{ my: 2 }}>

@@ -19,6 +19,7 @@ export const auth = createApi({
       return headers
     },
   }),
+  tagTypes: ['Providers'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -38,6 +39,7 @@ export const auth = createApi({
     }),
     getAllProviders: builder.query({
       query: () => `settings/providers`,
+      providesTags: (_) => ['Providers'],
     }),
     getOneProvider: builder.query({
       query: (providerId) => `settings/providers/${providerId}`,
@@ -59,6 +61,7 @@ export const auth = createApi({
         })
         return apply
       },
+      invalidatesTags: (_) => ['Providers'],
     }),
     putProvider: builder.mutation({
       // perform both the update and apply as a single redux action
@@ -77,6 +80,7 @@ export const auth = createApi({
         })
         return apply
       },
+      invalidatesTags: (_) => ['Providers'],
     }),
     deleteProvider: builder.mutation({
       // perform both the delete and apply as a single redux action
@@ -94,6 +98,7 @@ export const auth = createApi({
         })
         return apply
       },
+      invalidatesTags: (_) => ['Providers'],
     }),
   }),
 })

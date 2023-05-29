@@ -10,13 +10,18 @@ import { temporaryFile } from 'tempy'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
 import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertFromProviders.js'
 import WriteConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/WriteConfiguration.js'
+import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
+import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('WriteConfiguration use case', function () {
   let usecase
 
   before(function () {
     const configRepository = new ConfigurationRepository()
-    const convertFromProviders = ConvertFromProviders()
+    const convertFromProviders = ConvertFromProviders({
+      tidyAuthProviders: TidyAuthProviders(),
+      validateAuthProvider: ValidateAuthProvider()
+    })
     usecase = WriteConfiguration({ configRepository, convertFromProviders })
   })
 
@@ -277,9 +282,11 @@ describe('WriteConfiguration use case', function () {
     const providers = [{
       label: 'Acme Identity',
       protocol: 'saml',
+      metadataUrl: 'https://saml1.example.com'
     }, {
       label: 'Coyote Security',
-      protocol: 'saml'
+      protocol: 'saml',
+      metadataUrl: 'https://saml2.example.com'
     }]
     settings.set('AUTH_PROVIDERS', providers)
     await usecase(settings)
