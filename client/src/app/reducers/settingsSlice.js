@@ -7,7 +7,6 @@ import { auth } from '~/app/services/auth'
 const slice = createSlice({
   name: 'settings',
   initialState: {
-    providers: null,
     fetched: null,
     modified: null
   },
@@ -28,12 +27,6 @@ const slice = createSlice({
       }
     )
     builder.addMatcher(
-      auth.endpoints.getAllProviders.matchFulfilled,
-      (state, { payload }) => {
-        state.providers = payload.providers
-      }
-    )
-    builder.addMatcher(
       auth.endpoints.putProvider.matchFulfilled,
       (state, { payload }) => {
         state.modified = null
@@ -47,6 +40,5 @@ export const { applyChanges, discardChanges } = slice.actions
 
 export default slice.reducer
 
-export const selectProviders = (state) => state.settings.providers
 export const selectFetched = (state) => state.settings.fetched
 export const selectModified = (state) => state.settings.modified
