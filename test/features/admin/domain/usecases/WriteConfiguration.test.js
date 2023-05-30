@@ -7,6 +7,7 @@ import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
 import { temporaryFile } from 'tempy'
+import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
 import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertFromProviders.js'
 import WriteConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/WriteConfiguration.js'
@@ -18,11 +19,12 @@ describe('WriteConfiguration use case', function () {
 
   before(function () {
     const configRepository = new ConfigurationRepository()
+    const defaultsRepository = new DefaultsEnvRepository()
     const convertFromProviders = ConvertFromProviders({
       tidyAuthProviders: TidyAuthProviders(),
       validateAuthProvider: ValidateAuthProvider()
     })
-    usecase = WriteConfiguration({ configRepository, convertFromProviders })
+    usecase = WriteConfiguration({ configRepository, defaultsRepository, convertFromProviders })
   })
 
   after(function () {
@@ -30,8 +32,21 @@ describe('WriteConfiguration use case', function () {
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => WriteConfiguration({ configRepository: null, convertFromProviders: {} }), AssertionError)
-    assert.throws(() => WriteConfiguration({ configRepository: {}, convertFromProviders: null }), AssertionError)
+    assert.throws(() => WriteConfiguration({
+      configRepository: null,
+      defaultsRepository: {},
+      convertFromProviders: {}
+    }), AssertionError)
+    assert.throws(() => WriteConfiguration({
+      configRepository: {},
+      defaultsRepository: null,
+      convertFromProviders: {}
+    }), AssertionError)
+    assert.throws(() => WriteConfiguration({
+      configRepository: {},
+      defaultsRepository: {},
+      convertFromProviders: null
+    }), AssertionError)
   })
 
   it('should write values to the repository', async function () {
@@ -351,6 +366,30 @@ describe('WriteConfiguration use case', function () {
     // act
     const settings = new Map()
     settings.set('SAML_IDP_METADATA', '<xml><something/></xml>')
+    await usecase(settings)
+    // assert
+    assert.isTrue(readStub.calledOnce)
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
+
+  it('should filter unmodified default settings', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.equal(settings.get('CACHE_TTL'), 600)
+    })
+    // act
+    const settings = new Map()
+    settings.set('LOGIN_TIMEOUT', 60)
+    settings.set('OIDC_SELECT_ACCOUNT', false)
+    settings.set('OIDC_TOKEN_SIGNING_ALGO', 'RS256')
+    settings.set('CACHE_TTL', 600)
     await usecase(settings)
     // assert
     assert.isTrue(readStub.calledOnce)
