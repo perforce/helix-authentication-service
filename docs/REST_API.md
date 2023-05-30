@@ -29,19 +29,21 @@ The adminstrative (REST) interface to the service consists of two sets of endpoi
 1. Refresh the service to apply the new settings via `POST /settings/apply`
 1. End the administrative session by deleting the JWT from the in-memory registry via `DELETE /tokens`
 
-#### Temporary Settings
+#### Managing Providers
 
-The REST API provides a means of making changes to the setttings in a temporary fashion, allowing an administrator to try the changes before committing them to the configuration file. If the changes are discarded, or the service is restarted, then the service will use the configuration as defined by the environment variables (typically with the `.env` file).
+The authentication providers can be modified via the REST API in a manner similar to the overall application settings. The difference is that the providers API is for adding, modifying, and deleting authentication providers, without regards to other application settings. The steps involved would look something like this:
 
-To define settings changes temporarily:
+1. Pass the administrative user's credentials via `POST /tokens` and receieve the JWT in the response body. The remaining operations will require the JWT to be passed as a bearer token.
+1. Retrieve the available providers via `GET /settings/providers`
+1. Add a new provider via `POST /settings/providers`
+1. Update an existing provider via `PUT /settings/providers/:providerId`
+1. Delete an existing provider via `DELETE /settings/providers/:providerId`
+1. Refresh the service to apply the new providers via `POST /settings/apply`
+1. End the administrative session by deleting the JWT from the in-memory registry via `DELETE /tokens`
 
-1. Update some or all of the settings via `POST /settings/temp`
-1. Refresh the service to apply the new settings via `POST /settings/apply`
+#### Configuration File
 
-To remove the temporary settings and return to the saved configuration:
-
-1. Clear all of the temporary settings via `DELETE /settings/temp`
-1. Refresh the service to reload the previous settings via `POST /settings/apply`
+Note that any of the `POST`, `PUT`, and `DELETE` operations will result in configuration changes being written to the `.env` configuration file. As a result, any comments in that file will be lost.
 
 ## Routes
 
@@ -200,8 +202,6 @@ Update some or all of the settings with new values. The JSON Web Token from `/to
 Note that certain settings cannot be modified via this endpoint, including `ADMIN_ENABLED`, 
 `ADMIN_PASSWD_FILE`, and `ADMIN_USERNAME`.
 
-Note that calling this endpoint will overwrite the `.env` file, completely wiping out any comments.
-
 #### Request Headers
 
 | Name | Description |
@@ -239,12 +239,57 @@ curl -k --oauth2-bearer eyJ.<snip>.glw -X POST https://auth-service/settings/app
 
 The response body will be `{"status": "ok"}` unless an error occurred.
 
-### POST /settings/temp
+### GET /settings/providers
 
-Update some or all of the settings with new values, saving them temporarily. Any settings defined in this way will override the stored configuration and any defaults. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header. The new settings are to be provided via the request body in JSON format.
+Retrieve all of the authentication providers that have defined values. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header.
 
-Note that certain settings cannot be modified via this endpoint, including `ADMIN_ENABLED`, 
-`ADMIN_PASSWD_FILE`, and `ADMIN_USERNAME`.
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ.<snip>.glw https://auth-service/settings/providers
+```
+
+#### Response Example
+
+```json
+{
+    "providers": [
+        {
+            "clientId": "client-id",
+            "clientSecret": "client-secret",
+            "label": "oidc.example.com",
+            "issuerUri": "https://oidc.example.com/issuer",
+            "selectAccount": true,
+            "signingAlgo": "RS256",
+            "protocol": "oidc",
+            "id": "oidc"
+        },
+        {
+            "authnContext": "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
+            "metadataUrl": "https://saml.example.com/metadata",
+            "label": "saml.example.com",
+            "nameIdFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+            "spEntityId": "https://has.example.com",
+            "wantAssertionSigned": true,
+            "wantResponseSigned": true,
+            "keyAlgorithm": "sha256",
+            "protocol": "saml",
+            "id": "saml",
+            "default": true
+        }
+    ]
+}
+```
+
+### POST /settings/providers
+
+Add a new authentication provider. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header. The new provider definition is to be provided via the request body in JSON format.
 
 #### Request Headers
 
@@ -256,16 +301,25 @@ Note that certain settings cannot be modified via this endpoint, including `ADMI
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ.<snip>.glw -X POST -H 'Content-Type: application/json' -d '{"DEFAULT_PROTOCOL":"saml"}' https://auth-service/settings/temp
+curl -k --oauth2-bearer eyJ.<snip>.glw -X POST -H 'Content-Type: application/json' -d '{"clientId": "client-id", "clientSecret": "client-secret", "issuerUri": "https://oidc.example.com/issuer"}' https://auth-service/settings/providers
 ```
 
 #### Response Example
 
-The response body will be `{"status": "ok"}` unless an error occurred.
+The response body will look something like this, unless an error occurred.
 
-### DELETE /settings/temp
+```json
+{
+    "status": "ok",
+    "id": "oidc-2"
+}
+```
 
-This will remove the temporary settings, if any, as provided via `POST /settings/temp`. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header.
+The `id` property provides the unique identifier for this provider. Note that the identifiers are not persisted between restarts of the service, and may change when providers are added or removed.
+
+### GET /settings/providers/:providerId
+
+Retrieve the properties of a single authentication provider. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header.
 
 #### Request Headers
 
@@ -276,7 +330,59 @@ This will remove the temporary settings, if any, as provided via `POST /settings
 #### Request Example
 
 ```shell
-curl -k --oauth2-bearer eyJ.<snip>.glw -X DELETE https://auth-service/settings/temp
+curl -k --oauth2-bearer eyJ.<snip>.glw https://auth-service/settings/providers/oidc
+```
+
+#### Response Example
+
+```json
+{
+    "clientId": "client-id",
+    "clientSecret": "client-secret",
+    "label": "oidc.example.com",
+    "issuerUri": "https://oidc.example.com/issuer",
+    "selectAccount": true,
+    "signingAlgo": "RS256",
+    "protocol": "oidc",
+    "id": "oidc"
+}
+```
+
+### PUT /settings/providers/:providerId
+
+Update an existing authentication provider. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header. The updated provider definition is to be provided via the request body in JSON format.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
+| `Content-Type` | Always `application/json` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ.<snip>.glw -X PUT -H 'Content-Type: application/json' -d '{"clientId": "client-id", "clientSecret": "client-secret", "issuerUri": "https://oidc.example.com/issuer"}' https://auth-service/settings/providers/oidc
+```
+
+#### Response Example
+
+The response body will be `{"status": "ok"}` unless an error occurred.
+
+### DELETE /settings/providers/:providerId
+
+Remove an existing authentication provider. The JSON Web Token from `/tokens` must be provided as a bearer token via the `Authorization` header.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Authorization` | `Bearer ` plus the JSON web token from `/tokens` |
+
+#### Request Example
+
+```shell
+curl -k --oauth2-bearer eyJ.<snip>.glw -X DELETE https://auth-service/settings/providers/oidc
 ```
 
 #### Response Example
