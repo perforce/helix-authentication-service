@@ -58,12 +58,14 @@ export default function Editor({ protocol }) {
     return (
       <FormProvider {...methods} >
         <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <Container maxWidth='lg' sx={{ my: 2 }}>
-            {applyError && <Alert severity='error'>{applyError}</Alert>}
-            {protocol === 'saml' ? <SamlEditor /> : <OidcEditor />}
-            <Stack spacing={4} direction="row">
-              <Button onClick={() => navigate('/')} variant='outlined'>Cancel</Button>
-              <Button type='submit' variant='contained'>Update</Button>
+          <Container maxWidth='lg' sx={{ my: 4 }}>
+            <Stack spacing={4} justifyContent="space-around">
+              {applyError && <Alert severity='error'>{applyError}</Alert>}
+              {protocol === 'saml' ? <SamlEditor /> : <OidcEditor />}
+              <Stack spacing={4} direction="row">
+                <Button onClick={() => navigate('/')} variant='outlined'>Cancel</Button>
+                <Button type='submit' variant='contained'>Update</Button>
+              </Stack>
             </Stack>
           </Container>
         </form>

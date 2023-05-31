@@ -130,7 +130,13 @@ export default function Wizard() {
                 {
                   activeStep === steps.length - 1 ?
                     <Button onClick={handleSubmit} variant='contained'>Save</Button> :
-                    <Button onClick={handleNext} variant='contained'>Next</Button>
+                    <Button
+                      onClick={handleNext}
+                      variant='contained'
+                      disabled={activeStep === 0 && provider == null}
+                    >
+                      Next
+                    </Button>
                 }
               </Stack>
             </Stack>

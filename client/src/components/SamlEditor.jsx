@@ -6,6 +6,7 @@ import {
   Controller,
   useFormContext
 } from 'react-hook-form'
+import { TabContext, TabList, TabPanel } from '@mui/lab';
 import {
   Box,
   Checkbox,
@@ -19,54 +20,39 @@ import {
   OutlinedInput,
   Stack,
   Tab,
-  Tabs,
   Typography
 } from '@mui/material'
 
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
-
 // Must be contained within a FormProvider component.
 export default function SamlEditor() {
-  const [selectedTab, setSelectedTab] = React.useState(0)
+  const [selectedTab, setSelectedTab] = React.useState('1')
 
   const selectTab = (event, newValue) => {
     setSelectedTab(newValue)
   }
 
+  // The fixed height of 500px is a hack to get the container to be a consistent
+  // size when switching tabs, preventing the buttons (in the parent element)
+  // from moving up and down as the user switches tabs.
   return (
-    <Container>
-      <Typography variant="h6">
+    <Container sx={{ height: "500px" }}>
+      <Typography variant="h6" sx={{ py: 2 }}>
         Enter Details
       </Typography>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={selectedTab} onChange={selectTab}>
-          <Tab label="Basic Integration" />
-          <Tab label="Advanced Options" />
-        </Tabs>
-      </Box>
-      <TabPanel value={selectedTab} index={0}>
-        <BasicOptions />
-      </TabPanel>
-      <TabPanel value={selectedTab} index={1}>
-        <AdvancedOptions />
-      </TabPanel>
+      <TabContext value={selectedTab}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <TabList onChange={selectTab}>
+            <Tab label="Basic Integration" value="1" />
+            <Tab label="Advanced Options" value="2" />
+          </TabList>
+        </Box>
+        <TabPanel value="1">
+          <BasicOptions />
+        </TabPanel>
+        <TabPanel value="2">
+          <AdvancedOptions />
+        </TabPanel>
+      </TabContext>
     </Container>
   )
 }

@@ -41,7 +41,9 @@ export default function Root() {
       return (
         <Container maxWidth='lg' sx={{ my: 2 }}>
           <Stack spacing={4}>
-            <Button onClick={() => navigate('/new')} variant='contained'>Add Authentication</Button>
+            <Stack direction="row" justifyContent="flex-end">
+              <Button onClick={() => navigate('/new')} variant='contained'>Add Authentication</Button>
+            </Stack>
             <Providers providers={providers} onDelete={handleDelete} />
           </Stack>
         </Container >

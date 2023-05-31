@@ -37,6 +37,23 @@ const ActionsButton = ({ provider, onDelete }) => {
     setAnchorEl(null)
   }
 
+  const handleTestLogin = () => {
+    setAnchorEl(null)
+    fetch(`/requests/new/test?providerId=${provider.id}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Unable to get login URL (status ${response.status})`)
+        }
+        return response.json()
+      })
+      .then((response) => {
+        window.open(response.loginTestUrl, '_blank')
+      })
+      .catch((err) => {
+        console.error(err.message)
+      })
+  }
+
   return (
     <React.Fragment>
       <Tooltip title="Actions">
@@ -83,7 +100,7 @@ const ActionsButton = ({ provider, onDelete }) => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleTestLogin}>
           <ListItemIcon>
             <icons.PlayArrow fontSize="small" />
           </ListItemIcon>
@@ -114,7 +131,7 @@ const ActionsButton = ({ provider, onDelete }) => {
 
 const OidcProviderCard = ({ provider, onDelete }) => {
   return (
-    <Card sx={{ minWidth: 275 }}>
+    <Card sx={{ minWidth: 275, height: "100%" }}>
       <CardContent>
         <Typography>
           {provider.label}
@@ -141,7 +158,7 @@ const OidcProviderCard = ({ provider, onDelete }) => {
 
 const SamlProviderCard = ({ provider, onDelete }) => {
   return (
-    <Card sx={{ minWidth: 275 }}>
+    <Card sx={{ minWidth: 275, height: "100%" }}>
       <CardContent>
         <Typography>
           {provider.label}

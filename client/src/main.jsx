@@ -7,6 +7,7 @@ import {
   Alert,
   Container,
   Paper,
+  Stack,
   Typography
 } from '@mui/material'
 import {
@@ -19,6 +20,7 @@ import {
 } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { store } from '~/app/store'
+import ButtonAppBar from '~/components/ButtonAppBar'
 import { useAuth } from '~/hooks/useAuth'
 import Editor, { loader as editLoader } from '~/routes/edit'
 import Login from '~/routes/login'
@@ -49,7 +51,10 @@ export default function PrivateOutlet() {
   const location = useLocation()
 
   return auth.token ? (
-    <Outlet />
+    <Stack>
+      <ButtonAppBar />
+      <Outlet />
+    </Stack>
   ) : (
     <Navigate to="/login" state={{ from: location }} />
   )

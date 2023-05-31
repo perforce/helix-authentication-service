@@ -8,46 +8,18 @@ import {
   Box,
   Card,
   CardContent,
-  Container,
   FormControl,
   FormHelperText,
   Grid,
-  IconButton,
-  InputAdornment,
+  InputLabel,
   OutlinedInput,
   Stack,
   Typography,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useLoginMutation } from '~/app/services/auth'
-
-function PasswordInput({ register }) {
-  const [show, setShow] = useState(false)
-  const handleClick = () => setShow(!show)
-  const handleMouseDown = (event) => event.preventDefault()
-
-  return (
-    <OutlinedInput
-      type={show ? 'text' : 'password'}
-      placeholder="Password"
-      {...register("password", { required: true })}
-      endAdornment={
-        <InputAdornment position="end">
-          <IconButton
-            aria-label="toggle password visibility"
-            onClick={handleClick}
-            onMouseDown={handleMouseDown}
-            edge="end"
-          >
-            {show ? <VisibilityOff /> : <Visibility />}
-          </IconButton>
-        </InputAdornment>
-      }
-    />
-  )
-}
+import PasswordInput from '~/components/PasswordInput'
 
 export const Login = () => {
   const { register, handleSubmit, formState: { errors, touchedFields } } = useForm({ mode: 'onBlur' })
@@ -56,23 +28,26 @@ export const Login = () => {
   const [login, { isLoading }] = useLoginMutation()
 
   return (
-    <form onSubmit={handleSubmit((data) => {
-      login(data).unwrap()
-        .then(() => {
-          navigate('/')
-        }).catch((err) => {
-          setError(err.data.message || 'Oh no, there was an error!')
-        })
-    })}>
-      <Grid container justifyContent="space-around">
-        <Grid item xs={4} sx={{ backgroundColor: 'primary.main' }}>
-          <Box ml={2} mt={4} padding={2}>
+    <Grid container alignItems="stretch" justifyContent="space-around" style={{ height: "100vh" }}>
+      <Grid item xs={4} sx={{ backgroundColor: 'primary.main' }}>
+        <Box ml={2} mt={4} padding={2}>
+          <Stack direction="row" spacing={4}>
+            <img src="/images/apps-p4mfa-light.png" alt="logo" width="48" height="48" />
             <Typography variant="h5" component="div" sx={{ color: "#FFFFFF" }}>
               Helix Authentication Service
             </Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={8}>
+          </Stack>
+        </Box>
+      </Grid>
+      <Grid item xs={8}>
+        <form onSubmit={handleSubmit((data) => {
+          login(data).unwrap()
+            .then(() => {
+              navigate('/')
+            }).catch((err) => {
+              setError(err.data.message || 'Oh no, there was an error!')
+            })
+        })}>
           <Card variant='outlined' sx={{ margin: '128px', padding: '128px' }}>
             <CardContent>
               <Stack spacing={4}>
@@ -84,9 +59,12 @@ export const Login = () => {
                   Welcome back!
                 </Box>
                 <FormControl error={errors.username && touchedFields.username}>
+                  <InputLabel htmlFor="username">Username</InputLabel>
                   <OutlinedInput
                     type="text"
-                    placeholder="Username"
+                    id="username"
+                    name="username"
+                    label="Username"
                     {...register("username", { required: true })}
                   />
                   <FormHelperText>{
@@ -94,12 +72,13 @@ export const Login = () => {
                   }</FormHelperText>
                 </FormControl>
                 <FormControl error={errors.password && touchedFields.password}>
-                  <PasswordInput register={register} />
+                  <InputLabel htmlFor="password">Password</InputLabel>
+                  <PasswordInput name="password" label="Password" required={true} register={register} />
                   <FormHelperText>{
                     errors.password?.type === 'required' && 'Password is required'
                   }</FormHelperText>
                 </FormControl>
-                <Container>
+                <Stack direction="row" justifyContent="center">
                   <LoadingButton
                     type="submit"
                     variant="contained"
@@ -107,13 +86,13 @@ export const Login = () => {
                   >
                     Log in
                   </LoadingButton>
-                </Container>
+                </Stack>
               </Stack>
             </CardContent>
           </Card>
-        </Grid>
+        </form>
       </Grid>
-    </form>
+    </Grid>
   )
 }
 
