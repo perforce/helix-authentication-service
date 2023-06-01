@@ -17,6 +17,7 @@ import {
   Stepper,
   Typography
 } from '@mui/material'
+import LockIcon from '@mui/icons-material/Lock';
 import { useForm, FormProvider } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { usePostProviderMutation } from '~/app/services/auth'
@@ -25,12 +26,12 @@ import SamlEditor from '~/components/SamlEditor'
 
 const steps = ['Select Identity Provider', 'Select Protocol', 'Enter Details']
 const providers = [
-  { id: 'okta', label: 'Okta' },
-  { id: 'auth0', label: 'Auth0' },
-  { id: 'aad', label: 'Azure AD' },
-  { id: 'one', label: 'OneLogin' },
-  { id: 'goog', label: 'Google Workspace' },
-  { id: 'ping', label: 'PingFederate' },
+  { id: 'okta', label: 'Okta', icon: 'okta-logo.svg', width: 64, heigth: 64 },
+  { id: 'auth0', label: 'Auth0', icon: 'auth0-logo.svg', width: 96, heigth: 96 },
+  { id: 'aad', label: 'Azure AD', icon: 'azure-logo.svg', width: 48, heigth: 48 },
+  { id: 'one', label: 'OneLogin', icon: 'onelogin-logo.svg', width: 96, heigth: 96 },
+  { id: 'goog', label: 'Google Workspace', icon: 'google-logo.svg', width: 48, heigth: 48 },
+  { id: 'ping', label: 'PingFederate', icon: 'ping-logo.svg', width: 128, heigth: 128 },
   { id: 'cust', label: 'Custom Identity Provider ' }
 ]
 
@@ -147,6 +148,18 @@ export default function Wizard() {
   )
 }
 
+const makeProviderIcon = (provider) => {
+  if (provider.icon) {
+    return (
+      <img src={`/images/${provider.icon}`} alt="logo" width={provider.width} height={provider.height} />
+    )
+  } else {
+    return (
+      <LockIcon sx={{ fontSize: 64 }} />
+    )
+  }
+}
+
 // value will be the provider `id` as defined in the providers list
 function ProviderChooser({ onSelect, value }) {
   return (
@@ -156,12 +169,17 @@ function ProviderChooser({ onSelect, value }) {
       </Typography>
       <Grid container spacing={2}>
         {providers.map((p) => (
-          <Grid item xs={4} key={p.id}>
+          <Grid item xs={3} key={p.id}>
             <Button
               onClick={() => onSelect(p.id)}
-              variant={value === p.id ? 'contained' : 'outlined'}
+              variant='outlined'
+              style={value === p.id ? { border: '2px solid' } : {}}
+              sx={{ width: "100%", height: "100%" }}
             >
-              {p.label}
+              <Stack alignItems="center" spacing={4} justifyContent="space-around">
+                {makeProviderIcon(p)}
+                <Typography>{p.label}</Typography>
+              </Stack>
             </Button>
           </Grid>
         ))}
