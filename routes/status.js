@@ -43,7 +43,7 @@ async function validateOpenID () {
     for (const elem of providers) {
       if ('issuerUri' in elem) {
         const result = await status.validateOpenID(elem.issuerUri)
-        results[elem.label] = result
+        results[elem.id] = result
       }
     }
     return results
@@ -60,7 +60,7 @@ async function validateSaml () {
     for (const elem of providers) {
       if ('metadataUrl' in elem) {
         const result = await status.validateSaml(elem.metadataUrl)
-        results[elem.label] = result
+        results[elem.id] = result
       }
     }
     return results

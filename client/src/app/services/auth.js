@@ -37,6 +37,9 @@ export const auth = createApi({
     getSettings: builder.query({
       query: () => 'settings',
     }),
+    getStatus: builder.query({
+      query: () => 'status',
+    }),
     getAllProviders: builder.query({
       query: () => `settings/providers`,
       providesTags: (_) => ['Providers'],
@@ -109,6 +112,7 @@ export const {
   useGetAllProvidersQuery,
   useGetOneProviderQuery,
   useGetSettingsQuery,
+  useGetStatusQuery,
   usePostProviderMutation,
   usePutProviderMutation,
   useDeleteProviderMutation,

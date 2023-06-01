@@ -3,6 +3,7 @@
 //
 import React from 'react'
 import {
+  Alert,
   Box,
   Card,
   CardActions,
@@ -12,11 +13,20 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
-import * as icons from '@mui/icons-material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import EditIcon from '@mui/icons-material/Edit';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import WarningIcon from '@mui/icons-material/Warning';
 import { useNavigate } from 'react-router-dom'
+import { useGetStatusQuery } from '~/app/services/auth'
+import { green, red } from '@mui/material/colors';
 
 const ActionsButton = ({ provider, onDelete }) => {
   const navigate = useNavigate()
@@ -62,7 +72,7 @@ const ActionsButton = ({ provider, onDelete }) => {
           size="small"
           sx={{ ml: 2 }}
         >
-          <icons.MoreVert fontSize="small" />
+          <MoreVertIcon fontSize="small" />
         </IconButton>
       </Tooltip>
       <Menu
@@ -102,25 +112,25 @@ const ActionsButton = ({ provider, onDelete }) => {
       >
         <MenuItem onClick={handleTestLogin}>
           <ListItemIcon>
-            <icons.PlayArrow fontSize="small" />
+            <PlayArrowIcon fontSize="small" />
           </ListItemIcon>
           Test Integration
         </MenuItem>
         <MenuItem onClick={() => navigate(editUrl)}>
           <ListItemIcon>
-            <icons.Edit fontSize="small" />
+            <EditIcon fontSize="small" />
           </ListItemIcon>
           Edit
         </MenuItem>
         <MenuItem onClick={handleClose}>
           <ListItemIcon>
-            <icons.Download fontSize="small" />
+            <DownloadIcon fontSize="small" />
           </ListItemIcon>
           Download settings file
         </MenuItem>
         <MenuItem onClick={handleDelete}>
           <ListItemIcon>
-            <icons.Delete fontSize="small" />
+            <DeleteIcon fontSize="small" />
           </ListItemIcon>
           Delete
         </MenuItem>
@@ -129,79 +139,99 @@ const ActionsButton = ({ provider, onDelete }) => {
   )
 }
 
-const OidcProviderCard = ({ provider, onDelete }) => {
+const OidcProviderDetails = ({ provider }) => {
   return (
-    <Card sx={{ minWidth: 275, height: "100%" }}>
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle2">
+        Issuer URI:
+      </Typography>
+      <Typography>
+        {provider.issuerUri}
+      </Typography>
+    </Box>
+  )
+}
+
+const SamlProviderDetails = ({ provider }) => {
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle2">
+        Metadata URL:
+      </Typography>
+      <Typography>
+        {provider.metadataUrl}
+      </Typography>
+    </Box>
+  )
+}
+
+const ProviderCard = ({ provider, onDelete, status }) => {
+  const detailsComponent = provider.protocol === 'oidc' ?
+    OidcProviderDetails({ provider, onDelete }) :
+    SamlProviderDetails({ provider, onDelete })
+  // would have used colors "success" and "warning" but they don't look
+  // exactly like the colors in the proposed design
+  const statusComponent = status === 'ok' ? (
+    <Tooltip title="Status: ok">
+      <CheckCircleIcon fontSize="small" sx={{ color: green['400'] }} />
+    </Tooltip>
+  ) : (
+    <Tooltip title={`Status: ${status}`}>
+      <WarningIcon fontSize="small" sx={{ color: red['900'] }} />
+    </Tooltip>
+  )
+  return (
+    <Card sx={{
+      minWidth: 275, height: "100%", display: "flex", flexDirection: "column"
+    }}>
       <CardContent>
-        <Typography>
-          {provider.label}
-        </Typography>
-        <Typography variant="subtitle2">
-          Issuer URI:
-        </Typography>
-        <Typography>
-          {provider.issuerUri}
-        </Typography>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography color="text.secondary" sx={{ mb: 4 }}>
+            {provider.label}
+          </Typography>
+          {statusComponent}
+        </Stack>
+        {detailsComponent}
         <Typography variant="subtitle2">
           Protocol:
         </Typography>
-        <Typography variant="overline">
-          {provider.protocol}
+        <Typography variant="body2">
+          {provider.protocol.toUpperCase()}
         </Typography>
       </CardContent>
-      <CardActions>
+      <CardActions disableSpacing sx={{
+        mt: "auto", display: "flex", justifyContent: "flex-end"
+      }}>
         <ActionsButton provider={provider} onDelete={onDelete} />
       </CardActions>
     </Card>
   )
-}
-
-const SamlProviderCard = ({ provider, onDelete }) => {
-  return (
-    <Card sx={{ minWidth: 275, height: "100%" }}>
-      <CardContent>
-        <Typography>
-          {provider.label}
-        </Typography>
-        <Typography variant="subtitle2">
-          Metadata URL:
-        </Typography>
-        <Typography>
-          {provider.metadataUrl}
-        </Typography>
-        <Typography variant="subtitle2">
-          Protocol:
-        </Typography>
-        <Typography variant="overline">
-          {provider.protocol}
-        </Typography>
-      </CardContent>
-      <CardActions>
-        <ActionsButton provider={provider} onDelete={onDelete} />
-      </CardActions>
-    </Card>
-  )
-}
-
-const ProviderCard = ({ provider, onDelete }) => {
-  return provider.protocol === 'oidc' ?
-    OidcProviderCard({ provider, onDelete }) :
-    SamlProviderCard({ provider, onDelete })
 }
 
 export default function Providers({ providers, onDelete }) {
-  return (
-    <Box>
-      <Typography>
-        Authentication Integrations
-      </Typography>
-      <Grid container spacing={2}>
-        {providers.map((p) => (
-          <Grid item xs={4} key={p.id}>
-            <ProviderCard provider={p} onDelete={onDelete} />
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
-  )
+  const { data, error, isLoading } = useGetStatusQuery()
+  if (isLoading) {
+    return (
+      <Alert severity='info'>Fetching provider status...</Alert>
+    )
+  } else if (error) {
+    return (
+      <Alert severity='error'>{JSON.stringify(error)}</Alert>
+    )
+  } else {
+    return (
+      <Box>
+        <Typography>
+          Authentication Integrations
+        </Typography>
+        <Grid container spacing={2}>
+          {providers.map((p) => (
+            <Grid item xs={4} key={p.id}>
+              <ProviderCard provider={p} onDelete={onDelete} status={data[p.protocol][p.id]} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    )
+  }
 }
