@@ -23,10 +23,11 @@ describe('AddAuthProvider use case', function () {
     processEnvRepository,
     defaultsRepository
   })
-  const tidyAuthProviders = TidyAuthProviders()
+  const validateAuthProvider = ValidateAuthProvider()
+  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider })
   const usecase = AddAuthProvider({
     getAuthProviders: GetAuthProviders({ settingsRepository, tidyAuthProviders }),
-    validateAuthProvider: ValidateAuthProvider(),
+    validateAuthProvider,
     tidyAuthProviders
   })
 
@@ -67,7 +68,7 @@ describe('AddAuthProvider use case', function () {
       selectAccount: 'false',
       signingAlgo: 'RS256',
       label: 'Provider',
-      id: 'oidc-1'
+      id: 'xid123'
     }
     try {
       // act
@@ -95,11 +96,11 @@ describe('AddAuthProvider use case', function () {
     const providers = await usecase(provider)
     // assert
     assert.isArray(providers)
-    assert.lengthOf(providers, 3)
+    assert.lengthOf(providers, 1)
     const actual = providers.find((e) => e.clientId === 'client-id')
     assert.isNotNull(actual)
     // ensure provider has an assigned identifier
-    assert.match(provider.id, /^oidc-\d+/)
+    assert.equal(provider.id, 'oidc-0')
     assert.equal(provider.id, actual.id)
   })
 
@@ -115,7 +116,7 @@ describe('AddAuthProvider use case', function () {
           'signingAlgo': 'RS256',
           'label': 'oidc.example.com',
           'protocol': 'oidc',
-          'id': 'oidc-1'
+          'id': 'xid123'
         }
       ]
     }))
@@ -127,15 +128,53 @@ describe('AddAuthProvider use case', function () {
       signingAlgo: 'RS256',
       label: 'Provider',
       protocol: 'oidc',
-      id: 'oidc-1'
+      id: 'xid123'
     }
     // act
     const providers = await usecase(provider)
     // assert
     assert.isArray(providers)
-    assert.lengthOf(providers, 3)
+    assert.lengthOf(providers, 1)
     const actual = providers.find((e) => e.clientId === 'client-id')
     assert.isNotNull(actual)
-    assert.equal(actual.id, 'oidc-1')
+    assert.equal(actual.id, 'xid123')
+  })
+
+  it('should ignore default provider settings', async function () {
+    // arrange
+    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
+      providers: [
+        {
+          'clientId': 'client-id-1',
+          'clientSecret': 'client-secret-1',
+          'issuerUri': 'https://oidc1.example.com',
+          'label': 'oidc1.example.com',
+          'protocol': 'oidc',
+          'id': 'oidc-1'
+        },
+        {
+          'clientId': 'client-id-2',
+          'clientSecret': 'client-secret-2',
+          'issuerUri': 'https://oidc2.example.com',
+          'label': 'oidc2.example.com',
+          'protocol': 'oidc',
+          'id': 'oidc-2'
+        }
+      ]
+    }))
+    const provider = {
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml'
+    }
+    // act
+    const providers = await usecase(provider)
+    console.info(providers)
+    // assert
+    assert.isArray(providers)
+    assert.lengthOf(providers, 3)
+    assert.isTrue(providers.some((e) => e.id === 'saml'))
+    assert.isTrue(providers.some((e) => e.id === 'oidc-1'))
+    assert.isTrue(providers.some((e) => e.id === 'oidc-2'))
   })
 })

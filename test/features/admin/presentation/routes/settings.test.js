@@ -87,6 +87,20 @@ setTimeout(function () {
       })
 
       it('should fetch all auth providers', function (done) {
+        temporary.set('AUTH_PROVIDERS', JSON.stringify({
+          providers: [
+            {
+              clientId: 'unique-client-identifier',
+              clientSecret: 'shared secrets are bad',
+              issuerUri: 'https://oidc.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'oidc.example.com',
+              protocol: 'oidc',
+              id: 'oidc-1'
+            }
+          ]
+        }))
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings/providers')
@@ -97,12 +111,15 @@ setTimeout(function () {
             .expect(res => {
               assert.property(res.body, 'providers')
               const providers = res.body.providers
-              assert.lengthOf(providers, 2)
+              assert.lengthOf(providers, 1)
               const oidcProvider = providers.find((e) => e.protocol === 'oidc')
               assert.exists(oidcProvider)
               assert.propertyVal(oidcProvider, 'signingAlgo', 'RS256')
             })
-            .end(done)
+            .end(function (err) {
+              temporary.delete('AUTH_PROVIDERS')
+              done(err)
+            })
         })
       })
 
@@ -160,7 +177,7 @@ setTimeout(function () {
                 return done(err)
               }
               assert.equal(res.body.status, 'ok')
-              assert.equal(res.body.id, 'oidc-2')
+              assert.equal(res.body.id, 'oidc-0')
               const testenv = fs.readFileSync('test/test-dot.env', 'utf8')
               assert.include(testenv, 'https://oidc.example.com')
               done()

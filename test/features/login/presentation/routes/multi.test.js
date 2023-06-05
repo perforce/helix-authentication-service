@@ -44,8 +44,20 @@ setTimeout(function () {
     it('should return a page with multiple login URLs', function (done) {
       const providers = {
         providers: [
-          { label: 'Acme Identity', protocol: 'oidc' },
-          { label: 'Federated Enterprises', protocol: 'saml' },
+          {
+            label: 'Acme Identity',
+            issuerUri: 'https://oidc.example.com',
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+            protocol: 'oidc',
+            id: 'oidc'
+          },
+          {
+            label: 'Federated Enterprises',
+            metadataUrl: 'https://saml.example.com',
+            protocol: 'saml',
+            id: 'saml'
+          },
         ]
       }
       settings.set('AUTH_PROVIDERS', JSON.stringify(providers))

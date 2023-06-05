@@ -20,9 +20,10 @@ describe('WriteConfiguration use case', function () {
   before(function () {
     const configRepository = new ConfigurationRepository()
     const defaultsRepository = new DefaultsEnvRepository()
+    const validateAuthProvider = ValidateAuthProvider()
     const convertFromProviders = ConvertFromProviders({
-      tidyAuthProviders: TidyAuthProviders(),
-      validateAuthProvider: ValidateAuthProvider()
+      tidyAuthProviders: TidyAuthProviders({ validateAuthProvider }),
+      validateAuthProvider
     })
     usecase = WriteConfiguration({ configRepository, defaultsRepository, convertFromProviders })
   })
@@ -309,11 +310,16 @@ describe('WriteConfiguration use case', function () {
     try {
       assert.isTrue(readStub.calledOnce)
       assert.isTrue(writeStub.calledOnce)
-      const config = fs.readFileSync(providersFile, 'utf8')
-      assert.include(config, '"providers":[{')
-      assert.include(config, '"label":"Acme Identity"')
-      assert.include(config, '"protocol":"saml"')
-      assert.include(config, '"label":"Coyote Security"')
+      const contents = fs.readFileSync(providersFile, 'utf8')
+      const providers = JSON.parse(contents).providers
+      assert.equal(providers[0].label, 'Acme Identity')
+      assert.equal(providers[0].protocol, 'saml')
+      assert.equal(providers[0].metadataUrl, 'https://saml1.example.com')
+      assert.notProperty(providers[0], 'id')
+      assert.equal(providers[1].label, 'Coyote Security')
+      assert.equal(providers[1].protocol, 'saml')
+      assert.equal(providers[1].metadataUrl, 'https://saml2.example.com')
+      assert.notProperty(providers[1], 'id')
     } finally {
       fs.rmSync(providersFile)
       readStub.restore()

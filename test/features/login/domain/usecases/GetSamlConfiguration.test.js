@@ -6,6 +6,7 @@ import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
 import mute from 'mute'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
+import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import FetchSamlMetadata from 'helix-auth-svc/lib/features/login/domain/usecases/FetchSamlMetadata.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
 import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
@@ -14,7 +15,7 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 
 describe('GetSamlConfiguration use case', function () {
   const settingsRepository = new MapSettingsRepository()
-  const tidyAuthProviders = TidyAuthProviders()
+  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
   let usecase
 
   before(function () {
@@ -113,6 +114,7 @@ describe('GetSamlConfiguration use case', function () {
     // arrange
     const providers = {
       providers: [{
+        id: 'shibbo123',
         label: 'Shibboleth',
         protocol: 'saml',
         metadataFile: 'test/fixtures/idp-metadata.xml',
@@ -122,7 +124,7 @@ describe('GetSamlConfiguration use case', function () {
     }
     settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
-    const result = await usecase('saml-0')
+    const result = await usecase('shibbo123')
     // assert
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
     assert.isFalse(result.wantAssertionsSigned)
@@ -160,6 +162,7 @@ describe('GetSamlConfiguration use case', function () {
       // arrange
       const providers = {
         providers: [{
+          id: 'shibbo123',
           label: 'Shibboleth',
           protocol: 'saml',
           metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth',
@@ -173,7 +176,7 @@ describe('GetSamlConfiguration use case', function () {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
       // mute the warning from node about disabling TLS validation
       const unmute = mute(process.stderr)
-      const result = await usecase('saml-0')
+      const result = await usecase('shibbo123')
       unmute()
       delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
       // assert
@@ -203,6 +206,7 @@ describe('GetSamlConfiguration use case', function () {
     // arrange
     const providers = {
       providers: [{
+        id: 'shibbo123',
         label: 'Shibboleth',
         protocol: 'saml',
         metadataFile: 'test/fixtures/idp-metadata.xml',
@@ -212,7 +216,7 @@ describe('GetSamlConfiguration use case', function () {
     }
     settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
-    const result = await usecase('saml-0')
+    const result = await usecase('shibbo123')
     // assert
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
     assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
@@ -236,6 +240,7 @@ describe('GetSamlConfiguration use case', function () {
     // arrange
     const providers = {
       providers: [{
+        id: 'shibbo123',
         label: 'Acme Identity',
         protocol: 'saml',
         signonUrl: 'https://example.com/saml/sso',
@@ -244,7 +249,7 @@ describe('GetSamlConfiguration use case', function () {
     }
     settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
-    const result = await usecase('saml-0')
+    const result = await usecase('shibbo123')
     // assert
     assert.equal(result.entryPoint, 'https://example.com/saml/sso')
     assert.include(result.cert, 'MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv')

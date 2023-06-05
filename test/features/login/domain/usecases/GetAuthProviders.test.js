@@ -9,6 +9,7 @@ import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
+import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
@@ -26,7 +27,7 @@ describe('GetAuthProviders use case', function () {
   let usecase
 
   before(function () {
-    const tidyAuthProviders = TidyAuthProviders()
+    const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
     usecase = GetAuthProviders({ settingsRepository, tidyAuthProviders })
   })
 
@@ -53,72 +54,81 @@ describe('GetAuthProviders use case', function () {
     }
   })
 
-  it('should convert default settings when no AUTH_PROVIDERS', async function () {
+  it('should ignore default settings when no AUTH_PROVIDERS', async function () {
     // arrange
     // act
     const result = await usecase()
     // assert
-    assert.lengthOf(result, 2)
-    assert.equal(result[0].protocol, 'oidc')
-    assert.notProperty(result[0], 'id')
-    assert.notProperty(result[0], 'label')
-    assert.equal(result[1].protocol, 'saml')
-    assert.notProperty(result[1], 'id')
-    assert.notProperty(result[1], 'label')
+    assert.lengthOf(result, 0)
   })
 
-  it('should merge defaults and configured providers', async function () {
+  it('should return the single configured provider', async function () {
     // arrange
     const providers = {
-      providers: [{ label: 'Acme Identity', protocol: 'saml' }]
+      providers: [{
+        label: 'Acme Identity',
+        metadataUrl: 'https://saml.exmample.com',
+        protocol: 'saml'
+      }]
     }
     temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase()
     // assert
-    assert.lengthOf(result, 3)
+    assert.lengthOf(result, 1)
     assert.property(result[0], 'id')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'saml')
-    assert.equal(result[1].protocol, 'oidc')
-    assert.notProperty(result[1], 'id')
-    assert.notProperty(result[1], 'label')
-    assert.equal(result[2].protocol, 'saml')
-    assert.notProperty(result[2], 'id')
-    assert.notProperty(result[2], 'label')
   })
 
   it('should assign protocol if missing', async function () {
     // arrange
     const providers = {
-      providers: [{ label: 'Acme Identity', issuerUri: 'https://example.com' }]
+      providers: [{
+        label: 'Acme Identity',
+        issuerUri: 'https://example.com',
+        clientId: 'client-id',
+        clientSecret: 'client-secret'
+      }]
     }
     temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase()
     // assert
-    assert.lengthOf(result, 3)
+    assert.lengthOf(result, 1)
     assert.property(result[0], 'id')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'oidc')
-    assert.equal(result[1].protocol, 'oidc')
-    assert.equal(result[2].protocol, 'saml')
   })
 
   it('should assign unique identifier to each provider', async function () {
     // arrange
     const providers = {
       providers: [
-        { label: 'Azure', protocol: 'saml' },
-        { label: 'Okta', protocol: 'oidc' },
-        { label: 'Auth0', protocol: 'saml' }
+        {
+          label: 'Azure',
+          metadataUrl: 'https://saml.example.com',
+          protocol: 'saml'
+        },
+        {
+          label: 'Okta',
+          issuerUri: 'https://example.com',
+          clientId: 'client-id',
+          clientSecret: 'client-secret',
+          protocol: 'oidc'
+        },
+        {
+          label: 'Auth0',
+          metadataUrl: 'https://saml.example.com',
+          protocol: 'saml'
+        }
       ]
     }
     temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
     // act
     const result = await usecase()
     // assert
-    assert.lengthOf(result, 5)
+    assert.lengthOf(result, 3)
     const ids = new Set()
     for (const entry of result) {
       // incomplete converted providers do not have label/id properties
@@ -133,35 +143,38 @@ describe('GetAuthProviders use case', function () {
     // arrange
     const providersFile = temporaryFile({ extension: 'json' })
     const providers = {
-      providers: [{ label: 'Acme Identity', protocol: 'saml' }]
+      providers: [{
+        label: 'Acme Identity',
+        metadataUrl: 'https://saml.example.com',
+        protocol: 'saml'
+      }]
     }
     fs.writeFileSync(providersFile, JSON.stringify(providers))
     temporaryRepository.set('AUTH_PROVIDERS_FILE', providersFile)
     // act
     const result = await usecase()
     // assert
-    assert.lengthOf(result, 3)
+    assert.lengthOf(result, 1)
     assert.property(result[0], 'id')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'saml')
-    assert.equal(result[1].protocol, 'oidc')
-    assert.equal(result[2].protocol, 'saml')
   })
 
 
   it('should assign default and label properties', async function () {
     // arrange
     temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.example.com:8080/issuer')
+    temporaryRepository.set('OIDC_CLIENT_ID', 'client-id')
+    temporaryRepository.set('OIDC_CLIENT_SECRET', 'client-secret')
     temporaryRepository.set('OIDC_INFO_LABEL', 'OpenID Provider')
     temporaryRepository.set('DEFAULT_PROTOCOL', 'oidc')
     // act
     const result = await usecase()
     // assert
-    assert.lengthOf(result, 2)
+    assert.lengthOf(result, 1)
     assert.property(result[0], 'id')
     assert.equal(result[0].label, 'OpenID Provider')
     assert.equal(result[0].protocol, 'oidc')
     assert.equal(result[0].default, true)
-    assert.equal(result[1].protocol, 'saml')
   })
 })

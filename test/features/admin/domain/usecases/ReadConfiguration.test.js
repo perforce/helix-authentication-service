@@ -12,6 +12,7 @@ import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositori
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
 import ReadConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/ReadConfiguration.js'
+import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
@@ -26,7 +27,7 @@ describe('ReadConfiguration use case', function () {
     processEnvRepository,
     defaultsRepository
   })
-  const tidyAuthProviders = TidyAuthProviders()
+  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
   let usecase
 
   before(function () {
@@ -110,10 +111,7 @@ describe('ReadConfiguration use case', function () {
       assert.isUndefined(settings.get('ADMIN_USERNAME'))
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const providers = settings.get('AUTH_PROVIDERS')
-      assert.lengthOf(providers, 2)
-      // oidc is converted first, then saml, so order remains predictable
-      assert.equal(providers[0]['signingAlgo'], 'RS256')
-      assert.equal(providers[1]['keyAlgorithm'], 'sha256')
+      assert.lengthOf(providers, 0)
       assert.equal(settings.get('TOKEN_TTL'), '3600')
       assert.isTrue(readStub.calledOnce)
     } finally {
@@ -170,9 +168,7 @@ describe('ReadConfiguration use case', function () {
       // assert
       assert.lengthOf(settings, 12)
       const providers = settings.get('AUTH_PROVIDERS')
-      assert.lengthOf(providers, 2)
-      // assert.equal(providers[1]['spEntityId'], 'spIssuer')
-      // assert.equal(providers[1]['idpEntityId'], 'idpIssuer')
+      assert.lengthOf(providers, 0)
       assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
       assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
       assert.isTrue(readStub.calledOnce)
@@ -190,6 +186,8 @@ describe('ReadConfiguration use case', function () {
     // getAuthProviders is reading from the merged repository
     temporaryRepository.set('SAML_IDP_METADATA_FILE', 'test/fixtures/idp-metadata.xml')
     temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.example.com:8080/issuer')
+    temporaryRepository.set('OIDC_CLIENT_ID', 'client-id')
+    temporaryRepository.set('OIDC_CLIENT_SECRET', 'client-secret')
     try {
       // act
       const settings = await usecase()
@@ -216,9 +214,12 @@ describe('ReadConfiguration use case', function () {
     })
     // getAuthProviders is reading from the merged repository
     temporaryRepository.set('SAML_IDP_ENTITY_ID', 'idpIssuerId')
+    temporaryRepository.set('SAML_IDP_SSO_URL', 'https://saml.example.com/saml/sso')
     temporaryRepository.set('SAML_INFO_LABEL', 'Security Provider')
     temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.example.com:8080/issuer')
     temporaryRepository.set('OIDC_INFO_LABEL', 'OpenID Provider')
+    temporaryRepository.set('OIDC_CLIENT_ID', 'client-id')
+    temporaryRepository.set('OIDC_CLIENT_SECRET', 'client-secret')
     try {
       // act
       const settings = await usecase()
@@ -237,7 +238,7 @@ describe('ReadConfiguration use case', function () {
     }
   })
 
-  it('should generate nearly empty providers with default config', async function () {
+  it('should ignore nearly empty providers with default config', async function () {
     // arrange
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
       return new Map()
@@ -248,11 +249,7 @@ describe('ReadConfiguration use case', function () {
       // assert
       assert.lengthOf(settings, 12)
       const providers = settings.get('AUTH_PROVIDERS')
-      assert.lengthOf(providers, 2)
-      assert.equal(providers[0]['protocol'], 'oidc')
-      assert.equal(providers[1]['protocol'], 'saml')
-      assert.notProperty(providers[0], 'label')
-      assert.notProperty(providers[1], 'label')
+      assert.lengthOf(providers, 0)
       assert.isTrue(readStub.calledOnce)
     } finally {
       readStub.restore()
@@ -276,6 +273,7 @@ describe('ReadConfiguration use case', function () {
     // getAuthProviders is reading from the merged repository
     temporaryRepository.set('SAML_SP_ENTITY_ID', 'spIssuer')
     temporaryRepository.set('SAML_IDP_ENTITY_ID', 'idpIssuer')
+    temporaryRepository.set('SAML_IDP_SSO_URL', 'https://saml.example.com/saml/sso')
     temporaryRepository.set('SAML_SP_ISSUER', 'oldSpIssuer')
     temporaryRepository.set('SAML_IDP_ISSUER', 'oldIdpIssuer')
     try {
@@ -288,12 +286,12 @@ describe('ReadConfiguration use case', function () {
       assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
       assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
       const providers = settings.get('AUTH_PROVIDERS')
-      assert.equal(providers[0]['protocol'], 'oidc')
-      assert.equal(providers[1]['protocol'], 'saml')
+      assert.lengthOf(providers, 1)
+      assert.equal(providers[0]['protocol'], 'saml')
       // old names take precedence over new names (for provider settings)
-      assert.equal(providers[1]['spEntityId'], 'spIssuer')
-      assert.equal(providers[1]['idpEntityId'], 'idpIssuer')
-      assert.equal(providers[1]['label'], 'idpIssuer')
+      assert.equal(providers[0]['spEntityId'], 'spIssuer')
+      assert.equal(providers[0]['idpEntityId'], 'idpIssuer')
+      assert.equal(providers[0]['label'], 'idpIssuer')
       assert.isTrue(readStub.calledOnce)
     } finally {
       readStub.restore()
@@ -312,6 +310,9 @@ describe('ReadConfiguration use case', function () {
       results.set('KEY_PASSPHRASE_FILE', passwdFile)
       return results
     })
+    temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.example.com:8080/issuer')
+    temporaryRepository.set('OIDC_INFO_LABEL', 'OpenID Provider')
+    temporaryRepository.set('OIDC_CLIENT_ID', 'client-id')
     temporaryRepository.set('OIDC_CLIENT_SECRET_FILE', secretFile)
     try {
       // act
@@ -365,7 +366,11 @@ describe('ReadConfiguration use case', function () {
   it('should read auth providers from setting', async function () {
     // arrange
     const providers = {
-      providers: [{ label: 'Acme Identity', protocol: 'saml' }]
+      providers: [{
+        metadataUrl: 'https://saml.example.com/idp/metadata',
+        label: 'Acme Identity',
+        protocol: 'saml'
+      }]
     }
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
       return new Map()
@@ -378,7 +383,7 @@ describe('ReadConfiguration use case', function () {
       assert.lengthOf(settings, 12)
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
-      assert.lengthOf(actual, 3)
+      assert.lengthOf(actual, 1)
       assert.property(actual[0], 'label')
       assert.equal(actual[0].label, 'Acme Identity')
       assert.equal(actual[0].protocol, 'saml')
@@ -393,7 +398,11 @@ describe('ReadConfiguration use case', function () {
     // arrange
     const providersFile = temporaryFile({ extension: 'json' })
     const providers = {
-      providers: [{ label: 'Acme Identity', protocol: 'saml' }]
+      providers: [{
+        metadataUrl: 'https://saml.example.com/idp/metadata',
+        label: 'Acme Identity',
+        protocol: 'saml'
+      }]
     }
     fs.writeFileSync(providersFile, JSON.stringify(providers))
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
@@ -409,7 +418,7 @@ describe('ReadConfiguration use case', function () {
       assert.isFalse(settings.has('AUTH_PROVIDERS_FILE'))
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
-      assert.lengthOf(actual, 3)
+      assert.lengthOf(actual, 1)
       assert.property(actual[0], 'label')
       assert.equal(actual[0].label, 'Acme Identity')
       assert.equal(actual[0].protocol, 'saml')
@@ -454,11 +463,10 @@ describe('ReadConfiguration use case', function () {
       // assert
       assert.lengthOf(settings, 12)
       const actual = settings.get('AUTH_PROVIDERS')
-      assert.lengthOf(actual, 2)
-      assert.equal(actual[0]['protocol'], 'oidc')
-      assert.equal(actual[1]['protocol'], 'saml')
-      assert.property(actual[1], 'metadata')
-      assert.equal(actual[1]['label'], 'https://shibboleth.doc:4443/idp/shibboleth')
+      assert.lengthOf(actual, 1)
+      assert.equal(actual[0]['protocol'], 'saml')
+      assert.property(actual[0], 'metadata')
+      assert.equal(actual[0]['label'], 'https://shibboleth.doc:4443/idp/shibboleth')
       assert.isTrue(readStub.calledOnce)
     } finally {
       readStub.restore()

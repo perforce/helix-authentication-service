@@ -10,13 +10,13 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 
 describe('ConvertFromProviders use case', function () {
   const usecase = ConvertFromProviders({
-    tidyAuthProviders: TidyAuthProviders(),
-    validateAuthProvider: ValidateAuthProvider(),
- })
+    tidyAuthProviders: TidyAuthProviders({
+      validateAuthProvider: ValidateAuthProvider()
+    })
+  })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => ConvertFromProviders({ tidyAuthProviders: null, validateAuthProvider: {} }), AssertionError)
-    assert.throws(() => ConvertFromProviders({ tidyAuthProviders: {}, validateAuthProvider: null }), AssertionError)
+    assert.throws(() => ConvertFromProviders({ tidyAuthProviders: null }), AssertionError)
     try {
       // act
       await usecase(null)
@@ -78,6 +78,50 @@ describe('ConvertFromProviders use case', function () {
     assert.isTrue(actualProviders.every((e) => e.protocol === 'saml'))
     assert.isUndefined(settings.get('OIDC_ISSUER_URI'))
     assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
+  })
+
+  it('should ignore default providers if 2 saml providers', async function () {
+    // arrange
+    const settings = new Map()
+    settings.set('OIDC_SELECT_ACCOUNT', false)
+    settings.set('OIDC_TOKEN_SIGNING_ALGO', 'RS256')
+    settings.set('SAML_AUTHN_CONTEXT', 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
+    settings.set('SAML_NAMEID_FORMAT', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+    settings.set('SAML_SP_ENTITY_ID', 'https://has.example.com')
+    settings.set('SAML_WANT_ASSERTION_SIGNED', true)
+    settings.set('SAML_WANT_RESPONSE_SIGNED', true)
+    settings.set('SP_KEY_ALGO', 'sha256')
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      metadataUrl: 'https://saml.example.com',
+      spEntityId: 'urn:example:sp',
+      idpCert: '-----BEGIN CERTIFICATE-----'
+    }, {
+      label: 'Example SAML',
+      protocol: 'saml',
+      metadataUrl: 'https://saml2.example.com',
+      spEntityId: 'urn:example2:sp',
+      idpCert: '-----BEGIN CERTIFICATE-----'
+    }]
+    settings.set('AUTH_PROVIDERS', providers)
+    // act
+    await usecase(settings)
+    // assert
+    assert.isDefined(settings.get('AUTH_PROVIDERS'))
+    const actualProviders = settings.get('AUTH_PROVIDERS')
+    assert.lengthOf(actualProviders, 2)
+    assert.isTrue(actualProviders.every((e) => e.protocol === 'saml'))
+    assert.isUndefined(settings.get('OIDC_ISSUER_URI'))
+    assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
+    assert.isUndefined(settings.get('OIDC_SELECT_ACCOUNT'))
+    assert.isUndefined(settings.get('OIDC_TOKEN_SIGNING_ALGO'))
+    assert.isUndefined(settings.get('SAML_AUTHN_CONTEXT'))
+    assert.isUndefined(settings.get('SAML_NAMEID_FORMAT'))
+    assert.isUndefined(settings.get('SAML_SP_ENTITY_ID'))
+    assert.isUndefined(settings.get('SAML_WANT_ASSERTION_SIGNED'))
+    assert.isUndefined(settings.get('SAML_WANT_RESPONSE_SIGNED'))
+    assert.isUndefined(settings.get('SP_KEY_ALGO'))
   })
 
   it('should remove everything if 0 auth providers', async function () {

@@ -5,13 +5,14 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
+import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GenerateLoginUrl from 'helix-auth-svc/lib/features/login/domain/usecases/GenerateLoginUrl.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('GenerateLoginUrl use case', function () {
   const settingsRepository = new MapSettingsRepository()
-  const tidyAuthProviders = TidyAuthProviders()
+  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
   let usecase
 
   before(function () {
@@ -63,6 +64,8 @@ describe('GenerateLoginUrl use case', function () {
   it('should produce OIDC URL with only OIDC_ISSUER_URI', async function () {
     // arrange
     settingsRepository.set('OIDC_ISSUER_URI', 'https://example.com')
+    settingsRepository.set('OIDC_CLIENT_ID', 'client-id')
+    settingsRepository.set('OIDC_CLIENT_SECRET', 'client-secret')
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
@@ -76,22 +79,6 @@ describe('GenerateLoginUrl use case', function () {
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
     assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml')
-  })
-
-  it('should produce special URL with DEFAULT_PROTOCOL', async function () {
-    // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        protocol: 'pigeon',
-        default: true
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
-    // act
-    const result = await usecase('http://host', 'request123', 'foobar')
-    // assert
-    assert.equal(result, 'http://host/pigeon/login/request123?instanceId=foobar&providerId=pigeon-0')
   })
 
   it('should produce multi URL with AUTH_PROVIDERS', async function () {
@@ -137,10 +124,12 @@ describe('GenerateLoginUrl use case', function () {
     const providers = {
       providers: [{
         label: 'Acme Identity',
+        metadataUrl: 'https://saml.example.com/idp/metadata',
         protocol: 'saml',
         id: 'saml-1'
       }, {
         label: 'Maximum Security',
+        metadataUrl: 'https://saml.example.com/idp/metadata',
         protocol: 'saml',
         id: 'saml-2'
       }]
