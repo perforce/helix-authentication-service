@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import * as fs from 'node:fs'
@@ -251,7 +251,7 @@ describe('WriteConfiguration use case', function () {
     })
     const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
       assert.isDefined(settings)
-      assert.lengthOf(settings, 4)
+      assert.lengthOf(settings, 6)
       // raw IdP cert is converted to a file
       assert.isTrue(settings.has('IDP_CERT_FILE'))
       const certFile = settings.get('IDP_CERT_FILE')
@@ -260,6 +260,8 @@ describe('WriteConfiguration use case', function () {
       assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.acme.net')
       assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
       assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'urn:example:sp')
+      assert.isFalse(settings.get('SAML_WANT_ASSERTION_SIGNED'))
+      assert.isFalse(settings.get('SAML_WANT_RESPONSE_SIGNED'))
       fs.rmSync(certFile)
     })
     // act
@@ -278,6 +280,82 @@ describe('WriteConfiguration use case', function () {
     assert.isTrue(writeStub.calledOnce)
     readStub.restore()
     writeStub.restore()
+  })
+
+  it('should filter defaults from auth providers', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.isTrue(settings.has('AUTH_PROVIDERS'))
+      const providers = JSON.parse(settings.get('AUTH_PROVIDERS')).providers
+      assert.equal(providers[0].label, 'Acme Identity')
+      assert.equal(providers[0].protocol, 'saml')
+      assert.equal(providers[0].metadataUrl, 'https://saml1.example.com')
+      assert.notProperty(providers[0], 'id')
+      assert.notProperty(providers[0], 'wantAssertionSigned')
+      assert.notProperty(providers[0], 'wantResponseSigned')
+      assert.notProperty(providers[0], 'spEntityId')
+      assert.notProperty(providers[0], 'keyAlgorithm')
+      assert.notProperty(providers[0], 'authnContext')
+      assert.notProperty(providers[0], 'nameIdFormat')
+      assert.equal(providers[2].label, 'Pong Anonymous')
+      assert.equal(providers[2].protocol, 'oidc')
+      assert.equal(providers[2].issuerUri, 'https://oidc1.example.com')
+      assert.equal(providers[2].clientId, 'client-id')
+      assert.equal(providers[2].clientSecret, 'client-secret')
+      assert.notProperty(providers[2], 'id')
+      assert.notProperty(providers[2], 'selectAccount')
+      assert.notProperty(providers[2], 'signingAlgo')
+    })
+    // act
+    const settings = new Map()
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      id: 'saml-0',
+      metadataUrl: 'https://saml1.example.com',
+      wantAssertionSigned: true,
+      wantResponseSigned: true,
+      spEntityId: 'https://has.example.com',
+      keyAlgorithm: 'sha256',
+      authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
+    }, {
+      label: 'Coyote Security',
+      protocol: 'saml',
+      id: 'saml-1',
+      metadataUrl: 'https://saml2.example.com'
+    }, {
+      label: 'Pong Anonymous',
+      protocol: 'oidc',
+      id: 'oidc-0',
+      issuerUri: 'https://oidc1.example.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      selectAccount: false,
+      signingAlgo: 'RS256'
+    }, {
+      label: 'Veritas Solutions',
+      protocol: 'oidc',
+      id: 'oidc-1',
+      issuerUri: 'https://oidc2.example.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret'
+    }]
+    settings.set('AUTH_PROVIDERS', providers)
+    try {
+      await usecase(settings)
+      // assert
+      assert.isTrue(readStub.calledOnce)
+      assert.isTrue(writeStub.calledOnce)
+    } finally {
+      readStub.restore()
+      writeStub.restore()
+    }
   })
 
   it('should write auth providers configuration into a file', async function () {

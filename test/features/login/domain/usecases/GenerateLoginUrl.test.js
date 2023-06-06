@@ -4,6 +4,7 @@
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
+import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GenerateLoginUrl from 'helix-auth-svc/lib/features/login/domain/usecases/GenerateLoginUrl.js'
@@ -11,12 +12,13 @@ import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('GenerateLoginUrl use case', function () {
+  const defaultsRepository = new DefaultsEnvRepository()
   const settingsRepository = new MapSettingsRepository()
   const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
   let usecase
 
   before(function () {
-    const getAuthProviders = GetAuthProviders({ settingsRepository, tidyAuthProviders })
+    const getAuthProviders = GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders })
     usecase = GenerateLoginUrl({ settingsRepository, getAuthProviders })
   })
 

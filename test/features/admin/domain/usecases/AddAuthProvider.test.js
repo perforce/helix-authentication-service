@@ -26,7 +26,7 @@ describe('AddAuthProvider use case', function () {
   const validateAuthProvider = ValidateAuthProvider()
   const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider })
   const usecase = AddAuthProvider({
-    getAuthProviders: GetAuthProviders({ settingsRepository, tidyAuthProviders }),
+    getAuthProviders: GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders }),
     validateAuthProvider,
     tidyAuthProviders
   })

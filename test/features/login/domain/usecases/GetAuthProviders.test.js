@@ -28,7 +28,7 @@ describe('GetAuthProviders use case', function () {
 
   before(function () {
     const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
-    usecase = GetAuthProviders({ settingsRepository, tidyAuthProviders })
+    usecase = GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders })
   })
 
   beforeEach(function () {
@@ -36,8 +36,21 @@ describe('GetAuthProviders use case', function () {
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => GetAuthProviders({ settingsRepository: null, tidyAuthProviders: {} }), AssertionError)
-    assert.throws(() => GetAuthProviders({ settingsRepository: {}, tidyAuthProviders: null }), AssertionError)
+    assert.throws(() => GetAuthProviders({
+      defaultsRepository: null,
+      settingsRepository: {},
+      tidyAuthProviders: {}
+    }), AssertionError)
+    assert.throws(() => GetAuthProviders({
+      defaultsRepository: {},
+      settingsRepository: null,
+      tidyAuthProviders: {}
+    }), AssertionError)
+    assert.throws(() => GetAuthProviders({
+      defaultsRepository: {},
+      settingsRepository: {},
+      tidyAuthProviders: null
+    }), AssertionError)
   })
 
   it('should raise error for malformed input', async function () {
@@ -62,7 +75,7 @@ describe('GetAuthProviders use case', function () {
     assert.lengthOf(result, 0)
   })
 
-  it('should return the single configured provider', async function () {
+  it('should return a SAML provider with defaults', async function () {
     // arrange
     const providers = {
       providers: [{
@@ -76,9 +89,74 @@ describe('GetAuthProviders use case', function () {
     const result = await usecase()
     // assert
     assert.lengthOf(result, 1)
-    assert.property(result[0], 'id')
+    assert.equal(result[0].id, 'saml-0')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'saml')
+    assert.isTrue(result[0].wantAssertionSigned)
+    assert.isTrue(result[0].wantResponseSigned)
+    assert.equal(result[0].spEntityId, 'https://has.example.com')
+    assert.equal(result[0].keyAlgorithm, 'sha256')
+    assert.equal(result[0].authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
+    assert.equal(result[0].nameIdFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+  })
+
+  it('should return classic SAML with defaults', async function () {
+    // arrange
+    temporaryRepository.set('SAML_IDP_METADATA_URL', 'https://saml.exmample.com')
+    temporaryRepository.set('SAML_INFO_LABEL', 'Acme Identity')
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'saml')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'saml')
+    assert.isTrue(result[0].wantAssertionSigned)
+    assert.isTrue(result[0].wantResponseSigned)
+    assert.equal(result[0].spEntityId, 'https://has.example.com')
+    assert.equal(result[0].keyAlgorithm, 'sha256')
+    assert.equal(result[0].authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
+    assert.equal(result[0].nameIdFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+  })
+
+  it('should return an OIDC provider with defaults', async function () {
+    // arrange
+    const providers = {
+      providers: [{
+        label: 'Veritas Solutions',
+        issuerUri: 'https://oidc.exmample.com',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        protocol: 'oidc'
+      }]
+    }
+    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'oidc-0')
+    assert.equal(result[0].label, 'Veritas Solutions')
+    assert.equal(result[0].protocol, 'oidc')
+    assert.isFalse(result[0].selectAccount)
+    assert.equal(result[0].signingAlgo, 'RS256')
+  })
+
+  it('should return classic OIDC with defaults', async function () {
+    // arrange
+    temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.exmample.com')
+    temporaryRepository.set('OIDC_CLIENT_ID', 'client-id')
+    temporaryRepository.set('OIDC_CLIENT_SECRET', 'client-secret')
+    temporaryRepository.set('OIDC_INFO_LABEL', 'Veritas Solutions')
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'oidc')
+    assert.equal(result[0].label, 'Veritas Solutions')
+    assert.equal(result[0].protocol, 'oidc')
+    assert.isFalse(result[0].selectAccount)
+    assert.equal(result[0].signingAlgo, 'RS256')
   })
 
   it('should assign protocol if missing', async function () {
@@ -99,6 +177,53 @@ describe('GetAuthProviders use case', function () {
     assert.property(result[0], 'id')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'oidc')
+  })
+
+  it('should ignore OIDC defaults if properties defined', async function () {
+    // arrange
+    const providers = {
+      providers: [{
+        label: 'Acme Identity',
+        issuerUri: 'https://oidc.example.com',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        selectAccount: true,
+        signingAlgo: 'HS512'
+      }]
+    }
+    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'oidc-0')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'oidc')
+    assert.equal(result[0].issuerUri, 'https://oidc.example.com')
+    assert.isTrue(result[0].selectAccount)
+    assert.equal(result[0].signingAlgo, 'HS512')
+  })
+
+  it('should ignore SAML defaults if properties defined', async function () {
+    // arrange
+    const providers = {
+      providers: [{
+        label: 'Acme Identity',
+        metadataUrl: 'https://saml.example.com',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+        authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession'
+      }]
+    }
+    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'saml-0')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'saml')
+    assert.equal(result[0].nameIdFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress')
+    assert.equal(result[0].authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession')
   })
 
   it('should assign unique identifier to each provider', async function () {

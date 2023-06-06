@@ -39,7 +39,7 @@ describe('ReadConfiguration use case', function () {
         }
       }
     }
-    const getAuthProviders = GetAuthProviders({ settingsRepository, tidyAuthProviders })
+    const getAuthProviders = GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders })
     usecase = ReadConfiguration({
       configRepository,
       temporaryRepository,

@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
 import mute from 'mute'
+import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import FetchSamlMetadata from 'helix-auth-svc/lib/features/login/domain/usecases/FetchSamlMetadata.js'
@@ -14,6 +15,7 @@ import GetSamlConfiguration from 'helix-auth-svc/lib/features/login/domain/useca
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('GetSamlConfiguration use case', function () {
+  const defaultsRepository = new DefaultsEnvRepository()
   const settingsRepository = new MapSettingsRepository()
   const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
   let usecase
@@ -21,7 +23,7 @@ describe('GetSamlConfiguration use case', function () {
   before(function () {
     const fetchSamlMetadata = FetchSamlMetadata()
     const getSamlAuthnContext = GetSamlAuthnContext({ settingsRepository })
-    const getAuthProviders = GetAuthProviders({ settingsRepository, tidyAuthProviders })
+    const getAuthProviders = GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders })
     usecase = GetSamlConfiguration({
       fetchSamlMetadata,
       getSamlAuthnContext,
@@ -184,8 +186,8 @@ describe('GetSamlConfiguration use case', function () {
       assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
       assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
       assert.isFalse(result.forceAuthn)
-      assert.isUndefined(result.wantAssertionsSigned)
-      assert.isUndefined(result.wantAuthnResponseSigned)
+      assert.isTrue(result.wantAssertionsSigned)
+      assert.isTrue(result.wantAuthnResponseSigned)
     }
   })
 

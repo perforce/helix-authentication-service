@@ -93,6 +93,7 @@ describe('TidyAuthProviders use case', function () {
     const providers = [
       {
         metadataUrl: 'https://saml.example.com/idp/metadata',
+        wantResponseSigned: 'true',
         protocol: 'saml',
         id: 'saml'
       },
@@ -100,8 +101,8 @@ describe('TidyAuthProviders use case', function () {
         authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
         nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
         spEntityId: 'https://has.example.com',
-        wantAssertionSigned: true,
-        wantResponseSigned: true,
+        wantAssertionSigned: 'true',
+        wantResponseSigned: 'true',
         keyAlgorithm: 'sha256',
         protocol: 'saml'
       },
@@ -119,5 +120,7 @@ describe('TidyAuthProviders use case', function () {
     assert.equal(results[0].id, 'saml')
     assert.equal(results[0].protocol, 'saml')
     assert.equal(results[0].metadataUrl, 'https://saml.example.com/idp/metadata')
+    assert.isFalse(results[0].wantAssertionSigned)
+    assert.isTrue(results[0].wantResponseSigned)
   })
 })
