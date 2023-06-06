@@ -21,6 +21,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
+import LockIcon from '@mui/icons-material/Lock';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -165,6 +166,37 @@ const SamlProviderDetails = ({ provider }) => {
   )
 }
 
+const providers = [
+  { pattern: '.okta.com', icon: 'okta-logo.svg', width: 64, heigth: 64 },
+  { pattern: '.auth0.com', icon: 'auth0-logo.svg', width: 96, heigth: 96 },
+  { pattern: '.microsoftonline.com', icon: 'azure-logo.svg', width: 48, heigth: 48 },
+  { pattern: '.onelogin.com', icon: 'onelogin-logo.svg', width: 96, heigth: 96 },
+  { pattern: '.google.com', icon: 'google-logo.svg', width: 48, heigth: 48 }
+]
+
+function makeProviderIcon(provider) {
+  let url
+  if (provider.issuerUri) {
+    url = provider.issuerUri
+  } else if (provider.metadataUrl) {
+    url = provider.metadataUrl
+  } else {
+    return (
+      <LockIcon sx={{ fontSize: 64 }} />
+    )
+  }
+  for (const entry of providers) {
+    if (url.includes(entry.pattern)) {
+      return (
+        <img src={`/images/${entry.icon}`} alt="logo" width={entry.width} height={entry.height} />
+      )
+    }
+  }
+  return (
+    <LockIcon sx={{ fontSize: 64 }} />
+  )
+}
+
 const ProviderCard = ({ provider, onDelete, status }) => {
   const detailsComponent = provider.protocol === 'oidc' ?
     OidcProviderDetails({ provider, onDelete }) :
@@ -186,9 +218,9 @@ const ProviderCard = ({ provider, onDelete, status }) => {
     }}>
       <CardContent>
         <Stack direction="row" justifyContent="space-between">
-          <Typography color="text.secondary" sx={{ mb: 4 }}>
-            {provider.label}
-          </Typography>
+          <Box sx={{ mb: 4 }}>
+            {makeProviderIcon(provider)}
+          </Box>
           {statusComponent}
         </Stack>
         {detailsComponent}
@@ -212,7 +244,7 @@ export default function Providers({ providers, onDelete }) {
   const { data, error, isLoading } = useGetStatusQuery()
   if (isLoading) {
     return (
-      <Alert severity='info'>Fetching provider status...</Alert>
+      <Alert severity='info'>Checking status of providers...</Alert>
     )
   } else if (error) {
     return (

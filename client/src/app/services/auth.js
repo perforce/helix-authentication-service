@@ -39,6 +39,7 @@ export const auth = createApi({
     }),
     getStatus: builder.query({
       query: () => 'status',
+      providesTags: (_) => ['Status'],
     }),
     getAllProviders: builder.query({
       query: () => `settings/providers`,
@@ -64,7 +65,7 @@ export const auth = createApi({
         })
         return apply
       },
-      invalidatesTags: (_) => ['Providers'],
+      invalidatesTags: (_) => ['Providers', 'Status'],
     }),
     putProvider: builder.mutation({
       // perform both the update and apply as a single redux action
@@ -83,7 +84,7 @@ export const auth = createApi({
         })
         return apply
       },
-      invalidatesTags: (_) => ['Providers'],
+      invalidatesTags: (_) => ['Providers', 'Status'],
     }),
     deleteProvider: builder.mutation({
       // perform both the delete and apply as a single redux action
