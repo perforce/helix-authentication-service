@@ -184,8 +184,8 @@ describe('GetSamlConfiguration use case', function () {
       assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
       assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
       assert.isFalse(result.forceAuthn)
-      assert.isFalse(result.wantAssertionsSigned)
-      assert.isFalse(result.wantAuthnResponseSigned)
+      assert.isUndefined(result.wantAssertionsSigned)
+      assert.isUndefined(result.wantAuthnResponseSigned)
     }
   })
 
