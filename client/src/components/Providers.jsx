@@ -5,35 +5,94 @@ import React from 'react'
 import {
   Alert,
   Box,
+  Button,
   Card,
   CardActions,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
   IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
+  Paper,
   Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DownloadIcon from '@mui/icons-material/Download';
-import EditIcon from '@mui/icons-material/Edit';
-import LockIcon from '@mui/icons-material/Lock';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import DeleteIcon from '@mui/icons-material/Delete'
+import DownloadIcon from '@mui/icons-material/Download'
+import EditIcon from '@mui/icons-material/Edit'
+import LockIcon from '@mui/icons-material/Lock'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import WarningIcon from '@mui/icons-material/Warning'
 import { useNavigate } from 'react-router-dom'
 import { useGetStatusQuery } from '~/app/services/auth'
-import { green, red } from '@mui/material/colors';
+import { green, red } from '@mui/material/colors'
+
+function SettingsDialog(props) {
+  const { onClose, text, open } = props
+  const [isCopied, setIsCopied] = React.useState(false)
+
+  const handleClose = () => {
+    onClose()
+  }
+
+  async function copyTextToClipboard(text) {
+    if ('clipboard' in navigator) {
+      return await navigator.clipboard.writeText(text)
+    } else {
+      return document.execCommand('copy', true, text)
+    }
+  }
+
+  const handleCopyClick = () => {
+    copyTextToClipboard(text).then(() => {
+      setIsCopied(true)
+      setTimeout(() => {
+        setIsCopied(false)
+      }, 1500)
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
+
+  return (
+    <Dialog onClose={handleClose} open={open}>
+      <DialogTitle>Provider settings</DialogTitle>
+      <DialogContent>
+        <Box sx={{ m: 2 }}>
+          <Paper sx={{ minWidth: 600, minHeight: 300 }}>
+            <pre>
+              {text}
+            </pre>
+          </Paper>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button autoFocus onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleCopyClick}>
+          {isCopied ? 'Copied!' : 'Copy'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
 
 const ActionsButton = ({ provider, onDelete }) => {
   const navigate = useNavigate()
+  const [dialogOpen, setDialogOpen] = React.useState(false)
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
   const editUrl = `/${provider.protocol}/${provider.id}`
+  const providerJson = JSON.stringify(provider, null, '  ')
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
@@ -41,6 +100,10 @@ const ActionsButton = ({ provider, onDelete }) => {
 
   const handleClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleDialogClose = () => {
+    setDialogOpen(false)
   }
 
   const handleDelete = () => {
@@ -123,11 +186,14 @@ const ActionsButton = ({ provider, onDelete }) => {
           </ListItemIcon>
           Edit
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => {
+          setDialogOpen(true)
+          handleClose()
+        }}>
           <ListItemIcon>
             <DownloadIcon fontSize="small" />
           </ListItemIcon>
-          Download settings file
+          Show settings
         </MenuItem>
         <MenuItem onClick={handleDelete}>
           <ListItemIcon>
@@ -136,6 +202,11 @@ const ActionsButton = ({ provider, onDelete }) => {
           Delete
         </MenuItem>
       </Menu>
+      <SettingsDialog
+        text={providerJson}
+        open={dialogOpen}
+        onClose={handleDialogClose}
+      />
     </React.Fragment>
   )
 }
