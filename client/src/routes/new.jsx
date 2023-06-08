@@ -42,10 +42,22 @@ export default function Wizard() {
   const [protocol, setProtocol] = React.useState('saml')
   const [applyError, setApplyError] = React.useState(null)
   const [postProvider] = usePostProviderMutation()
-  const methods = useForm({ mode: 'onBlur', values: {} })
+  const methods = useForm({ mode: 'onBlur', values: {
+    // These boolean properties cannot be left blank, unlike text fields, and
+    // thereby allow the backend to assign the default value, so we must inject
+    // the same default value here for the "new" forms.
+    wantAssertionSigned: true,
+    wantResponseSigned: true,
+  } })
 
   const onSubmit = (data) => {
     data.protocol = protocol
+    if (protocol === 'oidc') {
+      // clean up the cruft from the defaults that do not make sense for
+      // this protocol, the backend will not remove unknown settings
+      delete data.wantAssertionSigned
+      delete data.wantResponseSigned
+    }
     postProvider(data).unwrap()
       .then(() => {
         navigate('/')
