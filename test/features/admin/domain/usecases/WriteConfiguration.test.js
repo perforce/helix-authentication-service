@@ -140,8 +140,10 @@ describe('WriteConfiguration use case', function () {
       assert.lengthOf(settings, 4)
       assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'spIssuer')
       assert.equal(settings.get('SAML_IDP_ENTITY_ID'), 'idpIssuer')
+      // CERT_FILE is accepted and the old setting is removed
       assert.equal(settings.get('CERT_FILE'), 'cert.pem')
-      assert.equal(settings.get('KEY_FILE'), 'key.pem')
+      // meanwhile, KEY_FILE is blocked and hence the old setting remains
+      assert.equal(settings.get('SP_KEY_FILE'), 'key.pem')
     })
     // act
     const settings = new Map()
@@ -149,12 +151,15 @@ describe('WriteConfiguration use case', function () {
     settings.set('SAML_IDP_ENTITY_ID', 'idpIssuer')
     settings.set('CERT_FILE', 'cert.pem')
     settings.set('KEY_FILE', 'key.pem')
-    await usecase(settings)
-    // assert
-    assert.isTrue(readStub.calledOnce)
-    assert.isTrue(writeStub.calledOnce)
-    readStub.restore()
-    writeStub.restore()
+    try {
+      await usecase(settings)
+      // assert
+      assert.isTrue(readStub.calledOnce)
+      assert.isTrue(writeStub.calledOnce)
+    } finally {
+      readStub.restore()
+      writeStub.restore()
+    }
   })
 
   it('should write certs and keys into files', async function () {

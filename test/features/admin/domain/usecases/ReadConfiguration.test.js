@@ -100,15 +100,21 @@ describe('ReadConfiguration use case', function () {
       results.set('ADMIN_USERNAME', 'scott')
       results.set('ADMIN_PASSWD_FILE', '/etc/passwd')
       results.set('ADMIN_P4_AUTH', true)
+      results.set('OAUTH_SIGNING_KEY_FILE', 'package.json')
+      results.set('PFX_FILE', 'package.json')
       return results
     })
     try {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 13)
+      assert.lengthOf(settings, 11)
       assert.equal(settings.get('NAME1'), 'VALUE1')
       assert.isUndefined(settings.get('ADMIN_USERNAME'))
+      assert.isFalse(settings.has('KEY'))
+      assert.isFalse(settings.has('OAUTH_SIGNING_KEY'))
+      assert.isFalse(settings.has('PFX'))
+      assert.isFalse(settings.has('REDIS_KEY'))
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 0)
@@ -166,11 +172,10 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 0)
       assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
-      assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
       assert.isTrue(readStub.calledOnce)
     } finally {
       readStub.restore()
@@ -192,7 +197,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 2)
       // providers sorted by label...
@@ -224,7 +229,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 2)
       assert.equal(providers[0]['protocol'], 'oidc')
@@ -247,7 +252,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 0)
       assert.isTrue(readStub.calledOnce)
@@ -280,11 +285,10 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       assert.isFalse(settings.has('SP_CERT_FILE'))
       assert.isFalse(settings.has('SP_KEY_FILE'))
       assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
-      assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 1)
       assert.equal(providers[0]['protocol'], 'saml')
@@ -318,7 +322,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 13)
+      assert.lengthOf(settings, 11)
       assert.equal(settings.get('KEY_PASSPHRASE'), 'housecat')
       assert.isFalse(settings.has('KEY_PASSPHRASE_FILE'))
       const providers = settings.get('AUTH_PROVIDERS')
@@ -350,12 +354,12 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 13)
+      assert.lengthOf(settings, 11)
       assert.equal(settings.get('CA_CERT'), '-----BEGIN AUTHORITY-----')
       assert.isFalse(settings.has('CA_CERT_FILE'))
       assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
       assert.isFalse(settings.has('CERT_FILE'))
-      assert.equal(settings.get('KEY'), '-----BEGIN PRIVATE KEY-----')
+      assert.isFalse(settings.has('KEY'))
       assert.isFalse(settings.has('KEY_FILE'))
       assert.isTrue(readStub.calledOnce)
     } finally {
@@ -380,7 +384,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(actual, 1)
@@ -414,7 +418,7 @@ describe('ReadConfiguration use case', function () {
     const settings = await usecase()
     // assert
     try {
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       assert.isFalse(settings.has('AUTH_PROVIDERS_FILE'))
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
@@ -440,7 +444,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       assert.isFalse(settings.has('IDP_CONFIG_FILE'))
       assert.isTrue(settings.has('IDP_CONFIG'))
       const idpConfig = settings.get('IDP_CONFIG')
@@ -461,7 +465,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 10)
       const actual = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(actual, 1)
       assert.equal(actual[0]['protocol'], 'saml')
