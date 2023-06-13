@@ -96,7 +96,8 @@ function BasicOptions() {
 }
 
 function AdvancedOptions() {
-  const { control, register, formState: { errors, touchedFields } } = useFormContext()
+  const { control, register, formState: { errors, touchedFields }, watch } = useFormContext()
+  const watchDisableContext = watch('disableContext', false)
 
   return (
     <Stack spacing={4}>
@@ -117,18 +118,6 @@ function AdvancedOptions() {
           </FormControl>
         </Grid>
         <Grid item xs={6}>
-          <FormControl error={errors["authnContext"] && touchedFields["authnContext"]} fullWidth>
-            <InputLabel htmlFor="authn-context">Authentication Context</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="authn-context"
-              name="authnContext"
-              label="Authentication Context"
-              {...register("authnContext")}
-            />
-          </FormControl>
-        </Grid>
-        <Grid item xs={6}>
           <FormControl error={errors["idpEntityId"] && touchedFields["idpEntityId"]} fullWidth>
             <InputLabel htmlFor="idp-entity-id">IDP Entity ID</InputLabel>
             <OutlinedInput
@@ -137,6 +126,18 @@ function AdvancedOptions() {
               name="idpEntityId"
               label="IDP Entity ID"
               {...register("idpEntityId")}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl error={errors["audience"] && touchedFields["audience"]} fullWidth>
+            <InputLabel htmlFor="sp-audience">SP Audience</InputLabel>
+            <OutlinedInput
+              type="text"
+              id="sp-audience"
+              name="audience"
+              label="SP Audience"
+              {...register("audience")}
             />
           </FormControl>
         </Grid>
@@ -153,20 +154,44 @@ function AdvancedOptions() {
           </FormControl>
         </Grid>
         <Grid item xs={6}>
-          <FormControl error={errors["audience"] && touchedFields["audience"]} fullWidth>
-            <InputLabel htmlFor="sp-audience">SP Audience</InputLabel>
+          <FormControl error={errors["authnContext"] && touchedFields["authnContext"]} fullWidth>
+            <InputLabel htmlFor="authn-context">Authentication Context</InputLabel>
             <OutlinedInput
               type="text"
-              id="sp-audience"
-              name="audience"
-              label="SP Audience"
-              {...register("audience")}
+              id="authn-context"
+              name="authnContext"
+              disabled={watchDisableContext}
+              label="Authentication Context"
+              {...register("authnContext")}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl error={errors["keyAlgorithm"] && touchedFields["keyAlgorithm"]} fullWidth>
+            <InputLabel htmlFor="key-algorithm">Key Algorithm</InputLabel>
+            <OutlinedInput
+              type="text"
+              id="key-algorithm"
+              name="keyAlgorithm"
+              label="Key Algorithm"
+              {...register("keyAlgorithm")}
             />
           </FormControl>
         </Grid>
       </Grid>
       <FormGroup>
         <Grid container spacing={4}>
+          <Grid item xs={4}>
+            <Controller
+              control={control}
+              name='disableContext'
+              render={({ field: { onChange, value } }) => (
+                <FormControlLabel
+                  control={<Checkbox checked={value} onChange={onChange} />}
+                  label='Disable Authentication Context' />
+              )}>
+            </Controller>
+          </Grid>
           <Grid item xs={4}>
             <Controller
               control={control}
