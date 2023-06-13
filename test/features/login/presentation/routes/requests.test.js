@@ -162,6 +162,27 @@ setTimeout(function () {
           })
           .end(done)
       })
+
+      it('should forceAuthn using provider property', function (done) {
+        temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
+          providers: [
+            {
+              label: 'Acme Security',
+              protocol: 'saml',
+              metadataUrl: 'https://saml.example.com',
+              forceAuthn: true
+            }
+          ]
+        }))
+        agent
+          .get('/requests/new/forceq?providerId=saml-0')
+          .trustLocalhost(true)
+          .expect(200)
+          .expect(res => {
+            assert.isTrue(res.body.forceAuthn)
+          })
+          .end(done)
+      })
     })
 
     describe('request without client certificate', function () {

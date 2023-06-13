@@ -88,6 +88,35 @@ describe('TidyAuthProviders use case', function () {
     assert.notEqual(results[0].id, results[1].id)
   })
 
+  it('should ensure boolean values are boolean', async function () {
+    // arrange
+    const providers = [
+      {
+        issuerUri: 'https://oidc.example.com/issuer',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        protocol: 'oidc',
+        selectAccount: 'on'
+      },
+      {
+        metadataUrl: 'https://saml.example.com/metadata',
+        protocol: 'saml',
+        forceAuthn: 'yes',
+        wantAssertionSigned: true,
+        wantResponseSigned: 'false'
+
+      }
+    ]
+    // act
+    const results = await usecase(providers)
+    // assert
+    assert.notEqual(results[0].id, results[1].id)
+    assert.isTrue(results[0].selectAccount)
+    assert.isTrue(results[1].forceAuthn)
+    assert.isTrue(results[1].wantAssertionSigned)
+    assert.isFalse(results[1].wantResponseSigned)
+  })
+
   it('should ignore default provider settings', async function () {
     // arrange
     const providers = [
