@@ -44,6 +44,7 @@ export default function SamlEditor() {
           <TabList onChange={selectTab}>
             <Tab label="Basic Integration" value="1" />
             <Tab label="Advanced Options" value="2" />
+            <Tab label="Metadata & Certs" value="3" />
           </TabList>
         </Box>
         <TabPanel value="1">
@@ -51,6 +52,9 @@ export default function SamlEditor() {
         </TabPanel>
         <TabPanel value="2">
           <AdvancedOptions />
+        </TabPanel>
+        <TabPanel value="3">
+          <MetadataCerts />
         </TabPanel>
       </TabContext>
     </Container>
@@ -216,6 +220,39 @@ function AdvancedOptions() {
           </Grid>
         </Grid>
       </FormGroup>
+    </Stack>
+  )
+}
+
+function MetadataCerts() {
+  const { register, formState: { errors, touchedFields } } = useFormContext()
+
+  return (
+    <Stack direction='row' spacing={4}>
+      <FormControl error={errors["metadata"] && touchedFields["metadata"]} fullWidth>
+        <InputLabel htmlFor="idp-metadata">IdP Metadata</InputLabel>
+        <OutlinedInput
+          type="text"
+          id="idp-metadata"
+          name="metadata"
+          label="IdP Metadata"
+          multiline
+          rows={12}
+          {...register("metadata")}
+        />
+      </FormControl>
+      <FormControl error={errors["idpCert"] && touchedFields["idpCert"]} fullWidth>
+        <InputLabel htmlFor="idp-cert">IDP Certificate</InputLabel>
+        <OutlinedInput
+          type="text"
+          id="idp-cert"
+          name="idpCert"
+          label="IDP Certificate"
+          multiline
+          rows={12}
+          {...register("idpCert")}
+        />
+      </FormControl>
     </Stack>
   )
 }

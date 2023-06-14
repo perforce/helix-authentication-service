@@ -25,7 +25,11 @@ export default function Root() {
   if (isLoading) {
     return <Alert severity='info'>Fetching providers...</Alert>
   } else if (error) {
-    throw new Error(JSON.stringify(error))
+    if (typeof error === 'string') {
+      throw new Error(error)
+    } else {
+      throw new Error(JSON.stringify(error))
+    }
   } else {
     const providers = deserialize(data)
     if (providers.length === 0) {

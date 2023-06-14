@@ -27,13 +27,14 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import DeleteIcon from '@mui/icons-material/Delete'
 import DownloadIcon from '@mui/icons-material/Download'
 import EditIcon from '@mui/icons-material/Edit'
+import HelpCenterIcon from '@mui/icons-material/HelpCenter';
 import LockIcon from '@mui/icons-material/Lock'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import WarningIcon from '@mui/icons-material/Warning'
 import { useNavigate } from 'react-router-dom'
 import { useGetStatusQuery } from '~/app/services/auth'
-import { green, red } from '@mui/material/colors'
+import { green, red, yellow } from '@mui/material/colors'
 
 function SettingsDialog(props) {
   const { onClose, text, open } = props
@@ -227,16 +228,29 @@ const OidcProviderDetails = ({ provider }) => {
 }
 
 const SamlProviderDetails = ({ provider }) => {
-  return (
-    <Box sx={{ mb: 2 }}>
-      <Typography variant="subtitle2">
-        Metadata URL:
-      </Typography>
-      <Typography>
-        {provider.metadataUrl}
-      </Typography>
-    </Box>
-  )
+  if (provider.metadataUrl) {
+    return (
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle2">
+          Metadata URL:
+        </Typography>
+        <Typography>
+          {provider.metadataUrl}
+        </Typography>
+      </Box>
+    )
+  } else {
+    return (
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle2">
+          Label:
+        </Typography>
+        <Typography>
+          {provider.label}
+        </Typography>
+      </Box>
+    )
+  }
 }
 
 const providers = [
@@ -248,18 +262,20 @@ const providers = [
 ]
 
 function makeProviderIcon(provider) {
-  let url
+  let query
   if (provider.issuerUri) {
-    url = provider.issuerUri
+    query = provider.issuerUri
   } else if (provider.metadataUrl) {
-    url = provider.metadataUrl
+    query = provider.metadataUrl
+  } else if (provider.label) {
+    query = provider.label
   } else {
     return (
       <LockIcon sx={{ fontSize: 64 }} />
     )
   }
   for (const entry of providers) {
-    if (url.includes(entry.pattern)) {
+    if (query.includes(entry.pattern)) {
       return (
         <img src={`/images/${entry.icon}`} alt="logo" width={entry.width} height={entry.height} />
       )
@@ -270,21 +286,37 @@ function makeProviderIcon(provider) {
   )
 }
 
+function makeStatusIcon(provider, status) {
+  // would have used colors "success" and "warning" but they don't look
+  // exactly like the colors in the proposed design
+  if (status === 'ok') {
+    return (
+      <Tooltip title="Status: ok">
+        <CheckCircleIcon fontSize="small" sx={{ color: green['400'] }} />
+      </Tooltip>
+    )
+  } else if (provider.metadataUrl) {
+    return (
+      <Tooltip title={`Status: ${status}`}>
+        <WarningIcon fontSize="small" sx={{ color: red['900'] }} />
+      </Tooltip>
+    )
+  } else {
+    return (
+      <Tooltip title={'Status: unknown'}>
+        <HelpCenterIcon fontSize="small" sx={{ color: yellow['600'] }} />
+      </Tooltip>
+    )
+  }
+}
+
 const ProviderCard = ({ provider, onDelete, status }) => {
   const detailsComponent = provider.protocol === 'oidc' ?
     OidcProviderDetails({ provider, onDelete }) :
     SamlProviderDetails({ provider, onDelete })
   // would have used colors "success" and "warning" but they don't look
   // exactly like the colors in the proposed design
-  const statusComponent = status === 'ok' ? (
-    <Tooltip title="Status: ok">
-      <CheckCircleIcon fontSize="small" sx={{ color: green['400'] }} />
-    </Tooltip>
-  ) : (
-    <Tooltip title={`Status: ${status}`}>
-      <WarningIcon fontSize="small" sx={{ color: red['900'] }} />
-    </Tooltip>
-  )
+  const statusComponent = makeStatusIcon(provider, status)
   return (
     <Card sx={{
       minWidth: 275, height: "100%", display: "flex", flexDirection: "column"
