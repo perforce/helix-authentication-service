@@ -4,18 +4,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {
-  Alert,
-  Container,
-  Paper,
+  Button,
   Stack,
   Typography
 } from '@mui/material'
+import { orange } from '@mui/material/colors'
+import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import {
   createBrowserRouter,
   Navigate,
   Outlet,
   RouterProvider,
   useLocation,
+  useNavigate,
   useRouteError,
 } from 'react-router-dom'
 import { Provider } from 'react-redux'
@@ -27,22 +28,40 @@ import Login from '~/routes/login'
 import Wizard from '~/routes/new'
 import Root from '~/routes/root'
 
+async function copyTextToClipboard(text) {
+  if ('clipboard' in navigator) {
+    return await navigator.clipboard.writeText(text)
+  } else {
+    return document.execCommand('copy', true, text)
+  }
+}
+
 function ErrorPage() {
+  const navigate = useNavigate()
   const error = useRouteError()
+  const errorText = error.statusText || error.message
   console.error(error)
 
+  const handleCopyClick = () => {
+    copyTextToClipboard(errorText).catch((err) => {
+      console.log(err)
+    })
+  }
+
   return (
-    <Container>
-      <div id="error-page">
-        <Alert severity='error'>Sorry, an unexpected error has occurred.</Alert>
-        <Paper>
-          <Typography variant="h6" gutterBottom>
-            Error details are shown below:
-          </Typography>
-          <pre>{error.statusText || error.message}</pre>
-        </Paper>
-      </div>
-    </Container>
+    <div id="error-page">
+      <Stack alignItems="center" justifyContent="center" style={{ height: "66vh" }} spacing={2}>
+        <WarningRoundedIcon fontSize="large" sx={{ color: orange['900'] }} />
+        <Typography variant="h6" align="center" gutterBottom sx={{ color: orange['900'] }}>
+          Sorry, an unexpected error has occurred.
+        </Typography>
+        <Typography width="50%">{errorText}</Typography>
+        <Stack direction="row" spacing={4}>
+          <Button variant="outlined" onClick={handleCopyClick}>Copy Error</Button>
+          <Button variant="contained" onClick={() => navigate('/')}>Return Home</Button>
+        </Stack>
+      </Stack>
+    </div>
   )
 }
 
