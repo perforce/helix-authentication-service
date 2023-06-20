@@ -33,7 +33,7 @@ export const ButtonAppBar = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <img src="/images/apps-p4mfa-dark.png" alt="logo" height="24" width="24" />
+          <img src="/admin/images/apps-p4mfa-dark.png" alt="logo" height="24" width="24" />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, mx: 2 }}>
             Helix Authentication Service
           </Typography>

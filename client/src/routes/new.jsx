@@ -163,7 +163,7 @@ export default function Wizard() {
 const makeProviderIcon = (provider) => {
   if (provider.icon) {
     return (
-      <img src={`/images/${provider.icon}`} alt="logo" width={provider.width} height={provider.height} />
+      <img src={`/admin/images/${provider.icon}`} alt="logo" width={provider.width} height={provider.height} />
     )
   } else {
     return (

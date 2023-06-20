@@ -32,7 +32,7 @@ export const Login = () => {
       <Grid item xs={4} sx={{ backgroundColor: 'primary.main' }}>
         <Box ml={2} mt={4} padding={2}>
           <Stack direction="row" spacing={4}>
-            <img src="/images/apps-p4mfa-light.png" alt="logo" width="48" height="48" />
+            <img src="/admin/images/apps-p4mfa-light.png" alt="logo" width="48" height="48" />
             <Typography variant="h5" component="div" sx={{ color: "#FFFFFF" }}>
               Helix Authentication Service
             </Typography>

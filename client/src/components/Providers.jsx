@@ -277,7 +277,7 @@ function makeProviderIcon(provider) {
   for (const entry of providers) {
     if (query.includes(entry.pattern)) {
       return (
-        <img src={`/images/${entry.icon}`} alt="logo" width={entry.width} height={entry.height} />
+        <img src={`/admin/images/${entry.icon}`} alt="logo" width={entry.width} height={entry.height} />
       )
     }
   }
