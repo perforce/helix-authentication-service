@@ -6,15 +6,16 @@ import {
   IconButton,
   InputAdornment,
   OutlinedInput,
+  Tooltip,
 } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
-export const PasswordInput = ({ name, label, required, register }) => {
+export const PasswordInput = ({ name, label, required, register, tooltip }) => {
   const [show, setShow] = useState(false)
   const handleClick = () => setShow(!show)
   const handleMouseDown = (event) => event.preventDefault()
 
-  return (
+  const inner = (
     <OutlinedInput
       type={show ? 'text' : 'password'}
       id={name}
@@ -35,6 +36,7 @@ export const PasswordInput = ({ name, label, required, register }) => {
       }
     />
   )
+  return tooltip ? <Tooltip title={tooltip}>{inner}</Tooltip> : inner
 }
 
 export default PasswordInput

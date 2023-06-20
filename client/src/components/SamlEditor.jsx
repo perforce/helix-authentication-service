@@ -20,6 +20,7 @@ import {
   OutlinedInput,
   Stack,
   Tab,
+  Tooltip,
   Typography
 } from '@mui/material'
 
@@ -68,13 +69,15 @@ function BasicOptions() {
       <Grid item xs={6}>
         <FormControl error={errors["metadataUrl"] && touchedFields["metadataUrl"]} fullWidth>
           <InputLabel htmlFor="metadata-url">Metadata URL</InputLabel>
-          <OutlinedInput
-            type="text"
-            id="metadata-url"
-            name="metadataUrl"
-            label="Metadata URL"
-            {...register("metadataUrl", { pattern: /^https?:\/\/.+/ })}
-          />
+          <Tooltip title="URL from which metadata for the identity provider may be retrieved.">
+            <OutlinedInput
+              type="text"
+              id="metadata-url"
+              name="metadataUrl"
+              label="Metadata URL"
+              {...register("metadataUrl", { pattern: /^https?:\/\/.+/ })}
+            />
+          </Tooltip>
           <FormHelperText>{
             errors.metadataUrl?.type === 'pattern' && 'URL must begin with http:// or https://'
           }</FormHelperText>
@@ -83,13 +86,15 @@ function BasicOptions() {
       <Grid item xs={6}>
         <FormControl error={errors["spEntityId"] && touchedFields["spEntityId"]} fullWidth>
           <InputLabel htmlFor="sp-entity-id">SP Entity ID</InputLabel>
-          <OutlinedInput
-            type="text"
-            id="sp-entity-id"
-            name="spEntityId"
-            label="SP Entity ID"
-            {...register("spEntityId")}
-          />
+          <Tooltip title="Identifier for this service, default is https://has.example.com">
+            <OutlinedInput
+              type="text"
+              id="sp-entity-id"
+              name="spEntityId"
+              label="SP Entity ID"
+              {...register("spEntityId")}
+            />
+          </Tooltip>
           <FormHelperText>{
             errors.spEntityId?.type === 'pattern' && 'URL must begin with http:// or https://'
           }</FormHelperText>
@@ -109,13 +114,15 @@ function AdvancedOptions() {
         <Grid item xs={6}>
           <FormControl error={errors["signonUrl"] && touchedFields["signonUrl"]} fullWidth>
             <InputLabel htmlFor="signon-url">Provider SSO URL</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="signon-url"
-              name="signonUrl"
-              label="Provider SSO URL"
-              {...register("signonUrl", { pattern: /^https?:\/\/.+/ })}
-            />
+            <Tooltip title="URL of the single sign-on service of the identity provider.">
+              <OutlinedInput
+                type="text"
+                id="signon-url"
+                name="signonUrl"
+                label="Provider SSO URL"
+                {...register("signonUrl", { pattern: /^https?:\/\/.+/ })}
+              />
+            </Tooltip>
             <FormHelperText>{
               errors.signonUrl?.type === 'pattern' && 'URL must begin with http:// or https://'
             }</FormHelperText>
@@ -124,62 +131,72 @@ function AdvancedOptions() {
         <Grid item xs={6}>
           <FormControl error={errors["idpEntityId"] && touchedFields["idpEntityId"]} fullWidth>
             <InputLabel htmlFor="idp-entity-id">IDP Entity ID</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="idp-entity-id"
-              name="idpEntityId"
-              label="IDP Entity ID"
-              {...register("idpEntityId")}
-            />
+            <Tooltip title="Identifier for this identity provider.">
+              <OutlinedInput
+                type="text"
+                id="idp-entity-id"
+                name="idpEntityId"
+                label="IDP Entity ID"
+                {...register("idpEntityId")}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["audience"] && touchedFields["audience"]} fullWidth>
             <InputLabel htmlFor="sp-audience">SP Audience</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="sp-audience"
-              name="audience"
-              label="SP Audience"
-              {...register("audience")}
-            />
+            <Tooltip title="If specified on both the identity provider and here, the service will ensure the SAML response matches this value.">
+              <OutlinedInput
+                type="text"
+                id="sp-audience"
+                name="audience"
+                label="SP Audience"
+                {...register("audience")}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["nameIdFormat"] && touchedFields["nameIdFormat"]} fullWidth>
             <InputLabel htmlFor="nameid-format">NameID Format</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="nameid-format"
-              name="nameIdFormat"
-              label="NameID Format"
-              {...register("nameIdFormat")}
-            />
+            <Tooltip title="Typically left blank, but may be used to inform the IdP what type of nameID value to return.">
+              <OutlinedInput
+                type="text"
+                id="nameid-format"
+                name="nameIdFormat"
+                label="NameID Format"
+                {...register("nameIdFormat")}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["authnContext"] && touchedFields["authnContext"]} fullWidth>
             <InputLabel htmlFor="authn-context">Authentication Context</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="authn-context"
-              name="authnContext"
-              disabled={watchDisableContext}
-              label="Authentication Context"
-              {...register("authnContext")}
-            />
+            <Tooltip title="May be used to restrict the means by which a user authenticates.">
+              <OutlinedInput
+                type="text"
+                id="authn-context"
+                name="authnContext"
+                disabled={watchDisableContext}
+                label="Authentication Context"
+                {...register("authnContext")}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["keyAlgorithm"] && touchedFields["keyAlgorithm"]} fullWidth>
             <InputLabel htmlFor="key-algorithm">Key Algorithm</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="key-algorithm"
-              name="keyAlgorithm"
-              label="Key Algorithm"
-              {...register("keyAlgorithm")}
-            />
+            <Tooltip title="Algorithm for signing requests; defaults to sha256.">
+              <OutlinedInput
+                type="text"
+                id="key-algorithm"
+                name="keyAlgorithm"
+                label="Key Algorithm"
+                {...register("keyAlgorithm")}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
       </Grid>
@@ -190,9 +207,11 @@ function AdvancedOptions() {
               control={control}
               name='disableContext'
               render={({ field: { onChange, value } }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={value} onChange={onChange} />}
-                  label='Disable Authentication Context' />
+                <Tooltip title="If checked, does not send any authentication context at all.">
+                  <FormControlLabel
+                    control={<Checkbox checked={value} onChange={onChange} />}
+                    label='Disable Authentication Context' />
+                </Tooltip>
               )}>
             </Controller>
           </Grid>
@@ -201,9 +220,11 @@ function AdvancedOptions() {
               control={control}
               name='wantAssertionSigned'
               render={({ field: { onChange, value } }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={value} onChange={onChange} />}
-                  label='Want assertion signed' />
+                <Tooltip title="The SAML assertion must be signed or authentication will fail. Not all identity providers do this by default, or at all.">
+                  <FormControlLabel
+                    control={<Checkbox checked={value} onChange={onChange} />}
+                    label='Want assertion signed' />
+                </Tooltip>
               )}>
             </Controller>
           </Grid>
@@ -212,9 +233,11 @@ function AdvancedOptions() {
               control={control}
               name='wantResponseSigned'
               render={({ field: { onChange, value } }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={value} onChange={onChange} />}
-                  label='Want response signed' />
+                <Tooltip title="The SAML response must be signed or authentication will fail. Not all identity providers do this by default, or at all.">
+                  <FormControlLabel
+                    control={<Checkbox checked={value} onChange={onChange} />}
+                    label='Want response signed' />
+                </Tooltip>
               )}>
             </Controller>
           </Grid>
@@ -231,27 +254,31 @@ function MetadataCerts() {
     <Stack direction='row' spacing={4}>
       <FormControl error={errors["metadata"] && touchedFields["metadata"]} fullWidth>
         <InputLabel htmlFor="idp-metadata">IdP Metadata</InputLabel>
-        <OutlinedInput
-          type="text"
-          id="idp-metadata"
-          name="metadata"
-          label="IdP Metadata"
-          multiline
-          rows={12}
-          {...register("metadata")}
-        />
+        <Tooltip title="Raw XML metadata for the SAML identity provider.">
+          <OutlinedInput
+            type="text"
+            id="idp-metadata"
+            name="metadata"
+            label="IdP Metadata"
+            multiline
+            rows={12}
+            {...register("metadata")}
+          />
+        </Tooltip>
       </FormControl>
       <FormControl error={errors["idpCert"] && touchedFields["idpCert"]} fullWidth>
         <InputLabel htmlFor="idp-cert">IDP Certificate</InputLabel>
-        <OutlinedInput
-          type="text"
-          id="idp-cert"
-          name="idpCert"
-          label="IDP Certificate"
-          multiline
-          rows={12}
-          {...register("idpCert")}
-        />
+        <Tooltip title="PEM encoded public certificate of the SAML identity provider.">
+          <OutlinedInput
+            type="text"
+            id="idp-cert"
+            name="idpCert"
+            label="IDP Certificate"
+            multiline
+            rows={12}
+            {...register("idpCert")}
+          />
+        </Tooltip>
       </FormControl>
     </Stack>
   )

@@ -20,6 +20,7 @@ import {
   OutlinedInput,
   Stack,
   Tab,
+  Tooltip,
   Typography
 } from '@mui/material'
 import PasswordInput from '~/components/PasswordInput'
@@ -65,13 +66,15 @@ function BasicOptions() {
       <Grid item xs={12}>
         <FormControl error={errors["issuerUri"] && touchedFields["issuerUri"]} fullWidth>
           <InputLabel htmlFor="issuer-uri">Issuer URI</InputLabel>
-          <OutlinedInput
-            type="text"
-            id="issuer-uri"
-            name="issuerUri"
-            label="Issuer URI"
-            {...register("issuerUri", { pattern: /^https?:\/\/.+/ })}
-          />
+          <Tooltip title="URL from which the OIDC issuer configuration may be retrieved.">
+            <OutlinedInput
+              type="text"
+              id="issuer-uri"
+              name="issuerUri"
+              label="Issuer URI"
+              {...register("issuerUri", { pattern: /^https?:\/\/.+/ })}
+            />
+          </Tooltip>
           <FormHelperText>{
             errors.issuerUri?.type === 'pattern' && 'URL must begin with http:// or https://'
           }</FormHelperText>
@@ -80,13 +83,15 @@ function BasicOptions() {
       <Grid item xs={6}>
         <FormControl error={errors["clientId"] && touchedFields["clientId"]} fullWidth>
           <InputLabel htmlFor="client-id">Client ID</InputLabel>
-          <OutlinedInput
-            type="text"
-            id="client-id"
-            name="clientId"
-            label="Client ID"
-            {...register("clientId", { required: true })}
-          />
+          <Tooltip title="Unique identifier for this service, provided by the OIDC issuer.">
+            <OutlinedInput
+              type="text"
+              id="client-id"
+              name="clientId"
+              label="Client ID"
+              {...register("clientId", { required: true })}
+            />
+          </Tooltip>
           <FormHelperText>{
             errors.clientId?.type === 'required' && 'Must provide an identifier'
           }</FormHelperText>
@@ -95,7 +100,13 @@ function BasicOptions() {
       <Grid item xs={6}>
         <FormControl error={errors["clientSecret"] && touchedFields["clientSecret"]} fullWidth>
           <InputLabel htmlFor="client-secret">Client Secret</InputLabel>
-          <PasswordInput name="clientSecret" label="Client Secret" required={true} register={register} />
+          <PasswordInput
+            name="clientSecret"
+            label="Client Secret"
+            required={true}
+            register={register}
+            tooltip="Secret value associated with the client ID, provided by the OIDC issuer."
+          />
           <FormHelperText>{
             errors.clientSecret?.type === 'required' && 'Must provide a secret value'
           }</FormHelperText>
@@ -114,25 +125,29 @@ function AdvancedOptions() {
         <Grid item xs={6}>
           <FormControl error={errors["codeChallenge"] && touchedFields["codeChallenge"]} fullWidth>
             <InputLabel htmlFor="code-challenge">Code Challenge Method</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="code-challenge"
-              name="codeChallenge"
-              label="Code Challenge Method"
-              {...register("codeChallenge")}
-            />
+            <Tooltip title="May be 'S256' or 'plain', with 'S256' being the default.">
+              <OutlinedInput
+                type="text"
+                id="code-challenge"
+                name="codeChallenge"
+                label="Code Challenge Method"
+                {...register("codeChallenge")}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["signingAlgo"] && touchedFields["signingAlgo"]} fullWidth>
-            <InputLabel htmlFor="signing-algo">Token signing algorithm</InputLabel>
-            <OutlinedInput
-              type="text"
-              id="signing-algo"
-              name="signingAlgo"
-              label="Token signing algorithm"
-              {...register("signingAlgo")}
-            />
+            <InputLabel htmlFor="signing-algo">Token Signing Algorithm</InputLabel>
+            <Tooltip title="May be 'RS256' or 'HS256', with 'RS256' being the default.">
+              <OutlinedInput
+                type="text"
+                id="signing-algo"
+                name="signingAlgo"
+                label="Token signing algorithm"
+                {...register("signingAlgo")}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
       </Grid>
@@ -143,9 +158,11 @@ function AdvancedOptions() {
               control={control}
               name='selectAccount'
               render={({ field: { onChange, value } }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={value} onChange={onChange} />}
-                  label='Allow account selection' />
+                <Tooltip title="If checked, user will be permitted to select an account for authentication.">
+                  <FormControlLabel
+                    control={<Checkbox checked={value} onChange={onChange} />}
+                    label='Allow account selection' />
+                </Tooltip>
               )}>
             </Controller>
           </Grid>
