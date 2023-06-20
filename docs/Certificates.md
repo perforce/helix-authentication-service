@@ -49,6 +49,17 @@ changed. Simply copy and paste the contents of the file named by `CERT_FILE`
 from the service into the `x509cert` setting in Swarm, with the `BEGIN` and
 `END` lines and line breaks.
 
+An alternative to using the `CERT_FILE` and `KEY_FILE` settings for the Swarm
+integration is to set the `SAML_CERT_FILE` and `SAML_KEY_FILE` settings, which
+may be used to reference a different public/private key pair specifically for
+use with SAML. If these settings are provided, the service will use them when
+signing and encrypting SAML authentication requests with the configured identity
+provider, as well as for producing the SAML authentication response that is sent
+to Swarm. Since these certs are separate from the certs used for HTTPS (namely
+`CERT_FILE` and `KEY_FILE`), then it is possible to routinely rotate the certs
+used for HTTPS while keeping the SAML-specific certs stable for a longer period
+of time (since changing those involves changing the Swarm configuration).
+
 ## Validating Certificates
 
 ### Verifying certificate was signed by authority
