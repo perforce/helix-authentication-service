@@ -1082,12 +1082,13 @@ function validate_inputs() {
     fi
     if [[ "${ADMIN_ENABLED}" == 'yes' ]]; then
         validate_admin_creds
-    fi
-    if $CONFIGURE_AUTH; then
-        validate_auth_inputs
-    fi
-    if $CONFIGURE_SCIM; then
-        validate_scim_inputs
+    else
+        if $CONFIGURE_AUTH; then
+            validate_auth_inputs
+        fi
+        if $CONFIGURE_SCIM; then
+            validate_scim_inputs
+        fi
     fi
     return 0
 }
