@@ -1,5 +1,8 @@
 import path from 'path'
-import { defineConfig } from 'vite'
+import {
+  defineConfig,
+  splitVendorChunkPlugin
+} from 'vite'
 import react from '@vitejs/plugin-react'
 import eslint from 'vite-plugin-eslint'
 
@@ -15,7 +18,11 @@ const backend = {
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/admin',
-  plugins: [react(), eslint()],
+  plugins: [
+    react(),
+    eslint(),
+    splitVendorChunkPlugin()
+  ],
   resolve: {
     alias: {
       // Would have used @ like everyone else except that there are real-world
