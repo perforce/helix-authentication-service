@@ -361,9 +361,11 @@ export default function Providers({ providers, onDelete }) {
       <Alert severity='info'>Checking status of providers...</Alert>
     )
   } else if (error) {
-    return (
-      <Alert severity='error'>{JSON.stringify(error)}</Alert>
-    )
+    if (typeof error === 'string') {
+      throw new Error(error)
+    } else {
+      throw new Error(JSON.stringify(error))
+    }
   } else {
     return (
       <Box>

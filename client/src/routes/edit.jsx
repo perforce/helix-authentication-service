@@ -51,9 +51,11 @@ export default function Editor({ protocol }) {
       <Alert severity='info'>Fetching {protocol.toUpperCase()} provider...</Alert>
     )
   } else if (error) {
-    return (
-      <Alert severity='error'>{JSON.stringify(error)}</Alert>
-    )
+    if (typeof error === 'string') {
+      throw new Error(error)
+    } else {
+      throw new Error(JSON.stringify(error))
+    }
   } else {
     return (
       <FormProvider {...methods} >
