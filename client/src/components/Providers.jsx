@@ -19,6 +19,7 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Snackbar,
   Stack,
   Tooltip,
   Typography,
@@ -38,7 +39,7 @@ import { green, red, yellow } from '@mui/material/colors'
 
 function SettingsDialog(props) {
   const { onClose, text, open } = props
-  const [isCopied, setIsCopied] = React.useState(false)
+  const [showSnackbar, setShowSnackbar] = React.useState(false)
 
   const handleClose = () => {
     onClose()
@@ -53,14 +54,14 @@ function SettingsDialog(props) {
   }
 
   const handleCopyClick = () => {
-    copyTextToClipboard(text).then(() => {
-      setIsCopied(true)
-      setTimeout(() => {
-        setIsCopied(false)
-      }, 1500)
-    }).catch((err) => {
+    copyTextToClipboard(text).catch((err) => {
       console.log(err)
     })
+    setShowSnackbar(true)
+  }
+
+  const handleSnackbarClose = () => {
+    setShowSnackbar(false)
   }
 
   return (
@@ -77,12 +78,20 @@ function SettingsDialog(props) {
       </DialogContent>
       <DialogActions>
         <Button autoFocus onClick={handleClose}>
-          Cancel
+          Close
         </Button>
-        <Button variant="contained" onClick={handleCopyClick}>
-          {isCopied ? 'Copied!' : 'Copy'}
-        </Button>
+        <Button variant="contained" onClick={handleCopyClick}>Copy</Button>
       </DialogActions>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={showSnackbar}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+          Settings Copied!
+        </Alert>
+      </Snackbar>
     </Dialog>
   )
 }

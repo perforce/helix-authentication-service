@@ -4,11 +4,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {
+  Alert,
   Button,
+  Snackbar,
   Stack,
   Typography
 } from '@mui/material'
 import { orange } from '@mui/material/colors'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import {
   createBrowserRouter,
@@ -38,6 +41,7 @@ async function copyTextToClipboard(text) {
 
 function ErrorPage() {
   const navigate = useNavigate()
+  const [showSnackbar, setShowSnackbar] = React.useState(false)
   const error = useRouteError()
   const errorText = error.statusText || error.message
   console.error(error)
@@ -46,6 +50,11 @@ function ErrorPage() {
     copyTextToClipboard(errorText).catch((err) => {
       console.log(err)
     })
+    setShowSnackbar(true)
+  }
+
+  const handleClose = () => {
+    setShowSnackbar(false)
   }
 
   return (
@@ -57,10 +66,20 @@ function ErrorPage() {
         </Typography>
         <Typography width="50%">{errorText}</Typography>
         <Stack direction="row" spacing={4}>
-          <Button variant="outlined" onClick={handleCopyClick}>Copy Error</Button>
-          <Button variant="contained" onClick={() => navigate('/')}>Return Home</Button>
+          <Button variant="outlined" onClick={() => navigate('/')}>Go Back</Button>
+          <Button startIcon={<ContentCopyIcon />} variant="contained" onClick={handleCopyClick}>Copy Error</Button>
         </Stack>
       </Stack>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={showSnackbar}
+        autoHideDuration={3000}
+        onClose={handleClose}
+      >
+        <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+          Error Copied!
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
