@@ -10,6 +10,7 @@ import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
 import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertFromProviders.js'
+import FormatAuthProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/FormatAuthProviders.js'
 import WriteConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/WriteConfiguration.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
@@ -21,11 +22,17 @@ describe('WriteConfiguration use case', function () {
     const configRepository = new ConfigurationRepository()
     const defaultsRepository = new DefaultsEnvRepository()
     const validateAuthProvider = ValidateAuthProvider()
+    const formatAuthProviders = FormatAuthProviders({ defaultsRepository })
     const convertFromProviders = ConvertFromProviders({
       tidyAuthProviders: TidyAuthProviders({ validateAuthProvider }),
       validateAuthProvider
     })
-    usecase = WriteConfiguration({ configRepository, defaultsRepository, convertFromProviders })
+    usecase = WriteConfiguration({
+      configRepository,
+      defaultsRepository,
+      convertFromProviders,
+      formatAuthProviders
+    })
   })
 
   after(function () {
