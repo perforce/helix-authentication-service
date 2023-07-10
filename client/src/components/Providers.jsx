@@ -312,7 +312,7 @@ function makeStatusIcon(provider, status) {
     )
   } else {
     return (
-      <Tooltip title={'Status: unknown'}>
+      <Tooltip title={'Status: cannot be tested automatically'}>
         <HelpCenterIcon fontSize="small" sx={{ color: yellow['600'] }} />
       </Tooltip>
     )
