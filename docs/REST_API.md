@@ -45,6 +45,12 @@ The authentication providers can be modified via the REST API in a manner simila
 
 Note that any of the `POST`, `PUT`, and `DELETE` operations will result in configuration changes being written to the `.env` configuration file. As a result, any comments in that file will be lost.
 
+### Validation
+
+#### Swarm Configuration
+
+The authentication service offers an API endpoint that will validate a given Swarm configuration file. This feature is enabled by setting `VALIDATE_ENABLED` to `true` in the `.env` file, which then enables the `/validate/swarm` endpoint. See the appropriate section below for details.
+
 ## Routes
 
 ### GET /requests/new/:userId
@@ -437,3 +443,31 @@ curl -k --oauth2-bearer eyJ.<snip>.glw -X DELETE https://auth-service/tokens
 #### Response Example
 
 The response body will be `{"status": "ok"}` unless an error occurred.
+
+### POST /validate/swarm
+
+Validate the provided Swarm configuration file and return a JSON formatted response that indicates the result of that validation.
+
+#### Request Headers
+
+| Name | Description |
+| ---- | ----------- |
+| `Content-Type` | Must be `multipart/form-data` |
+
+#### Request Body
+
+| Name | Description |
+| ---- | ----------- |
+| `config` | Full contents of the Swarm `config.php` file to be validated. |
+
+#### Request Example
+
+```shell
+curl -k -F config=@swarm/data/config.php https://auth-service/validate/swarm
+```
+
+*Note:* the `-F config=@` syntax has been tested with the 7.x version of `curl` but may require a different usage for versions 8.0 and higher.
+
+#### Response Example
+
+The response body will be formatted as JSON and contain a property named `status` that names the appropriate property to consider, either `results` or `errors`. If `status` is `errors` then the configuration file was malformed and could not be processed and the `errors` property will contain the details of the error. If `status` is `results` then the `results` property will contain the results of the validation. If `results` is an empty list, then no issues were found.
