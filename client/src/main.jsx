@@ -41,10 +41,21 @@ async function copyTextToClipboard(text) {
 
 function ErrorPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [showSnackbar, setShowSnackbar] = React.useState(false)
   const error = useRouteError()
   const errorText = error.statusText || error.message
   console.error(error)
+
+  const handleGoBack = () => {
+    if (location.pathname === '/') {
+      // Refresh the page since simply navigating to "/" does not have the
+      // desired effect when we are already at that location.
+      navigate(0)
+    } else {
+      navigate('/')
+    }
+  }
 
   const handleCopyClick = () => {
     copyTextToClipboard(errorText).catch((err) => {
@@ -66,7 +77,7 @@ function ErrorPage() {
         </Typography>
         <Typography width="50%">{errorText}</Typography>
         <Stack direction="row" spacing={4}>
-          <Button variant="outlined" onClick={() => navigate('/')}>Go Back</Button>
+          <Button variant="outlined" onClick={handleGoBack}>Go Back</Button>
           <Button startIcon={<ContentCopyIcon />} variant="contained" onClick={handleCopyClick}>Copy Error</Button>
         </Stack>
       </Stack>
