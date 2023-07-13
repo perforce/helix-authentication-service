@@ -21,13 +21,13 @@ module.exports = {
   // These are examples, be sure to replace them with real values.
   //
   'urn:swarm-example:sp': {
-    acsUrl: 'http://swarm.example.com/api/v10/session'
+    acsUrl: 'https://swarm.example.com/api/v10/session'
   },
   'urn:swarm-2019.3:sp': {
-    acsUrl: 'http://swarm.example.com/login'
+    acsUrl: 'https://swarm.example.com/login'
   },
   'http://hth.example.com/account/saml/hth/metadata': {
-    acsUrl: 'http://hth.example.com/account/saml/hth/consume'
+    acsUrl: 'https://hth.example.com/account/saml/hth/consume'
   }
   //
   // Support for Swarm installations configured to connect with multiple Helix
