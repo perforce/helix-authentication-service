@@ -138,7 +138,7 @@ return array(
     'sp' => array(
       'entityId' => 'urn:swarm-example:sp',
       'assertionConsumerService' => array(
-        'url' => 'http://swarm.example.com/',
+        'url' => 'https://swarm.example.com/',
       ),
     ),
     'idp' => array(

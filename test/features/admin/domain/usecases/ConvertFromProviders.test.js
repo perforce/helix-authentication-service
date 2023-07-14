@@ -42,8 +42,8 @@ describe('ConvertFromProviders use case', function () {
     // act
     await usecase(settings)
     // assert
-    assert.isUndefined(settings.get('AUTH_PROVIDERS'))
-    assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
+    assert.isFalse(settings.has('AUTH_PROVIDERS'))
+    assert.isFalse(settings.has('SAML_IDP_SLO_URL'))
     assert.equal(settings.get('IDP_CERT'), '-----BEGIN CERTIFICATE-----')
     assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.example.com')
     assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
@@ -76,6 +76,38 @@ describe('ConvertFromProviders use case', function () {
     const actualProviders = settings.get('AUTH_PROVIDERS')
     assert.lengthOf(actualProviders, 2)
     assert.isTrue(actualProviders.every((e) => e.protocol === 'saml'))
+    assert.isFalse(settings.has('OIDC_ISSUER_URI'))
+    assert.isFalse(settings.has('SAML_IDP_SLO_URL'))
+  })
+
+  it('should shadow classic settings if 2 saml providers', async function () {
+    // arrange
+    const settings = new Map()
+    settings.set('OIDC_ISSUER_URI', 'https://oidc/issuer')
+    settings.set('SAML_IDP_SLO_URL', 'https://saml/logout')
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      metadataUrl: 'https://saml.example.com',
+      spEntityId: 'urn:example:sp',
+      idpCert: '-----BEGIN CERTIFICATE-----'
+    }, {
+      label: 'Example SAML',
+      protocol: 'saml',
+      metadataUrl: 'https://saml2.example.com',
+      spEntityId: 'urn:example2:sp',
+      idpCert: '-----BEGIN CERTIFICATE-----'
+    }]
+    settings.set('AUTH_PROVIDERS', providers)
+    // act
+    await usecase(settings, { shadow: true })
+    // assert
+    assert.isDefined(settings.get('AUTH_PROVIDERS'))
+    const actualProviders = settings.get('AUTH_PROVIDERS')
+    assert.lengthOf(actualProviders, 2)
+    assert.isTrue(actualProviders.every((e) => e.protocol === 'saml'))
+    assert.isTrue(settings.has('OIDC_ISSUER_URI'))
+    assert.isTrue(settings.has('SAML_IDP_SLO_URL'))
     assert.isUndefined(settings.get('OIDC_ISSUER_URI'))
     assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
   })
@@ -112,16 +144,16 @@ describe('ConvertFromProviders use case', function () {
     const actualProviders = settings.get('AUTH_PROVIDERS')
     assert.lengthOf(actualProviders, 2)
     assert.isTrue(actualProviders.every((e) => e.protocol === 'saml'))
-    assert.isUndefined(settings.get('OIDC_ISSUER_URI'))
-    assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
-    assert.isUndefined(settings.get('OIDC_SELECT_ACCOUNT'))
-    assert.isUndefined(settings.get('OIDC_TOKEN_SIGNING_ALGO'))
-    assert.isUndefined(settings.get('SAML_AUTHN_CONTEXT'))
-    assert.isUndefined(settings.get('SAML_NAMEID_FORMAT'))
-    assert.isUndefined(settings.get('SAML_SP_ENTITY_ID'))
-    assert.isUndefined(settings.get('SAML_WANT_ASSERTION_SIGNED'))
-    assert.isUndefined(settings.get('SAML_WANT_RESPONSE_SIGNED'))
-    assert.isUndefined(settings.get('SP_KEY_ALGO'))
+    assert.isFalse(settings.has('OIDC_ISSUER_URI'))
+    assert.isFalse(settings.has('SAML_IDP_SLO_URL'))
+    assert.isFalse(settings.has('OIDC_SELECT_ACCOUNT'))
+    assert.isFalse(settings.has('OIDC_TOKEN_SIGNING_ALGO'))
+    assert.isFalse(settings.has('SAML_AUTHN_CONTEXT'))
+    assert.isFalse(settings.has('SAML_NAMEID_FORMAT'))
+    assert.isFalse(settings.has('SAML_SP_ENTITY_ID'))
+    assert.isFalse(settings.has('SAML_WANT_ASSERTION_SIGNED'))
+    assert.isFalse(settings.has('SAML_WANT_RESPONSE_SIGNED'))
+    assert.isFalse(settings.has('SP_KEY_ALGO'))
   })
 
   it('should remove everything if 0 auth providers', async function () {
@@ -133,9 +165,9 @@ describe('ConvertFromProviders use case', function () {
     // act
     await usecase(settings)
     // assert
-    assert.isUndefined(settings.get('AUTH_PROVIDERS'))
-    assert.isUndefined(settings.get('OIDC_ISSUER_URI'))
-    assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
+    assert.isFalse(settings.has('AUTH_PROVIDERS'))
+    assert.isFalse(settings.has('OIDC_ISSUER_URI'))
+    assert.isFalse(settings.has('SAML_IDP_SLO_URL'))
   })
 
   it('should have classic and auth providers if 1 oidc and 2 saml', async function () {
@@ -181,6 +213,6 @@ describe('ConvertFromProviders use case', function () {
     assert.equal(settings.get('OIDC_ISSUER_URI'), 'https://oidc.example.com')
     assert.equal(settings.get('OIDC_CLIENT_ID'), 'updated-id')
     assert.equal(settings.get('OIDC_CLIENT_SECRET'), 'updated-secret')
-    assert.isUndefined(settings.get('SAML_IDP_SLO_URL'))
+    assert.isFalse(settings.has('SAML_IDP_SLO_URL'))
   })
 })

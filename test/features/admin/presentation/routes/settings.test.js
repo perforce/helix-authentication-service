@@ -185,6 +185,94 @@ setTimeout(function () {
         })
       })
 
+      it('should return the one new auth provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.lengthOf(providers, 1)
+              const oidcProvider = providers.find((e) => e.protocol === 'oidc')
+              assert.exists(oidcProvider)
+              assert.propertyVal(oidcProvider, 'clientId', 'client-id')
+              assert.propertyVal(oidcProvider, 'clientSecret', 'client-secret')
+              assert.propertyVal(oidcProvider, 'issuerUri', 'https://oidc.example.com')
+              assert.propertyVal(oidcProvider, 'label', 'Provider')
+            })
+            .end(function (err) {
+              // simulate a restart by clearing all temporary settings
+              temporary.clear()
+              done(err)
+            })
+        })
+      })
+
+      it('should post new OIDC provider when SAML already exists', function (done) {
+        temporary.set('SAML_IDP_METADATA_URL', 'https://saml.example.com/metadata')
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: 'client-id',
+              clientSecret: 'client-secret',
+              issuerUri: 'https://oidc.example.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'Provider',
+              protocol: 'oidc',
+              id: 'this-will-be-assigned'
+            })
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              assert.equal(res.body.status, 'ok')
+              assert.equal(res.body.id, 'oidc-0')
+              const testenv = fs.readFileSync('test/test-dot.env', 'utf8')
+              assert.include(testenv, 'https://oidc.example.com')
+              done()
+            })
+        })
+      })
+
+      it('should return the existing and new providers', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.lengthOf(providers, 2)
+              const oidcProvider = providers.find((e) => e.protocol === 'oidc')
+              assert.exists(oidcProvider)
+              assert.propertyVal(oidcProvider, 'clientId', 'client-id')
+              assert.propertyVal(oidcProvider, 'clientSecret', 'client-secret')
+              assert.propertyVal(oidcProvider, 'issuerUri', 'https://oidc.example.com')
+              assert.propertyVal(oidcProvider, 'label', 'Provider')
+              const samlProvider = providers.find((e) => e.protocol === 'saml')
+              assert.exists(samlProvider)
+              assert.propertyVal(samlProvider, 'metadataUrl', 'https://saml.example.com/metadata')
+            })
+            .end(function (err) {
+              // simulate a restart by clearing all temporary settings
+              temporary.clear()
+              done(err)
+            })
+        })
+      })
+
       it('should update an existing auth provider', function (done) {
         temporary.set('AUTH_PROVIDERS', JSON.stringify({
           providers: [
@@ -217,13 +305,72 @@ setTimeout(function () {
             })
             .expect(200, { status: 'ok' })
             .end(function (err) {
-              temporary.delete('AUTH_PROVIDERS')
               if (err) {
                 return done(err)
               }
               const testenv = fs.readFileSync('test/test-dot.env', 'utf8')
               assert.include(testenv, 'updated-client-secret')
               done()
+            })
+        })
+      })
+
+      it('should return the one updated auth provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.lengthOf(providers, 1)
+              const oidcProvider = providers.find((e) => e.protocol === 'oidc')
+              assert.exists(oidcProvider)
+              assert.propertyVal(oidcProvider, 'clientId', 'client-id')
+              assert.propertyVal(oidcProvider, 'clientSecret', 'updated-client-secret')
+              assert.propertyVal(oidcProvider, 'issuerUri', 'https://oidc.example.com')
+              assert.propertyVal(oidcProvider, 'label', 'Provider')
+            })
+            .end(function (err) {
+              // simulate a restart by clearing all temporary settings
+              temporary.clear()
+              done(err)
+            })
+        })
+      })
+
+      it('should delete a classic auth provider', function (done) {
+        temporary.set('SAML_IDP_METADATA_URL', 'https://saml.example.com/metadata')
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .delete('/settings/providers/saml')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200, { status: 'ok' })
+            .end(done)
+        })
+      })
+
+      it('should return zero auth providers', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.lengthOf(providers, 0)
+            })
+            .end(function (err) {
+              // simulate a restart by clearing all temporary settings
+              temporary.clear()
+              done(err)
             })
         })
       })
@@ -257,7 +404,6 @@ setTimeout(function () {
             .set('Authorization', 'Bearer ' + webToken)
             .expect(200, { status: 'ok' })
             .end(function (err) {
-              temporary.delete('AUTH_PROVIDERS')
               if (err) {
                 return done(err)
               }
@@ -265,6 +411,32 @@ setTimeout(function () {
               assert.include(testenv, 'urn:example:sp')
               assert.notInclude(testenv, 'unique-client-identifier')
               done()
+            })
+        })
+      })
+
+      it('should return the one remaining auth provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.lengthOf(providers, 1)
+              const samlProvider = providers.find((e) => e.protocol === 'saml')
+              assert.exists(samlProvider)
+              assert.propertyVal(samlProvider, 'metadataUrl', 'https://saml.example.com/metadata')
+              assert.propertyVal(samlProvider, 'spEntityId', 'urn:example:sp')
+              assert.propertyVal(samlProvider, 'label', 'saml.example.com')
+            })
+            .end(function (err) {
+              // simulate a restart by clearing all temporary settings
+              temporary.clear()
+              done(err)
             })
         })
       })

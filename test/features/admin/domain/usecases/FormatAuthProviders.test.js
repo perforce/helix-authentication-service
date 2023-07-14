@@ -66,6 +66,7 @@ describe('FormatAuthProviders use case', function () {
     // assert
     assert.isTrue(settings.has('AUTH_PROVIDERS'))
     const providers = JSON.parse(settings.get('AUTH_PROVIDERS')).providers
+    assert.lengthOf(providers, 4)
     assert.equal(providers[0].label, 'Acme Identity')
     assert.equal(providers[0].protocol, 'saml')
     assert.equal(providers[0].metadataUrl, 'https://saml1.example.com')
@@ -84,5 +85,11 @@ describe('FormatAuthProviders use case', function () {
     assert.notProperty(providers[2], 'id')
     assert.notProperty(providers[2], 'selectAccount')
     assert.notProperty(providers[2], 'signingAlgo')
+    assert.equal(providers[1].label, 'Coyote Security')
+    assert.equal(providers[1].protocol, 'saml')
+    assert.equal(providers[1].metadataUrl, 'https://saml2.example.com')
+    assert.equal(providers[3].label, 'Veritas Solutions')
+    assert.equal(providers[3].protocol, 'oidc')
+    assert.equal(providers[3].issuerUri, 'https://oidc2.example.com')
   })
 })
