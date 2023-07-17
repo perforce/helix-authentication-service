@@ -59,7 +59,7 @@ describe('Service status', function () {
 
     it('should report missing file', async function () {
       const result = await sut.validateCertAuth('nosuchfile')
-      assert.include(result.code, 'ENOENT')
+      assert.include(result, 'ENOENT')
     })
 
     it('should report invalid certificate', async function () {
@@ -94,7 +94,7 @@ describe('Service status', function () {
   describe('validateServerCert', function () {
     it('should report missing certificate', async function () {
       const result = await sut.validateServerCert('nosuchfile', 'certs/server.key')
-      assert.include(result.code, 'ENOENT')
+      assert.include(result, 'ENOENT')
     })
 
     it('should report invalid certificate', async function () {
@@ -124,7 +124,7 @@ describe('Service status', function () {
 
     it('should report missing key', async function () {
       const result = await sut.validateServerCert('certs/server.crt', 'nosuchfile')
-      assert.include(result.code, 'ENOENT')
+      assert.include(result, 'ENOENT')
     })
 
     it('should report invalid key', async function () {
@@ -169,7 +169,7 @@ describe('Service status', function () {
   describe('validatePfxFile', function () {
     it('should report missing file', async function () {
       const result = await sut.validatePfxFile('nosuchfile')
-      assert.include(result.code, 'ENOENT')
+      assert.include(result, 'ENOENT')
     })
 
     it('should report invalid file', async function () {
@@ -212,7 +212,7 @@ describe('Service status', function () {
     it('should return an error when not working', async function () {
       // assumes gopher (port 70) is not running on localhost
       const result = await sut.validateOpenID('https://localhost:70')
-      assert.instanceOf(result, Error)
+      assert.include(result, 'ECONNREFUSED')
     })
 
     it('should return ok for working OIDC connection', async function () {
@@ -240,7 +240,7 @@ describe('Service status', function () {
     it('should return an error when not working', async function () {
       // assumes gopher (port 70) is not running on localhost
       const result = await sut.validateSaml('https://localhost:70')
-      assert.instanceOf(result, Error)
+      assert.include(result, 'no response')
     })
 
     it('should return ok for working SAML connection', async function () {
@@ -288,7 +288,7 @@ describe('Service status', function () {
       // act
       const result = await sut.validateRedis(connector)
       // assert
-      assert.equal(result.message, 'not working')
+      assert.include(result, 'not working')
       stub.restore()
     })
 
