@@ -88,10 +88,14 @@ describe('GenerateLoginUrl use case', function () {
     const providers = {
       providers: [{
         label: 'Acme Identity',
-        protocol: 'saml'
+        metadataUrl: 'https://saml.example.com/idp/metadata',
+        protocol: 'saml',
+        id: 'saml-1'
       }, {
         label: 'Maximum Security',
-        protocol: 'saml'
+        metadataUrl: 'https://saml.example.com/idp/metadata',
+        protocol: 'saml',
+        id: 'saml-2'
       }]
     }
     settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
@@ -106,10 +110,12 @@ describe('GenerateLoginUrl use case', function () {
     const providers = {
       providers: [{
         label: 'Acme Identity',
+        metadataUrl: 'https://saml.example.com/idp/metadata',
         protocol: 'saml',
         id: 'saml-1'
       }, {
         label: 'Maximum Security',
+        metadataUrl: 'https://saml.example.com/idp/metadata',
         protocol: 'saml',
         id: 'saml-2'
       }]
@@ -121,6 +127,29 @@ describe('GenerateLoginUrl use case', function () {
     assert.equal(result, 'http://host/multi/login/request123?instanceId=foobar')
   })
 
+  it('should produce specific URL if a provider is default', async function () {
+    // arrange
+    const providers = {
+      providers: [{
+        label: 'Acme Identity',
+        metadataUrl: 'https://saml.example.com/idp/metadata',
+        protocol: 'saml',
+        id: 'saml-1',
+        default: true
+      }, {
+        label: 'Maximum Security',
+        metadataUrl: 'https://saml.example.com/idp/metadata',
+        protocol: 'saml',
+        id: 'saml-2'
+      }]
+    }
+    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase('http://host', 'request123', 'foobar')
+    // assert
+    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml-1')
+  })
+
   it('should produce specific URL if specified provider found', async function () {
     // arrange
     const providers = {
@@ -128,7 +157,8 @@ describe('GenerateLoginUrl use case', function () {
         label: 'Acme Identity',
         metadataUrl: 'https://saml.example.com/idp/metadata',
         protocol: 'saml',
-        id: 'saml-1'
+        id: 'saml-1',
+        default: true
       }, {
         label: 'Maximum Security',
         metadataUrl: 'https://saml.example.com/idp/metadata',
