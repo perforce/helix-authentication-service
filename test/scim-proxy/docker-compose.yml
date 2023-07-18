@@ -1,0 +1,45 @@
+#
+# Set of containers for testing the published Docker Hub image with nginx as a
+# reverse proxy that isolates the authentication service from the public
+# internet while still allowing access to the user provisioning endpoints.
+#
+
+#
+# Container names have a domain-like naming scheme to facilitate dnsmasq usage.
+# By ending in .doc, which is not a valid TLD, we can easily configure dnsmasq
+# to resolve these names to the docker machine. This allows the containers to
+# use the same names to refer to each other as the host does when resolving the
+# container names.
+#
+
+services:
+  auth-svc1.doc:
+    image: perforce/helix-auth-svc:latest
+    container_name: auth-svc1.doc
+    environment:
+      DEBUG: "1"
+      BEARER_TOKEN: "keyboard cat"
+      CERT_FILE: "certs/server.crt"
+      KEY_FILE: "certs/server.key"
+      SVC_BASE_URI: "https://authen.doc"
+      PORT: 3001
+      PROTOCOL: "http"
+      TRUST_PROXY: "true"
+    networks:
+      - authen
+    ports:
+      - "3001:3001"
+  authen.doc:
+    build:
+      context: containers/nginx
+    container_name: authen.doc
+    networks:
+      - authen
+    ports:
+      - "443:443"
+    depends_on:
+      - auth-svc1.doc
+
+networks:
+  authen:
+    name: auth-service
