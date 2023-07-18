@@ -71,6 +71,7 @@ Note that VPN software such as Cisco AnyConnect will block any attempts to use a
 Build and start the containers (from the parent directory) like so:
 
 ```shell
+$ docker compose build auth-svc1.doc
 $ docker compose up --build -d
 ```
 
