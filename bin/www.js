@@ -152,7 +152,16 @@ function scrubSecrets(env) {
     } else if (name.match(/passphrase/i)) {
       // but the other "passphrase" settings are not safe
       obj[name] = '[hidden]'
+    } else if (name.match(/passwd_file/i)) {
+      // the "passwd_file" entries are safe
+      obj[name] = env[name]
     } else if (name.match(/passwd/i)) {
+      obj[name] = '[hidden]'
+    } else if (name.match(/bearer_token_file/i)) {
+      // the "bearer_token_file" entry is safe
+      obj[name] = env[name]
+    } else if (name.match(/bearer_token/i)) {
+      // but the "bearer_token" setting is not safe
       obj[name] = '[hidden]'
     } else {
       obj[name] = env[name]

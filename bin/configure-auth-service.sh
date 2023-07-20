@@ -27,6 +27,7 @@ OIDC_CLIENT_SECRET=''
 OIDC_CLIENT_SECRET_FILE='client-secret.txt'
 FOUND_P4=true
 BEARER_TOKEN=''
+BEARER_TOKEN_FILE='bearer-token.txt'
 P4PORT=''
 P4USER=''
 P4PASSWD=''
@@ -1157,7 +1158,8 @@ EOT
         echo "  * Set P4PASSWD to (hidden)"
     fi
     if [[ -n "${BEARER_TOKEN}" ]]; then
-        echo "  * Set BEARER_TOKEN to ${BEARER_TOKEN}"
+        echo "  * Set BEARER_TOKEN_FILE to ${BEARER_TOKEN_FILE}"
+        echo '    (the file will contain the bearer token)'
     fi
     echo -e "\nThe service will then be restarted.\n"
 }
@@ -1200,6 +1202,10 @@ function read_settings() {
     set_var_from_env 'P4PASSWD' true
     set_var_from_env 'P4TICKETS'
     set_var_from_env 'P4TRUST'
+    set_var_from_env 'BEARER_TOKEN_FILE'
+    if [ -n "${BEARER_TOKEN_FILE}" -a -f "${BEARER_TOKEN_FILE}" ]; then
+        BEARER_TOKEN=$(<${BEARER_TOKEN_FILE})
+    fi
     set_var_from_env 'BEARER_TOKEN'
     set_var_from_env 'DEFAULT_PROTOCOL'
     set_var_from_env 'SVC_BASE_URI'
@@ -1302,10 +1308,11 @@ function modify_env_config() {
         # thus will not generally be able to find the .p4trust file.
         add_or_replace_var_in_env 'P4TRUST' "${P4TRUST:-${HOME}/.p4trust}"
     fi
-    add_or_replace_var_in_env 'BEARER_TOKEN' "${BEARER_TOKEN}"
-    # save the encoded version of the bearer token for convenience
-    BEARER_BASE64=$(echo -n "$BEARER_TOKEN" | base64)
-    add_or_replace_var_in_env 'BEARER_BASE64' "${BEARER_BASE64}"
+    if [[ -n "${BEARER_TOKEN}" ]]; then
+        add_or_replace_var_in_env 'BEARER_TOKEN_FILE' "${BEARER_TOKEN_FILE}"
+        # always use the BEARER_TOKEN_FILE setting over the bare token
+        add_or_replace_var_in_env 'BEARER_TOKEN' ''
+    fi
 
     # Ensure the logging.config.cjs file is readable by all users to avoid
     # difficult to debug situations where the logging is not working and no
@@ -1332,6 +1339,13 @@ function modify_config() {
         echo "${ADMIN_PASSWD}" > ${ADMIN_PASSWD_FILE}
         chmod 600 ${ADMIN_PASSWD_FILE}
         chown --reference=example.env ${ADMIN_PASSWD_FILE}
+    fi
+    if [[ -n "${BEARER_TOKEN}" ]]; then
+        # write BEARER_TOKEN to file named by BEARER_TOKEN_FILE;
+        # make the BEARER_TOKEN_FILE file readable only by current user
+        echo "${BEARER_TOKEN}" > ${BEARER_TOKEN_FILE}
+        chmod 600 ${BEARER_TOKEN_FILE}
+        chown --reference=example.env ${BEARER_TOKEN_FILE}
     fi
     if [[ -n "${OIDC_CLIENT_SECRET}" ]]; then
         # write OIDC_CLIENT_SECRET to file named by OIDC_CLIENT_SECRET_FILE;
