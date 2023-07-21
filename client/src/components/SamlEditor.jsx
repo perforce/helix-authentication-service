@@ -173,7 +173,7 @@ function AdvancedOptions() {
         <Grid item xs={6}>
           <FormControl error={errors["authnContext"] && touchedFields["authnContext"]} fullWidth>
             <InputLabel htmlFor="authn-context">Authentication Context</InputLabel>
-            <Tooltip title="May be used to restrict the means by which a user authenticates.">
+            <Tooltip title="May be used to restrict the means by which a user authenticates. Multiple values should be separated by commas.">
               <OutlinedInput
                 type="text"
                 id="authn-context"

@@ -13,6 +13,7 @@ import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/useca
 import FormatAuthProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/FormatAuthProviders.js'
 import WriteConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/WriteConfiguration.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
+import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('WriteConfiguration use case', function () {
@@ -24,7 +25,10 @@ describe('WriteConfiguration use case', function () {
     const validateAuthProvider = ValidateAuthProvider()
     const formatAuthProviders = FormatAuthProviders({ defaultsRepository })
     const convertFromProviders = ConvertFromProviders({
-      tidyAuthProviders: TidyAuthProviders({ validateAuthProvider }),
+      tidyAuthProviders: TidyAuthProviders({
+        getSamlAuthnContext: GetSamlAuthnContext(),
+        validateAuthProvider
+      }),
       validateAuthProvider
     })
     usecase = WriteConfiguration({
@@ -292,6 +296,44 @@ describe('WriteConfiguration use case', function () {
     assert.isTrue(writeStub.calledOnce)
     readStub.restore()
     writeStub.restore()
+  })
+
+  it('should convert authnContext to string for classic', async function () {
+    // arrange
+    const contexts = [
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+    ]
+    const authnContext = contexts.map((e) => `"${e}"`).join()
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 5)
+      assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.acme.net')
+      assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
+      assert.equal(settings.get('SAML_AUTHN_CONTEXT'), authnContext)
+    })
+    // act
+    const settings = new Map()
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      metadataUrl: 'https://saml.acme.net',
+      authnContext: contexts
+    }]
+    settings.set('AUTH_PROVIDERS', providers)
+    try {
+      await usecase(settings)
+      // assert
+      assert.isTrue(readStub.calledOnce)
+      assert.isTrue(writeStub.calledOnce)
+    } finally {
+      readStub.restore()
+      writeStub.restore()
+    }
   })
 
   it('should filter defaults from auth providers', async function () {

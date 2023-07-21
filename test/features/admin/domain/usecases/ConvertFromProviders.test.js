@@ -6,11 +6,13 @@ import { assert } from 'chai'
 import { describe, it } from 'mocha'
 import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertFromProviders.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
+import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('ConvertFromProviders use case', function () {
   const usecase = ConvertFromProviders({
     tidyAuthProviders: TidyAuthProviders({
+      getSamlAuthnContext: GetSamlAuthnContext(),
       validateAuthProvider: ValidateAuthProvider()
     })
   })
@@ -48,6 +50,31 @@ describe('ConvertFromProviders use case', function () {
     assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.example.com')
     assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
     assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'urn:example:sp')
+  })
+
+  it('should convert authnContext list to a string', async function () {
+    // arrange
+    const contexts = [
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+    ]
+    const authnContext = contexts.map((e) => `"${e}"`).join()
+    const settings = new Map()
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      metadataUrl: 'https://saml.example.com',
+      authnContext: contexts
+    }]
+    settings.set('AUTH_PROVIDERS', providers)
+    // act
+    await usecase(settings)
+    // assert
+    assert.isFalse(settings.has('AUTH_PROVIDERS'))
+    assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.example.com')
+    assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
+    assert.equal(settings.get('SAML_AUTHN_CONTEXT'), authnContext)
   })
 
   it('should remove classic settings if 2 saml providers', async function () {

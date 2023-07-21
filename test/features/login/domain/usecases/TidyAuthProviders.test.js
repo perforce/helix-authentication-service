@@ -5,17 +5,22 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, describe, it } from 'mocha'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
+import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('TidyAuthProviders use case', function () {
   let usecase
 
   before(function () {
-    usecase = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
+    usecase = TidyAuthProviders({
+      getSamlAuthnContext: GetSamlAuthnContext(),
+      validateAuthProvider: ValidateAuthProvider()
+    })
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => TidyAuthProviders({ validateAuthProvider: null }), AssertionError)
+    assert.throws(() => TidyAuthProviders({ getSamlAuthnContext: null, validateAuthProvider: {} }), AssertionError)
+    assert.throws(() => TidyAuthProviders({ getSamlAuthnContext: {}, validateAuthProvider: null }), AssertionError)
     try {
       await usecase(null)
       assert.fail('should have raised error')
@@ -104,7 +109,6 @@ describe('TidyAuthProviders use case', function () {
         forceAuthn: 'yes',
         wantAssertionSigned: true,
         wantResponseSigned: 'false'
-
       }
     ]
     // act
@@ -115,6 +119,30 @@ describe('TidyAuthProviders use case', function () {
     assert.isTrue(results[1].forceAuthn)
     assert.isTrue(results[1].wantAssertionSigned)
     assert.isFalse(results[1].wantResponseSigned)
+  })
+
+  it('should convert list-like values to lists', async function () {
+    // arrange
+    const contexts = [
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+    ]
+    const authnContext = contexts.map((e) => `"${e}"`).join()
+    const providers = [
+      {
+        metadataUrl: 'https://saml.example.com/metadata',
+        authnContext: `[${authnContext}]`,
+        protocol: 'saml'
+      }
+    ]
+    // act
+    const results = await usecase(providers)
+    // assert
+    assert.lengthOf(results, 1)
+    assert.isArray(results[0].authnContext)
+    assert.lengthOf(results[0].authnContext, 3)
+    assert.deepEqual(results[0].authnContext, contexts)
   })
 
   it('should ignore default provider settings', async function () {

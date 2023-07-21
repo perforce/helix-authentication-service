@@ -14,6 +14,7 @@ import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domai
 import ReadConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/ReadConfiguration.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
+import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('ReadConfiguration use case', function () {
@@ -27,7 +28,10 @@ describe('ReadConfiguration use case', function () {
     processEnvRepository,
     defaultsRepository
   })
-  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
+  const tidyAuthProviders = TidyAuthProviders({
+    getSamlAuthnContext: GetSamlAuthnContext(),
+    validateAuthProvider: ValidateAuthProvider()
+  })
   let usecase
 
   before(function () {
@@ -391,6 +395,81 @@ describe('ReadConfiguration use case', function () {
       assert.property(actual[0], 'label')
       assert.equal(actual[0].label, 'Acme Identity')
       assert.equal(actual[0].protocol, 'saml')
+      assert.isTrue(readStub.calledOnce)
+    } finally {
+      readStub.restore()
+      temporaryRepository.clear()
+    }
+  })
+
+  it('should read authnContext from classic settings', async function () {
+    // arrange
+    const contexts = [
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+    ]
+    const authnContext = contexts.map((e) => `"${e}"`).join()
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    temporaryRepository.set('SAML_IDP_METADATA_URL', 'https://saml.example.com/idp/metadata')
+    temporaryRepository.set('SAML_AUTHN_CONTEXT', `[${authnContext}]`)
+    temporaryRepository.set('SAML_INFO_LABEL', 'Acme Identity')
+    try {
+      // act
+      const settings = await usecase()
+      // assert
+      assert.lengthOf(settings, 10)
+      assert.isTrue(settings.has('AUTH_PROVIDERS'))
+      const actual = settings.get('AUTH_PROVIDERS')
+      assert.lengthOf(actual, 1)
+      assert.property(actual[0], 'label')
+      assert.equal(actual[0].label, 'Acme Identity')
+      assert.equal(actual[0].protocol, 'saml')
+      assert.isArray(actual[0].authnContext)
+      assert.lengthOf(actual[0].authnContext, 3)
+      assert.deepEqual(actual[0].authnContext, contexts)
+      assert.isTrue(readStub.calledOnce)
+    } finally {
+      readStub.restore()
+      temporaryRepository.clear()
+    }
+  })
+
+  it('should read auth providers with authnContext', async function () {
+    // arrange
+    const contexts = [
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
+      'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+    ]
+    const providers = {
+      providers: [{
+        metadataUrl: 'https://saml.example.com/idp/metadata',
+        authnContext: contexts,
+        label: 'Acme Identity',
+        protocol: 'saml'
+      }]
+    }
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    try {
+      // act
+      const settings = await usecase()
+      // assert
+      assert.lengthOf(settings, 10)
+      assert.isTrue(settings.has('AUTH_PROVIDERS'))
+      const actual = settings.get('AUTH_PROVIDERS')
+      assert.lengthOf(actual, 1)
+      assert.property(actual[0], 'label')
+      assert.equal(actual[0].label, 'Acme Identity')
+      assert.equal(actual[0].protocol, 'saml')
+      assert.isArray(actual[0].authnContext)
+      assert.lengthOf(actual[0].authnContext, 3)
+      assert.deepEqual(actual[0].authnContext, contexts)
       assert.isTrue(readStub.calledOnce)
     } finally {
       readStub.restore()

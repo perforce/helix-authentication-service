@@ -43,14 +43,34 @@ export const auth = createApi({
     }),
     getAllProviders: builder.query({
       query: () => `settings/providers`,
+      transformResponse: (response, meta, arg) => {
+        // convert certain properties for easier editing
+        response.providers.forEach((e) => {
+          if ('authnContext' in e) {
+            e.authnContext = e.authnContext.join(', ')
+          }
+        })
+        return response
+      },
       providesTags: ['Providers'],
     }),
     getOneProvider: builder.query({
       query: (providerId) => `settings/providers/${providerId}`,
+      transformResponse: (response, meta, arg) => {
+        // convert certain properties for easier editing
+        if ('authnContext' in response) {
+          response.authnContext = response.authnContext.join(', ')
+        }
+        return response
+      },
+      providesTags: ['Providers'],
     }),
     postProvider: builder.mutation({
       // perform both the addition and apply as a single redux action
       async queryFn(arg, queryApi, extraOptions, baseQuery) {
+        if ('authnContext' in arg) {
+          arg.authnContext = fixAuthnContext(arg.authnContext)
+        }
         const update = await baseQuery({
           url: 'settings/providers',
           method: 'POST',
@@ -70,6 +90,9 @@ export const auth = createApi({
     putProvider: builder.mutation({
       // perform both the update and apply as a single redux action
       async queryFn(arg, queryApi, extraOptions, baseQuery) {
+        if ('authnContext' in arg) {
+          arg.authnContext = fixAuthnContext(arg.authnContext)
+        }
         const update = await baseQuery({
           url: `settings/providers/${arg.id}`,
           method: 'PUT',
@@ -106,6 +129,11 @@ export const auth = createApi({
     }),
   }),
 })
+
+function fixAuthnContext(ctx) {
+  // exactly same transformation as GetSamlAuthnContext
+  return ctx.replace(/[ "'[\]]/g, '').split(',').map((c) => c.trim()).filter((c) => c.length)
+}
 
 export const {
   useLoginMutation,

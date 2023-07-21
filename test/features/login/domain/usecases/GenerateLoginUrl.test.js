@@ -9,12 +9,16 @@ import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositori
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GenerateLoginUrl from 'helix-auth-svc/lib/features/login/domain/usecases/GenerateLoginUrl.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
+import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('GenerateLoginUrl use case', function () {
   const defaultsRepository = new DefaultsEnvRepository()
   const settingsRepository = new MapSettingsRepository()
-  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
+  const tidyAuthProviders = TidyAuthProviders({
+    getSamlAuthnContext: GetSamlAuthnContext(),
+    validateAuthProvider: ValidateAuthProvider()
+  })
   let usecase
 
   before(function () {

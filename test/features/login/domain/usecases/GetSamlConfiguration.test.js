@@ -17,12 +17,15 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 describe('GetSamlConfiguration use case', function () {
   const defaultsRepository = new DefaultsEnvRepository()
   const settingsRepository = new MapSettingsRepository()
-  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider: ValidateAuthProvider() })
+  const getSamlAuthnContext = GetSamlAuthnContext({ settingsRepository })
+  const tidyAuthProviders = TidyAuthProviders({
+    getSamlAuthnContext,
+    validateAuthProvider: ValidateAuthProvider()
+  })
   let usecase
 
   before(function () {
     const fetchSamlMetadata = FetchSamlMetadata()
-    const getSamlAuthnContext = GetSamlAuthnContext({ settingsRepository })
     const getAuthProviders = GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders })
     usecase = GetSamlConfiguration({
       fetchSamlMetadata,

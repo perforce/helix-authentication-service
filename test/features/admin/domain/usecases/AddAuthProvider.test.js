@@ -10,6 +10,7 @@ import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/reposit
 import AddAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/AddAuthProvider.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
+import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
 import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/TidyAuthProviders.js'
 
 describe('AddAuthProvider use case', function () {
@@ -24,7 +25,10 @@ describe('AddAuthProvider use case', function () {
     defaultsRepository
   })
   const validateAuthProvider = ValidateAuthProvider()
-  const tidyAuthProviders = TidyAuthProviders({ validateAuthProvider })
+  const tidyAuthProviders = TidyAuthProviders({
+    getSamlAuthnContext: GetSamlAuthnContext(),
+    validateAuthProvider
+  })
   const usecase = AddAuthProvider({
     getAuthProviders: GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders }),
     validateAuthProvider,
