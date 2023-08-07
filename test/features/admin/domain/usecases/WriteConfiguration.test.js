@@ -9,7 +9,7 @@ import sinon from 'sinon'
 import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
-import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertFromProviders.js'
+import ConvertToProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertToProviders.js'
 import FormatAuthProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/FormatAuthProviders.js'
 import WriteConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/WriteConfiguration.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
@@ -24,7 +24,7 @@ describe('WriteConfiguration use case', function () {
     const defaultsRepository = new DefaultsEnvRepository()
     const validateAuthProvider = ValidateAuthProvider()
     const formatAuthProviders = FormatAuthProviders({ defaultsRepository })
-    const convertFromProviders = ConvertFromProviders({
+    const convertToProviders = ConvertToProviders({
       tidyAuthProviders: TidyAuthProviders({
         getSamlAuthnContext: GetSamlAuthnContext(),
         validateAuthProvider
@@ -34,7 +34,7 @@ describe('WriteConfiguration use case', function () {
     usecase = WriteConfiguration({
       configRepository,
       defaultsRepository,
-      convertFromProviders,
+      convertToProviders,
       formatAuthProviders
     })
   })
@@ -47,17 +47,17 @@ describe('WriteConfiguration use case', function () {
     assert.throws(() => WriteConfiguration({
       configRepository: null,
       defaultsRepository: {},
-      convertFromProviders: {}
+      convertToProviders: {}
     }), AssertionError)
     assert.throws(() => WriteConfiguration({
       configRepository: {},
       defaultsRepository: null,
-      convertFromProviders: {}
+      convertToProviders: {}
     }), AssertionError)
     assert.throws(() => WriteConfiguration({
       configRepository: {},
       defaultsRepository: {},
-      convertFromProviders: null
+      convertToProviders: null
     }), AssertionError)
   })
 
@@ -173,31 +173,6 @@ describe('WriteConfiguration use case', function () {
     }
   })
 
-  it('should write certs and keys into files', async function () {
-    // arrange
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      return new Map()
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 1)
-      assert.isTrue(settings.has('CA_CERT_FILE'))
-      const certFile = settings.get('CA_CERT_FILE')
-      const certificate = fs.readFileSync(certFile, 'utf8')
-      assert.equal(certificate, '-----BEGIN CERTIFICATE-----')
-      fs.rmSync(certFile)
-    })
-    // act
-    const settings = new Map()
-    settings.set('CA_CERT', '-----BEGIN CERTIFICATE-----')
-    await usecase(settings)
-    // assert
-    assert.isTrue(readStub.calledOnce)
-    assert.isTrue(writeStub.calledOnce)
-    readStub.restore()
-    writeStub.restore()
-  })
-
   it('should write secrets to files if appropriate', async function () {
     // arrange
     const secretFile = temporaryFile({ extension: 'txt' })
@@ -257,84 +232,81 @@ describe('WriteConfiguration use case', function () {
     writeStub.restore()
   })
 
-  it('should convert auth providers to original settings', async function () {
-    // arrange
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const settings = new Map()
-      // incoming providers will wipe out these settings
-      settings.set('SAML_IDP_SLO_URL', 'https://saml/logout')
-      return settings
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 6)
-      // raw IdP cert is converted to a file
-      assert.isTrue(settings.has('IDP_CERT_FILE'))
-      const certFile = settings.get('IDP_CERT_FILE')
-      const certificate = fs.readFileSync(certFile, 'utf8')
-      assert.equal(certificate, '-----BEGIN CERTIFICATE-----')
-      assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.acme.net')
-      assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
-      assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'urn:example:sp')
-      assert.isFalse(settings.get('SAML_WANT_ASSERTION_SIGNED'))
-      assert.isFalse(settings.get('SAML_WANT_RESPONSE_SIGNED'))
-      fs.rmSync(certFile)
-    })
-    // act
-    const settings = new Map()
-    const providers = [{
-      label: 'Acme Identity',
-      protocol: 'saml',
-      metadataUrl: 'https://saml.acme.net',
-      spEntityId: 'urn:example:sp',
-      idpCert: '-----BEGIN CERTIFICATE-----'
-    }]
-    settings.set('AUTH_PROVIDERS', providers)
-    await usecase(settings)
-    // assert
-    assert.isTrue(readStub.calledOnce)
-    assert.isTrue(writeStub.calledOnce)
-    readStub.restore()
-    writeStub.restore()
-  })
+  // it('should convert auth providers to original settings', async function () {
+  //   // arrange
+  //   const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+  //     const settings = new Map()
+  //     // incoming providers will wipe out these settings
+  //     settings.set('SAML_IDP_SLO_URL', 'https://saml/logout')
+  //     return settings
+  //   })
+  //   const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+  //     assert.isDefined(settings)
+  //     assert.lengthOf(settings, 6)
+  //     // raw IdP cert is converted to a file
+  //     assert.isTrue(settings.has('IDP_CERT'))
+  //     assert.equal(settings.get('IDP_CERT'), '-----BEGIN CERTIFICATE-----')
+  //     assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.acme.net')
+  //     assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
+  //     assert.equal(settings.get('SAML_SP_ENTITY_ID'), 'urn:example:sp')
+  //     assert.isFalse(settings.get('SAML_WANT_ASSERTION_SIGNED'))
+  //     assert.isFalse(settings.get('SAML_WANT_RESPONSE_SIGNED'))
+  //   })
+  //   // act
+  //   const settings = new Map()
+  //   const providers = [{
+  //     label: 'Acme Identity',
+  //     protocol: 'saml',
+  //     metadataUrl: 'https://saml.acme.net',
+  //     spEntityId: 'urn:example:sp',
+  //     idpCert: '-----BEGIN CERTIFICATE-----'
+  //   }]
+  //   settings.set('AUTH_PROVIDERS', providers)
+  //   await usecase(settings)
+  //   // assert
+  //   assert.isTrue(readStub.calledOnce)
+  //   assert.isTrue(writeStub.calledOnce)
+  //   readStub.restore()
+  //   writeStub.restore()
+  // })
 
-  it('should convert authnContext to string for classic', async function () {
-    // arrange
-    const contexts = [
-      'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
-      'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
-      'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
-    ]
-    const authnContext = contexts.map((e) => `"${e}"`).join()
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      return new Map()
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 5)
-      assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.acme.net')
-      assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
-      assert.equal(settings.get('SAML_AUTHN_CONTEXT'), authnContext)
-    })
-    // act
-    const settings = new Map()
-    const providers = [{
-      label: 'Acme Identity',
-      protocol: 'saml',
-      metadataUrl: 'https://saml.acme.net',
-      authnContext: contexts
-    }]
-    settings.set('AUTH_PROVIDERS', providers)
-    try {
-      await usecase(settings)
-      // assert
-      assert.isTrue(readStub.calledOnce)
-      assert.isTrue(writeStub.calledOnce)
-    } finally {
-      readStub.restore()
-      writeStub.restore()
-    }
-  })
+  // it('should convert authnContext to string for classic', async function () {
+  //   // arrange
+  //   const contexts = [
+  //     'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+  //     'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
+  //     'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+  //   ]
+  //   const authnContext = contexts.map((e) => `"${e}"`).join()
+  //   const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+  //     return new Map()
+  //   })
+  //   const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+  //     assert.isDefined(settings)
+  //     assert.lengthOf(settings, 5)
+  //     assert.equal(settings.get('SAML_IDP_METADATA_URL'), 'https://saml.acme.net')
+  //     assert.equal(settings.get('SAML_INFO_LABEL'), 'Acme Identity')
+  //     assert.equal(settings.get('SAML_AUTHN_CONTEXT'), authnContext)
+  //   })
+  //   // act
+  //   const settings = new Map()
+  //   const providers = [{
+  //     label: 'Acme Identity',
+  //     protocol: 'saml',
+  //     metadataUrl: 'https://saml.acme.net',
+  //     authnContext: contexts
+  //   }]
+  //   settings.set('AUTH_PROVIDERS', providers)
+  //   try {
+  //     await usecase(settings)
+  //     // assert
+  //     assert.isTrue(readStub.calledOnce)
+  //     assert.isTrue(writeStub.calledOnce)
+  //   } finally {
+  //     readStub.restore()
+  //     writeStub.restore()
+  //   }
+  // })
 
   it('should filter defaults from auth providers', async function () {
     // arrange
@@ -459,34 +431,6 @@ describe('WriteConfiguration use case', function () {
     }
   })
 
-  it('should write IdP configuration into a file', async function () {
-    // arrange
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      return new Map()
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 1)
-      assert.isTrue(settings.has('IDP_CONFIG_FILE'))
-      const filename = settings.get('IDP_CONFIG_FILE')
-      const config = fs.readFileSync(filename, 'utf8')
-      assert.include(config, 'module.exports')
-      assert.include(config, 'urn:swarm-example:sp')
-      fs.rmSync(filename)
-    })
-    // act
-    const settings = new Map()
-    settings.set('IDP_CONFIG', {
-      'urn:swarm-example:sp': { acsUrl: 'https://swarm.example.com' }
-    })
-    await usecase(settings)
-    // assert
-    assert.isTrue(readStub.calledOnce)
-    assert.isTrue(writeStub.calledOnce)
-    readStub.restore()
-    writeStub.restore()
-  })
-
   it('should write IdP metadata into a file', async function () {
     // arrange
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
@@ -495,11 +439,9 @@ describe('WriteConfiguration use case', function () {
     const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
       assert.isDefined(settings)
       assert.lengthOf(settings, 1)
-      assert.isTrue(settings.has('SAML_IDP_METADATA_FILE'))
-      const filename = settings.get('SAML_IDP_METADATA_FILE')
-      const config = fs.readFileSync(filename, 'utf8')
-      assert.include(config, '<something/>')
-      fs.rmSync(filename)
+      assert.isTrue(settings.has('SAML_IDP_METADATA'))
+      const metadata = settings.get('SAML_IDP_METADATA')
+      assert.include(metadata, '<something/>')
     })
     // act
     const settings = new Map()

@@ -1,7 +1,7 @@
 //
 // Copyright 2023 Perforce Software
 //
-import * as fs from 'node:fs'
+import * as fs from 'node:fs/promises'
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
@@ -146,6 +146,34 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].signingAlgo, 'RS256')
   })
 
+  it('should not read file properties if so desired', async function () {
+    // arrange
+    await fs.writeFile('client-secret.txt', 'my client secret')
+    const providers = {
+      providers: [{
+        label: 'Veritas Solutions',
+        issuerUri: 'https://oidc.exmample.com',
+        clientId: 'client-id',
+        clientSecretFile: 'client-secret.txt',
+        protocol: 'oidc'
+      }]
+    }
+    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    // act
+    const result = await usecase({ loadFiles: false })
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'oidc-0')
+    assert.equal(result[0].label, 'Veritas Solutions')
+    assert.equal(result[0].protocol, 'oidc')
+    assert.notProperty(result[0], 'clientSecret')
+    assert.property(result[0], 'clientSecretFile')
+    assert.equal(result[0].clientSecretFile, 'client-secret.txt')
+    assert.isFalse(result[0].selectAccount)
+    assert.equal(result[0].signingAlgo, 'RS256')
+    fs.unlink('client-secret.txt')
+  })
+
   it('should return classic OIDC with defaults', async function () {
     // arrange
     temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.exmample.com')
@@ -278,7 +306,7 @@ describe('GetAuthProviders use case', function () {
         protocol: 'saml'
       }]
     }
-    fs.writeFileSync(providersFile, JSON.stringify(providers))
+    await fs.writeFile(providersFile, JSON.stringify(providers))
     temporaryRepository.set('AUTH_PROVIDERS_FILE', providersFile)
     // act
     const result = await usecase()

@@ -2,6 +2,7 @@
 // Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
+import * as fs from 'node:fs/promises'
 import { assert } from 'chai'
 import { beforeEach, describe, it } from 'mocha'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
@@ -173,12 +174,43 @@ describe('AddAuthProvider use case', function () {
     }
     // act
     const providers = await usecase(provider)
-    console.info(providers)
     // assert
     assert.isArray(providers)
     assert.lengthOf(providers, 3)
     assert.isTrue(providers.some((e) => e.id === 'saml'))
     assert.isTrue(providers.some((e) => e.id === 'oidc-1'))
     assert.isTrue(providers.some((e) => e.id === 'oidc-2'))
+  })
+
+  it('should ignore files from old version of provider', async function () {
+    // arrange
+    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
+      providers: [
+        {
+          clientId: 'client-id',
+          clientSecretFile: 'test/passwd.txt',
+          issuerUri: 'https://oidc2.example.com',
+          label: 'Provider',
+          protocol: 'oidc',
+          id: 'xid123'
+        }
+      ]
+    }))
+    const provider = {
+      clientId: 'client-id',
+      clientSecret: 'updated client secret',
+      issuerUri: 'https://oidc2.example.com',
+      label: 'Provider',
+      protocol: 'oidc',
+      id: 'xid123'
+    }
+    // act
+    const updated = await usecase(provider)
+    assert.lengthOf(updated, 1)
+    assert.equal(updated[0].id, 'xid123')
+    assert.property(updated[0], 'clientSecret')
+    assert.notProperty(updated[0], 'clientSecretFile')
+    const stats = await fs.stat('test/passwd.txt')
+    assert.isDefined(stats)
   })
 })
