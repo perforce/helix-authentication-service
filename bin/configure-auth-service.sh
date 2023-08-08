@@ -1419,8 +1419,9 @@ EOT
     fi
     if [[ -n "${BEARER_TOKEN}" ]]; then
         BEARER_BASE64=$(echo -n "$BEARER_TOKEN" | base64)
-        echo '  * Provide the BEARER_TOKEN value to the cloud service provider.'
-        echo "    The base64-encoded value is ${BEARER_BASE64}"
+        echo '  * Provide the BEARER_TOKEN value to the cloud service provider if'
+        echo '    using the SCIM user provisioning feature. The base64-encoded value'
+        echo "    is ${BEARER_BASE64}"
     fi
     cat <<EOT
   * If not already completed, the server and client certificates should be
