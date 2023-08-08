@@ -63,7 +63,7 @@ export default function SamlEditor() {
 }
 
 function BasicOptions() {
-  const { register, formState: { errors, touchedFields } } = useFormContext()
+  const { control, register, formState: { errors, touchedFields } } = useFormContext()
   return (
     <Grid container spacing={4}>
       <Grid item xs={6}>
@@ -99,6 +99,19 @@ function BasicOptions() {
             errors.spEntityId?.type === 'pattern' && 'URL must begin with http:// or https://'
           }</FormHelperText>
         </FormControl>
+      </Grid>
+      <Grid item xs={12}>
+        <Controller
+          control={control}
+          name='forceAuthn'
+          render={({ field: { onChange, value } }) => (
+            <Tooltip title="Require the user to authenticate every time.">
+              <FormControlLabel
+                control={<Checkbox checked={value} onChange={onChange} />}
+                label='Always require authentication' />
+            </Tooltip>
+          )}>
+        </Controller>
       </Grid>
     </Grid>
   )

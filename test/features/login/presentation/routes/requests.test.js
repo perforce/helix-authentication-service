@@ -163,7 +163,7 @@ setTimeout(function () {
           .end(done)
       })
 
-      it('should forceAuthn using provider property', function (done) {
+      it('should ignore forceAuthn setting in provider', function (done) {
         temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
           providers: [
             {
@@ -179,7 +179,7 @@ setTimeout(function () {
           .trustLocalhost(true)
           .expect(200)
           .expect(res => {
-            assert.isTrue(res.body.forceAuthn)
+            assert.isFalse(res.body.forceAuthn)
           })
           .end(done)
       })

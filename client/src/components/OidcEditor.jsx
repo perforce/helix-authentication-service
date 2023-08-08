@@ -112,6 +112,24 @@ function BasicOptions() {
           }</FormHelperText>
         </FormControl>
       </Grid>
+      <Grid item xs={12}>
+        <FormControl error={errors["maxAge"] && touchedFields["maxAge"]}>
+          <InputLabel htmlFor="max-age">Max Session Age</InputLabel>
+          <Tooltip title="Maximum number of seconds for duration of authenticated session after which user must authenticate.">
+            <OutlinedInput
+              type="number"
+              inputProps={{ step: 10 }}
+              id="max-age"
+              name="maxAge"
+              label="Max Session Age"
+              {...register("maxAge", { validate: (value) => parseInt(value, 10) >= 0 })}
+            />
+          </Tooltip>
+          <FormHelperText>{
+            errors.maxAge && 'Must be zero or higher'
+          }</FormHelperText>
+        </FormControl>
+      </Grid>
     </Grid>
   )
 }

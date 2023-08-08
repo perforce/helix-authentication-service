@@ -26,6 +26,7 @@ describe('ValidateAuthProvider use case', function () {
       issuerUri: "https://oidc.example.com",
       selectAccount: "false",
       signingAlgo: "RS256",
+      maxAge: 1024,
       label: "Provider",
       protocol: "oidc",
       id: "oidc-1"
@@ -263,6 +264,25 @@ describe('ValidateAuthProvider use case', function () {
     const result = await usecase(provider)
     // assert
     assert.equal(result, 'missing file: nosuchfile')
+  })
+
+  it('should reject oidc provider with invalid maxAge', async function () {
+    // arrange
+    const provider = {
+      clientId: "client-id",
+      clientSecret: 'client-secret',
+      issuerUri: "https://oidc.example.com",
+      selectAccount: "false",
+      signingAlgo: "RS256",
+      maxAge: 'foobar',
+      label: "Provider",
+      protocol: "oidc",
+      id: 'oidc-1'
+    }
+    // act
+    const result = await usecase(provider)
+    // assert
+    assert.equal(result, 'invalid maxAge: foobar')
   })
 
   it('should reject saml provider with invalid metadataUrl', async function () {

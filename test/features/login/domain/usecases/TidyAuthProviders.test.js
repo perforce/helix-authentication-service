@@ -106,6 +106,7 @@ describe('TidyAuthProviders use case', function () {
       {
         metadataUrl: 'https://saml.example.com/metadata',
         protocol: 'saml',
+        disableContxet: undefined,
         forceAuthn: 'yes',
         wantAssertionSigned: true,
         wantResponseSigned: 'false'
@@ -116,6 +117,7 @@ describe('TidyAuthProviders use case', function () {
     // assert
     assert.notEqual(results[0].id, results[1].id)
     assert.isTrue(results[0].selectAccount)
+    assert.isFalse(results[1].disableContext)
     assert.isTrue(results[1].forceAuthn)
     assert.isTrue(results[1].wantAssertionSigned)
     assert.isFalse(results[1].wantResponseSigned)
