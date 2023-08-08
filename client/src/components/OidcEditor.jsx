@@ -122,7 +122,7 @@ function BasicOptions() {
               id="max-age"
               name="maxAge"
               label="Max Session Age"
-              {...register("maxAge", { validate: (value) => parseInt(value, 10) >= 0 })}
+              {...register("maxAge", { validate: (value) => value === '' || parseInt(value, 10) >= 0 })}
             />
           </Tooltip>
           <FormHelperText>{
