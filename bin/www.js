@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import * as awilix from 'awilix'
 import createApp from 'helix-auth-svc/lib/app.js'
@@ -16,6 +16,7 @@ import {
 const logger = container.resolve('logger')
 const loadEnvironment = container.resolve('loadEnvironment')
 const refreshEnvironment = container.resolve('refreshEnvironment')
+const temporaryRepository = container.resolve('temporaryRepository')
 const settings = container.resolve('settingsRepository')
 
 function startServer () {
@@ -102,6 +103,9 @@ function startServer () {
       setTimeout(() => {
         refreshEnvironment(process.env).then(() => {
           logger.info('www: reloaded configuration from .env')
+          // simulate a process restart by clearing the temporary settings
+          // repository, which is meant not to be persistent indefinitely
+          temporaryRepository.clear()
           registerLateBindings()
         }).catch((err) => {
           // log the non-fatal error and pretend nothing happened
