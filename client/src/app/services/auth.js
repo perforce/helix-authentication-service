@@ -18,6 +18,7 @@ export const auth = createApi({
       }
       return headers
     },
+    responseHandler: 'content-type'
   }),
   tagTypes: ['Providers', 'Status'],
   endpoints: (builder) => ({
@@ -27,6 +28,9 @@ export const auth = createApi({
         method: 'POST',
         body: { ...credentials, grant_type: 'password' },
       }),
+      // clear any cached error results from previous failures that
+      // resulted when the auth token expired
+      invalidatesTags: ['Providers', 'Status'],
     }),
     logout: builder.mutation({
       query: () => ({
