@@ -500,7 +500,7 @@ setTimeout(function () {
             .get('/settings/providers/foobar')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
-            .expect(404, /Not Found/, done)
+            .expect(404, /"not found"/, done)
         })
       })
 
@@ -510,7 +510,7 @@ setTimeout(function () {
             .delete('/settings/providers/foobar')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
-            .expect(404, /Not Found/, done)
+            .expect(404, /"not found"/, done)
         })
       })
 

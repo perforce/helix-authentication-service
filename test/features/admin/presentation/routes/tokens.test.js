@@ -50,7 +50,7 @@ setTimeout(function () {
                 .delete('/tokens')
                 .trustLocalhost(true)
                 .set('Authorization', 'Bearer ' + accessToken)
-                .expect(200, { status: 'ok' }, done)
+                .expect(200, { status: 200, message: 'ok' }, done)
             }
           })
       })
