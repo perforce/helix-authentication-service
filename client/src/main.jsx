@@ -59,7 +59,7 @@ function ErrorPage() {
 
   const handleCopyClick = () => {
     copyTextToClipboard(errorText).catch((err) => {
-      console.log(err)
+      console.error(err)
     })
     setShowSnackbar(true)
   }

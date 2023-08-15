@@ -55,7 +55,7 @@ function SettingsDialog(props) {
 
   const handleCopyClick = () => {
     copyTextToClipboard(text).catch((err) => {
-      console.log(err)
+      console.error(err)
     })
     setShowSnackbar(true)
   }
@@ -134,7 +134,7 @@ const ActionsButton = ({ provider, onDelete }) => {
         window.open(response.loginTestUrl, '_blank')
       })
       .catch((err) => {
-        console.error(err.message)
+        console.error(err)
       })
   }
 
