@@ -168,7 +168,7 @@ return array(
     'idp' => array(
       'entityId' => 'present',
       'singleSignOnService' => array(
-        'url' => 'https://has.example.com/saml/sso',
+        'url' => 'https://has.example.com/saml/login',
       ),
       'x509cert' => 'present',
     ),
@@ -202,7 +202,7 @@ return array(
     'idp' => array(
       'entityId' => 'present',
       'singleSignOnService' => array(
-        'url' => 'https://has.example.com/saml/sso',
+        'url' => 'https://has.example.com/saml/login',
       ),
       'x509cert' => 'present',
     ),
@@ -272,7 +272,7 @@ return array(
     'idp' => array(
       'entityId' => 'urn:auth-service:idp',
       'singleSignOnService' => array(
-        'url' => 'https://has.example.com/saml/sso',
+        'url' => 'https://has.example.com/saml/login',
       ),
       'x509cert' => 'present',
     ),
@@ -307,7 +307,7 @@ return array(
     'idp' => array(
       'entityId' => 'urn:auth-service:idp',
       'singleSignOnService' => array(
-        'url' => 'https://has.example.com/saml/sso',
+        'url' => 'https://has.example.com/saml/login',
       ),
       'x509cert' => '-----BEGIN CERTIFICATE-----
 MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv
@@ -371,7 +371,7 @@ return array(
     'idp' => array(
       'entityId' => 'urn:auth-service:idp',
       'singleSignOnService' => array(
-        'url' => 'https://has.example.com/saml/sso',
+        'url' => 'https://has.example.com/saml/login',
       ),
       'x509cert' => '-----BEGIN CERTIFICATE-----
 MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv
@@ -431,7 +431,7 @@ return array(
     'idp' => array(
       'entityId' => 'urn:auth-service:idp',
       'singleSignOnService' => array(
-        'url' => 'https://has.example.com/saml/sso',
+        'url' => 'https://has.example.com/saml/login',
       ),
       'x509cert' => '-----BEGIN CERTIFICATE-----
 MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv

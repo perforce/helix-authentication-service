@@ -144,7 +144,7 @@ return array(
     'idp' => array(
       'entityId' => 'urn:auth-service:idp',
       'singleSignOnService' => array(
-        'url' => 'https://localhost:3333/saml/sso',
+        'url' => 'https://localhost:3333/saml/login',
       ),
       'x509cert' => '-----BEGIN CERTIFICATE-----
 MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv
