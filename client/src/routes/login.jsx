@@ -2,7 +2,10 @@
 // Copyright 2023 Perforce Software
 //
 import React, { useState } from 'react'
-import { useForm } from "react-hook-form"
+import {
+  Controller,
+  useForm
+} from "react-hook-form"
 import {
   Alert,
   Box,
@@ -22,7 +25,8 @@ import { useLoginMutation } from '~/app/services/auth'
 import PasswordInput from '~/components/PasswordInput'
 
 export const Login = () => {
-  const { register, handleSubmit, formState: { errors, touchedFields } } = useForm({ mode: 'onBlur' })
+  const { control, handleSubmit, formState: { errors, touchedFields } } =
+    useForm({ defaultValues: { username: '', password: '' }, mode: 'onBlur' })
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [login, { isLoading }] = useLoginMutation()
@@ -60,20 +64,37 @@ export const Login = () => {
                 </Box>
                 <FormControl error={errors.username && touchedFields.username}>
                   <InputLabel htmlFor="username">Username</InputLabel>
-                  <OutlinedInput
-                    type="text"
-                    id="username"
-                    name="username"
-                    label="Username"
-                    {...register("username", { required: true })}
-                  />
+                  <Controller control={control} name="username" rules={{ required: true }}
+                    render={({ field: { onChange, onBlur, value, ref } }) => (
+                      <OutlinedInput
+                        type="text"
+                        id="username"
+                        name="username"
+                        label="Username"
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        value={value}
+                        ref={ref}
+                      />
+                    )} />
                   <FormHelperText>{
                     errors.username?.type === 'required' && 'Username is required'
                   }</FormHelperText>
                 </FormControl>
                 <FormControl error={errors.password && touchedFields.password}>
                   <InputLabel htmlFor="password">Password</InputLabel>
-                  <PasswordInput name="password" label="Password" required={true} register={register} />
+                  <Controller control={control} name="password" rules={{ required: true }}
+                    render={({ field: { onChange, onBlur, value, ref } }) => (
+                      <PasswordInput
+                        name="password"
+                        label="Password"
+                        onChange={onChange}
+                        onBlur={onBlur}
+                        value={value}
+                        forwardedRef={ref}
+                        tooltip="Secret value associated with the client ID, provided by the OIDC issuer."
+                      />
+                    )} />
                   <FormHelperText>{
                     errors.password?.type === 'required' && 'Password is required'
                   }</FormHelperText>

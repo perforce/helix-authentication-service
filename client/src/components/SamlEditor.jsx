@@ -63,21 +63,27 @@ export default function SamlEditor() {
 }
 
 function BasicOptions() {
-  const { control, register, formState: { errors, touchedFields } } = useFormContext()
+  const { control, formState: { errors, touchedFields } } = useFormContext()
   return (
     <Grid container spacing={4}>
       <Grid item xs={6}>
         <FormControl error={errors["metadataUrl"] && touchedFields["metadataUrl"]} fullWidth>
           <InputLabel htmlFor="metadata-url">Metadata URL</InputLabel>
-          <Tooltip title="URL from which metadata for the identity provider may be retrieved.">
-            <OutlinedInput
-              type="text"
-              id="metadata-url"
-              name="metadataUrl"
-              label="Metadata URL"
-              {...register("metadataUrl", { pattern: /^https?:\/\/.+/ })}
-            />
-          </Tooltip>
+          <Controller control={control} name="metadataUrl" rules={{ pattern: /^https?:\/\/.+/ }}
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Tooltip title="URL from which metadata for the identity provider may be retrieved.">
+                <OutlinedInput
+                  type="text"
+                  id="metadata-url"
+                  name="metadataUrl"
+                  label="Metadata URL"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  ref={ref}
+                />
+              </Tooltip>
+            )} />
           <FormHelperText>{
             errors.metadataUrl?.type === 'pattern' && 'URL must begin with http:// or https://'
           }</FormHelperText>
@@ -86,15 +92,20 @@ function BasicOptions() {
       <Grid item xs={6}>
         <FormControl error={errors["spEntityId"] && touchedFields["spEntityId"]} fullWidth>
           <InputLabel htmlFor="sp-entity-id">SP Entity ID</InputLabel>
-          <Tooltip title="Identifier for this service, default is https://has.example.com">
-            <OutlinedInput
-              type="text"
-              id="sp-entity-id"
-              name="spEntityId"
-              label="SP Entity ID"
-              {...register("spEntityId")}
-            />
-          </Tooltip>
+          <Controller control={control} name="spEntityId"
+            render={({ field: { onChange, value, ref } }) => (
+              <Tooltip title="Identifier for this service, default is https://has.example.com">
+                <OutlinedInput
+                  type="text"
+                  id="sp-entity-id"
+                  name="spEntityId"
+                  label="SP Entity ID"
+                  onChange={onChange}
+                  value={value}
+                  ref={ref}
+                />
+              </Tooltip>
+            )} />
           <FormHelperText>{
             errors.spEntityId?.type === 'pattern' && 'URL must begin with http:// or https://'
           }</FormHelperText>
@@ -110,15 +121,14 @@ function BasicOptions() {
                 control={<Checkbox checked={value} onChange={onChange} />}
                 label='Always require authentication' />
             </Tooltip>
-          )}>
-        </Controller>
+          )} />
       </Grid>
     </Grid>
   )
 }
 
 function AdvancedOptions() {
-  const { control, register, formState: { errors, touchedFields }, watch } = useFormContext()
+  const { control, formState: { errors, touchedFields }, watch } = useFormContext()
   const watchDisableContext = watch('disableContext', false)
 
   return (
@@ -127,15 +137,21 @@ function AdvancedOptions() {
         <Grid item xs={6}>
           <FormControl error={errors["signonUrl"] && touchedFields["signonUrl"]} fullWidth>
             <InputLabel htmlFor="signon-url">Provider SSO URL</InputLabel>
-            <Tooltip title="URL of the single sign-on service of the identity provider.">
-              <OutlinedInput
-                type="text"
-                id="signon-url"
-                name="signonUrl"
-                label="Provider SSO URL"
-                {...register("signonUrl", { pattern: /^https?:\/\/.+/ })}
-              />
-            </Tooltip>
+            <Controller control={control} name="signonUrl" rules={{ pattern: /^https?:\/\/.+/ }}
+              render={({ field: { onChange, onBlur, value, ref } }) => (
+                <Tooltip title="URL of the single sign-on service of the identity provider.">
+                  <OutlinedInput
+                    type="text"
+                    id="signon-url"
+                    name="signonUrl"
+                    label="Provider SSO URL"
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
             <FormHelperText>{
               errors.signonUrl?.type === 'pattern' && 'URL must begin with http:// or https://'
             }</FormHelperText>
@@ -144,72 +160,97 @@ function AdvancedOptions() {
         <Grid item xs={6}>
           <FormControl error={errors["idpEntityId"] && touchedFields["idpEntityId"]} fullWidth>
             <InputLabel htmlFor="idp-entity-id">IDP Entity ID</InputLabel>
-            <Tooltip title="Identifier for this identity provider.">
-              <OutlinedInput
-                type="text"
-                id="idp-entity-id"
-                name="idpEntityId"
-                label="IDP Entity ID"
-                {...register("idpEntityId")}
-              />
-            </Tooltip>
+            <Controller control={control} name="idpEntityId"
+              render={({ field: { onChange, value, ref } }) => (
+                <Tooltip title="Identifier for this identity provider.">
+                  <OutlinedInput
+                    type="text"
+                    id="idp-entity-id"
+                    name="idpEntityId"
+                    label="IDP Entity ID"
+                    onChange={onChange}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["audience"] && touchedFields["audience"]} fullWidth>
             <InputLabel htmlFor="sp-audience">SP Audience</InputLabel>
-            <Tooltip title="If specified on both the identity provider and here, the service will ensure the SAML response matches this value.">
-              <OutlinedInput
-                type="text"
-                id="sp-audience"
-                name="audience"
-                label="SP Audience"
-                {...register("audience")}
-              />
-            </Tooltip>
+            <Controller control={control} name="audience"
+              render={({ field: { onChange, value, ref } }) => (
+                <Tooltip title="If specified on both the identity provider and here, the service will ensure the SAML response matches this value.">
+                  <OutlinedInput
+                    type="text"
+                    id="sp-audience"
+                    name="audience"
+                    label="SP Audience"
+                    onChange={onChange}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["nameIdFormat"] && touchedFields["nameIdFormat"]} fullWidth>
             <InputLabel htmlFor="nameid-format">NameID Format</InputLabel>
-            <Tooltip title="Typically left blank, but may be used to inform the IdP what type of nameID value to return.">
-              <OutlinedInput
-                type="text"
-                id="nameid-format"
-                name="nameIdFormat"
-                label="NameID Format"
-                {...register("nameIdFormat")}
-              />
-            </Tooltip>
+            <Controller control={control} name="nameIdFormat"
+              render={({ field: { onChange, value, ref } }) => (
+                <Tooltip title="Typically left blank, but may be used to inform the IdP what type of nameID value to return.">
+                  <OutlinedInput
+                    type="text"
+                    id="nameid-format"
+                    name="nameIdFormat"
+                    label="NameID Format"
+                    onChange={onChange}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["authnContext"] && touchedFields["authnContext"]} fullWidth>
             <InputLabel htmlFor="authn-context">Authentication Context</InputLabel>
-            <Tooltip title="May be used to restrict the means by which a user authenticates. Multiple values should be separated by commas.">
-              <OutlinedInput
-                type="text"
-                id="authn-context"
-                name="authnContext"
-                disabled={watchDisableContext}
-                label="Authentication Context"
-                {...register("authnContext")}
-              />
-            </Tooltip>
+            <Controller control={control} name="authnContext"
+              render={({ field: { onChange, value, ref } }) => (
+                <Tooltip title="May be used to restrict the means by which a user authenticates. Multiple values should be separated by commas.">
+                  <OutlinedInput
+                    type="text"
+                    id="authn-context"
+                    name="authnContext"
+                    disabled={watchDisableContext}
+                    label="Authentication Context"
+                    onChange={onChange}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["keyAlgorithm"] && touchedFields["keyAlgorithm"]} fullWidth>
             <InputLabel htmlFor="key-algorithm">Key Algorithm</InputLabel>
-            <Tooltip title="Algorithm for signing requests; defaults to sha256.">
-              <OutlinedInput
-                type="text"
-                id="key-algorithm"
-                name="keyAlgorithm"
-                label="Key Algorithm"
-                {...register("keyAlgorithm")}
-              />
-            </Tooltip>
+            <Controller control={control} name="keyAlgorithm"
+              render={({ field: { onChange, value, ref } }) => (
+                <Tooltip title="Algorithm for signing requests; defaults to sha256.">
+                  <OutlinedInput
+                    type="text"
+                    id="key-algorithm"
+                    name="keyAlgorithm"
+                    label="Key Algorithm"
+                    onChange={onChange}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
           </FormControl>
         </Grid>
       </Grid>
@@ -261,37 +302,47 @@ function AdvancedOptions() {
 }
 
 function MetadataCerts() {
-  const { register, formState: { errors, touchedFields } } = useFormContext()
+  const { control, formState: { errors, touchedFields } } = useFormContext()
 
   return (
     <Stack direction='row' spacing={4}>
       <FormControl error={errors["metadata"] && touchedFields["metadata"]} fullWidth>
         <InputLabel htmlFor="idp-metadata">IdP Metadata</InputLabel>
-        <Tooltip title="Raw XML metadata for the SAML identity provider.">
-          <OutlinedInput
-            type="text"
-            id="idp-metadata"
-            name="metadata"
-            label="IdP Metadata"
-            multiline
-            rows={12}
-            {...register("metadata")}
-          />
-        </Tooltip>
+        <Controller control={control} name="metadata"
+          render={({ field: { onChange, value, ref } }) => (
+            <Tooltip title="Raw XML metadata for the SAML identity provider.">
+              <OutlinedInput
+                type="text"
+                id="idp-metadata"
+                name="metadata"
+                label="IdP Metadata"
+                multiline
+                rows={12}
+                onChange={onChange}
+                value={value}
+                ref={ref}
+              />
+            </Tooltip>
+          )} />
       </FormControl>
       <FormControl error={errors["idpCert"] && touchedFields["idpCert"]} fullWidth>
         <InputLabel htmlFor="idp-cert">IDP Certificate</InputLabel>
-        <Tooltip title="PEM encoded public certificate of the SAML identity provider.">
-          <OutlinedInput
-            type="text"
-            id="idp-cert"
-            name="idpCert"
-            label="IDP Certificate"
-            multiline
-            rows={12}
-            {...register("idpCert")}
-          />
-        </Tooltip>
+        <Controller control={control} name="idpCert"
+          render={({ field: { onChange, value, ref } }) => (
+            <Tooltip title="PEM encoded public certificate of the SAML identity provider.">
+              <OutlinedInput
+                type="text"
+                id="idp-cert"
+                name="idpCert"
+                label="IDP Certificate"
+                multiline
+                rows={12}
+                onChange={onChange}
+                value={value}
+                ref={ref}
+              />
+            </Tooltip>
+          )} />
       </FormControl>
     </Stack>
   )

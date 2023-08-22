@@ -25,3 +25,22 @@ Building for the purpose of building the authentication service deliverable, how
 ```shell
 npx vite build --outDir ../public/admin --emptyOutDir
 ```
+
+## Implementation Details
+
+### Forms and Material UI
+
+The input validation library, `react-hook-form`, prominently demonstrates the
+use of a function named `register()` that is invoked for each form input field.
+However, when used with CSS frameworks like Material UI (MUI), the result may be
+undesirable visual artifacts. Namely, when using the `OutlinedInput` for a text
+field, the placeholder text would be drawn over the field value, rather than
+appearing as the form label. To correct this behavior, the forms all make use of
+the `Controller` type from `react-hook-form`, and as such, the code looks quite
+different from the examples on the
+[react-hook-form.com](https://react-hook-form.com) web site.
+
+As a side note, any `Tooltip` that is associated with an input field must be
+wrapped in the `render()` function of the `Controller` rather than being
+outside. This avoids warnings in the console about the manner in which the `ref`
+is passed to children.

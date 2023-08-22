@@ -30,7 +30,31 @@ export default function Editor({ protocol }) {
   const { providerId } = useLoaderData()
   const { data, error, isLoading } = useGetOneProviderQuery(providerId)
   const [putProvider] = usePutProviderMutation()
-  const methods = useForm({ mode: 'onBlur', values: data })
+  const methods = useForm({
+    mode: 'onBlur', values: data, defaultValues: {
+      audience: '',
+      authnContext: '',
+      clientId: '',
+      clientSecret: '',
+      codeChallenge: '',
+      disableContext: false,
+      forceAuthn: false,
+      idpCert: '',
+      idpEntityId: '',
+      issuerUri: '',
+      keyAlgorithm: '',
+      maxAge: '',
+      metadata: '',
+      metadataUrl: '',
+      nameIdFormat: '',
+      selectAccount: false,
+      signingAlgo: '',
+      signonUrl: '',
+      spEntityId: '',
+      wantAssertionSigned: true,
+      wantResponseSigned: true
+    }
+  })
 
   const onSubmit = (data) => {
     putProvider(data).unwrap()

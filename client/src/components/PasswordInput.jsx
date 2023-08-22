@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
-export const PasswordInput = ({ name, label, required, register, tooltip }) => {
+export const PasswordInput = ({ name, value, label, onChange, onBlur, forwardedRef, tooltip }) => {
   const [show, setShow] = useState(false)
   const handleClick = () => setShow(!show)
   const handleMouseDown = (event) => event.preventDefault()
@@ -20,8 +20,11 @@ export const PasswordInput = ({ name, label, required, register, tooltip }) => {
       type={show ? 'text' : 'password'}
       id={name}
       name={name}
+      value={value}
       label={label}
-      {...register(name, { required })}
+      onChange={onChange}
+      onBlur={onBlur}
+      ref={forwardedRef}
       endAdornment={
         <InputAdornment position="end">
           <IconButton

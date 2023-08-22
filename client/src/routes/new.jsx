@@ -42,13 +42,31 @@ export default function Wizard() {
   const [protocol, setProtocol] = React.useState('saml')
   const [applyError, setApplyError] = React.useState(null)
   const [postProvider] = usePostProviderMutation()
-  const methods = useForm({ mode: 'onBlur', values: {
-    // These boolean properties cannot be left blank, unlike text fields, and
-    // thereby allow the backend to assign the default value, so we must inject
-    // the same default value here for the "new" forms.
-    wantAssertionSigned: true,
-    wantResponseSigned: true,
-  } })
+  const methods = useForm({
+    mode: 'onBlur', defaultValues: {
+      audience: '',
+      authnContext: '',
+      clientId: '',
+      clientSecret: '',
+      codeChallenge: '',
+      disableContext: false,
+      forceAuthn: false,
+      idpCert: '',
+      idpEntityId: '',
+      issuerUri: '',
+      keyAlgorithm: '',
+      maxAge: '',
+      metadata: '',
+      metadataUrl: '',
+      nameIdFormat: '',
+      selectAccount: false,
+      signingAlgo: '',
+      signonUrl: '',
+      spEntityId: '',
+      wantAssertionSigned: true,
+      wantResponseSigned: true
+    }
+  })
 
   const onSubmit = (data) => {
     data.protocol = protocol

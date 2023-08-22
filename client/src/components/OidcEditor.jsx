@@ -60,21 +60,27 @@ export default function OidcEditor() {
 }
 
 function BasicOptions() {
-  const { register, formState: { errors, touchedFields } } = useFormContext()
+  const { control, formState: { errors, touchedFields } } = useFormContext()
   return (
     <Grid container spacing={4}>
       <Grid item xs={12}>
         <FormControl error={errors["issuerUri"] && touchedFields["issuerUri"]} fullWidth>
           <InputLabel htmlFor="issuer-uri">Issuer URI</InputLabel>
-          <Tooltip title="URL from which the OIDC issuer configuration may be retrieved.">
-            <OutlinedInput
-              type="text"
-              id="issuer-uri"
-              name="issuerUri"
-              label="Issuer URI"
-              {...register("issuerUri", { pattern: /^https?:\/\/.+/ })}
-            />
-          </Tooltip>
+          <Controller control={control} name="issuerUri" rules={{ pattern: /^https?:\/\/.+/ }}
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Tooltip title="URL from which the OIDC issuer configuration may be retrieved.">
+                <OutlinedInput
+                  type="text"
+                  id="issuer-uri"
+                  name="issuerUri"
+                  label="Issuer URI"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  ref={ref}
+                />
+              </Tooltip>
+            )} />
           <FormHelperText>{
             errors.issuerUri?.type === 'pattern' && 'URL must begin with http:// or https://'
           }</FormHelperText>
@@ -83,15 +89,21 @@ function BasicOptions() {
       <Grid item xs={6}>
         <FormControl error={errors["clientId"] && touchedFields["clientId"]} fullWidth>
           <InputLabel htmlFor="client-id">Client ID</InputLabel>
-          <Tooltip title="Unique identifier for this service, provided by the OIDC issuer.">
-            <OutlinedInput
-              type="text"
-              id="client-id"
-              name="clientId"
-              label="Client ID"
-              {...register("clientId", { required: true })}
-            />
-          </Tooltip>
+          <Controller control={control} name="clientId" rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Tooltip title="Unique identifier for this service, provided by the OIDC issuer.">
+                <OutlinedInput
+                  type="text"
+                  id="client-id"
+                  name="clientId"
+                  label="Client ID"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  ref={ref}
+                />
+              </Tooltip>
+            )} />
           <FormHelperText>{
             errors.clientId?.type === 'required' && 'Must provide an identifier'
           }</FormHelperText>
@@ -100,13 +112,18 @@ function BasicOptions() {
       <Grid item xs={6}>
         <FormControl error={errors["clientSecret"] && touchedFields["clientSecret"]} fullWidth>
           <InputLabel htmlFor="client-secret">Client Secret</InputLabel>
-          <PasswordInput
-            name="clientSecret"
-            label="Client Secret"
-            required={true}
-            register={register}
-            tooltip="Secret value associated with the client ID, provided by the OIDC issuer."
-          />
+          <Controller control={control} name="clientSecret" rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <PasswordInput
+                name="clientSecret"
+                label="Client Secret"
+                onChange={onChange}
+                onBlur={onBlur}
+                value={value}
+                forwardedRef={ref}
+                tooltip="Secret value associated with the client ID, provided by the OIDC issuer."
+              />
+            )} />
           <FormHelperText>{
             errors.clientSecret?.type === 'required' && 'Must provide a secret value'
           }</FormHelperText>
@@ -115,16 +132,23 @@ function BasicOptions() {
       <Grid item xs={12}>
         <FormControl error={errors["maxAge"] && touchedFields["maxAge"]}>
           <InputLabel htmlFor="max-age">Max Session Age</InputLabel>
-          <Tooltip title="Maximum number of seconds for duration of authenticated session after which user must authenticate.">
-            <OutlinedInput
-              type="number"
-              inputProps={{ step: 10 }}
-              id="max-age"
-              name="maxAge"
-              label="Max Session Age"
-              {...register("maxAge", { validate: (value) => value === '' || parseInt(value, 10) >= 0 })}
-            />
-          </Tooltip>
+          <Controller control={control} name="maxAge"
+            rules={{ validate: (value) => value === '' || parseInt(value, 10) >= 0 }}
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <Tooltip title="Maximum number of seconds for duration of authenticated session after which user must authenticate.">
+                <OutlinedInput
+                  type="number"
+                  inputProps={{ step: 10 }}
+                  id="max-age"
+                  name="maxAge"
+                  label="Max Session Age"
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  ref={ref}
+                />
+              </Tooltip>
+            )} />
           <FormHelperText>{
             errors.maxAge && 'Must be zero or higher'
           }</FormHelperText>
@@ -135,7 +159,7 @@ function BasicOptions() {
 }
 
 function AdvancedOptions() {
-  const { control, register, formState: { errors, touchedFields } } = useFormContext()
+  const { control, formState: { errors, touchedFields } } = useFormContext()
 
   return (
     <Stack spacing={4}>
@@ -143,29 +167,39 @@ function AdvancedOptions() {
         <Grid item xs={6}>
           <FormControl error={errors["codeChallenge"] && touchedFields["codeChallenge"]} fullWidth>
             <InputLabel htmlFor="code-challenge">Code Challenge Method</InputLabel>
-            <Tooltip title="May be 'S256' or 'plain', with 'S256' being the default.">
-              <OutlinedInput
-                type="text"
-                id="code-challenge"
-                name="codeChallenge"
-                label="Code Challenge Method"
-                {...register("codeChallenge")}
-              />
-            </Tooltip>
+            <Controller control={control} name="codeChallenge"
+              render={({ field: { onChange, value, ref } }) => (
+                <Tooltip title="May be 'S256' or 'plain', with 'S256' being the default.">
+                  <OutlinedInput
+                    type="text"
+                    id="code-challenge"
+                    name="codeChallenge"
+                    label="Code Challenge Method"
+                    onChange={onChange}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
           </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl error={errors["signingAlgo"] && touchedFields["signingAlgo"]} fullWidth>
             <InputLabel htmlFor="signing-algo">Token Signing Algorithm</InputLabel>
-            <Tooltip title="May be 'RS256' or 'HS256', with 'RS256' being the default.">
-              <OutlinedInput
-                type="text"
-                id="signing-algo"
-                name="signingAlgo"
-                label="Token signing algorithm"
-                {...register("signingAlgo")}
-              />
-            </Tooltip>
+            <Controller control={control} name="signingAlgo"
+              render={({ field: { onChange, value, ref } }) => (
+                <Tooltip title="May be 'RS256' or 'HS256', with 'RS256' being the default.">
+                  <OutlinedInput
+                    type="text"
+                    id="signing-algo"
+                    name="signingAlgo"
+                    label="Token signing algorithm"
+                    onChange={onChange}
+                    value={value}
+                    ref={ref}
+                  />
+                </Tooltip>
+              )} />
           </FormControl>
         </Grid>
       </Grid>
