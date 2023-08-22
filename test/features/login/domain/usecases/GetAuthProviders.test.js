@@ -355,4 +355,19 @@ describe('GetAuthProviders use case', function () {
     assert.isTrue(result[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
     assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
   })
+
+  it('should decode the encoded classic properties', async function () {
+    // arrange
+    temporaryRepository.set('SAML_INFO_LABEL', 'Acme Identity')
+    temporaryRepository.set('SAML_IDP_METADATA', 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48RW50aXR5RGVzY3JpcHRvciBJRD0iXzA2MzJmMmJiLTI1NzUtNGRmNi04ZjhmLTE5NjYzMjUwY2VjYiIgZW50aXR5SUQ9Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcxOWQ4OGYzLWY5NTctNDRjZi05YWE1LTBhMWEzYTQ0ZjdiOS8iIHhtbG5zPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6bWV0YWRhdGEiPjwvRW50aXR5RGVzY3JpcHRvcj4=')
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'saml-0')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'saml')
+    assert.isTrue(result[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
+    assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
+  })
 })

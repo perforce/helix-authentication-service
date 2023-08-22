@@ -101,6 +101,7 @@ describe('TidyAuthProviders use case', function () {
         clientId: 'client-id',
         clientSecret: 'client-secret',
         protocol: 'oidc',
+        wantAssertionSigned: null,
         selectAccount: 'on'
       },
       {
@@ -117,7 +118,9 @@ describe('TidyAuthProviders use case', function () {
     // assert
     assert.notEqual(results[0].id, results[1].id)
     assert.isTrue(results[0].selectAccount)
-    assert.isFalse(results[1].disableContext)
+    assert.isUndefined(results[0].wantAssertionSigned)
+    assert.isUndefined(results[0].wantResponseSigned)
+    assert.isUndefined(results[1].disableContext)
     assert.isTrue(results[1].forceAuthn)
     assert.isTrue(results[1].wantAssertionSigned)
     assert.isFalse(results[1].wantResponseSigned)
@@ -179,7 +182,7 @@ describe('TidyAuthProviders use case', function () {
     assert.equal(results[0].id, 'saml')
     assert.equal(results[0].protocol, 'saml')
     assert.equal(results[0].metadataUrl, 'https://saml.example.com/idp/metadata')
-    assert.isFalse(results[0].wantAssertionSigned)
+    assert.isUndefined(results[0].wantAssertionSigned)
     assert.isTrue(results[0].wantResponseSigned)
   })
 })

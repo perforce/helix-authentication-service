@@ -14,7 +14,7 @@ describe('DefaultsEnvRepository', function () {
 
   it('should return all available entries', function () {
     const result = Object.fromEntries(sut.entries())
-    assert.equal(Object.keys(result).length, 20)
+    assert.equal(Object.keys(result).length, 22)
     assert.property(result, 'ADMIN_USERNAME')
     assert.property(result, 'OIDC_TOKEN_SIGNING_ALGO')
     assert.property(result, 'TOKEN_TTL')

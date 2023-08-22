@@ -103,7 +103,7 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should interpret truthy values from settings', async function () {
     // arrange
-    settingsRepository.set('FORCE_AUTHN', '1')
+    settingsRepository.set('SAML_FORCE_AUTHN', '1')
     settingsRepository.set('SAML_IDP_METADATA_FILE', 'test/fixtures/idp-metadata.xml')
     settingsRepository.set('SAML_WANT_ASSERTION_SIGNED', 'false')
     settingsRepository.set('SAML_WANT_RESPONSE_SIGNED', 'TRUE')
@@ -112,8 +112,8 @@ describe('GetSamlConfiguration use case', function () {
     const result = await usecase()
     // assert
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
-    assert.isFalse(result.forceAuthn)
-    assert.isFalse(result.disableRequestedAuthnContext)
+    assert.isTrue(result.forceAuthn)
+    assert.isUndefined(result.disableRequestedAuthnContext)
     assert.isFalse(result.wantAssertionsSigned)
     assert.isTrue(result.wantAuthnResponseSigned)
   })
@@ -162,8 +162,8 @@ describe('GetSamlConfiguration use case', function () {
       assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
       assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
       assert.equal(result.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password')
-      assert.isFalse(result.wantAssertionsSigned)
-      assert.isFalse(result.wantAuthnResponseSigned)
+      assert.isUndefined(result.wantAssertionsSigned)
+      assert.isUndefined(result.wantAuthnResponseSigned)
     }
   })
 
