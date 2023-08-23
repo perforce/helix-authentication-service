@@ -356,6 +356,22 @@ describe('GetAuthProviders use case', function () {
     assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
   })
 
+  it('should ignore empty SAML_AUTHN_CONTEXT value', async function () {
+    // arrange
+    temporaryRepository.set('SAML_AUTHN_CONTEXT', '')
+    temporaryRepository.set('SAML_INFO_LABEL', 'Acme Identity')
+    temporaryRepository.set('SAML_IDP_METADATA_URL', 'https://saml.example.com/idp/metadata')
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'saml')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'saml')
+    assert.equal(result[0].metadataUrl, 'https://saml.example.com/idp/metadata')
+    assert.isUndefined(result[0].authnContext)
+  })
+
   it('should decode the encoded classic properties', async function () {
     // arrange
     temporaryRepository.set('SAML_INFO_LABEL', 'Acme Identity')

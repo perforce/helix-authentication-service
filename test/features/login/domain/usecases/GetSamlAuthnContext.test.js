@@ -8,9 +8,44 @@ import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecas
 describe('GetSamlAuthnContext use case', function () {
   const usecase = GetSamlAuthnContext()
 
-  it('should return undefined if content is not given', function () {
+  it('should return undefined if no argument is given', function () {
     // act
     const result = usecase()
+    // assert
+    assert.isUndefined(result)
+  })
+
+  it('should return undefined if false is given', function () {
+    // act
+    const result = usecase(false)
+    // assert
+    assert.isUndefined(result)
+  })
+
+  it('should return undefined if true is given', function () {
+    // act
+    const result = usecase(true)
+    // assert
+    assert.isUndefined(result)
+  })
+
+  it('should return undefined if integer is given', function () {
+    // act
+    const result = usecase(1234)
+    // assert
+    assert.isUndefined(result)
+  })
+
+  it('should return undefined if empty string is given', function () {
+    // act
+    const result = usecase('')
+    // assert
+    assert.isUndefined(result)
+  })
+
+  it('should return undefined if empty array is given', function () {
+    // act
+    const result = usecase([])
     // assert
     assert.isUndefined(result)
   })
