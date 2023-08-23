@@ -48,6 +48,29 @@ $ docker compose up --build -d
 $ npm test
 ```
 
+### Testing without Docker
+
+Many of the unit tests do not use the `.doc` Docker containers and thus most of
+the test suite can be run using this command:
+
+```shell
+$ npm unit
+```
+
+### Running individual tests
+
+To run a single test, use `npx mocha` as shown in the example below:
+
+```shell
+$ npx mocha --exit test/features/login/domain/usecases/GetSamlAuthnContext.test.js
+```
+
+If the test makes use of `setTimeout()` then add the `--delay` flag:
+
+```shell
+$ npx mocha --exit --delay test/features/login/presentation/routes/requests.test.js
+```
+
 ## Running the Service on HTTP
 
 If for some reason you do not want the auth service to be using HTTPS and its
