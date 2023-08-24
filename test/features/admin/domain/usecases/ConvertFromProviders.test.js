@@ -60,7 +60,7 @@ describe('ConvertFromProviders use case', function () {
       'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
       'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
     ]
-    const authnContext = contexts.map((e) => `"${e}"`).join()
+    const authnContext = '[' + contexts.map((e) => `"${e}"`).join() + ']'
     const settings = new Map()
     const providers = [{
       label: 'Acme Identity',
