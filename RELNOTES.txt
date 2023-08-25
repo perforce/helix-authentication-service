@@ -99,7 +99,7 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2023.2 (2023.2/2479541) (2023/08/24)
 
     HAS-412 (Change #2451243)
         Introduction of web-based administrative interface.
@@ -108,13 +108,13 @@ New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         REST API for validating Swarm integration with HAS.
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2023.2 (2023.2/2479541) (2023/08/24)
 
     HAS-435 (Change #2437976)
         Redis connector was creating too many clients.
 
 ----------------------------------------------------------------------
-Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Other changes in 2023.2 (2023.2/2479541) (2023/08/24)
 
     HAS-404 (Change #2426954)
         Support for Node.js v14 has been removed from install script.
