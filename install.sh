@@ -139,9 +139,11 @@ function detect_platform() {
     #
     ID=$(awk -F= '/^ID=/ {print $2}' /etc/os-release | tr -d '"')
     if [[ "$ID" == 'amzn' ]]; then
-        # For now, all Amazon Linux releases only support Node.js v16.
         PLATFORM=redhat
-        NODE_VERSION=16
+        VERSION_ID=$(awk -F= '/VERSION_ID/ {print $2}' /etc/os-release | tr -d '"')
+        if [[ "$VERSION_ID" == '2' ]]; then
+            NODE_VERSION=16
+        fi
     elif [[ "$ID" == 'centos' ]]; then
         PLATFORM=redhat
         VERSION_ID=$(awk -F= '/VERSION_ID/ {print $2}' /etc/os-release | tr -d '"')

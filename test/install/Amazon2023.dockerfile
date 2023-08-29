@@ -1,7 +1,7 @@
-FROM amazonlinux:2
+FROM amazonlinux:2023
 #
-# $ docker build -f test/install/Amazon2.dockerfile -t has-amazon2-install .
-# $ docker image ls | grep has-amazon2-install
+# $ docker build -f test/install/Amazon2023.dockerfile -t has-amazon2023-install .
+# $ docker image ls | grep has-amazon2023-install
 #
 
 # The docker base images are generally minimal, and our install and configure
@@ -27,7 +27,7 @@ RUN ./helix-auth-svc/install.sh -n --no-create-user --no-systemd
 # ensure node has been installed as expected
 RUN test -f /usr/bin/node
 # ensure expected version of node was installed
-RUN node --version | grep -Eq '^v16\.'
+RUN node --version | grep -Eq '^v18\.'
 
 # run the configure script and set up OIDC
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
