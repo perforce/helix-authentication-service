@@ -44,6 +44,12 @@ Supported Platforms
     for correction. Any platform not listed above is not actively tested by
     Perforce.
 
+    Amazon Linux (x86_64)
+        2, 2023
+
+    HAS is known to work on Amazon Linux when installed and configured using the
+    provided shell scripts. Package installation may work but is not supported.
+
     Windows (x86_64)
         10 Pro
         Server 2019
