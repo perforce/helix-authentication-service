@@ -53,6 +53,21 @@ setTimeout(function () {
         .end(done)
     })
 
+    it('should return error for group with space', function (done) {
+      agent
+        .get('/scim/v2/Groups/has%20spaces')
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(400)
+        .expect(res => {
+          assert.equal(res.body.status, '400')
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
+          assert.equal(res.body.detail, 'group name cannot contain spaces')
+        })
+        .end(done)
+    })
+
     it('should return an empty list when no groups', function (done) {
       agent
         .get('/scim/v2/Groups')
@@ -92,6 +107,26 @@ setTimeout(function () {
           assert.equal(res.body.status, '400')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
           assert.include(res.body.detail, 'schemas must be defined')
+        })
+        .end(done)
+    })
+
+    it('should reject group creation if name contains spaces', function (done) {
+      agent
+        .post('/scim/v2/Groups')
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .send({
+          externalId: '61A9073F-40A5-4491-A1D7-43ED1F091C33',
+          schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+          displayName: 'has spaces',
+          members: []
+        })
+        .expect(400)
+        .expect(res => {
+          assert.equal(res.body.status, '400')
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
+          assert.include(res.body.detail, 'group name cannot contain spaces')
         })
         .end(done)
     })

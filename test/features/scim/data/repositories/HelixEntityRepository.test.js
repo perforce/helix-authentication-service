@@ -458,6 +458,29 @@ describe('HelixEntity repository', function () {
       }
     })
 
+    it('should reject adding a group with a space character', async function () {
+      // arrange
+      const tGroup = new Group('under group', [])
+      // act/assert
+      try {
+        await repository.addGroup(tGroup)
+        assert.fail('should have raised Error')
+      } catch (err) {
+        assert.equal(err.message, 'group name must not contain spaces')
+      }
+    })
+
+    it('should reject adding a group with a space character', async function () {
+      // arrange
+      // act/assert
+      try {
+        await repository.getGroup('has spaces')
+        assert.fail('should have raised Error')
+      } catch (err) {
+        assert.equal(err.message, 'group name cannot contain spaces')
+      }
+    })
+
     it('should add and retrieve a single group entity', async function () {
       this.timeout(10000)
       // arrange
