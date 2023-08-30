@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -57,6 +57,40 @@ describe('ValidateSamlRequest use case', function () {
     // arrange
     const config = {
       'urn:swarm-example:sp': {
+        acsUrl: 'https://swarm.example.com/api/v10/session'
+      }
+    }
+    const usecase = ValidateSamlRequest({ getIdPConfiguration: () => config })
+    // act
+    const result = await usecase(
+      'urn:swarm-example:sp',
+      'https://swarm.example.com/api/v10/session'
+    )
+    // assert
+    assert.isTrue(result)
+  })
+
+  it('should return false for glob non-matching entityId', async function () {
+    // arrange
+    const config = {
+      'urn:swarm-*:sp': {
+        acsUrl: 'https://swarm.example.com/api/v10/session'
+      }
+    }
+    const usecase = ValidateSamlRequest({ getIdPConfiguration: () => config })
+    // act
+    const result = await usecase(
+      'urn:hive-example:sp',
+      'https://swarm.example.com/api/v10/session'
+    )
+    // assert
+    assert.isFalse(result)
+  })
+
+  it('should return true for glob matching entityId', async function () {
+    // arrange
+    const config = {
+      'urn:swarm-*:sp': {
         acsUrl: 'https://swarm.example.com/api/v10/session'
       }
     }

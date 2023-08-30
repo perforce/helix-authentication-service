@@ -28,18 +28,29 @@ module.exports = {
   },
   'http://hth.example.com/account/saml/hth/metadata': {
     acsUrl: 'https://hth.example.com/account/saml/hth/consume'
-  }
+  },
+  //
+  // The top-level property name can contain wildcards (* and ?), in which case
+  // the minimatch library will be used to match against the audience provided
+  // by the service provider. c.f. https://github.com/isaacs/minimatch
+  //
+  'urn:swarm-201?.*:sp': {
+    acsUrl: 'https://swarm.example.com/login'
+  },
   //
   // Support for Swarm installations configured to connect with multiple Helix
   // Core Server instances is shown below, in the form of two settings named
   // `acsUrls` and `acsUrlRe`, which take the place of `acsUrl`.
   //
-  // acsUrls: [
-  //   'http://swarm.example.com/chicago/api/v10/session',
-  //   'http://swarm.example.com/tokyo/api/v10/session',
-  // ]
-  //
-  // acsUrlRe: 'https://swarm\\.example\\.com/[^/]+/api/v10/session'
+  'urn:swarm-group:sp': {
+    acsUrls: [
+      'http://swarm.example.com/chicago/api/v10/session',
+      'http://swarm.example.com/tokyo/api/v10/session',
+    ]
+  },
+  'urn:swarm-cluster:sp': {
+    acsUrlRe: 'https://swarm\\.example\\.com/[^/]+/api/v10/session'
+  }
   //
   // The format for the acsUrlRe regular expression is documented here:
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
