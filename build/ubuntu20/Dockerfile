@@ -1,10 +1,8 @@
 FROM ubuntu:20.04 AS ubuntu20_pkg_base
 #
-# $ docker build -f build/ubuntu20/Dockerfile --tag auth-svc:ubuntu20 .
-# $ docker run --rm --entrypoint find auth-svc:ubuntu20 /build -name '*.deb'
-# $ docker run --rm --entrypoint cat auth-svc:ubuntu20 /build/...deb > package.deb
+# $ docker build -f build/ubuntu20/Dockerfile --output type=local,dest=. .
 #
-# Should set ID_REL_BASE and ID_PATCH build args.
+# Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
@@ -22,7 +20,7 @@ ADD https://deb.nodesource.com/setup_18.x setup_18.x
 RUN bash setup_18.x
 RUN apt-get -q -y install nodejs
 
-FROM ubuntu20_pkg_base
+FROM ubuntu20_pkg_base AS ubuntu20-build
 
 ARG ID_REL_BASE=2023.2.0
 ARG ID_PATCH=9999999
@@ -106,3 +104,14 @@ RUN dpkg-deb -R ../${PACKAGE_FILENAME} tmp
 RUN rm ../${PACKAGE_FILENAME}
 RUN fakeroot dpkg-deb -Zgzip --build tmp ../${PACKAGE_FILENAME}
 RUN rm -rf tmp
+
+#
+# Produce an image that contains only the build artifact, allowing for the use
+# of the --output option to the `docker build` command.
+#
+FROM scratch AS ubuntu20-export
+ARG ID_REL_BASE=2023.2.0
+ARG ID_PATCH=9999999
+ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
+ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~focal_amd64.deb
+COPY --from=ubuntu20-build /build/${PACKAGE_FILENAME} ${PACKAGE_FILENAME}

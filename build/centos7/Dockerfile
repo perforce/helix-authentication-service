@@ -1,10 +1,8 @@
-FROM centos:7
+FROM centos:7 AS centos7-build
 #
-# $ docker build -f build/centos7/Dockerfile --tag auth-svc:centos7 .
-# $ docker run --rm --entrypoint find auth-svc:centos7 /root/rpmbuild/RPMS -name '*.rpm'
-# $ docker run --rm --entrypoint cat auth-svc:centos7 /root/rpmbuild/RPMS/...rpm > package.rpm
+# $ docker build -f build/centos7/Dockerfile --output type=local,dest=. .
 #
-# Should set ID_REL_BASE and ID_PATCH build args.
+# Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
 
 # Enable package documentation as we need the Node.js license file.
@@ -87,3 +85,14 @@ RUN rpmdev-setuptree
 RUN tar -C .. -z -c -f /root/rpmbuild/SOURCES/${PKGNAME}.tar.gz ${DIRNAME}
 COPY build/rpm /root/rpmbuild/SPECS
 RUN rpmbuild -bb /root/rpmbuild/SPECS/helix-auth-svc.spec
+
+#
+# Produce an image that contains only the build artifact, allowing for the use
+# of the --output option to the `docker build` command.
+#
+FROM scratch AS centos7-export
+ARG ID_REL_BASE=2023.2.0
+ARG ID_PATCH=9999999
+ENV PKGNAME helix-auth-svc
+ENV PACKAGE_FILENAME ${PKGNAME}-${ID_REL_BASE}-${ID_PATCH}.x86_64.rpm
+COPY --from=centos7-build /root/rpmbuild/RPMS/x86_64/${PACKAGE_FILENAME} ${PACKAGE_FILENAME}
