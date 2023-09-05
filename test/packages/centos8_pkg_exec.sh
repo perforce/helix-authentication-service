@@ -43,6 +43,7 @@ grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json || 
 
 # ensure certain files are present
 echo -e '\nTesting for presence of certain files...\n'
+test -f /opt/perforce/helix-auth-svc/.env
 test -f /opt/perforce/helix-auth-svc/README.html
 test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
 test -x /opt/perforce/helix-auth-svc/bin/node
