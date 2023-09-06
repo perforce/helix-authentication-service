@@ -44,29 +44,12 @@ services:
       - /run/lock
       - /tmp
 
-  ubuntu_16_test:
+  rocky_9_test:
     build:
       context: ../..
-      dockerfile: test/packages/Ubuntu16.dockerfile
-    image: has-ubuntu16-test
-    container_name: ubuntu_16_test
-    privileged: true
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    stop_signal: SIGRTMIN+3
-    tmpfs:
-      - /run
-      - /run/lock
-      - /tmp
-
-  ubuntu_18_test:
-    build:
-      context: ../..
-      dockerfile: test/packages/Ubuntu18.dockerfile
-    image: has-ubuntu18-test
-    container_name: ubuntu_18_test
+      dockerfile: test/packages/Rocky9.dockerfile
+    image: has-rocky9-test
+    container_name: rocky_9_test
     privileged: true
     cap_add:
       - SYS_ADMIN
