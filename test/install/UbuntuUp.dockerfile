@@ -9,11 +9,14 @@ FROM ubuntu:20.04
 # The docker base images are generally minimal, and our package and its
 # post-install script have certain requirements, so install those now.
 RUN apt-get -q update --fix-missing && \
-    apt-get -q -y install curl iputils-ping sudo systemd
+    apt-get -q -y install ca-certificates curl gnupg iputils-ping sudo systemd
 
 # install the previous LTS version of Node.js via package
-ADD https://deb.nodesource.com/setup_16.x setup_16.x
-RUN bash setup_16.x
+RUN mkdir -p /etc/apt/keyrings
+ADD https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key nodesource-repo.gpg.key
+RUN gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg nodesource-repo.gpg.key
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+RUN apt-get -q update
 RUN apt-get -q -y install nodejs
 RUN test -f /usr/bin/node
 RUN node --version | grep -Eq '^v16\.'

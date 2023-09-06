@@ -275,12 +275,14 @@ function install_nodejs() {
             fi
             set -e  # now go back to exiting if a command returns non-zero
             sudo apt-get -q update
-            sudo apt-get -q -y install build-essential curl git
-            # Run a shell script from the internet as root to get Node.js
-            # directly from the vendor. This includes npm as well.
-            #
-            # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
+            sudo apt-get -q -y install build-essential ca-certificates curl git gnupg
+            sudo mkdir -p /etc/apt/keyrings
+            if [ -f /etc/apt/keyrings/nodesource.gpg ]; then
+                sudo rm /etc/apt/keyrings/nodesource.gpg
+            fi
+            curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/nodesource.gpg
+            echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+            sudo apt-get -q update
             sudo apt-get -q -y install nodejs
         elif [ $PLATFORM == "redhat" ]; then
             # In the upgrade scenario, need to remove the repository package first.
@@ -288,16 +290,14 @@ function install_nodejs() {
                 sudo rpm -e nodesource-release-el7
             elif [ -f /etc/yum.repos.d/nodesource-el8.repo ]; then
                 sudo rpm -e nodesource-release-el8
+            elif [ -f /etc/yum.repos.d/nodesource-nodistro.repo ]; then
+                sudo rpm -e nodesource-release
             fi
             # Add --skip-broken for Oracle Linux and its redundant packages
             sudo yum -q -y install --skip-broken curl gcc-c++ git make
-            # Run a shell script from the internet as root to get Node.js
-            # directly from the vendor. This includes npm as well.
-            #
-            # c.f. https://nodejs.org/en/download/package-manager/
-            curl -sL https://rpm.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
             sudo yum clean all
-            sudo yum -q -y install nodejs
+            sudo yum install -y https://rpm.nodesource.com/pub_${NODE_VERSION}.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+            sudo yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
         fi
     fi
     # run npm once as the unprivileged user so it creates the ~/.config

@@ -8,13 +8,11 @@ FROM has-build:centos8 AS centos8-build
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
 
-ADD https://rpm.nodesource.com/setup_18.x setup_18.x
-RUN bash setup_18.x
-# Skip gpg key check because it fails on some systems, and how that can happen
-# in a docker container is beyond my comprehension.
-RUN yum -q -y install --nogpgcheck -y nodejs
-
-# Install packages for building packages.
+#
+# install build and packaging prerequisites
+#
+RUN yum install -y https://rpm.nodesource.com/pub_18.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
 # (base image has rpmdevtools, rpm-build already)
 # RUN yum -q -y install rpmdevtools rpm-build
 

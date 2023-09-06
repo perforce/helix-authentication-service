@@ -12,9 +12,8 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 # install build and packaging prerequisites
 #
 RUN yum -q -y install curl gcc-c++ git make rpm-build rpmdevtools
-ADD https://rpm.nodesource.com/setup_16.x setup_16.x
-RUN bash setup_16.x
-RUN yum -q -y install nodejs
+RUN yum install -y https://rpm.nodesource.com/pub_16.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
 
 ARG ID_REL_BASE=2023.2.0
 ARG ID_PATCH=9999999

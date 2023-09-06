@@ -8,12 +8,11 @@ FROM rockylinux:8
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
-RUN yum -q -y install sudo which
+RUN yum -q -y install findutils sudo which
 
 # install the previous LTS version of Node.js via package
-ADD https://rpm.nodesource.com/setup_16.x setup_16.x
-RUN bash setup_16.x
-RUN yum -y install nodejs
+RUN yum install -y https://rpm.nodesource.com/pub_16.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
 RUN test -f /usr/bin/node
 RUN node --version | grep -Eq '^v16\.'
 
