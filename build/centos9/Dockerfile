@@ -1,6 +1,6 @@
 FROM rockylinux:9 AS rocky9-sha1
 #
-# $ docker build -f build/rocky9/Dockerfile --output type=local,dest=. .
+# $ docker build -f build/centos9/Dockerfile --output type=local,dest=. .
 #
 # Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
