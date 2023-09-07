@@ -47,7 +47,7 @@ test -f /opt/perforce/helix-auth-svc/.env
 test -f /opt/perforce/helix-auth-svc/README.html
 test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
 test -x /opt/perforce/helix-auth-svc/bin/node
-test -f /opt/perforce/helix-auth-svc/public/admin/assets/index-*.js
+test -f /opt/perforce/helix-auth-svc/private/admin/assets/index-*.js
 
 # ensure the systemd service is running
 systemctl status helix-auth | grep 'Active: active' || { echo 'service not active' ; exit 1; }

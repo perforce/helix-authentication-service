@@ -56,7 +56,7 @@ COPY RELNOTES.txt RELNOTES.txt
 #
 # build the admin interface static files
 #
-RUN cd client && npm -q i && npx vite build --outDir ../public/admin --emptyOutDir
+RUN cd client && npm -q i && npx vite build --outDir ../private/admin --emptyOutDir
 RUN rm -rf client/node_modules
 
 RUN cd .. && tar zcf helix-authentication-service.tgz helix-authentication-service

@@ -18,6 +18,7 @@ docs/REST_API.md    opt/perforce/helix-auth-svc/docs
 docs/licenses       opt/perforce/helix-auth-svc/docs
 lib/                opt/perforce/helix-auth-svc
 node_modules/       opt/perforce/helix-auth-svc
+private/            opt/perforce/helix-auth-svc
 public/             opt/perforce/helix-auth-svc
 routes/             opt/perforce/helix-auth-svc
 views/              opt/perforce/helix-auth-svc

@@ -69,7 +69,7 @@ RUN rm -rf node_modules
 #
 # build the admin interface static files
 #
-RUN cd client && npm -q ci && npx vite build --outDir ../public/admin --emptyOutDir
+RUN cd client && npm -q ci && npx vite build --outDir ../private/admin --emptyOutDir
 
 #
 # build only what is needed for deployment

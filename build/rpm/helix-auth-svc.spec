@@ -33,6 +33,7 @@ install -d %{buildroot}%{installprefix}/certs
 install -d %{buildroot}%{installprefix}/docs
 install -d %{buildroot}%{installprefix}/lib
 install -d %{buildroot}%{installprefix}/node_modules
+install -d %{buildroot}%{installprefix}/private
 install -d %{buildroot}%{installprefix}/public
 install -d %{buildroot}%{installprefix}/routes
 install -d %{buildroot}%{installprefix}/views
@@ -52,6 +53,7 @@ cp -pr lib/* %{buildroot}%{installprefix}/lib
 # remove this problematic, seemingly duplicate, file
 rm -f node_modules/unix-dgram/build/Release/obj.target/unix_dgram.node
 cp -pr node_modules/* %{buildroot}%{installprefix}/node_modules
+cp -pr private/* %{buildroot}%{installprefix}/private
 cp -pr public/* %{buildroot}%{installprefix}/public
 cp -pr routes/* %{buildroot}%{installprefix}/routes
 cp -pr views/* %{buildroot}%{installprefix}/views

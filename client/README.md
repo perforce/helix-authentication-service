@@ -23,7 +23,7 @@ npx vite build
 Building for the purpose of building the authentication service deliverable, however, we use the following options:
 
 ```shell
-npx vite build --outDir ../public/admin --emptyOutDir
+npx vite build --outDir ../private/admin --emptyOutDir
 ```
 
 ## Implementation Details

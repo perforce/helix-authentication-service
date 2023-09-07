@@ -16,7 +16,7 @@ build/Release
 
 # other build artifacts
 docs/licenses
-public/admin
+private/admin
 README.html
 
 # Dependency directories
