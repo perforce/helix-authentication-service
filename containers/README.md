@@ -86,6 +86,7 @@ Testing the authentication with the accounts defined below is easy enough, as de
     - username `johndoe`, password `Passw0rd!`, email `johndoe@example.com`
 * Shibboleth
     - username `george`, password `Passw0rd!`, email `george@example.org`
+    - username `sampson`, password `Passw0rd!`, email `sampson@example.org`
     - username `jackson`, password `Passw0rd!`, email `saml.jackson@example.com`
     - username `janedoe`, password `Passw0rd!`, email `janedoe@example.com`
     - username `johndoe`, password `Passw0rd!`, email `johndoe@example.com`

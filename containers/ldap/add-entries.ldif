@@ -13,6 +13,17 @@ cn: Curious George
 userPassword: Passw0rd!
 uid: george
 
+dn: uid=sampson,ou=people,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+mail: sampson@example.org
+sn: Son
+cn: Sam P. Son
+userPassword: Passw0rd!
+uid: sampson
+
 dn: uid=jackson,ou=people,dc=example,dc=org
 objectClass: top
 objectClass: person
