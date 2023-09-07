@@ -21,7 +21,7 @@ RUN yum install -y https://rpm.nodesource.com/pub_18.x/nodistro/repo/nodesource-
 RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
 RUN yum install -y rpmdevtools rpm-build
 
-ARG ID_REL_BASE=2023.2.0
+ARG ID_REL_BASE=2024.1.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
@@ -92,7 +92,7 @@ RUN rpmbuild -bb /root/rpmbuild/SPECS/helix-auth-svc.spec
 # of the --output option to the `docker build` command.
 #
 FROM scratch AS rocky9-export
-ARG ID_REL_BASE=2023.2.0
+ARG ID_REL_BASE=2024.1.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV PACKAGE_FILENAME ${PKGNAME}-${ID_REL_BASE}-${ID_PATCH}.x86_64.rpm
