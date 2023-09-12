@@ -54,6 +54,7 @@
     "minimatch": "^9.0.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "node-forge": "^1.3.1",
     "openid-client": "^5.4.2",
     "p4api": "^3.4.0",
     "passport": "^0.6.0",
@@ -65,9 +66,6 @@
     "ulid": "^2.3.0",
     "winston": "^3.9.0",
     "winston-syslog": "^2.4.4"
-  },
-  "overrides": {
-    "node-forge": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^4.3.7",

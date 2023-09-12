@@ -16,12 +16,13 @@ services:
     image: auth-svc:latest
     container_name: auth-svc1.doc
     environment:
-      NODE_ENV: development
       DEBUG: "1"
       SVC_BASE_URI: "https://authen.doc"
       PORT: 3001
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
+      CLIENT_CERT_HEADER: 'X-SSL-Client-Cert'
+      CLIENT_CERT_FP: '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E'
       REDIS_URL: 'rediss://rediss.doc:6389'
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
@@ -47,12 +48,13 @@ services:
     image: auth-svc:latest
     container_name: auth-svc2.doc
     environment:
-      NODE_ENV: development
       DEBUG: "1"
       SVC_BASE_URI: "https://authen.doc"
       PORT: 3002
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
+      CLIENT_CERT_HEADER: 'X-SSL-Client-Cert'
+      CLIENT_CERT_FP: '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E'
       REDIS_URL: 'rediss://rediss.doc:6389'
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
@@ -85,7 +87,8 @@ services:
       - "636:636"
   authen.doc:
     build:
-      context: containers/haproxy
+      context: .
+      dockerfile: containers/haproxy/Dockerfile
     container_name: authen.doc
     networks:
       - authen

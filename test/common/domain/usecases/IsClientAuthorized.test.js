@@ -216,6 +216,124 @@ describe('IsClientAuthorized use case', function () {
       .cert(cert)
       .expect(200, 'success', done)
   })
+
+  it('should return 401 if cert header value empty', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'NoSuchHeader')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .expect(401, 'client certificate required', done)
+  })
+
+  it('should return 400 if cert header value malformed', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'X-ARR-ClientCert')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('X-ARR-ClientCert', 'not-a-valid-base64-encoded-value')
+      .expect(400, 'Invalid PEM formatted message.', done)
+  })
+
+  it('should return 200 if neither CN nor FP configured', function (done) {
+    // technically this would be a misconfiguration but for consistency with the
+    // non-header validation, treat as success
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt')
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', encodeURI(cert))
+      .expect(200, 'success', done)
+  })
+
+  it('should return 403 if cert CN does not match', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CLIENT_CERT_CN', 'WrongCommonName')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt')
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', encodeURI(cert))
+      .expect(403, 'client certificate LoginExtension is not permitted', done)
+  })
+
+  it('should return 403 if cert FP does not match', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CLIENT_CERT_FP', '63:2F:17:F3:2F:31:40:68:58:D6:38:54:92:7C:F8:95:26:E4:34:95:D4:1D:82:97:3C:2E:68:39:5E:A1:AC:11')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt')
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', encodeURI(cert))
+      .expect(403, 'client certificate does not match fingerprint', done)
+  })
+
+  it('should return 200 if cert CN matches', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CLIENT_CERT_CN', 'LoginExtension')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt')
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', encodeURI(cert))
+      .expect(200, 'success', done)
+  })
+
+  it('should return 200 if cert FP matches', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt')
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', encodeURI(cert))
+      .expect(200, 'success', done)
+  })
+
+  it('should return 200 if FP matches for single-line cert', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'X-ARR-ClientCert')
+    settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    // strip begin/end armor, merge into one line, do not URI encode
+    const certBytes = fs.readFileSync('test/client.crt')
+    const cert = massageCertificate(certBytes.toString())
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('X-ARR-ClientCert', cert)
+      .expect(200, 'success', done)
+  })
 })
 
 // Construct a simplified Express.js web application for testing the usecase.
@@ -257,4 +375,12 @@ function createServer(app, protocol, settings, loadAuthorityCerts) {
     }
     return https.createServer(options, app)
   }
+}
+
+// Format the certificate text into a single line without begin/end lines.
+function massageCertificate(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l =>
+    l !== '-----BEGIN CERTIFICATE-----' && l !== '-----END CERTIFICATE-----' && l.length > 0
+  )
+  return lines.join('')
 }
