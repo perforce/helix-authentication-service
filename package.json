@@ -34,7 +34,7 @@
     "licenses": "license-checker --production --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {
-    "@node-saml/node-saml": "^4.0.4",
+    "@node-saml/node-saml": "^4.0.5",
     "@node-saml/passport-saml": "^4.0.4",
     "awilix": "^8.0.0",
     "connect-redis": "^7.1.0",
