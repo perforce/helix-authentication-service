@@ -35,13 +35,13 @@ RUN apt-get update --fix-missing && \
     apt-get -y install curl jetty9
 
 WORKDIR /build
-ADD https://shibboleth.net/downloads/identity-provider/4.3.0/shibboleth-identity-provider-4.3.0.tar.gz .
-RUN tar zxf shibboleth-identity-provider-4.3.0.tar.gz
+ADD https://shibboleth.net/downloads/identity-provider/4.3.1/shibboleth-identity-provider-4.3.1.tar.gz .
+RUN tar zxf shibboleth-identity-provider-4.3.1.tar.gz
 ADD idp.properties .
-RUN cd shibboleth-identity-provider-4.3.0 && \
+RUN cd shibboleth-identity-provider-4.3.1 && \
     ./bin/install.sh \
     -Didp.property.file=/build/idp.properties \
-    -Didp.src.dir=/build/shibboleth-identity-provider-4.3.0
+    -Didp.src.dir=/build/shibboleth-identity-provider-4.3.1
 WORKDIR /opt/shibboleth-idp
 ADD attribute-resolver.xml ./conf/attribute-resolver.xml
 ADD ldap.properties ./conf/ldap.properties
