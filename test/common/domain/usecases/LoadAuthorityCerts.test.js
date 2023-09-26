@@ -39,7 +39,7 @@ describe('LoadAuthorityCerts use case', function () {
   it('should succesfully load a single file via glob', function () {
     // arrange
     const settingsRepository = new MapSettingsRepository()
-    settingsRepository.set('CA_CERT_FILE', './certs/c*.crt')
+    settingsRepository.set('CA_CERT_FILE', './certs/c?.crt')
     const usecase = LoadAuthorityCerts({ settingsRepository })
     // act
     const result = usecase()
@@ -58,7 +58,7 @@ describe('LoadAuthorityCerts use case', function () {
     const result = usecase()
     // assert
     assert.isDefined(result)
-    assert.lengthOf(result, 2)
+    assert.lengthOf(result, 3)
     assert.instanceOf(result[0], Buffer)
     assert.instanceOf(result[1], Buffer)
   })
@@ -72,7 +72,7 @@ describe('LoadAuthorityCerts use case', function () {
     const result = usecase()
     // assert
     assert.isDefined(result)
-    assert.lengthOf(result, 7)
+    assert.lengthOf(result, 9)
     assert.instanceOf(result[0], Buffer)
     assert.instanceOf(result[6], Buffer)
   })

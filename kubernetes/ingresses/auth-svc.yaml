@@ -1,0 +1,30 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-svc
+  namespace: helix
+  annotations:
+    nginx.ingress.kubernetes.io/auth-tls-secret: helix/auth-ca-crt
+    # need to allow those requests for which a client cert is not required
+    # (which is literally everything _except_ /requests/status/XYZ)
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: 'optional'
+    nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: 'true'
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - auth-svc.cluster
+    secretName: auth-svc-tls
+  rules:
+  - host: auth-svc.cluster
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-svc
+            port:
+              number: 80
+...
