@@ -250,11 +250,11 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
-    const cert = fs.readFileSync('test/client.crt')
+    const cert = fs.readFileSync('test/client.crt').toString()
     agent
       .get('/')
       .trustLocalhost(true)
-      .set('ssl-client-cert', encodeURI(cert))
+      .set('ssl-client-cert', encodeURIComponent(cert))
       .expect(200, 'success', done)
   })
 
@@ -265,11 +265,11 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
     settingsRepository.set('CLIENT_CERT_CN', 'WrongCommonName')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
-    const cert = fs.readFileSync('test/client.crt')
+    const cert = fs.readFileSync('test/client.crt').toString()
     agent
       .get('/')
       .trustLocalhost(true)
-      .set('ssl-client-cert', encodeURI(cert))
+      .set('ssl-client-cert', encodeURIComponent(cert))
       .expect(403, 'client certificate LoginExtension is not permitted', done)
   })
 
@@ -280,11 +280,11 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
     settingsRepository.set('CLIENT_CERT_FP', '63:2F:17:F3:2F:31:40:68:58:D6:38:54:92:7C:F8:95:26:E4:34:95:D4:1D:82:97:3C:2E:68:39:5E:A1:AC:11')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
-    const cert = fs.readFileSync('test/client.crt')
+    const cert = fs.readFileSync('test/client.crt').toString()
     agent
       .get('/')
       .trustLocalhost(true)
-      .set('ssl-client-cert', encodeURI(cert))
+      .set('ssl-client-cert', encodeURIComponent(cert))
       .expect(403, 'client certificate does not match fingerprint', done)
   })
 
@@ -295,11 +295,11 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
     settingsRepository.set('CLIENT_CERT_CN', 'LoginExtension')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
-    const cert = fs.readFileSync('test/client.crt')
+    const cert = fs.readFileSync('test/client.crt').toString()
     agent
       .get('/')
       .trustLocalhost(true)
-      .set('ssl-client-cert', encodeURI(cert))
+      .set('ssl-client-cert', encodeURIComponent(cert))
       .expect(200, 'success', done)
   })
 
@@ -310,11 +310,27 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
     settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
-    const cert = fs.readFileSync('test/client.crt')
+    const cert = fs.readFileSync('test/client.crt').toString()
     agent
       .get('/')
       .trustLocalhost(true)
-      .set('ssl-client-cert', encodeURI(cert))
+      .set('ssl-client-cert', encodeURIComponent(cert))
+      .expect(200, 'success', done)
+  })
+
+  it('should return 200 for matching cert (k8s example)', function (done) {
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    // real world example of encoded cert provided by nginx ingress controller in k8s
+    const cert = '-----BEGIN%20CERTIFICATE-----%0AMIIEpTCCAo0CAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv%0Acml0eTAeFw0yMTExMDgyMjE1MjJaFw0zMTExMDYyMjE1MjJaMBkxFzAVBgNVBAMM%0ADkxvZ2luRXh0ZW5zaW9uMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA%0A6GSolzFoudYLxxPZQmaCiE%2BdcgRhK%2F8eESP7knkwnzjF2zEns1enQJOTPkcAFeCF%0Aw3hqKCViXjW%2BK0GTtGr%2FTy1W7VNTbD%2B4cVPRsh6g9BJCXRFNqXlkjM%2FVz1Nxw1pr%0AgHLU7q0BBDk59HMyaWmvJCOOUeVuCoDF%2B6CpgviiAIitl%2FPlvPjnHFfo8ebAWENx%0As8o2guJQjOcBF0Qo%2Bjql4I6apQzHFiq6DXxe2YJhkBjKDfpS81991Rm5UuQF%2B4EN%0AOGPepRdfxxlSw7wzJYwiabxMxCabOc6nKSTsSANKMBVdEZzHuDJLZAckPbeZgxTR%0Abcf52Wx%2FykutbSDL00vQxGTyYJoyS1D9mRO9vOrCJ9jrOwDMqSDMn%2FLYM7%2FLrVbB%0A%2BGdjWjA%2Be4dNiMH87JX6FAJjJ5uwI%2BpoceM9TFzdIxk0nEcLB6c88VAwvGQBhDjV%0ASD2RFlvu%2FocSZlok%2B3jeP1I1EnD%2F%2FH%2FC4xdo0u%2Bv8fkGaMqXKf1t3zDIyFPcefDe%0AgAyxVEp31PRB0U9kAYyEJpNfsoq17oMrUY78G0eCwePFHjdoSsJWesWN9iANF2CV%0AKYYsEljaksoUgZWrfffOeGVlkvZfAw%2BCTd7upBCDMZ2U9Ls3XbDvP2ATixjslgc%2F%0AdrHvRRZipNpWStjBJilQyKXZ1%2Bal63X4Ein0%2BXFa39kCAwEAATANBgkqhkiG9w0B%0AAQsFAAOCAgEAflgeOxTn56u%2FmiMJRfDDpCKTp6r3P09V0VGcvRgDYDpSe7xJ%2BQJ7%0Aa48ElDkEcCzE9z1yxPfBemHVfIgETDEc2tQ3%2FkFbV66IJ3Jcst6x0ppzxLPRwwjN%0AuC05Ms1ju7WH68BZlsQnz3fAieQfJScFeqJu0Ud3GIgobwZWHQ04Bd2o%2FJ6Twds%2F%0AAtRgN8eJfEvqH9yID%2FT%2BLCHYvKdr8YxthmFxIfZxIj3zycO8XM0f2A1S9rtiXYAz%0AQvXpH1Il8kTjcRl99fTTMw5M7CHoaDDrJS5zTym%2FmQiLbfLDAuPwEurYo049a7RR%0A5YtZCXS%2BwZe1bSqjAf3WLS79fUIbIiY4XM0cmF9q%2F%2BG5t%2BR%2FvXL9sI2z5kU0Iuvg%0ApO0TT8tFV32pNGffV7eyYjfO2VVU%2FkjXg5pORTewQydumGHXlufsziHDVw88jU0J%0Amt%2BTg1O%2FiAKc0iIukLB1sd9Tee0uHyYrEMlfc1V9187aRjCSouiJ8ngF%2FckK1pS7%0AHTNd5Oyc4Mamu0VDLLKizOJ%2F5%2FwVrDFmNCESVmVeZlrPw4mDtyHS4yBg%2BkXNiZNJ%0AKb%2BKL22md6GhcdUZ7owGxh2vi%2FDax%2FIuHFLgUM4%2FgNXQX1X%2B4z6%2FxzL%2BzWuozw8S%0A9MLAMUmZk66KdMZUbVli%2F%2FjTSrIOvXz%2FTfoZULC1G%2FucGzV0Y20rRic%3D%0A-----END%20CERTIFICATE-----%0A'
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', cert)
       .expect(200, 'success', done)
   })
 
