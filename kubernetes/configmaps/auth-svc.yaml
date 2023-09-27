@@ -12,6 +12,7 @@ data:
   OIDC_ISSUER_URI: https://perforce-dev.onelogin.com/oidc/2
   PORT: '3000'
   PROTOCOL: http
+  REDIS_URL: 'redis://redis.helix:6379'
   SAML_IDP_METADATA_URL: https://app.onelogin.com/saml/metadata/a4987734-9edc-4103-a60b-53cecdb8dc95
   SAML_SP_ENTITY_ID: urn:example:sp
   SAML_WANT_ASSERTION_SIGNED: 'false'
