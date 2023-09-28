@@ -1,7 +1,7 @@
 #
 # Secure Redis build that expects client certificiates
 #
-FROM redis:6.2
+FROM redis:7.2
 COPY redis.conf /usr/local/etc/redis/redis.conf
 COPY redis.crt /usr/local/etc/redis/redis.crt
 COPY redis.key /usr/local/etc/redis/redis.key
