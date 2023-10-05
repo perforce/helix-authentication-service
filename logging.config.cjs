@@ -1,8 +1,9 @@
 //
 // Default logging configuration file for Helix Authentication Service.
 //
-// See https://www.perforce.com/manuals/helix-auth-svc/ for documentation on the
-// available settings, including configuration specific to the log transports.
+// See the setting named LOGGING and the Logging section in the documentation
+// https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html
+// for more information.
 //
 module.exports = {
   level: 'info',

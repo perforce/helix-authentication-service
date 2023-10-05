@@ -1,11 +1,9 @@
 //
 // Example configuration file for use with Redis Sentinel.
 //
-// See https://github.com/luin/ioredis for configuration options.
-//
-// 1. Set SENTINEL_CONFIG_FILE in .env to reference this file.
-// 2. Modify this file to match your Sentinel configuration.
-// 5. Retart the service (`systemctl restart helix-auth`)
+// See the setting named SENTINEL_CONFIG_FILE in the documentation
+// https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html
+// for more information.
 //
 module.exports = {
   name: 'mymaster',
