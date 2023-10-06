@@ -80,7 +80,7 @@
     "saml2-js": "^4.0.2",
     "selenium-webdriver": "^4.9.2",
     "showdown": "^2.1.0",
-    "sinon": "^15.1.0",
+    "sinon": "^16.1.0",
     "supertest": "^6.3.3",
     "tempy": "^3.0.0",
     "xid-js": "^1.0.1"
