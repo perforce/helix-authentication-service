@@ -15,11 +15,11 @@ import {
 } from 'helix-auth-svc/lib/server.js'
 const logger = container.resolve('logger')
 const loadEnvironment = container.resolve('loadEnvironment')
-const refreshEnvironment = container.resolve('refreshEnvironment')
+const dotenvRepository = container.resolve('dotenvRepository')
 const temporaryRepository = container.resolve('temporaryRepository')
 const settings = container.resolve('settingsRepository')
 
-function startServer () {
+function startServer() {
   // Get port from environment and store in Express.
   const port = normalizePort(getPort(settings))
   const app = createApp()
@@ -101,15 +101,14 @@ function startServer () {
       // the enviornment and start another server instance; probably not really
       // necessary but probably safer this way.
       setTimeout(() => {
-        refreshEnvironment(process.env).then(() => {
-          logger.info('www: reloaded configuration from .env')
-          // simulate a process restart by clearing the temporary settings
-          // repository, which is meant not to be persistent indefinitely
-          temporaryRepository.clear()
-          registerLateBindings()
-        }).catch((err) => {
+        dotenvRepository.reload()
+        logger.info('www: reloaded configuration from .env')
+        // simulate a process restart by clearing the temporary settings
+        // repository, which is meant not to be persistent indefinitely
+        temporaryRepository.clear()
+        registerLateBindings().catch((err) => {
           // log the non-fatal error and pretend nothing happened
-          logger.error(`www: unable to read .env file: ${err}`)
+          logger.error(`www: unable to register late bindings: ${err}`)
         }).then(() => startServer())
       }, 0)
     })

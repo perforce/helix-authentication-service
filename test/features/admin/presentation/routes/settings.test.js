@@ -18,9 +18,14 @@ import container from 'helix-auth-svc/lib/container.js'
 
 const settings = container.resolve('settingsRepository')
 const temporary = container.resolve('temporaryRepository')
+const dotenv = container.resolve('dotenvRepository')
 const app = createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
+// create a test dot.env file every time for repeatability
+const dotenvFile = 'test/test-dot.env'
+fs.writeFileSync(dotenvFile, 'HAS_UNIT_OLD1="oldvalue"')
+dotenv.reload()
 
 //
 // Give the server a chance to start up asynchronously. This works in concert
@@ -31,9 +36,6 @@ setTimeout(function () {
   describe('Settings requests', function () {
     describe('Success cases', function () {
       it('should retrieve configuration settings', function (done) {
-        // create a test dot.env file every time for repeatability
-        const dotenvFile = 'test/test-dot.env'
-        fs.writeFileSync(dotenvFile, 'HAS_UNIT_OLD1="oldvalue"')
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings')

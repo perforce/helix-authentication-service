@@ -17,12 +17,12 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 describe('DeleteAuthProvider use case', function () {
   const temporaryRepository = new MapSettingsRepository()
   // cannot actually write to process.env, use map instead
-  const processEnvRepository = new MapSettingsRepository()
+  const dotenvRepository = new MapSettingsRepository()
   const defaultsRepository = new DefaultsEnvRepository()
   // construct a realistic repository so GetAuthProviders works properly
   const settingsRepository = new MergedSettingsRepository({
     temporaryRepository,
-    processEnvRepository,
+    dotenvRepository,
     defaultsRepository
   })
   const validateAuthProvider = ValidateAuthProvider()

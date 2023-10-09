@@ -20,12 +20,12 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 describe('ReadConfiguration use case', function () {
   const temporaryRepository = new MapSettingsRepository()
   // cannot actually write to process.env, use map instead
-  const processEnvRepository = new MapSettingsRepository()
+  const dotenvRepository = new MapSettingsRepository()
   const defaultsRepository = new DefaultsEnvRepository()
   // construct a realistic repository so GetAuthProviders works properly
   const settingsRepository = new MergedSettingsRepository({
     temporaryRepository,
-    processEnvRepository,
+    dotenvRepository,
     defaultsRepository
   })
   const tidyAuthProviders = TidyAuthProviders({
@@ -162,9 +162,9 @@ describe('ReadConfiguration use case', function () {
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
       const results = new Map()
       //
-      // These settings get renamed by lib/env.js at startu which makes testing
-      // of both this case case and the getAuthProvider more difficult than it
-      // should be.
+      // These settings get renamed by EnvSettingsRepository at startup which
+      // makes testing of both this case case and the getAuthProvider more
+      // difficult than it should be.
       //
       // results.set('SAML_SP_ISSUER', 'spIssuer')
       // results.set('SAML_IDP_ISSUER', 'idpIssuer')

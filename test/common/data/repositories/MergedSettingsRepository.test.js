@@ -10,11 +10,11 @@ import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/reposit
 
 describe('MergedSettingsRepository', function () {
   const temporary = new MapSettingsRepository()
-  const processEnv = new EnvSettingsRepository()
+  const dotenv = new EnvSettingsRepository({ dotenvFile: 'test/dot.env' })
   const defaults = new DefaultsEnvRepository()
   const sut = new MergedSettingsRepository({
     temporaryRepository: temporary,
-    processEnvRepository: processEnv,
+    dotenvRepository: dotenv,
     defaultsRepository: defaults
   })
 
@@ -69,9 +69,9 @@ describe('MergedSettingsRepository', function () {
     sut.set('MSR_TEST_STR', 'abc')
     assert.equal(sut.get('MSR_TEST_STR'), 'abc')
     // assert that the value did not go into the process repo
-    assert.isFalse(processEnv.has('MSR_TEST_BOOL'))
-    assert.isFalse(processEnv.has('MSR_TEST_INT'))
-    assert.isFalse(processEnv.has('MSR_TEST_STR'))
+    assert.isFalse(dotenv.has('MSR_TEST_BOOL'))
+    assert.isFalse(dotenv.has('MSR_TEST_INT'))
+    assert.isFalse(dotenv.has('MSR_TEST_STR'))
     // assert that the value was saved to the temporary repo
     assert.isTrue(temporary.has('MSR_TEST_BOOL'))
     assert.isTrue(temporary.has('MSR_TEST_INT'))
