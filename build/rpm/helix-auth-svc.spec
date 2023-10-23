@@ -60,6 +60,7 @@ cp -pr views/* %{buildroot}%{installprefix}/views
 
 cp defaults.env %{buildroot}%{installprefix}/defaults.env
 cp example.env %{buildroot}%{installprefix}/example.env
+cp example.toml %{buildroot}%{installprefix}/example.toml
 cp logging.config.cjs %{buildroot}%{installprefix}/logging.config.cjs
 cp sentinel.config.cjs %{buildroot}%{installprefix}/sentinel.config.cjs
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json

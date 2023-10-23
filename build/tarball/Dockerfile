@@ -44,6 +44,7 @@ COPY CHANGELOG.md CHANGELOG.md
 COPY CODE_OF_CONDUCT.md CODE_OF_CONDUCT.md
 COPY defaults.env defaults.env
 COPY example.env example.env
+COPY example.toml example.toml
 COPY install.sh install.sh
 COPY LICENSE.txt LICENSE.txt
 COPY logging.config.cjs logging.config.cjs

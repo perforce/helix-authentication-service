@@ -6,14 +6,14 @@ import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
-import FormatAuthProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/FormatAuthProviders.js'
+import CleanAuthProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/CleanAuthProviders.js'
 
-describe('FormatAuthProviders use case', function () {
+describe('CleanAuthProviders use case', function () {
   let usecase
 
   before(function () {
     const defaultsRepository = new DefaultsEnvRepository()
-    usecase = FormatAuthProviders({ defaultsRepository })
+    usecase = CleanAuthProviders({ defaultsRepository })
   })
 
   after(function () {
@@ -21,7 +21,7 @@ describe('FormatAuthProviders use case', function () {
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => FormatAuthProviders({ defaultsRepository: null }), AssertionError)
+    assert.throws(() => CleanAuthProviders({ defaultsRepository: null }), AssertionError)
   })
 
   it('should filter defaults from auth providers', async function () {
@@ -65,7 +65,7 @@ describe('FormatAuthProviders use case', function () {
     await usecase(settings)
     // assert
     assert.isTrue(settings.has('AUTH_PROVIDERS'))
-    const providers = JSON.parse(settings.get('AUTH_PROVIDERS')).providers
+    const providers = settings.get('AUTH_PROVIDERS')
     assert.lengthOf(providers, 4)
     assert.equal(providers[0].label, 'Acme Identity')
     assert.equal(providers[0].protocol, 'saml')
@@ -149,11 +149,11 @@ describe('FormatAuthProviders use case', function () {
     await usecase(settings)
     // assert
     assert.isTrue(settings.has('AUTH_PROVIDERS'))
-    const providers = JSON.parse(settings.get('AUTH_PROVIDERS')).providers
+    const providers = settings.get('AUTH_PROVIDERS')
     assert.lengthOf(providers, 1)
     assert.equal(providers[0].label, 'Acme Identity')
     assert.equal(providers[0].protocol, 'saml')
-    assert.isTrue(providers[0].metadata.startsWith('PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTg'))
-    assert.isTrue(providers[0].metadata.endsWith('jcmlwdG9yPgo8L0VudGl0eURlc2NyaXB0b3I+Cg=='))
+    assert.isTrue(providers[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
+    assert.isTrue(providers[0].metadata.endsWith('</EntityDescriptor>\n'))
   })
 })

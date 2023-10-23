@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -58,8 +58,7 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should raise error when no providers configured', async function () {
     // arrange
-    const providers = { providers: [] }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [])
     // act
     try {
       await usecase('saml-0')
@@ -71,14 +70,11 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should raise error when provider not found', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        protocol: 'saml',
-        signonUrl: 'https://example.com/saml/sso'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      signonUrl: 'https://example.com/saml/sso'
+    }])
     // act
     try {
       await usecase('oidc-10')
@@ -120,19 +116,16 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should interpret truthy values from provider', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        id: 'shibbo123',
-        label: 'Shibboleth',
-        protocol: 'saml',
-        metadataFile: 'test/fixtures/idp-metadata.xml',
-        disableContext: undefined,
-        forceAuthn: 1,
-        wantAssertionSigned: 'false',
-        wantResponseSigned: 'TRUE'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      id: 'shibbo123',
+      label: 'Shibboleth',
+      protocol: 'saml',
+      metadataFile: 'test/fixtures/idp-metadata.xml',
+      disableContext: undefined,
+      forceAuthn: 1,
+      wantAssertionSigned: 'false',
+      wantResponseSigned: 'TRUE'
+    }])
     // act
     const result = await usecase('shibbo123')
     // assert
@@ -172,18 +165,15 @@ describe('GetSamlConfiguration use case', function () {
       this.skip()
     } else {
       // arrange
-      const providers = {
-        providers: [{
-          id: 'shibbo123',
-          label: 'Shibboleth',
-          protocol: 'saml',
-          metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth',
-          nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
-          authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
-          forceAuthn: false
-        }]
-      }
-      settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+      settingsRepository.set('AUTH_PROVIDERS', [{
+        id: 'shibbo123',
+        label: 'Shibboleth',
+        protocol: 'saml',
+        metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+        authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
+        forceAuthn: false
+      }])
       // act
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
       // mute the warning from node about disabling TLS validation
@@ -216,17 +206,14 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should fetch metadata via file with provider', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        id: 'shibbo123',
-        label: 'Shibboleth',
-        protocol: 'saml',
-        metadataFile: 'test/fixtures/idp-metadata.xml',
-        nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
-        authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      id: 'shibbo123',
+      label: 'Shibboleth',
+      protocol: 'saml',
+      metadataFile: 'test/fixtures/idp-metadata.xml',
+      nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+      authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
+    }])
     // act
     const result = await usecase('shibbo123')
     // assert
@@ -250,16 +237,13 @@ describe('GetSamlConfiguration use case', function () {
 
   it('should read IdP cert file via provider', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        id: 'shibbo123',
-        label: 'Acme Identity',
-        protocol: 'saml',
-        signonUrl: 'https://example.com/saml/sso',
-        idpCertFile: 'certs/server.crt'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      id: 'shibbo123',
+      label: 'Acme Identity',
+      protocol: 'saml',
+      signonUrl: 'https://example.com/saml/sso',
+      idpCertFile: 'certs/server.crt'
+    }])
     // act
     const result = await usecase('shibbo123')
     // assert

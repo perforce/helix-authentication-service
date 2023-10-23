@@ -2,15 +2,13 @@
 // Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
-import * as fs from 'node:fs'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
-import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
-import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
+import { ConfigurationRepository } from 'helix-auth-svc/lib/common/domain/repositories/ConfigurationRepository.js'
 import ConvertFromProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/ConvertFromProviders.js'
-import FormatAuthProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/FormatAuthProviders.js'
+import CleanAuthProviders from 'helix-auth-svc/lib/features/admin/domain/usecases/CleanAuthProviders.js'
 import WriteConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/WriteConfiguration.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GetSamlAuthnContext from 'helix-auth-svc/lib/features/login/domain/usecases/GetSamlAuthnContext.js'
@@ -20,10 +18,10 @@ describe('WriteConfiguration use case', function () {
   let usecase
 
   before(function () {
-    const configRepository = new ConfigurationRepository()
+    const configurationRepository = new ConfigurationRepository()
     const defaultsRepository = new DefaultsEnvRepository()
     const validateAuthProvider = ValidateAuthProvider()
-    const formatAuthProviders = FormatAuthProviders({ defaultsRepository })
+    const cleanAuthProviders = CleanAuthProviders({ defaultsRepository })
     const convertFromProviders = ConvertFromProviders({
       tidyAuthProviders: TidyAuthProviders({
         getSamlAuthnContext: GetSamlAuthnContext(),
@@ -32,10 +30,10 @@ describe('WriteConfiguration use case', function () {
       validateAuthProvider
     })
     usecase = WriteConfiguration({
-      configRepository,
+      configurationRepository,
       defaultsRepository,
       convertFromProviders,
-      formatAuthProviders
+      cleanAuthProviders
     })
   })
 
@@ -45,17 +43,17 @@ describe('WriteConfiguration use case', function () {
 
   it('should raise an error for invalid input', async function () {
     assert.throws(() => WriteConfiguration({
-      configRepository: null,
+      configurationRepository: null,
       defaultsRepository: {},
       convertFromProviders: {}
     }), AssertionError)
     assert.throws(() => WriteConfiguration({
-      configRepository: {},
+      configurationRepository: {},
       defaultsRepository: null,
       convertFromProviders: {}
     }), AssertionError)
     assert.throws(() => WriteConfiguration({
-      configRepository: {},
+      configurationRepository: {},
       defaultsRepository: {},
       convertFromProviders: null
     }), AssertionError)
@@ -173,65 +171,6 @@ describe('WriteConfiguration use case', function () {
     }
   })
 
-  it('should write secrets to files if appropriate', async function () {
-    // arrange
-    const secretFile = temporaryFile({ extension: 'txt' })
-    fs.writeFileSync(secretFile, 'lioness')
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const results = new Map()
-      results.set('OIDC_CLIENT_SECRET_FILE', secretFile)
-      return results
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 2)
-      assert.isFalse(settings.has('KEY_PASSPHRASE_FILE'))
-      assert.equal(settings.get('KEY_PASSPHRASE'), 'housecat')
-      assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
-      assert.isFalse(settings.has('OIDC_CLIENT_SECRET'))
-    })
-    // act
-    const settings = new Map()
-    settings.set('OIDC_CLIENT_SECRET', 'tiger')
-    settings.set('KEY_PASSPHRASE', 'housecat')
-    await usecase(settings)
-    // assert
-    const secret = fs.readFileSync(secretFile, 'utf8')
-    assert.equal(secret, 'tiger')
-    assert.isTrue(readStub.calledOnce)
-    assert.isTrue(writeStub.calledOnce)
-    readStub.restore()
-    writeStub.restore()
-  })
-
-  it('should write secrets only if different', async function () {
-    // arrange
-    const secretFile = temporaryFile({ extension: 'txt' })
-    fs.writeFileSync(secretFile, 'lioness\n')
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const results = new Map()
-      results.set('OIDC_CLIENT_SECRET_FILE', secretFile)
-      return results
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 1)
-      assert.isTrue(settings.has('OIDC_CLIENT_SECRET_FILE'))
-      assert.isFalse(settings.has('OIDC_CLIENT_SECRET'))
-    })
-    // act
-    const settings = new Map()
-    settings.set('OIDC_CLIENT_SECRET', 'lioness') // note missing trailing newline
-    await usecase(settings)
-    // assert
-    const secret = fs.readFileSync(secretFile, 'utf8')
-    assert.equal(secret, 'lioness\n')
-    assert.isTrue(readStub.calledOnce)
-    assert.isTrue(writeStub.calledOnce)
-    readStub.restore()
-    writeStub.restore()
-  })
-
   it('should convert auth providers to original settings', async function () {
     // arrange
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
@@ -318,7 +257,7 @@ describe('WriteConfiguration use case', function () {
       assert.isDefined(settings)
       assert.lengthOf(settings, 1)
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
-      const providers = JSON.parse(settings.get('AUTH_PROVIDERS')).providers
+      const providers = settings.get('AUTH_PROVIDERS')
       assert.equal(providers[0].label, 'Acme Identity')
       assert.equal(providers[0].protocol, 'saml')
       assert.equal(providers[0].metadataUrl, 'https://saml1.example.com')
@@ -374,79 +313,6 @@ describe('WriteConfiguration use case', function () {
       clientSecret: 'client-secret'
     }]
     settings.set('AUTH_PROVIDERS', providers)
-    try {
-      await usecase(settings)
-      // assert
-      assert.isTrue(readStub.calledOnce)
-      assert.isTrue(writeStub.calledOnce)
-    } finally {
-      readStub.restore()
-      writeStub.restore()
-    }
-  })
-
-  it('should write auth providers configuration into a file', async function () {
-    // arrange
-    const providersFile = temporaryFile({ extension: 'json' })
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const settings = new Map()
-      settings.set('AUTH_PROVIDERS_FILE', providersFile)
-      return settings
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 1)
-      assert.isTrue(settings.has('AUTH_PROVIDERS_FILE'))
-    })
-    // act
-    const settings = new Map()
-    const providers = [{
-      label: 'Acme Identity',
-      protocol: 'saml',
-      metadataUrl: 'https://saml1.example.com'
-    }, {
-      label: 'Coyote Security',
-      protocol: 'saml',
-      metadataUrl: 'https://saml2.example.com'
-    }]
-    settings.set('AUTH_PROVIDERS', providers)
-    await usecase(settings)
-    // assert
-    try {
-      assert.isTrue(readStub.calledOnce)
-      assert.isTrue(writeStub.calledOnce)
-      const contents = fs.readFileSync(providersFile, 'utf8')
-      const providers = JSON.parse(contents).providers
-      assert.equal(providers[0].label, 'Acme Identity')
-      assert.equal(providers[0].protocol, 'saml')
-      assert.equal(providers[0].metadataUrl, 'https://saml1.example.com')
-      assert.notProperty(providers[0], 'id')
-      assert.equal(providers[1].label, 'Coyote Security')
-      assert.equal(providers[1].protocol, 'saml')
-      assert.equal(providers[1].metadataUrl, 'https://saml2.example.com')
-      assert.notProperty(providers[1], 'id')
-    } finally {
-      fs.rmSync(providersFile)
-      readStub.restore()
-      writeStub.restore()
-    }
-  })
-
-  it('should encode SAML metadata for dotenv safety', async function () {
-    // arrange
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      return new Map()
-    })
-    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
-      assert.isDefined(settings)
-      assert.lengthOf(settings, 1)
-      assert.isTrue(settings.has('SAML_IDP_METADATA'))
-      const metadata = settings.get('SAML_IDP_METADATA')
-      assert.equal(metadata, 'PHhtbD48S2V5SW5mbyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+PC94bWw+')
-    })
-    // act
-    const settings = new Map()
-    settings.set('SAML_IDP_METADATA', '<xml><KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"></xml>')
     try {
       await usecase(settings)
       // assert

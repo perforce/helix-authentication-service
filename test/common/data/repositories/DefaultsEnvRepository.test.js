@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
@@ -50,15 +50,16 @@ describe('DefaultsEnvRepository', function () {
     assert.equal(sut.get('ADMIN_USERNAME'), 'perforce')
     assert.equal(sut.get('BEARER_TOKEN'), 'keyboard cat')
     assert.equal(sut.get('CACHE_TTL'), '300')
-    assert.equal(sut.get('CERT_FILE'), 'certs/server.crt')
-    assert.equal(sut.get('IDP_CONFIG_FILE'), './routes/saml_idp.conf.cjs')
+    assert.isTrue(sut.has('CERT_FILE'))
+    assert.include(sut.get('IDP_CONFIG'), 'urn:swarm-example:sp')
+    assert.isFalse(sut.has('IDP_CONFIG_FILE'))
     assert.equal(sut.get('INSTANCE_ID'), 'none')
-    assert.equal(sut.get('KEY_FILE'), 'certs/server.key')
+    assert.isTrue(sut.has('KEY_FILE'))
     assert.equal(sut.get('LOGIN_TIMEOUT'), '60')
     assert.equal(sut.get('OIDC_SELECT_ACCOUNT'), 'false')
     assert.equal(sut.get('OIDC_TOKEN_SIGNING_ALGO'), 'RS256')
-    assert.equal(sut.get('REDIS_CERT_FILE'), 'certs/server.crt')
-    assert.equal(sut.get('REDIS_KEY_FILE'), 'certs/server.key')
+    assert.isTrue(sut.has('REDIS_CERT_FILE'))
+    assert.isTrue(sut.has('REDIS_KEY_FILE'))
     assert.equal(sut.get('SAML_AUTHN_CONTEXT'), 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
     assert.equal(sut.get('SAML_NAMEID_FORMAT'), 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
     assert.equal(sut.get('SAML_SP_ENTITY_ID'), 'https://has.example.com')

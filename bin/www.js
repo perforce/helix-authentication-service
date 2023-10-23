@@ -14,8 +14,7 @@ import {
   normalizePort
 } from 'helix-auth-svc/lib/server.js'
 const logger = container.resolve('logger')
-const loadEnvironment = container.resolve('loadEnvironment')
-const dotenvRepository = container.resolve('dotenvRepository')
+const configuredRepository = container.resolve('configuredRepository')
 const temporaryRepository = container.resolve('temporaryRepository')
 const settings = container.resolve('settingsRepository')
 
@@ -63,13 +62,8 @@ function startServer() {
     }
   })
 
-  loadEnvironment().then((envConfig) => {
-    const scrubbed = scrubSecrets(envConfig)
-    logger.debug('www: dotenv results: %o', scrubbed)
-  }).catch((err) => {
-    // a missing .env file is not an error
-    logger.debug('www: .env file not loaded: %s', err.message)
-  })
+  const scrubbed = scrubSecrets(new Map(configuredRepository.entries()))
+  logger.debug('www: loaded settings: %o', scrubbed)
 
   server.on('listening', () => {
     // After successfully binding to the port, switch user/group if possible and
@@ -92,7 +86,7 @@ function startServer() {
   })
 
   // register the listener once each time server is started
-  logger.info('www: use `kill -USR2 %s` to reload .env changes', process.pid)
+  logger.info('www: use `kill -USR2 %s` to reload configuration', process.pid)
   process.once('SIGUSR2', () => {
     logger.info('www: USR2 signal received, closing server')
     server.close(() => {
@@ -101,8 +95,8 @@ function startServer() {
       // the enviornment and start another server instance; probably not really
       // necessary but probably safer this way.
       setTimeout(() => {
-        dotenvRepository.reload()
-        logger.info('www: reloaded configuration from .env')
+        configuredRepository.reload()
+        logger.info('www: reloaded configuration')
         // simulate a process restart by clearing the temporary settings
         // repository, which is meant not to be persistent indefinitely
         temporaryRepository.clear()
@@ -140,34 +134,34 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 function scrubSecrets(env) {
-  const keys = Object.keys(env)
+  const keys = env.keys()
   const obj = {}
   for (const name of keys) {
     if (name.match(/secret_file/i)) {
       // the "secret_file" entries are safe
-      obj[name] = env[name]
+      obj[name] = env.get(name)
     } else if (name.match(/secret/i)) {
       // but the other "secret" settings are not safe
       obj[name] = '[hidden]'
     } else if (name.match(/passphrase_file/i)) {
       // the "passphrase_file" entries are safe
-      obj[name] = env[name]
+      obj[name] = env.get(name)
     } else if (name.match(/passphrase/i)) {
       // but the other "passphrase" settings are not safe
       obj[name] = '[hidden]'
     } else if (name.match(/passwd_file/i)) {
       // the "passwd_file" entries are safe
-      obj[name] = env[name]
+      obj[name] = env.get(name)
     } else if (name.match(/passwd/i)) {
       obj[name] = '[hidden]'
     } else if (name.match(/bearer_token_file/i)) {
       // the "bearer_token_file" entry is safe
-      obj[name] = env[name]
+      obj[name] = env.get(name)
     } else if (name.match(/bearer_token/i)) {
       // but the "bearer_token" setting is not safe
       obj[name] = '[hidden]'
     } else {
-      obj[name] = env[name]
+      obj[name] = env.get(name)
     }
   }
   return obj

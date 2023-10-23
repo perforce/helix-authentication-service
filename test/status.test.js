@@ -7,9 +7,10 @@ import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import mute from 'mute'
 import sinon from 'sinon'
-import loadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
+import LoadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
 import { DummyRedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/DummyRedisConnector.js'
 import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
+import RedisSentinel from 'helix-auth-svc/lib/features/login/data/connectors/RedisSentinel.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { HelixEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/HelixEntityRepository.js'
 import * as helpers from 'helix-auth-svc/test/helpers.js'
@@ -301,7 +302,9 @@ describe('Service status', function () {
         // arrange
         const settingsRepository = new MapSettingsRepository()
         settingsRepository.set('REDIS_URL', 'redis://redis.doc:6379')
-        const connector = new RedisConnector({ settingsRepository })
+        const redisSentinel = RedisSentinel({ settingsRepository })
+        const loadAuthorityCerts = LoadAuthorityCerts({ settingsRepository })
+        const connector = new RedisConnector({ redisSentinel, settingsRepository, loadAuthorityCerts })
         // act
         const result = await sut.validateRedis(connector)
         // assert
@@ -321,10 +324,9 @@ describe('Service status', function () {
         settingsRepository.set('REDIS_CERT_FILE', './test/client.crt')
         settingsRepository.set('REDIS_KEY_FILE', './test/client.key')
         settingsRepository.set('CA_CERT_FILE', './certs/ca.crt')
-        const connector = new RedisConnector({
-          settingsRepository,
-          loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
-        })
+        const redisSentinel = RedisSentinel({ settingsRepository })
+        const loadAuthorityCerts = LoadAuthorityCerts({ settingsRepository })
+        const connector = new RedisConnector({ redisSentinel, settingsRepository, loadAuthorityCerts })
         // act
         const result = await sut.validateRedis(connector)
         // assert

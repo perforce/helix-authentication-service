@@ -89,20 +89,17 @@ describe('GenerateLoginUrl use case', function () {
 
   it('should produce multi URL with AUTH_PROVIDERS', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-1'
-      }, {
-        label: 'Maximum Security',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-2'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      label: 'Acme Identity',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-1'
+    }, {
+      label: 'Maximum Security',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-2'
+    }])
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
@@ -111,20 +108,17 @@ describe('GenerateLoginUrl use case', function () {
 
   it('should produce multi URL if specified provider not found', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-1'
-      }, {
-        label: 'Maximum Security',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-2'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      label: 'Acme Identity',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-1'
+    }, {
+      label: 'Maximum Security',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-2'
+    }])
     // act
     const result = await usecase('http://host', 'request123', 'foobar', 'oidc-1')
     // assert
@@ -133,21 +127,18 @@ describe('GenerateLoginUrl use case', function () {
 
   it('should produce specific URL if a provider is default', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-1',
-        default: true
-      }, {
-        label: 'Maximum Security',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-2'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      label: 'Acme Identity',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-1',
+      default: true
+    }, {
+      label: 'Maximum Security',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-2'
+    }])
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
@@ -156,21 +147,18 @@ describe('GenerateLoginUrl use case', function () {
 
   it('should produce specific URL if specified provider found', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-1',
-        default: true
-      }, {
-        label: 'Maximum Security',
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        protocol: 'saml',
-        id: 'saml-2'
-      }]
-    }
-    settingsRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      label: 'Acme Identity',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-1',
+      default: true
+    }, {
+      label: 'Maximum Security',
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      protocol: 'saml',
+      id: 'saml-2'
+    }])
     // act
     const result = await usecase('http://host', 'request123', 'foobar', 'saml-2')
     // assert

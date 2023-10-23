@@ -3,6 +3,7 @@
 //
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
+import { BasicConfigRepository } from 'helix-auth-svc/lib/common/data/repositories/BasicConfigRepository.js'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { EnvSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/EnvSettingsRepository.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
@@ -10,11 +11,17 @@ import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/reposit
 
 describe('MergedSettingsRepository', function () {
   const temporary = new MapSettingsRepository()
-  const dotenv = new EnvSettingsRepository({ dotenvFile: 'test/dot.env' })
+  const source = {
+    readSync() {
+      return new Map()
+    }
+  }
+  const cfg = new BasicConfigRepository({ configSource: source })
+  const dotenv = new EnvSettingsRepository({ configurationRepository: cfg })
   const defaults = new DefaultsEnvRepository()
   const sut = new MergedSettingsRepository({
     temporaryRepository: temporary,
-    dotenvRepository: dotenv,
+    configuredRepository: dotenv,
     defaultsRepository: defaults
   })
 

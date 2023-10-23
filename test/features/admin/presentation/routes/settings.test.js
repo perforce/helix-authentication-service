@@ -18,7 +18,7 @@ import container from 'helix-auth-svc/lib/container.js'
 
 const settings = container.resolve('settingsRepository')
 const temporary = container.resolve('temporaryRepository')
-const dotenv = container.resolve('dotenvRepository')
+const dotenv = container.resolve('configuredRepository')
 const app = createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
@@ -89,20 +89,18 @@ setTimeout(function () {
       })
 
       it('should fetch all auth providers', function (done) {
-        temporary.set('AUTH_PROVIDERS', JSON.stringify({
-          providers: [
-            {
-              clientId: 'unique-client-identifier',
-              clientSecret: 'shared secrets are bad',
-              issuerUri: 'https://oidc.example.com',
-              selectAccount: 'false',
-              signingAlgo: 'RS256',
-              label: 'oidc.example.com',
-              protocol: 'oidc',
-              id: 'oidc-1'
-            }
-          ]
-        }))
+        temporary.set('AUTH_PROVIDERS', [
+          {
+            clientId: 'unique-client-identifier',
+            clientSecret: 'shared secrets are bad',
+            issuerUri: 'https://oidc.example.com',
+            selectAccount: 'false',
+            signingAlgo: 'RS256',
+            label: 'oidc.example.com',
+            protocol: 'oidc',
+            id: 'oidc-1'
+          }
+        ])
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings/providers')
@@ -126,20 +124,18 @@ setTimeout(function () {
       })
 
       it('should fetch a specific auth provider', function (done) {
-        temporary.set('AUTH_PROVIDERS', JSON.stringify({
-          providers: [
-            {
-              clientId: 'unique-client-identifier',
-              clientSecret: 'shared secrets are bad',
-              issuerUri: 'https://oidc.example.com',
-              selectAccount: 'false',
-              signingAlgo: 'RS256',
-              label: 'oidc.example.com',
-              protocol: 'oidc',
-              id: 'oidc-1'
-            }
-          ]
-        }))
+        temporary.set('AUTH_PROVIDERS', [
+          {
+            clientId: 'unique-client-identifier',
+            clientSecret: 'shared secrets are bad',
+            issuerUri: 'https://oidc.example.com',
+            selectAccount: 'false',
+            signingAlgo: 'RS256',
+            label: 'oidc.example.com',
+            protocol: 'oidc',
+            id: 'oidc-1'
+          }
+        ])
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .get('/settings/providers/oidc-1')
@@ -276,20 +272,18 @@ setTimeout(function () {
       })
 
       it('should update an existing auth provider', function (done) {
-        temporary.set('AUTH_PROVIDERS', JSON.stringify({
-          providers: [
-            {
-              clientId: 'unique-client-identifier',
-              clientSecret: 'shared secrets are bad',
-              issuerUri: 'https://oidc.example.com',
-              selectAccount: 'false',
-              signingAlgo: 'RS256',
-              label: 'oidc.example.com',
-              protocol: 'oidc',
-              id: 'oidc-1'
-            }
-          ]
-        }))
+        temporary.set('AUTH_PROVIDERS', [
+          {
+            clientId: 'unique-client-identifier',
+            clientSecret: 'shared secrets are bad',
+            issuerUri: 'https://oidc.example.com',
+            selectAccount: 'false',
+            signingAlgo: 'RS256',
+            label: 'oidc.example.com',
+            protocol: 'oidc',
+            id: 'oidc-1'
+          }
+        ])
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .put('/settings/providers/oidc-1')
@@ -378,27 +372,25 @@ setTimeout(function () {
       })
 
       it('should delete an existing auth provider', function (done) {
-        temporary.set('AUTH_PROVIDERS', JSON.stringify({
-          providers: [
-            {
-              clientId: 'unique-client-identifier',
-              clientSecret: 'shared secrets are bad',
-              issuerUri: 'https://oidc.example.com',
-              selectAccount: 'false',
-              signingAlgo: 'RS256',
-              label: 'oidc.example.com',
-              protocol: 'oidc',
-              id: 'oidc-1'
-            },
-            {
-              metadataUrl: 'https://saml.example.com/metadata',
-              spEntityId: 'urn:example:sp',
-              label: 'saml.example.com',
-              protocol: 'saml',
-              id: 'saml-1'
-            }
-          ]
-        }))
+        temporary.set('AUTH_PROVIDERS', [
+          {
+            clientId: 'unique-client-identifier',
+            clientSecret: 'shared secrets are bad',
+            issuerUri: 'https://oidc.example.com',
+            selectAccount: 'false',
+            signingAlgo: 'RS256',
+            label: 'oidc.example.com',
+            protocol: 'oidc',
+            id: 'oidc-1'
+          },
+          {
+            metadataUrl: 'https://saml.example.com/metadata',
+            spEntityId: 'urn:example:sp',
+            label: 'saml.example.com',
+            protocol: 'saml',
+            id: 'saml-1'
+          }
+        ])
         getToken('scott', 'tiger').then((webToken) => {
           agent
             .delete('/settings/providers/oidc-1')

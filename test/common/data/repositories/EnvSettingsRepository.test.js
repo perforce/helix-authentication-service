@@ -3,10 +3,22 @@
 //
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
+import { BasicConfigRepository } from 'helix-auth-svc/lib/common/data/repositories/BasicConfigRepository.js'
 import { EnvSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/EnvSettingsRepository.js'
 
 describe('EnvSettingsRepository', function () {
-  const sut = new EnvSettingsRepository({ dotenvFile: 'test/dot.env' })
+  const source = {
+    readSync() {
+      const settings = new Map()
+      settings.set('OAUTH_ISSUER', 'http://jwt.doc:3000/')
+      return settings
+    },
+    supportsCollections() {
+      return false
+    }
+  }
+  const cfg = new BasicConfigRepository({ configSource: source })
+  const sut = new EnvSettingsRepository({ configurationRepository: cfg })
 
   it('should return string or undefined from get()', function () {
     process.env['ESR_SETTING_VALUE'] = 'a_value'

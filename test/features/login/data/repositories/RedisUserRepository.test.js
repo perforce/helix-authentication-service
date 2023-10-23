@@ -5,11 +5,12 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, describe, it } from 'mocha'
 import { ulid } from 'ulid'
-import loadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
-import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
-import { User } from 'helix-auth-svc/lib/features/login/domain/entities/User.js'
+import LoadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
+import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
+import RedisSentinel from 'helix-auth-svc/lib/features/login/data/connectors/RedisSentinel.js'
 import { RedisUserRepository } from 'helix-auth-svc/lib/features/login/data/repositories/RedisUserRepository.js'
+import { User } from 'helix-auth-svc/lib/features/login/domain/entities/User.js'
 
 describe('RedisUser repository', function () {
   describe('without TLS', function () {
@@ -22,7 +23,9 @@ describe('RedisUser repository', function () {
         const settingsRepository = new MapSettingsRepository()
         settingsRepository.set('CACHE_TTL', '2')
         settingsRepository.set('REDIS_URL', 'redis://redis.doc:6379')
-        const connector = new RedisConnector({ settingsRepository })
+        const redisSentinel = RedisSentinel({ settingsRepository })
+        const loadAuthorityCerts = LoadAuthorityCerts({ settingsRepository })
+        const connector = new RedisConnector({ redisSentinel, settingsRepository, loadAuthorityCerts })
         repository = new RedisUserRepository({
           redisConnector: connector,
           settingsRepository
@@ -92,10 +95,9 @@ describe('RedisUser repository', function () {
         settingsRepository.set('REDIS_KEY_FILE', './test/client.key')
         settingsRepository.set('CACHE_TTL', '2')
         settingsRepository.set('CA_CERT_FILE', './certs/ca.crt')
-        const connector = new RedisConnector({
-          settingsRepository,
-          loadAuthorityCerts: loadAuthorityCerts({ settingsRepository })
-        })
+        const redisSentinel = RedisSentinel({ settingsRepository })
+        const loadAuthorityCerts = LoadAuthorityCerts({ settingsRepository })
+        const connector = new RedisConnector({ redisSentinel, settingsRepository, loadAuthorityCerts })
         repository = new RedisUserRepository({
           redisConnector: connector,
           settingsRepository

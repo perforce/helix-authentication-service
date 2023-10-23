@@ -17,12 +17,12 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 describe('AddAuthProvider use case', function () {
   const temporaryRepository = new MapSettingsRepository()
   // cannot actually write to process.env, use map instead
-  const dotenvRepository = new MapSettingsRepository()
+  const configuredRepository = new MapSettingsRepository()
   const defaultsRepository = new DefaultsEnvRepository()
   // construct a realistic repository so GetAuthProviders works properly
   const settingsRepository = new MergedSettingsRepository({
     temporaryRepository,
-    dotenvRepository,
+    configuredRepository,
     defaultsRepository
   })
   const validateAuthProvider = ValidateAuthProvider()
@@ -111,20 +111,16 @@ describe('AddAuthProvider use case', function () {
 
   it('should update an existing provider', async function () {
     // arrange
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
-      providers: [
-        {
-          'clientId': 'unique-client-identifier',
-          'clientSecret': 'shared secrets are bad',
-          'issuerUri': 'https://oidc.example.com',
-          'selectAccount': 'false',
-          'signingAlgo': 'RS256',
-          'label': 'oidc.example.com',
-          'protocol': 'oidc',
-          'id': 'xid123'
-        }
-      ]
-    }))
+    temporaryRepository.set('AUTH_PROVIDERS', [{
+      'clientId': 'unique-client-identifier',
+      'clientSecret': 'shared secrets are bad',
+      'issuerUri': 'https://oidc.example.com',
+      'selectAccount': 'false',
+      'signingAlgo': 'RS256',
+      'label': 'oidc.example.com',
+      'protocol': 'oidc',
+      'id': 'xid123'
+    }])
     const provider = {
       clientId: 'client-id',
       clientSecret: 'client-secret',
@@ -147,26 +143,24 @@ describe('AddAuthProvider use case', function () {
 
   it('should ignore default provider settings', async function () {
     // arrange
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
-      providers: [
-        {
-          'clientId': 'client-id-1',
-          'clientSecret': 'client-secret-1',
-          'issuerUri': 'https://oidc1.example.com',
-          'label': 'oidc1.example.com',
-          'protocol': 'oidc',
-          'id': 'oidc-1'
-        },
-        {
-          'clientId': 'client-id-2',
-          'clientSecret': 'client-secret-2',
-          'issuerUri': 'https://oidc2.example.com',
-          'label': 'oidc2.example.com',
-          'protocol': 'oidc',
-          'id': 'oidc-2'
-        }
-      ]
-    }))
+    temporaryRepository.set('AUTH_PROVIDERS', [
+      {
+        'clientId': 'client-id-1',
+        'clientSecret': 'client-secret-1',
+        'issuerUri': 'https://oidc1.example.com',
+        'label': 'oidc1.example.com',
+        'protocol': 'oidc',
+        'id': 'oidc-1'
+      },
+      {
+        'clientId': 'client-id-2',
+        'clientSecret': 'client-secret-2',
+        'issuerUri': 'https://oidc2.example.com',
+        'label': 'oidc2.example.com',
+        'protocol': 'oidc',
+        'id': 'oidc-2'
+      }
+    ])
     const provider = {
       metadataUrl: 'https://saml.example.com/idp/metadata',
       protocol: 'saml',
@@ -184,18 +178,16 @@ describe('AddAuthProvider use case', function () {
 
   it('should ignore files from old version of provider', async function () {
     // arrange
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
-      providers: [
-        {
-          clientId: 'client-id',
-          clientSecretFile: 'test/passwd.txt',
-          issuerUri: 'https://oidc2.example.com',
-          label: 'Provider',
-          protocol: 'oidc',
-          id: 'xid123'
-        }
-      ]
-    }))
+    temporaryRepository.set('AUTH_PROVIDERS', [
+      {
+        clientId: 'client-id',
+        clientSecretFile: 'test/passwd.txt',
+        issuerUri: 'https://oidc2.example.com',
+        label: 'Provider',
+        protocol: 'oidc',
+        id: 'xid123'
+      }
+    ])
     const provider = {
       clientId: 'client-id',
       clientSecret: 'updated client secret',

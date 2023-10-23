@@ -164,16 +164,14 @@ setTimeout(function () {
       })
 
       it('should ignore forceAuthn setting in provider', function (done) {
-        temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
-          providers: [
-            {
-              label: 'Acme Security',
-              protocol: 'saml',
-              metadataUrl: 'https://saml.example.com',
-              forceAuthn: true
-            }
-          ]
-        }))
+        temporaryRepository.set('AUTH_PROVIDERS', [
+          {
+            label: 'Acme Security',
+            protocol: 'saml',
+            metadataUrl: 'https://saml.example.com',
+            forceAuthn: true
+          }
+        ])
         agent
           .get('/requests/new/forceq?providerId=saml-0')
           .trustLocalhost(true)

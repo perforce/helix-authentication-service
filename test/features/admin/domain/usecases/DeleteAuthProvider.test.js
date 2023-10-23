@@ -17,12 +17,12 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 describe('DeleteAuthProvider use case', function () {
   const temporaryRepository = new MapSettingsRepository()
   // cannot actually write to process.env, use map instead
-  const dotenvRepository = new MapSettingsRepository()
+  const configuredRepository = new MapSettingsRepository()
   const defaultsRepository = new DefaultsEnvRepository()
   // construct a realistic repository so GetAuthProviders works properly
   const settingsRepository = new MergedSettingsRepository({
     temporaryRepository,
-    dotenvRepository,
+    configuredRepository,
     defaultsRepository
   })
   const validateAuthProvider = ValidateAuthProvider()
@@ -54,20 +54,18 @@ describe('DeleteAuthProvider use case', function () {
 
   it('should ignore provider not found in list', async function () {
     // arrange
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
-      providers: [
-        {
-          clientId: 'unique-client-identifier',
-          clientSecret: 'shared secrets are bad',
-          issuerUri: 'https://oidc.example.com',
-          selectAccount: 'false',
-          signingAlgo: 'RS256',
-          label: 'oidc.example.com',
-          protocol: 'oidc',
-          id: 'xid123'
-        }
-      ]
-    }))
+    temporaryRepository.set('AUTH_PROVIDERS', [
+      {
+        clientId: 'unique-client-identifier',
+        clientSecret: 'shared secrets are bad',
+        issuerUri: 'https://oidc.example.com',
+        selectAccount: 'false',
+        signingAlgo: 'RS256',
+        label: 'oidc.example.com',
+        protocol: 'oidc',
+        id: 'xid123'
+      }
+    ])
     const provider = {
       clientId: 'client-id',
       clientSecret: 'client-secret',
@@ -84,28 +82,26 @@ describe('DeleteAuthProvider use case', function () {
 
   it('should remove matching provider from the list', async function () {
     // arrange
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
-      providers: [
-        {
-          clientId: 'unique-client-identifier',
-          clientSecret: 'shared secrets are bad',
-          issuerUri: 'https://oidc.example.com',
-          selectAccount: 'false',
-          signingAlgo: 'RS256',
-          label: 'oidc.example.com',
-          protocol: 'oidc',
-          id: 'xid123'
-        },
-        {
-          clientId: 'client-id',
-          clientSecret: 'client-secret',
-          issuerUri: 'https://oidc2.example.com',
-          label: 'Provider',
-          protocol: 'oidc',
-          id: 'xid321'
-        }
-      ]
-    }))
+    temporaryRepository.set('AUTH_PROVIDERS', [
+      {
+        clientId: 'unique-client-identifier',
+        clientSecret: 'shared secrets are bad',
+        issuerUri: 'https://oidc.example.com',
+        selectAccount: 'false',
+        signingAlgo: 'RS256',
+        label: 'oidc.example.com',
+        protocol: 'oidc',
+        id: 'xid123'
+      },
+      {
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        issuerUri: 'https://oidc2.example.com',
+        label: 'Provider',
+        protocol: 'oidc',
+        id: 'xid321'
+      }
+    ])
     const provider = {
       clientId: 'client-id',
       clientSecret: 'client-secret',
@@ -122,28 +118,26 @@ describe('DeleteAuthProvider use case', function () {
 
   it('should remove a provider but ignore associated files', async function () {
     // arrange
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify({
-      providers: [
-        {
-          clientId: 'unique-client-identifier',
-          clientSecret: 'shared secrets are bad',
-          issuerUri: 'https://oidc.example.com',
-          selectAccount: 'false',
-          signingAlgo: 'RS256',
-          label: 'oidc.example.com',
-          protocol: 'oidc',
-          id: 'xid123'
-        },
-        {
-          clientId: 'client-id',
-          clientSecretFile: 'test/passwd.txt',
-          issuerUri: 'https://oidc2.example.com',
-          label: 'Provider',
-          protocol: 'oidc',
-          id: 'xid321'
-        }
-      ]
-    }))
+    temporaryRepository.set('AUTH_PROVIDERS', [
+      {
+        clientId: 'unique-client-identifier',
+        clientSecret: 'shared secrets are bad',
+        issuerUri: 'https://oidc.example.com',
+        selectAccount: 'false',
+        signingAlgo: 'RS256',
+        label: 'oidc.example.com',
+        protocol: 'oidc',
+        id: 'xid123'
+      },
+      {
+        clientId: 'client-id',
+        clientSecretFile: 'test/passwd.txt',
+        issuerUri: 'https://oidc2.example.com',
+        label: 'Provider',
+        protocol: 'oidc',
+        id: 'xid321'
+      }
+    ])
     const provider = {
       clientId: 'client-id',
       clientSecret: 'some client secret',

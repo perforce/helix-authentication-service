@@ -10,7 +10,7 @@ import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
-import { ConfigurationRepository } from 'helix-auth-svc/lib/features/admin/domain/repositories/ConfigurationRepository.js'
+import { ConfigurationRepository } from 'helix-auth-svc/lib/common/domain/repositories/ConfigurationRepository.js'
 import ReadConfiguration from 'helix-auth-svc/lib/features/admin/domain/usecases/ReadConfiguration.js'
 import ValidateAuthProvider from 'helix-auth-svc/lib/features/admin/domain/usecases/ValidateAuthProvider.js'
 import GetAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases/GetAuthProviders.js'
@@ -20,12 +20,12 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 describe('ReadConfiguration use case', function () {
   const temporaryRepository = new MapSettingsRepository()
   // cannot actually write to process.env, use map instead
-  const dotenvRepository = new MapSettingsRepository()
+  const configuredRepository = new MapSettingsRepository()
   const defaultsRepository = new DefaultsEnvRepository()
   // construct a realistic repository so GetAuthProviders works properly
   const settingsRepository = new MergedSettingsRepository({
     temporaryRepository,
-    dotenvRepository,
+    configuredRepository,
     defaultsRepository
   })
   const tidyAuthProviders = TidyAuthProviders({
@@ -35,20 +35,12 @@ describe('ReadConfiguration use case', function () {
   let usecase
 
   before(function () {
-    const configRepository = new ConfigurationRepository()
-    const getIdPConfiguration = () => {
-      return {
-        'urn:swarm-example:sp': {
-          'acsUrl': 'https://swarm.example.com'
-        }
-      }
-    }
+    const configurationRepository = new ConfigurationRepository()
     const getAuthProviders = GetAuthProviders({ defaultsRepository, settingsRepository, tidyAuthProviders })
     usecase = ReadConfiguration({
-      configRepository,
+      configurationRepository,
       temporaryRepository,
       defaultsRepository,
-      getIdPConfiguration,
       getAuthProviders
     })
   })
@@ -59,37 +51,26 @@ describe('ReadConfiguration use case', function () {
 
   it('should raise an error for invalid input', async function () {
     assert.throws(() => ReadConfiguration({
-      configRepository: null,
+      configurationRepository: null,
       temporaryRepository: {},
-      getIdPConfiguration: {},
       defaultsRepository: {},
       getAuthProviders: {}
     }), AssertionError)
     assert.throws(() => ReadConfiguration({
-      configRepository: {},
+      configurationRepository: {},
       temporaryRepository: null,
-      getIdPConfiguration: {},
       defaultsRepository: {},
       getAuthProviders: {}
     }), AssertionError)
     assert.throws(() => ReadConfiguration({
-      configRepository: {},
+      configurationRepository: {},
       temporaryRepository: {},
-      getIdPConfiguration: null,
-      defaultsRepository: {},
-      getAuthProviders: {}
-    }), AssertionError)
-    assert.throws(() => ReadConfiguration({
-      configRepository: {},
-      temporaryRepository: {},
-      getIdPConfiguration: {},
       defaultsRepository: null,
       getAuthProviders: {}
     }), AssertionError)
     assert.throws(() => ReadConfiguration({
-      configRepository: {},
+      configurationRepository: {},
       temporaryRepository: {},
-      getIdPConfiguration: {},
       defaultsRepository: {},
       getAuthProviders: null
     }), AssertionError)
@@ -162,9 +143,8 @@ describe('ReadConfiguration use case', function () {
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
       const results = new Map()
       //
-      // These settings get renamed by EnvSettingsRepository at startup which
-      // makes testing of both this case case and the getAuthProvider more
-      // difficult than it should be.
+      // These settings get renamed at startup which makes testing of both this
+      // case case and the getAuthProvider more difficult than it should be.
       //
       // results.set('SAML_SP_ISSUER', 'spIssuer')
       // results.set('SAML_IDP_ISSUER', 'idpIssuer')
@@ -179,7 +159,7 @@ describe('ReadConfiguration use case', function () {
       assert.lengthOf(settings, 10)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 0)
-      assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
+      assert.isTrue(settings.has('CERT_FILE'))
       assert.isTrue(readStub.calledOnce)
     } finally {
       readStub.restore()
@@ -292,7 +272,8 @@ describe('ReadConfiguration use case', function () {
       assert.lengthOf(settings, 10)
       assert.isFalse(settings.has('SP_CERT_FILE'))
       assert.isFalse(settings.has('SP_KEY_FILE'))
-      assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
+      assert.isTrue(settings.has('CERT_FILE'))
+      assert.isFalse(settings.has('KEY_FILE')) // intentionally concealed
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 1)
       assert.equal(providers[0]['protocol'], 'saml')
@@ -307,83 +288,17 @@ describe('ReadConfiguration use case', function () {
     }
   })
 
-  it('should read secrets from files into settings', async function () {
-    // arrange
-    const secretFile = temporaryFile({ extension: 'txt' })
-    fs.writeFileSync(secretFile, 'tiger')
-    const passwdFile = temporaryFile({ extension: 'txt' })
-    fs.writeFileSync(passwdFile, 'housecat')
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const results = new Map()
-      results.set('KEY_PASSPHRASE_FILE', passwdFile)
-      return results
-    })
-    temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.example.com:8080/issuer')
-    temporaryRepository.set('OIDC_INFO_LABEL', 'OpenID Provider')
-    temporaryRepository.set('OIDC_CLIENT_ID', 'client-id')
-    temporaryRepository.set('OIDC_CLIENT_SECRET_FILE', secretFile)
-    try {
-      // act
-      const settings = await usecase()
-      // assert
-      assert.lengthOf(settings, 11)
-      assert.equal(settings.get('KEY_PASSPHRASE'), 'housecat')
-      assert.isFalse(settings.has('KEY_PASSPHRASE_FILE'))
-      const providers = settings.get('AUTH_PROVIDERS')
-      assert.equal(providers[0]['clientSecret'], 'tiger')
-      assert.notProperty(providers[0], 'clientSecretFile')
-      assert.isTrue(readStub.calledOnce)
-    } finally {
-      readStub.restore()
-      temporaryRepository.clear()
-    }
-  })
-
-  it('should read certificates from files into settings', async function () {
-    // arrange
-    const caCertFile = temporaryFile({ extension: 'pem' })
-    fs.writeFileSync(caCertFile, '-----BEGIN AUTHORITY-----')
-    const certFile = temporaryFile({ extension: 'crt' })
-    fs.writeFileSync(certFile, '-----BEGIN CERTIFICATE-----')
-    const keyFile = temporaryFile({ extension: 'key' })
-    fs.writeFileSync(keyFile, '-----BEGIN PRIVATE KEY-----')
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const results = new Map()
-      results.set('CA_CERT_FILE', caCertFile)
-      results.set('CERT_FILE', certFile)
-      results.set('KEY_FILE', keyFile)
-      return results
-    })
-    try {
-      // act
-      const settings = await usecase()
-      // assert
-      assert.lengthOf(settings, 11)
-      assert.equal(settings.get('CA_CERT'), '-----BEGIN AUTHORITY-----')
-      assert.isFalse(settings.has('CA_CERT_FILE'))
-      assert.equal(settings.get('CERT'), '-----BEGIN CERTIFICATE-----')
-      assert.isFalse(settings.has('CERT_FILE'))
-      assert.isFalse(settings.has('KEY'))
-      assert.isFalse(settings.has('KEY_FILE'))
-      assert.isTrue(readStub.calledOnce)
-    } finally {
-      readStub.restore()
-    }
-  })
-
   it('should read auth providers from setting', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        label: 'Acme Identity',
-        protocol: 'saml'
-      }]
-    }
+    const providers = [{
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      label: 'Acme Identity',
+      protocol: 'saml'
+    }]
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
       return new Map()
     })
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     try {
       // act
       const settings = await usecase()
@@ -444,18 +359,16 @@ describe('ReadConfiguration use case', function () {
       'urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos',
       'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
     ]
-    const providers = {
-      providers: [{
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        authnContext: contexts,
-        label: 'Acme Identity',
-        protocol: 'saml'
-      }]
-    }
+    const providers = [{
+      metadataUrl: 'https://saml.example.com/idp/metadata',
+      authnContext: contexts,
+      label: 'Acme Identity',
+      protocol: 'saml'
+    }]
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
       return new Map()
     })
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     try {
       // act
       const settings = await usecase()
@@ -474,63 +387,6 @@ describe('ReadConfiguration use case', function () {
     } finally {
       readStub.restore()
       temporaryRepository.clear()
-    }
-  })
-
-  it('should read auth providers from file', async function () {
-    // arrange
-    const providersFile = temporaryFile({ extension: 'json' })
-    const providers = {
-      providers: [{
-        metadataUrl: 'https://saml.example.com/idp/metadata',
-        label: 'Acme Identity',
-        protocol: 'saml'
-      }]
-    }
-    fs.writeFileSync(providersFile, JSON.stringify(providers))
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const results = new Map()
-      return results
-    })
-    temporaryRepository.set('AUTH_PROVIDERS_FILE', providersFile)
-    // act
-    const settings = await usecase()
-    // assert
-    try {
-      assert.lengthOf(settings, 10)
-      assert.isFalse(settings.has('AUTH_PROVIDERS_FILE'))
-      assert.isTrue(settings.has('AUTH_PROVIDERS'))
-      const actual = settings.get('AUTH_PROVIDERS')
-      assert.lengthOf(actual, 1)
-      assert.property(actual[0], 'label')
-      assert.equal(actual[0].label, 'Acme Identity')
-      assert.equal(actual[0].protocol, 'saml')
-      assert.isTrue(readStub.calledOnce)
-    } finally {
-      readStub.restore()
-      temporaryRepository.clear()
-    }
-  })
-
-  it('should read IdP configuration into settings', async function () {
-    // arrange
-    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
-      const results = new Map()
-      results.set('IDP_CONFIG_FILE', 'routes/samlidp.cjs')
-      return results
-    })
-    try {
-      // act
-      const settings = await usecase()
-      // assert
-      assert.lengthOf(settings, 10)
-      assert.isFalse(settings.has('IDP_CONFIG_FILE'))
-      assert.isTrue(settings.has('IDP_CONFIG'))
-      const idpConfig = settings.get('IDP_CONFIG')
-      assert.property(idpConfig, 'urn:swarm-example:sp')
-      assert.isTrue(readStub.calledOnce)
-    } finally {
-      readStub.restore()
     }
   })
 

@@ -5,7 +5,6 @@ import * as fs from 'node:fs/promises'
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
-import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
@@ -17,12 +16,12 @@ import TidyAuthProviders from 'helix-auth-svc/lib/features/login/domain/usecases
 describe('GetAuthProviders use case', function () {
   const temporaryRepository = new MapSettingsRepository()
   // cannot actually write to process.env, use map instead
-  const dotenvRepository = new MapSettingsRepository()
+  const configuredRepository = new MapSettingsRepository()
   const defaultsRepository = new DefaultsEnvRepository()
   // construct a realistic repository so GetAuthProviders works properly
   const settingsRepository = new MergedSettingsRepository({
     temporaryRepository,
-    dotenvRepository,
+    configuredRepository,
     defaultsRepository
   })
   let usecase
@@ -57,20 +56,6 @@ describe('GetAuthProviders use case', function () {
     }), AssertionError)
   })
 
-  it('should raise error for malformed input', async function () {
-    // arrange
-    const providers = '["not_valid": "json"]'
-    temporaryRepository.set('AUTH_PROVIDERS', providers)
-    try {
-      // act
-      await usecase()
-      assert.fail('should have raised error')
-    } catch (err) {
-      // assert
-      assert.include(err.message, 'Unexpected token')
-    }
-  })
-
   it('should ignore default settings when no AUTH_PROVIDERS', async function () {
     // arrange
     // act
@@ -81,14 +66,12 @@ describe('GetAuthProviders use case', function () {
 
   it('should return a SAML provider with defaults', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        metadataUrl: 'https://saml.exmample.com',
-        protocol: 'saml'
-      }]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    const providers = [{
+      label: 'Acme Identity',
+      metadataUrl: 'https://saml.exmample.com',
+      protocol: 'saml'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     // act
     const result = await usecase()
     // assert
@@ -125,16 +108,14 @@ describe('GetAuthProviders use case', function () {
 
   it('should return an OIDC provider with defaults', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Veritas Solutions',
-        issuerUri: 'https://oidc.exmample.com',
-        clientId: 'client-id',
-        clientSecret: 'client-secret',
-        protocol: 'oidc'
-      }]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    const providers = [{
+      label: 'Veritas Solutions',
+      issuerUri: 'https://oidc.exmample.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      protocol: 'oidc'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     // act
     const result = await usecase()
     // assert
@@ -149,16 +130,14 @@ describe('GetAuthProviders use case', function () {
   it('should not read file properties if so desired', async function () {
     // arrange
     await fs.writeFile('client-secret.txt', 'my client secret')
-    const providers = {
-      providers: [{
-        label: 'Veritas Solutions',
-        issuerUri: 'https://oidc.exmample.com',
-        clientId: 'client-id',
-        clientSecretFile: 'client-secret.txt',
-        protocol: 'oidc'
-      }]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    const providers = [{
+      label: 'Veritas Solutions',
+      issuerUri: 'https://oidc.exmample.com',
+      clientId: 'client-id',
+      clientSecretFile: 'client-secret.txt',
+      protocol: 'oidc'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     // act
     const result = await usecase({ loadFiles: false })
     // assert
@@ -193,15 +172,13 @@ describe('GetAuthProviders use case', function () {
 
   it('should assign protocol if missing', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        issuerUri: 'https://example.com',
-        clientId: 'client-id',
-        clientSecret: 'client-secret'
-      }]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    const providers = [{
+      label: 'Acme Identity',
+      issuerUri: 'https://example.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     // act
     const result = await usecase()
     // assert
@@ -213,17 +190,15 @@ describe('GetAuthProviders use case', function () {
 
   it('should ignore OIDC defaults if properties defined', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        issuerUri: 'https://oidc.example.com',
-        clientId: 'client-id',
-        clientSecret: 'client-secret',
-        selectAccount: true,
-        signingAlgo: 'HS512'
-      }]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    const providers = [{
+      label: 'Acme Identity',
+      issuerUri: 'https://oidc.example.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      selectAccount: true,
+      signingAlgo: 'HS512'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     // act
     const result = await usecase()
     // assert
@@ -238,15 +213,13 @@ describe('GetAuthProviders use case', function () {
 
   it('should ignore SAML defaults if properties defined', async function () {
     // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        metadataUrl: 'https://saml.example.com',
-        nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
-        authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession'
-      }]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    const providers = [{
+      label: 'Acme Identity',
+      metadataUrl: 'https://saml.example.com',
+      nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+      authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     // act
     const result = await usecase()
     // assert
@@ -260,28 +233,26 @@ describe('GetAuthProviders use case', function () {
 
   it('should assign unique identifier to each provider', async function () {
     // arrange
-    const providers = {
-      providers: [
-        {
-          label: 'Azure',
-          metadataUrl: 'https://saml.example.com',
-          protocol: 'saml'
-        },
-        {
-          label: 'Okta',
-          issuerUri: 'https://example.com',
-          clientId: 'client-id',
-          clientSecret: 'client-secret',
-          protocol: 'oidc'
-        },
-        {
-          label: 'Auth0',
-          metadataUrl: 'https://saml.example.com',
-          protocol: 'saml'
-        }
-      ]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
+    const providers = [
+      {
+        label: 'Azure',
+        metadataUrl: 'https://saml.example.com',
+        protocol: 'saml'
+      },
+      {
+        label: 'Okta',
+        issuerUri: 'https://example.com',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        protocol: 'oidc'
+      },
+      {
+        label: 'Auth0',
+        metadataUrl: 'https://saml.example.com',
+        protocol: 'saml'
+      }
+    ]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
     // act
     const result = await usecase()
     // assert
@@ -295,28 +266,6 @@ describe('GetAuthProviders use case', function () {
       }
     }
   })
-
-  it('should read providers from a file', async function () {
-    // arrange
-    const providersFile = temporaryFile({ extension: 'json' })
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        metadataUrl: 'https://saml.example.com',
-        protocol: 'saml'
-      }]
-    }
-    await fs.writeFile(providersFile, JSON.stringify(providers))
-    temporaryRepository.set('AUTH_PROVIDERS_FILE', providersFile)
-    // act
-    const result = await usecase()
-    // assert
-    assert.lengthOf(result, 1)
-    assert.property(result[0], 'id')
-    assert.equal(result[0].label, 'Acme Identity')
-    assert.equal(result[0].protocol, 'saml')
-  })
-
 
   it('should assign default and label properties', async function () {
     // arrange
@@ -335,27 +284,6 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].default, true)
   })
 
-  it('should decode the encoded properties', async function () {
-    // arrange
-    const providers = {
-      providers: [{
-        label: 'Acme Identity',
-        protocol: 'saml',
-        metadata: 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48RW50aXR5RGVzY3JpcHRvciBJRD0iXzA2MzJmMmJiLTI1NzUtNGRmNi04ZjhmLTE5NjYzMjUwY2VjYiIgZW50aXR5SUQ9Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcxOWQ4OGYzLWY5NTctNDRjZi05YWE1LTBhMWEzYTQ0ZjdiOS8iIHhtbG5zPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6bWV0YWRhdGEiPjwvRW50aXR5RGVzY3JpcHRvcj4='
-      }]
-    }
-    temporaryRepository.set('AUTH_PROVIDERS', JSON.stringify(providers))
-    // act
-    const result = await usecase()
-    // assert
-    assert.lengthOf(result, 1)
-    assert.equal(result[0].id, 'saml-0')
-    assert.equal(result[0].label, 'Acme Identity')
-    assert.equal(result[0].protocol, 'saml')
-    assert.isTrue(result[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
-    assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
-  })
-
   it('should ignore empty SAML_AUTHN_CONTEXT value', async function () {
     // arrange
     temporaryRepository.set('SAML_AUTHN_CONTEXT', '')
@@ -370,20 +298,5 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].protocol, 'saml')
     assert.equal(result[0].metadataUrl, 'https://saml.example.com/idp/metadata')
     assert.isUndefined(result[0].authnContext)
-  })
-
-  it('should decode the encoded classic properties', async function () {
-    // arrange
-    temporaryRepository.set('SAML_INFO_LABEL', 'Acme Identity')
-    temporaryRepository.set('SAML_IDP_METADATA', 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48RW50aXR5RGVzY3JpcHRvciBJRD0iXzA2MzJmMmJiLTI1NzUtNGRmNi04ZjhmLTE5NjYzMjUwY2VjYiIgZW50aXR5SUQ9Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcxOWQ4OGYzLWY5NTctNDRjZi05YWE1LTBhMWEzYTQ0ZjdiOS8iIHhtbG5zPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6bWV0YWRhdGEiPjwvRW50aXR5RGVzY3JpcHRvcj4=')
-    // act
-    const result = await usecase()
-    // assert
-    assert.lengthOf(result, 1)
-    assert.equal(result[0].id, 'saml-0')
-    assert.equal(result[0].label, 'Acme Identity')
-    assert.equal(result[0].protocol, 'saml')
-    assert.isTrue(result[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
-    assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
   })
 })
