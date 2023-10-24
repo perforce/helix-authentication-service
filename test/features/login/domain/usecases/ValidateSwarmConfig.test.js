@@ -454,4 +454,38 @@ return array(
     assert.equal(result.status, 'ok')
     assert.lengthOf(result.results, 0)
   })
+
+  it('should match sp entityId with wildcard', async function () {
+    // arrange
+    settingsRepository.set('CERT_FILE', 'certs/server.crt')
+    const idpConfig = {
+      'urn:swarm-*:sp': {
+        acsUrl: 'https://swarm.example.com/api/v10/session'
+      }
+    }
+    const usecase = ValidateSwarmConfig({ settingsRepository, getIdPConfiguration: () => idpConfig })
+    // act
+    const swarmConfig = `<?php
+return array(
+  'saml' => array(
+    'sp' => array(
+      'entityId' => 'urn:swarm-example:sp',
+      'assertionConsumerService' => array(
+        'url' => 'https://swarm.example.com/',
+      ),
+    ),
+    'idp' => array(
+      'entityId' => 'urn:auth-service:idp',
+      'singleSignOnService' => array(
+        'url' => 'https://has.example.com/saml/login',
+      ),
+      'x509cert' => '${certificateContents}',
+    ),
+  ),
+);`
+    const result = await usecase('https://has.example.com', swarmConfig)
+    // assert
+    assert.equal(result.status, 'ok')
+    assert.lengthOf(result.results, 0)
+  })
 })
