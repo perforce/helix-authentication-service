@@ -65,6 +65,12 @@ ca_cert_file = 'certs/ca.crt'
 #
 bearer_token = 'keyboard cat'
 
+# Path of a file containing the plain text form of the bearer token. Use this
+# instead of bearer_token to avoid having the shared secret exposed in the
+# configuration.
+#
+# bearer_token_file = undefined
+
 # The client identifier as provided by the OIDC identity provider.
 #
 # oidc_client_id = undefined
