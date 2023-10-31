@@ -13,11 +13,11 @@ Download and run the Windows-based installers for [Git](https://git-scm.com) and
 Installing the module dependencies for the authentication service is done from a command prompt. Open a **PowerShell** window (preferably as an _Administrator_) and change to the directory containing the authentication service, then run the following commands (note that **order matters** here):
 
 ```
-> cd helix-authentication-service
-> npm ci --omit=dev --omit=optional
-> npm -g install node-windows
-> npm link --omit=dev --omit=optional node-windows
-> node .\bin\install-windows-service.js
+cd helix-authentication-service
+npm ci --omit=dev --omit=optional
+npm -g install node-windows
+npm link --omit=dev --omit=optional node-windows
+node .\bin\install-windows-service.js
 ```
 
 If running those commands as a normal user, as opposed to an administrator, there will be several **User Access Control** prompts from Windows to request permission for the installation of the service.
@@ -27,8 +27,8 @@ The authentication service is now installed and running as a Windows service. If
 If the service does _not_ appear to be installed and running, then run the `uninstall` script and then install a second time. Ideally it would work the first time, but there seems to be an unknown issue that silently prevents the installation in some cases.
 
 ```
-> node .\bin\uninstall-windows-service.js
-> node .\bin\install-windows-service.js
+node .\bin\uninstall-windows-service.js
+node .\bin\install-windows-service.js
 ```
 
 ## Starting and Stopping the Service
@@ -36,7 +36,7 @@ If the service does _not_ appear to be installed and running, then run the `unin
 Once installed as a Windows service, with the name *Helix Authentication*, the authentication service can be started and stopped using the Windows service utilities. The **Services** application provides a graphical interface for this purpose, while the `NET` command is available from the command shell. For example, stopping the service from the command shell can be done using the `NET STOP` command, as shown below:
 
 ```
-> net stop helixauthentication.exe
+net stop helixauthentication.exe
 ```
 
 Similarly, the command `net start helixauthentication.exe` will start the service.
@@ -74,7 +74,7 @@ The authentication service itself also supports writing its own logging to the _
 An example of logging all messages at levels from `info` up to `error`, to the "SYSTEM" _events_ log, with a source named "Auth-Service", is shown below.
 
 ```javascript
-export default {
+module.exports = {
   level: 'info',
   transport: 'event',
   event: {
@@ -91,8 +91,8 @@ export default {
 Open the **PowerShell** and execute the following commands from the installation directory of the Helix Authentication Service.
 
 ```
-> net stop helixauthentication.exe
-> node .\bin\uninstall-windows-service.js
+net stop helixauthentication.exe
+node .\bin\uninstall-windows-service.js
 ```
 
 The Windows service can also be stopped from the **Services** application, where its name is _Helix Authentication_, however the `uninstall-windows-service.js` must still be run from the shell.
