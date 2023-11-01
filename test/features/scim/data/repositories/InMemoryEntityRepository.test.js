@@ -212,7 +212,7 @@ describe('InMemoryEntity repository', function () {
     const tUser = new User(userId, 'joeuser@work.com', 'Joe E. User')
     await repository.addUser(tUser)
     // act
-    const usecase = GetUsers({ entityRepository: repository })
+    const usecase = GetUsers({ getDomainLeader: () => null, entityRepository: repository })
     const query = new Query({
       filter: 'userName eq "emailuser@example.com"'
     })

@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -10,56 +10,106 @@ import GetGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/GetGroup.
 import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
 
 describe('GetGroup use case', function () {
-  let usecase
+  describe('single server', function () {
+    let usecase
 
-  before(function () {
-    const entityRepository = new EntityRepository()
-    usecase = GetGroup({ entityRepository: entityRepository })
-  })
-
-  after(function () {
-    sinon.restore()
-  })
-
-  it('should raise an error for invalid input', async function () {
-    assert.throws(() => GetGroup({ entityRepository: null }), AssertionError)
-    try {
-      await usecase(null)
-      assert.fail('should have raised error')
-    } catch (err) {
-      assert.instanceOf(err, AssertionError)
-    }
-  })
-
-  it('should return null for a missing group entity', function () {
-    // arrange
-    // eslint-disable-next-line no-unused-vars
-    const stub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((id) => {
-      return null
+    before(function () {
+      const entityRepository = new EntityRepository()
+      usecase = GetGroup({
+        getDomainLeader: () => { return null },
+        entityRepository: entityRepository
+      })
     })
-    // act
-    const user = usecase('staff')
-    // assert
-    assert.isNull(user)
-    assert.isTrue(stub.calledOnce)
-    stub.restore()
+
+    after(function () {
+      sinon.restore()
+    })
+
+    it('should raise an error for invalid input', async function () {
+      assert.throws(() => GetGroup({ getDomainLeader: {}, entityRepository: null }), AssertionError)
+      assert.throws(() => GetGroup({ getDomainLeader: null, entityRepository: {} }), AssertionError)
+      try {
+        await usecase(null)
+        assert.fail('should have raised error')
+      } catch (err) {
+        assert.include(err.message, 'display name must be defined')
+      }
+    })
+
+    it('should return null for a missing group entity', async function () {
+      // arrange
+      // eslint-disable-next-line no-unused-vars
+      const stub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((id) => {
+        return Promise.resolve(null)
+      })
+      // act
+      const group = await usecase('staff')
+      // assert
+      assert.isNull(group)
+      assert.isTrue(stub.calledOnce)
+      stub.restore()
+    })
+
+    it('should find an existing group entity', async function () {
+      // arrange
+      const tGroup = new Group('staff', ['sam', 'frodo'])
+      // eslint-disable-next-line no-unused-vars
+      const stub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((id) => {
+        return Promise.resolve(tGroup)
+      })
+      // act
+      const group = await usecase('staff')
+      // assert
+      assert.equal(group.displayName, 'staff')
+      assert.lengthOf(group.members, 2)
+      assert.isOk(group.members.find((e) => e === 'sam'))
+      assert.isOk(group.members.find((e) => e === 'frodo'))
+      assert.isTrue(stub.calledOnce)
+      stub.restore()
+    })
   })
 
-  it('should find an existing user entity', function () {
-    // arrange
-    const tGroup = new Group('staff', ['sam', 'frodo'])
-    // eslint-disable-next-line no-unused-vars
-    const stub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((id) => {
-      return tGroup
+  describe('multiple servers', function () {
+    let usecase
+
+    before(function () {
+      const entityRepository = new EntityRepository()
+      usecase = GetGroup({
+        getDomainLeader: () => {
+          return {
+            p4port: 'ssl:chicago:1666',
+            p4user: 'super',
+            p4passwd: 'secret123',
+            domains: ['canine'],
+            leader: ['canine']
+          }
+        },
+        entityRepository: entityRepository
+      })
     })
-    // act
-    const group = usecase('staff')
-    // assert
-    assert.equal(group.displayName, 'staff')
-    assert.lengthOf(group.members, 2)
-    assert.isOk(group.members.find((e) => e === 'sam'))
-    assert.isOk(group.members.find((e) => e === 'frodo'))
-    assert.isTrue(stub.calledOnce)
-    stub.restore()
+
+    after(function () {
+      sinon.restore()
+    })
+
+    it('should find existing group in leading domain', async function () {
+      // arrange
+      const tGroup = new Group('staff', ['sam', 'frodo'])
+      // eslint-disable-next-line no-unused-vars
+      const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((displayName, server) => {
+        return Promise.resolve(tGroup)
+      })
+      // act
+      const group = await usecase('staff', 'canine')
+      // assert
+      assert.equal(group.displayName, 'staff')
+      assert.isTrue(getStub.calledOnce)
+      sinon.assert.calledWith(
+        getStub,
+        sinon.match('staff'),
+        sinon.match.has('p4port', 'ssl:chicago:1666')
+      )
+      getStub.restore()
+    })
   })
 })

@@ -4,7 +4,7 @@
 import { spawn } from 'node:child_process'
 import { temporaryFile } from 'tempy'
 import { assert } from 'chai'
-import { after, before, describe, it } from 'mocha'
+import { after, afterEach, before, describe, it } from 'mocha'
 import mute from 'mute'
 import sinon from 'sinon'
 import LoadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
@@ -13,6 +13,7 @@ import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connector
 import RedisSentinel from 'helix-auth-svc/lib/features/login/data/connectors/RedisSentinel.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { HelixEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/HelixEntityRepository.js'
+import GetProvisioningServers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetProvisioningServers.js'
 import * as helpers from 'helix-auth-svc/test/helpers.js'
 import * as runner from 'helix-auth-svc/test/runner.js'
 import * as sut from 'helix-auth-svc/lib/status.js'
@@ -336,6 +337,8 @@ describe('Service status', function () {
   })
 
   describe('validatePerforce', function () {
+    const settingsRepository = new MapSettingsRepository()
+    const getProvisioningServers = GetProvisioningServers({ settingsRepository })
     let p4config
 
     before(async function () {
@@ -349,6 +352,10 @@ describe('Service status', function () {
         const p4 = helpers.makeP4(p4config)
         p4.cmdSync('logout')
       }
+    })
+
+    afterEach(function () {
+      settingsRepository.clear()
     })
 
     after(async function () {
@@ -365,12 +372,11 @@ describe('Service status', function () {
 
     it('should report not ok for bad p4port', async function () {
       // arrange
-      const settingsRepository = new MapSettingsRepository()
       // assumes gopher (port 70) is not running on localhost
       settingsRepository.set('P4PORT', 'ssl:localhost:70')
       settingsRepository.set('P4USER', 'bruno')
       settingsRepository.set('P4PASSWD', 'secret123')
-      const repository = new HelixEntityRepository({ settingsRepository })
+      const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
       // assert
@@ -379,11 +385,10 @@ describe('Service status', function () {
 
     it('should report not ok for wrong user', async function () {
       // arrange
-      const settingsRepository = new MapSettingsRepository()
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', 'nosuchuser')
       settingsRepository.set('P4PASSWD', 'secret123')
-      const repository = new HelixEntityRepository({ settingsRepository })
+      const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
       // assert
@@ -392,11 +397,10 @@ describe('Service status', function () {
 
     it('should report not ok for wrong password', async function () {
       // arrange
-      const settingsRepository = new MapSettingsRepository()
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', 'wrongpassword')
-      const repository = new HelixEntityRepository({ settingsRepository })
+      const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
       // assert
@@ -405,11 +409,10 @@ describe('Service status', function () {
 
     it('should report ok for working connection', async function () {
       // arrange
-      const settingsRepository = new MapSettingsRepository()
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
-      const repository = new HelixEntityRepository({ settingsRepository })
+      const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
       // assert

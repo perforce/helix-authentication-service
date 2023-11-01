@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -15,7 +15,11 @@ describe('UpdateUser use case', function () {
 
   before(function () {
     const entityRepository = new EntityRepository()
-    usecase = UpdateUser({ entityRepository: entityRepository })
+    usecase = UpdateUser({
+      getDomainLeader: () => { return null },
+      getDomainMembers: () => [],
+      entityRepository: entityRepository
+    })
   })
 
   after(function () {
@@ -23,18 +27,32 @@ describe('UpdateUser use case', function () {
   })
 
   it('should raise an error for invalid input', async function () {
-    assert.throws(() => UpdateUser({ entityRepository: null }), AssertionError)
+    assert.throws(() => UpdateUser({
+      getDomainLeader: null,
+      getDomainMembers: () => [],
+      entityRepository: {}
+    }), AssertionError)
+    assert.throws(() => UpdateUser({
+      getDomainLeader: () => { return null },
+      getDomainMembers: null,
+      entityRepository: {}
+    }), AssertionError)
+    assert.throws(() => UpdateUser({
+      getDomainLeader: () => { return null },
+      getDomainMembers: () => [],
+      entityRepository: null
+    }), AssertionError)
     try {
       await usecase(null)
       assert.fail('should have raised error')
     } catch (err) {
-      assert.instanceOf(err, AssertionError)
+      assert.include(err.message, 'username must be defined')
     }
     try {
       await usecase('username', null)
       assert.fail('should have raised error')
     } catch (err) {
-      assert.instanceOf(err, AssertionError)
+      assert.include(err.message, 'user record must be defined')
     }
   })
 
@@ -42,11 +60,11 @@ describe('UpdateUser use case', function () {
     // arrange
     const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
       assert.equal(username, 'joeuser')
-      return null
+      return Promise.resolve(null)
     })
     const addStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
       assert.isNotNull(user)
-      return null
+      return Promise.resolve(null)
     })
     // act
     try {
@@ -68,15 +86,16 @@ describe('UpdateUser use case', function () {
     const tUser = new User('joeuser', 'joeuser@example.com', 'Joe Q. User')
     const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
       assert.equal(username, 'joeuser')
-      return tUser
+      return Promise.resolve(tUser)
     })
     const updateStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
       assert.isNotNull(user)
-      return null
+      return Promise.resolve(user)
     })
     // act
-    await usecase('joeuser', tUser)
+    const updated = await usecase('joeuser', tUser)
     // assert
+    assert.propertyVal(updated, 'username', 'joeuser')
     assert.isTrue(getStub.calledOnce)
     assert.isTrue(updateStub.calledOnce)
     getStub.restore()
@@ -87,16 +106,17 @@ describe('UpdateUser use case', function () {
     // arrange
     const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
       assert.equal(username, 'joeuser')
-      return new User('joeuser', 'joeuser@example.com', 'Joe Q. User')
+      return Promise.resolve(new User('joeuser', 'joeuser@example.com', 'Joe Q. User'))
     })
     const renameStub = sinon.stub(EntityRepository.prototype, 'renameUser').callsFake((alt, neu) => {
       assert.equal(alt, 'joeuser')
       assert.equal(neu, 'userjoe')
+      return Promise.resolve()
     })
     const updateStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
       assert.isNotNull(user)
       assert.equal(user.username, 'userjoe')
-      return user
+      return Promise.resolve(user)
     })
     // act
     const tUser = new User('userjoe', 'joeuser@example.com', 'Joe Q. User')
@@ -109,5 +129,73 @@ describe('UpdateUser use case', function () {
     getStub.restore()
     renameStub.restore()
     updateStub.restore()
+  })
+
+  describe('multiple servers', function () {
+    let usecase
+
+    before(function () {
+      const entityRepository = new EntityRepository()
+      usecase = UpdateUser({
+        getDomainLeader: () => {
+          return {
+            p4port: 'ssl:chicago:1666',
+            p4user: 'super',
+            p4passwd: 'secret123',
+            domains: ['canine'],
+            leader: ['canine']
+          }
+        },
+        getDomainMembers: () => [
+          {
+            p4port: 'ssl:tokyo:1666',
+            p4user: 'super',
+            p4passwd: 'secret123',
+            domains: ['canine']
+          }
+        ],
+        entityRepository: entityRepository
+      })
+    })
+
+    after(function () {
+      sinon.restore()
+    })
+
+    it('should update user on all domain members', async function () {
+      // arrange
+      const tUser = new User('joeuser', 'joeuser@example.com', 'Joe Q. User')
+      const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
+        assert.equal(username, 'joeuser')
+        return Promise.resolve(tUser)
+      })
+      const updateStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
+        assert.isNotNull(user)
+        return Promise.resolve(user)
+      })
+      // act
+      const updated = await usecase('joeuser', tUser)
+      // assert
+      assert.propertyVal(updated, 'username', 'joeuser')
+      assert.isTrue(getStub.calledOnce)
+      sinon.assert.calledWith(
+        getStub,
+        sinon.match('joeuser'),
+        sinon.match.has('p4port', 'ssl:chicago:1666')
+      )
+      assert.isTrue(updateStub.calledTwice)
+      sinon.assert.calledWith(
+        updateStub,
+        sinon.match.has('userName', 'joeuser'),
+        sinon.match.has('p4port', 'ssl:chicago:1666')
+      )
+      sinon.assert.calledWith(
+        updateStub,
+        sinon.match.has('userName', 'joeuser'),
+        sinon.match.has('p4port', 'ssl:tokyo:1666')
+      )
+      getStub.restore()
+      updateStub.restore()
+    })
   })
 })

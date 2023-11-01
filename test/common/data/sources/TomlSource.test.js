@@ -99,12 +99,24 @@ acs_urls = [
   'http://swarm.example.com/chicago/api/v10/session',
   'http://swarm.example.com/tokyo/api/v10/session'
 ]
+
+[provisioning]
+[[provisioning.providers]]
+bearer_token_file = "feline-token.txt"
+domain = "feline"
+
+[[provisioning.servers]]
+p4port = "ssl:chicago:1666"
+p4user = "super"
+p4passwd = "2E7092CC2CA6BCAC74EB364BF4C4AD99"
+domains = [ "feline" ]
+leader = [ "feline" ]
 `)
     const repository = new TomlSource({ tomlFile })
     // act
     const settings = await repository.read()
     // assert
-    assert.lengthOf(settings, 5)
+    assert.lengthOf(settings, 6)
     assert.equal(settings.get('DEBUG'), true)
     assert.equal(settings.get('SVC_BASE_URI'), 'https://has.example.com')
     const providers = settings.get('AUTH_PROVIDERS')
@@ -124,6 +136,15 @@ acs_urls = [
     assert.lengthOf(idpConfig['urn:swarm-multiple:sp'].acsUrls, 2)
     assert.equal(idpConfig['urn:swarm-multiple:sp'].acsUrls[0], 'http://swarm.example.com/chicago/api/v10/session')
     assert.equal(idpConfig['urn:swarm-multiple:sp'].acsUrls[1], 'http://swarm.example.com/tokyo/api/v10/session')
+    const provisioning = settings.get('PROVISIONING')
+    assert.isArray(provisioning.providers)
+    assert.lengthOf(provisioning.providers, 1)
+    assert.property(provisioning.providers[0], 'bearerTokenFile')
+    assert.property(provisioning.providers[0], 'domain')
+    assert.isArray(provisioning.servers)
+    assert.lengthOf(provisioning.servers, 1)
+    assert.isArray(provisioning.servers[0].domains)
+    assert.lengthOf(provisioning.servers[0].domains, 1)
   })
 
   it('should be okay with ENV naming convention', async function () {

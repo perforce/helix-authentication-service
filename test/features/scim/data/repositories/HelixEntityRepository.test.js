@@ -15,10 +15,14 @@ import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
 import GetUsers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetUsers.js'
 import PatchGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/PatchGroup.js'
 import { HelixEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/HelixEntityRepository.js'
+import GetProvisioningServers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetProvisioningServers.js'
 import p4pkg from 'p4api'
 const { P4 } = p4pkg
 
 describe('HelixEntity repository', function () {
+  const settingsRepository = new MapSettingsRepository()
+  const getProvisioningServers = GetProvisioningServers({ settingsRepository })
+
   before(function () {
     if (process.env.UNIT_ONLY) {
       this.skip()
@@ -26,16 +30,15 @@ describe('HelixEntity repository', function () {
   })
 
   describe('Connect using ticket', function () {
-    const settings = new MapSettingsRepository()
     let p4config
 
     before(async function () {
       this.timeout(30000)
       p4config = await runner.startServer('./tmp/p4d/tickets')
       helpers.establishSuper(p4config)
-      settings.set('P4PORT', p4config.port)
-      settings.set('P4USER', p4config.user)
-      settings.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', p4config.password)
     })
 
     after(async function () {
@@ -50,15 +53,15 @@ describe('HelixEntity repository', function () {
       })
       const logoutCmd = await p4.cmd('logout -a')
       assert.isOk(logoutCmd.info[0].data)
-      settings.set('P4PASSWD', 'CD9FC48D2F36752258C11CDBBD094EBC')
-      const sut = new HelixEntityRepository({ settingsRepository: settings })
+      settingsRepository.set('P4PASSWD', 'CD9FC48D2F36752258C11CDBBD094EBC')
+      const sut = new HelixEntityRepository({ getProvisioningServers })
       try {
         await sut.getUsers()
         assert.fail('should have raised Error')
       } catch (err) {
         assert.include(err.message, 'Password invalid')
       }
-      settings.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4PASSWD', p4config.password)
     })
 
     it('should accept ticket with authenticated session', async function () {
@@ -71,17 +74,17 @@ describe('HelixEntity repository', function () {
       // is extremely difficult if not impossible to do this programmatically.
       const ticketCmd = await p4.cmd('login -p', 'p8ssword')
       assert.isOk(ticketCmd.info[0].data)
-      settings.set('P4PASSWD', ticketCmd.info[0].data)
+      settingsRepository.set('P4PASSWD', ticketCmd.info[0].data)
       const loginCmd = await p4.cmd('login', 'p8ssword')
       assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
-      const sut = new HelixEntityRepository({ settingsRepository: settings })
+      const sut = new HelixEntityRepository({ getProvisioningServers })
       const users = await sut.getUsers()
       assert.isNotNull(users)
-      settings.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4PASSWD', p4config.password)
     })
   })
 
-  describe('Non-SSL', function () {
+  describe('Basic Non-SSL', function () {
     let repository
     let p4config
 
@@ -89,11 +92,11 @@ describe('HelixEntity repository', function () {
       this.timeout(30000)
       p4config = await runner.startServer('./tmp/p4d/non-ssl-repo')
       helpers.establishSuper(p4config)
-      const settings = new MapSettingsRepository()
-      settings.set('P4PORT', p4config.port)
-      settings.set('P4USER', p4config.user)
-      settings.set('P4PASSWD', p4config.password)
-      repository = new HelixEntityRepository({ settingsRepository: settings })
+      settingsRepository.clear()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', p4config.password)
+      repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
     after(async function () {
@@ -420,7 +423,7 @@ describe('HelixEntity repository', function () {
       const tUser = new User(userId, 'joeuser@work.com', 'Joe E. User')
       await repository.addUser(tUser)
       // act
-      const usecase = GetUsers({ entityRepository: repository })
+      const usecase = GetUsers({ getDomainLeader: () => null, entityRepository: repository })
       const query = new Query({
         filter: 'userName eq "emailuser@example.com"'
       })
@@ -589,7 +592,11 @@ describe('HelixEntity repository', function () {
     it('should ignore no-op changes to a group', async function () {
       this.timeout(10000)
       // arrange
-      const usecase = PatchGroup({ entityRepository: repository })
+      const usecase = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
       // act
       const patch = {
         schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
@@ -642,6 +649,124 @@ describe('HelixEntity repository', function () {
     })
   })
 
+  describe('Users and Domains ', function () {
+    let repository
+    let p4config
+
+    before(async function () {
+      this.timeout(30000)
+      p4config = await runner.startServer('./tmp/p4d/domain-repo')
+      helpers.establishSuper(p4config)
+      settingsRepository.clear()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', p4config.password)
+      repository = new HelixEntityRepository({ getProvisioningServers })
+    })
+
+    after(async function () {
+      this.timeout(30000)
+      await runner.stopServer(p4config)
+    })
+
+    it('should add user for domain A with externalId idA', async function () {
+      this.timeout(10000)
+      // arrange
+      const tUser = new User('adduserA', 'joe@example.com', 'Joe Q. User')
+      tUser.externalId = 'idA'
+      tUser.password = 'secret123'
+      // act
+      const added = await repository.addUser(tUser, undefined, 'A')
+      // assert
+      assert.instanceOf(added, UserModel)
+      assert.equal(added.id, 'user-adduserA')
+    })
+
+    it('should retrieve user with appropriate externalId', async function () {
+      this.timeout(10000)
+      // arrange
+      // act
+      const domainA = await repository.getUser('adduserA', undefined, 'A')
+      const domainB = await repository.getUser('adduserA', undefined, 'B')
+      const domainNone = await repository.getUser('adduserA')
+      // assert
+      assert.instanceOf(domainA, UserModel)
+      assert.equal(domainA.id, 'user-adduserA')
+      assert.equal(domainA.externalId, 'idA')
+      assert.equal(domainA.email, 'joe@example.com')
+      assert.instanceOf(domainB, UserModel)
+      assert.equal(domainB.id, 'user-adduserA')
+      assert.isUndefined(domainB.externalId)
+      assert.equal(domainB.email, 'joe@example.com')
+      assert.instanceOf(domainNone, UserModel)
+      assert.equal(domainNone.id, 'user-adduserA')
+      assert.isUndefined(domainNone.externalId)
+      assert.equal(domainNone.email, 'joe@example.com')
+    })
+
+    it('should update and return user with additional externalId', async function () {
+      this.timeout(10000)
+      // arrange
+      // act
+      const original = await repository.getUser('adduserA', undefined, 'B')
+      original.externalId = 'idB'
+      await repository.updateUser(original, undefined, 'B')
+      const domainB = await repository.getUser('adduserA', undefined, 'B')
+      // assert
+      assert.instanceOf(domainB, UserModel)
+      assert.equal(domainB.id, 'user-adduserA')
+      assert.equal(domainB.externalId, 'idB')
+      assert.equal(domainB.email, 'joe@example.com')
+    })
+
+    it('should retrieve all users with appropriate externalId', async function () {
+      this.timeout(10000)
+      // arrange
+      const query = new Query()
+      // act
+      const alldomainA = await repository.getUsers(query, undefined, 'A')
+      const alldomainB = await repository.getUsers(query, undefined, 'B')
+      const domainA = alldomainA.filter((e) => e.userName !== 'bruno')
+      const domainB = alldomainB.filter((e) => e.userName !== 'bruno')
+      // assert
+      assert.lengthOf(domainA, 1)
+      assert.lengthOf(domainB, 1)
+      assert.equal(domainA[0].id, 'user-adduserA')
+      assert.equal(domainA[0].externalId, 'idA')
+      assert.equal(domainA[0].email, 'joe@example.com')
+      assert.equal(domainB[0].id, 'user-adduserA')
+      assert.equal(domainB[0].externalId, 'idB')
+      assert.equal(domainB[0].email, 'joe@example.com')
+    })
+
+    it('should remove externalId for specific domain', async function () {
+      this.timeout(10000)
+      // arrange
+      // act
+      const original = await repository.getUser('adduserA', undefined, 'B')
+      original.externalId = undefined
+      await repository.updateUser(original, undefined, 'B')
+      const domainB = await repository.getUser('adduserA', undefined, 'B')
+      // assert
+      assert.instanceOf(domainB, UserModel)
+      assert.equal(domainB.id, 'user-adduserA')
+      assert.isUndefined(domainB.externalId)
+      assert.equal(domainB.email, 'joe@example.com')
+    })
+
+    it('should retrieve user externalId for domain A', async function () {
+      this.timeout(10000)
+      // arrange
+      // act
+      const domainA = await repository.getUser('adduserA', undefined, 'A')
+      // assert
+      assert.instanceOf(domainA, UserModel)
+      assert.equal(domainA.id, 'user-adduserA')
+      assert.equal(domainA.externalId, 'idA')
+      assert.equal(domainA.email, 'joe@example.com')
+    })
+  })
+
   describe('Missing P4PASSWD', function () {
     let repository
     let p4config
@@ -649,10 +774,10 @@ describe('HelixEntity repository', function () {
     before(async function () {
       this.timeout(30000)
       p4config = await runner.startSslServer('./tmp/p4d/ssl-passwd')
-      const settings = new MapSettingsRepository()
-      settings.set('P4PORT', p4config.port)
-      settings.set('P4USER', p4config.user)
-      repository = new HelixEntityRepository({ settingsRepository: settings })
+      settingsRepository.clear()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
     after(async function () {
@@ -668,7 +793,7 @@ describe('HelixEntity repository', function () {
         await repository.getUsers(query)
         assert.fail('should have raised Error')
       } catch (err) {
-        assert.include(err.message, 'P4PASSWD not specified')
+        assert.equal(err.message, 'server p4passwd not specified')
       }
     })
   })
@@ -680,11 +805,11 @@ describe('HelixEntity repository', function () {
     before(async function () {
       this.timeout(30000)
       p4config = await runner.startSslServer('./tmp/p4d/ssl-untrust')
-      const settings = new MapSettingsRepository()
-      settings.set('P4PORT', p4config.port)
-      settings.set('P4USER', p4config.user)
-      settings.set('P4PASSWD', p4config.password)
-      repository = new HelixEntityRepository({ settingsRepository: settings })
+      settingsRepository.clear()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', p4config.password)
+      repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
     after(async function () {
@@ -714,11 +839,11 @@ describe('HelixEntity repository', function () {
       p4config = await runner.startSslServer('./tmp/p4d/ssl-trust')
       helpers.establishTrust(p4config)
       helpers.establishSuper(p4config)
-      const settings = new MapSettingsRepository()
-      settings.set('P4PORT', p4config.port)
-      settings.set('P4USER', p4config.user)
-      settings.set('P4PASSWD', p4config.password)
-      repository = new HelixEntityRepository({ settingsRepository: settings })
+      settingsRepository.clear()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', p4config.password)
+      repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
     after(async function () {
