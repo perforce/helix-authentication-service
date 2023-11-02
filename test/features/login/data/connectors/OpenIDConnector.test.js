@@ -32,7 +32,7 @@ describe('OpenID connector', function () {
       await connector.ping()
       assert.fail('should have raised an error')
     } catch (err) {
-      assert.include(err.toString(), 'ECONNREFUSED')
+      assert.equal(err.code, 'ECONNREFUSED')
     }
   })
 
