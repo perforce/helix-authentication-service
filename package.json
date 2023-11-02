@@ -7,7 +7,7 @@
   },
   "type": "module",
   "engines": {
-    "node": "^14.13.1 || >=16.0.0"
+    "node": "^18.0.0 || >=21.0.0"
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,7 @@
   "dependencies": {
     "@node-saml/node-saml": "^4.0.4",
     "@node-saml/passport-saml": "^4.0.4",
-    "awilix": "^8.0.0",
+    "awilix": "^9.0.0",
     "connect-redis": "^7.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.1.2",
@@ -61,7 +61,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-saml-metadata": "^3.1.2",
     "samlp": "^7.0.0",
-    "scim-patch": "^0.7.0",
+    "scim-patch": "^0.8.0",
     "scim-query-filter-parser": "^2.0.4",
     "smol-toml": "^1.1.2",
     "ulid": "^2.3.0",
@@ -71,7 +71,7 @@
   "devDependencies": {
     "chai": "^4.3.7",
     "eslint": "^8.41.0",
-    "eslint-plugin-unicorn": "^48.0.0",
+    "eslint-plugin-unicorn": "^49.0.0",
     "geckodriver": "^4.0.2",
     "get-port": "^7.0.0",
     "license-checker": "^25.0.1",
