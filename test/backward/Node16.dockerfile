@@ -16,6 +16,7 @@ COPY certs certs
 COPY containers containers
 COPY defaults.env defaults.env
 COPY lib lib
+COPY logging.config.cjs .
 COPY package.json .
 COPY package-lock.json .
 COPY public public
