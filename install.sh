@@ -10,7 +10,7 @@ CREATE_USER=true
 ALLOW_ROOT=false
 HOMEDIR=/opt/perforce
 UPGRADE_NODE=false
-NODE_VERSION=18
+NODE_VERSION=20
 INSTALL_SERVICE=true
 
 # Print arguments to STDERR and exit.
@@ -156,10 +156,10 @@ function detect_platform() {
         PLATFORM=redhat
     elif [[ "$ID" == 'ubuntu' ]]; then
         PLATFORM=debian
-        CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
-        if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
-            NODE_VERSION=16
-        fi
+        # CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
+        # if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
+        #     NODE_VERSION=16
+        # fi
     fi
 }
 

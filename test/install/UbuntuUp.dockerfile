@@ -15,11 +15,11 @@ RUN apt-get -q update --fix-missing && \
 RUN mkdir -p /etc/apt/keyrings
 ADD https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key nodesource-repo.gpg.key
 RUN gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg nodesource-repo.gpg.key
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
 RUN apt-get -q update
 RUN apt-get -q -y install nodejs
 RUN test -f /usr/bin/node
-RUN node --version | grep -Eq '^v16\.'
+RUN node --version | grep -Eq '^v18\.'
 
 # install (and configure) script(s) want to run as non-root user, and npm
 # expects a home directory that the user has permissions to write to
@@ -38,7 +38,7 @@ RUN tar zxf helix-authentication-service.tgz && \
 RUN ./helix-auth-svc/install.sh -n --no-create-user --no-systemd --upgrade
 
 # ensure latest version of node has been installed as expected
-RUN node --version | grep -Eq '^v18\.'
+RUN node --version | grep -Eq '^v20\.'
 
 # run the configure script and set up OIDC
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \

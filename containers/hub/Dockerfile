@@ -33,7 +33,7 @@ RUN apt-get update && \
 #
 # build the smallest feasible image for the service
 #
-FROM node:18-slim
+FROM node:20-slim
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl git

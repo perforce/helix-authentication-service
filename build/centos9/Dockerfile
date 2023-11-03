@@ -17,7 +17,7 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 #
 # install build and packaging prerequisites
 #
-RUN yum install -y https://rpm.nodesource.com/pub_18.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+RUN yum install -y https://rpm.nodesource.com/pub_20.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
 RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
 RUN yum install -y rpmdevtools rpm-build
 

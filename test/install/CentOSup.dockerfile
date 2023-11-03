@@ -11,10 +11,10 @@ FROM rockylinux:8
 RUN yum -q -y install findutils sudo which
 
 # install the previous LTS version of Node.js via package
-RUN yum install -y https://rpm.nodesource.com/pub_16.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+RUN yum install -y https://rpm.nodesource.com/pub_18.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
 RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
 RUN test -f /usr/bin/node
-RUN node --version | grep -Eq '^v16\.'
+RUN node --version | grep -Eq '^v18\.'
 
 # install (and configure) script(s) want to run as non-root user, and npm
 # expects a home directory that the user has permissions to write to
@@ -33,7 +33,7 @@ RUN tar zxf helix-authentication-service.tgz && \
 RUN ./helix-auth-svc/install.sh -n --no-create-user --no-systemd --upgrade
 
 # ensure latest version of node has been installed as expected
-RUN node --version | grep -Eq '^v18\.'
+RUN node --version | grep -Eq '^v20\.'
 
 # run the configure script and set up OIDC
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
