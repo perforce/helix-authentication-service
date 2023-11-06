@@ -284,6 +284,59 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].default, true)
   })
 
+  it('should accept plaintext metadata without decoding', async function () {
+    // arrange
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      metadata: '<?xml version="1.0" encoding="utf-8"?><EntityDescriptor ID="_0632f2bb-2575-4df6-8f8f-19663250cecb" entityID="https://sts.windows.net/719d88f3-f957-44cf-9aa5-0a1a3a44f7b9/" xmlns="urn:oasis:names:tc:SAML:2.0:metadata"></EntityDescriptor>'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'saml-0')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'saml')
+    assert.isTrue(result[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
+    assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
+  })
+
+  it('should decode metadata using old config format', async function () {
+    // arrange
+    const providers = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      metadata: 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48RW50aXR5RGVzY3JpcHRvciBJRD0iXzA2MzJmMmJiLTI1NzUtNGRmNi04ZjhmLTE5NjYzMjUwY2VjYiIgZW50aXR5SUQ9Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcxOWQ4OGYzLWY5NTctNDRjZi05YWE1LTBhMWEzYTQ0ZjdiOS8iIHhtbG5zPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6bWV0YWRhdGEiPjwvRW50aXR5RGVzY3JpcHRvcj4='
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'saml-0')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'saml')
+    assert.isTrue(result[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
+    assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
+  })
+
+  it('should decode classic metadata using old config format', async function () {
+    // arrange
+    temporaryRepository.set('SAML_INFO_LABEL', 'Acme Identity')
+    temporaryRepository.set('SAML_IDP_METADATA', 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48RW50aXR5RGVzY3JpcHRvciBJRD0iXzA2MzJmMmJiLTI1NzUtNGRmNi04ZjhmLTE5NjYzMjUwY2VjYiIgZW50aXR5SUQ9Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcxOWQ4OGYzLWY5NTctNDRjZi05YWE1LTBhMWEzYTQ0ZjdiOS8iIHhtbG5zPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6bWV0YWRhdGEiPjwvRW50aXR5RGVzY3JpcHRvcj4=')
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'saml-0')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'saml')
+    assert.isTrue(result[0].metadata.startsWith('<?xml version="1.0" encoding="utf-8"?>'))
+    assert.isTrue(result[0].metadata.endsWith('</EntityDescriptor>'))
+  })
+
   it('should ignore empty SAML_AUTHN_CONTEXT value', async function () {
     // arrange
     temporaryRepository.set('SAML_AUTHN_CONTEXT', '')
