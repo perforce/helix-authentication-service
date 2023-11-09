@@ -78,6 +78,10 @@ When using a reverse proxy, bear in mind that the proxy will likely have a set a
 1. Terminate the TLS connection to offload that work from the service.
 1. Use the session cookie for session affinity with multiple instances.
 1. Set request headers that allow Express.js to detect the effective protocol.
+1. Pass the client TLS certificate to the backend using a specific HTTP header.
+1. Enforce rate limits on requests to specific API endpoints on the backend.
+
+By default, HAProxy limits request sizes to `16,384` bytes which protects the backend server from abuse by clients that send large amounts of data. See the `tune.bufsize` setting in the documentation for details and caveats with regards to changing the value.
 
 ### NGINX
 
