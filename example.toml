@@ -498,3 +498,31 @@ key_file = 'certs/server.key'
 # Swarm configuration with respect to SAML integration.
 #
 # validate_enabled = false
+
+#
+# User provisioning configuration that supports multiple cloud service providers
+# with one or more Helix Core servers. See the documentation for details on the
+# configuration and usage.
+#
+
+# [provisioning]
+# [[provisioning.providers]]
+# bearer_token_file = "feline-token.txt"
+# domain = "feline"
+
+# [[provisioning.providers]]
+# bearer_token_file = "canine-token.txt"
+# domain = "canine"
+
+# [[provisioning.servers]]
+# p4port = "ssl:chicago:1666"
+# p4user = "super"
+# p4passwd = "2E7092CC2CA6BCAC74EB364BF4C4AD99"
+# domains = [ "feline", "canine" ]
+# leader = [ "canine" ]
+
+# [[provisioning.servers]]
+# p4port = "ssl:tokyo:1666"
+# p4user = "super"
+# p4passwd = "C8478F3F32B62A84731ADDB5A2443E68"
+# domains = [ "canine" ]
