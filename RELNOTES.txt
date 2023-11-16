@@ -57,6 +57,14 @@ Supported Platforms
     HAS is known to work on the Windows systems listed above.
 
 
+Important Platform End-of-Life Notice
+
+    HAS will no longer support Node.js v16 as of the next release (2024.2).
+    This specifically impacts the following platforms:
+        Amazon Linux 2
+        CentOS/RHEL 7
+
+
 Requirements
 
     Node.js v20 (LTS)
