@@ -79,4 +79,45 @@ module.exports = {
     assert.equal(logger.level, 'warn')
     assert.isFalse(logger.exitOnError)
   })
+
+  it('should return a silent logger for missing section', async function () {
+    settingsRepository.set('LOGGING', `// commment
+module.exports = {
+  level: 'warn',
+  transport: 'file',
+  file: {
+    filename: 'auth-svc.log',
+    maxsize: 1048576,
+    maxfiles: 4
+  }
+}
+`)
+    const sut = ConstructLogger({ settingsRepository })
+    const logger = await sut('scim')
+    assert.isDefined(logger)
+    assert.equal(logger.level, 'error')
+    assert.isTrue(logger.silent)
+  })
+
+  it('should construct logger from a named sub-section', async function () {
+    settingsRepository.set('LOGGING', {
+      level: 'warn',
+      transport: 'console',
+      scim: {
+        level: 'info',
+        transport: 'file',
+        file: {
+          filename: 'provisioning.log',
+          format: 'json',
+          maxsize: 1048576,
+          maxfiles: 4
+        },
+      }
+    })
+    const sut = ConstructLogger({ settingsRepository })
+    const logger = await sut('scim')
+    assert.isDefined(logger)
+    assert.equal(logger.level, 'info')
+    assert.isFalse(logger.exitOnError)
+  })
 })

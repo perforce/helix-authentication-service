@@ -276,7 +276,7 @@ key_file = 'certs/server.key'
 #
 # instance_id = 'none'
 
-# Table defining the logging configuration. Set to "none" to disable logging.
+# Table defining the logging configuration. Use "logging = none" to disable logging.
 #
 # Changing this setting may require restarting the service.
 #
@@ -285,6 +285,18 @@ key_file = 'certs/server.key'
 # transport = 'file'
 # [logging.file]
 # filename = 'auth-svc.log'
+# maxsize = 1048576
+# maxfiles = 4
+#
+# Logging configuration specific to the user provisioning feature must be nested
+# within a table named 'scim' so that it may be configured appropriately.
+#
+# [logging.scim]
+# level = 'info'
+# transport = 'file'
+# format = 'json'
+# [logging.scim.file]
+# filename = 'provisioning.log'
 # maxsize = 1048576
 # maxfiles = 4
 

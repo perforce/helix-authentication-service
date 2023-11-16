@@ -12,5 +12,18 @@ module.exports = {
     filename: 'auth-svc.log',
     maxsize: 1048576,
     maxfiles: 4
+  },
+  // User-provisioning specific logging; features are identical to the top-level
+  // logging configuration, but contained within a property named 'scim' so that
+  // it may be configured appropriately.
+  scim: {
+    level: 'info',
+    transport: 'file',
+    format: 'json',
+    file: {
+      filename: 'provisioning.log',
+      maxsize: 1048576,
+      maxfiles: 4
+    },
   }
 }
