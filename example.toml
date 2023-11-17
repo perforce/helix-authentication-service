@@ -511,6 +511,10 @@ key_file = 'certs/server.key'
 #
 # validate_enabled = false
 
+# If set to 'true' (the default) then the /status route will be enabled.
+#
+# status_enabled = true
+
 #
 # User provisioning configuration that supports multiple cloud service providers
 # with one or more Helix Core servers. See the documentation for details on the
