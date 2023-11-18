@@ -35,7 +35,7 @@ router.get('/', async (req, res, next) => {
   }
 })
 
-async function validateOpenID () {
+async function validateOpenID() {
   const getAuthProviders = container.resolve('getAuthProviders')
   const providers = await getAuthProviders()
   if (providers) {
@@ -46,13 +46,14 @@ async function validateOpenID () {
         results[elem.id] = result
       }
     }
-    return results
-  } else {
-    return 'not configured'
+    if (Object.keys(results).length > 0) {
+      return results
+    }
   }
+  return 'not configured'
 }
 
-async function validateSaml () {
+async function validateSaml() {
   const getAuthProviders = container.resolve('getAuthProviders')
   const providers = await getAuthProviders()
   if (providers) {
@@ -63,13 +64,14 @@ async function validateSaml () {
         results[elem.id] = result
       }
     }
-    return results
-  } else {
-    return 'not configured'
+    if (Object.keys(results).length > 0) {
+      return results
+    }
   }
+  return 'not configured'
 }
 
-async function validateCert () {
+async function validateCert() {
   const passphrase = loadPassPhrase(settings)
   const pfxfile = settings.get('PFX_FILE')
   if (pfxfile) {
