@@ -44,7 +44,7 @@ setTimeout(function () {
             .expect(200)
             .expect('Content-Type', /application\/json/)
             .expect(res => {
-              assert.equal(Object.keys(res.body).length, 12)
+              assert.equal(Object.keys(res.body).length, 13)
               assert.equal(res.body.HAS_UNIT_OLD1, 'oldvalue')
               assert.equal(res.body.SESSION_SECRET, 'keyboard cat')
               assert.equal(res.body.TOKEN_TTL, '3600')

@@ -515,6 +515,11 @@ key_file = 'certs/server.key'
 #
 # status_enabled = true
 
+# If set to true, the user provisioning feature will allow the client to rename
+# user accounts, which normally can be very detrimental.
+#
+# allow_user_rename = false
+
 #
 # User provisioning configuration that supports multiple cloud service providers
 # with one or more Helix Core servers. See the documentation for details on the

@@ -5,20 +5,24 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
+import { MutabilityError } from 'helix-auth-svc/lib/features/scim/domain/errors/MutabilityError.js'
 import { NoSuchUserError } from 'helix-auth-svc/lib/features/scim/domain/errors/NoSuchUserError.js'
 import UpdateUser from 'helix-auth-svc/lib/features/scim/domain/usecases/UpdateUser.js'
 import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
 
 describe('UpdateUser use case', function () {
   let usecase
+  const settingsRepository = new MapSettingsRepository()
 
   before(function () {
     const entityRepository = new EntityRepository()
     usecase = UpdateUser({
       getDomainLeader: () => { return null },
       getDomainMembers: () => [],
-      entityRepository: entityRepository
+      entityRepository: entityRepository,
+      settingsRepository
     })
   })
 
@@ -30,17 +34,26 @@ describe('UpdateUser use case', function () {
     assert.throws(() => UpdateUser({
       getDomainLeader: null,
       getDomainMembers: () => [],
-      entityRepository: {}
+      entityRepository: {},
+      settingsRepository: {}
     }), AssertionError)
     assert.throws(() => UpdateUser({
       getDomainLeader: () => { return null },
       getDomainMembers: null,
-      entityRepository: {}
+      entityRepository: {},
+      settingsRepository: {}
     }), AssertionError)
     assert.throws(() => UpdateUser({
       getDomainLeader: () => { return null },
       getDomainMembers: () => [],
-      entityRepository: null
+      entityRepository: null,
+      settingsRepository: {}
+    }), AssertionError)
+    assert.throws(() => UpdateUser({
+      getDomainLeader: () => { return null },
+      getDomainMembers: () => [],
+      entityRepository: {},
+      settingsRepository: null
     }), AssertionError)
     try {
       await usecase(null)
@@ -102,8 +115,42 @@ describe('UpdateUser use case', function () {
     updateStub.restore()
   })
 
-  it('should support renaming an existing user entity', async function () {
+  it('should reject user rename by default', async function () {
     // arrange
+    const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
+      assert.equal(username, 'joeuser')
+      return Promise.resolve(new User('joeuser', 'joeuser@example.com', 'Joe Q. User'))
+    })
+    const renameStub = sinon.stub(EntityRepository.prototype, 'renameUser').callsFake((alt, neu) => {
+      assert.equal(alt, 'joeuser')
+      assert.equal(neu, 'userjoe')
+      return Promise.resolve()
+    })
+    const updateStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
+      assert.isNotNull(user)
+      assert.equal(user.username, 'userjoe')
+      return Promise.resolve(user)
+    })
+    // act
+    const tUser = new User('userjoe', 'joeuser@example.com', 'Joe Q. User')
+    try {
+      await usecase('joeuser', tUser)
+      assert.fail('should raise error')
+    } catch (err) {
+      assert.instanceOf(err, MutabilityError)
+    }
+    // assert
+    assert.isTrue(getStub.calledOnce)
+    assert.isTrue(renameStub.notCalled)
+    assert.isTrue(updateStub.notCalled)
+    getStub.restore()
+    renameStub.restore()
+    updateStub.restore()
+  })
+
+  it('should rename a user if allowed', async function () {
+    // arrange
+    settingsRepository.set('ALLOW_USER_RENAME', true)
     const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
       assert.equal(username, 'joeuser')
       return Promise.resolve(new User('joeuser', 'joeuser@example.com', 'Joe Q. User'))
@@ -133,6 +180,7 @@ describe('UpdateUser use case', function () {
 
   describe('multiple servers', function () {
     let usecase
+    const settingsRepository = new MapSettingsRepository()
 
     before(function () {
       const entityRepository = new EntityRepository()
@@ -154,7 +202,8 @@ describe('UpdateUser use case', function () {
             domains: ['canine']
           }
         ],
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        settingsRepository
       })
     })
 

@@ -477,7 +477,7 @@ setTimeout(function () {
         .end(done)
     })
 
-    it('should rename a user via PUT', function (done) {
+    it('should reject user rename via PUT', function (done) {
       agent
         .put('/scim/v2/Users/UserName123')
         .trustLocalhost(true)
@@ -499,24 +499,17 @@ setTimeout(function () {
           ]
         })
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\/user-UserNameOne1/)
-        .expect(200)
+        .expect(400)
         .expect(res => {
-          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
-          assert.equal(res.body.userName, 'UserNameOne1')
-          assert.equal(res.body.displayName, 'Ryan P. Leenay')
-          assert.equal(res.body.name.formatted, 'Ryan P. Leenay')
-          assert.lengthOf(res.body.emails, 1)
-          assert.equal(res.body.emails[0].value, 'testingwork@bob.com')
-          assert.exists(res.body.meta.created)
-          assert.exists(res.body.meta.lastModified)
-          assert.equal(res.body.meta.resourceType, 'User')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserNameOne1/)
+          assert.equal(res.body.status, '400')
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
+          assert.equal(res.body.scimType, 'mutability')
+          assert.equal(res.body.detail, 'Cannot change property userName')
         })
         .end(done)
     })
 
-    it('should rename a user via PATCH', function (done) {
+    it('should reject user rename via PATCH', function (done) {
       agent
         .patch('/scim/v2/Users/UserName222')
         .trustLocalhost(true)
@@ -532,26 +525,19 @@ setTimeout(function () {
           ]
         })
         .expect('Content-Type', /application\/scim\+json/)
-        .expect('Location', /\/scim\/v2\/Users\/user-UserNameTutu/)
-        .expect(200)
+        .expect(400)
         .expect(res => {
-          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
-          assert.equal(res.body.userName, 'UserNameTutu')
-          assert.equal(res.body.displayName, 'Drew Ryan')
-          assert.equal(res.body.name.formatted, 'Drew Ryan')
-          assert.lengthOf(res.body.emails, 1)
-          assert.equal(res.body.emails[0].value, 'testing@bob2.com')
-          assert.exists(res.body.meta.created)
-          assert.exists(res.body.meta.lastModified)
-          assert.equal(res.body.meta.resourceType, 'User')
-          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserNameTutu/)
+          assert.equal(res.body.status, '400')
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
+          assert.equal(res.body.scimType, 'mutability')
+          assert.equal(res.body.detail, 'Cannot change property userName')
         })
         .end(done)
     })
 
     it('should delete the first user', function (done) {
       agent
-        .delete('/scim/v2/Users/UserNameOne1')
+        .delete('/scim/v2/Users/UserName123')
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .expect(204, done)
@@ -559,7 +545,7 @@ setTimeout(function () {
 
     it('should delete the second user', function (done) {
       agent
-        .delete('/scim/v2/Users/UserNameTutu')
+        .delete('/scim/v2/Users/UserName222')
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .expect(204, done)

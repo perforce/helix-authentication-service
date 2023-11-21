@@ -14,7 +14,7 @@ describe('DefaultsEnvRepository', function () {
 
   it('should return all available entries', function () {
     const result = Object.fromEntries(sut.entries())
-    assert.equal(Object.keys(result).length, 23)
+    assert.equal(Object.keys(result).length, 24)
     assert.property(result, 'ADMIN_USERNAME')
     assert.property(result, 'OIDC_TOKEN_SIGNING_ALGO')
     assert.property(result, 'TOKEN_TTL')
@@ -48,6 +48,7 @@ describe('DefaultsEnvRepository', function () {
   it('should return expected values for all default settings', function () {
     // verify every default setting
     assert.equal(sut.get('ADMIN_USERNAME'), 'perforce')
+    assert.equal(sut.get('ALLOW_USER_RENAME'), 'false')
     assert.equal(sut.get('BEARER_TOKEN'), 'keyboard cat')
     assert.equal(sut.get('CACHE_TTL'), '300')
     assert.isTrue(sut.has('CERT_FILE'))
