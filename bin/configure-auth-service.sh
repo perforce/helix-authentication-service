@@ -1328,8 +1328,9 @@ function modify_env_config() {
     # difficult to debug situations where the logging is not working and no
     # errors are displayed.
     chmod 0644 logging.config.cjs
-    # always enable logging for the time being
-    add_or_replace_var_in_env 'LOGGING' '../logging.config.cjs'
+    if [[ -z "${LOGGING}" ]]; then
+        add_or_replace_var_in_env 'LOGGING' './logging.config.cjs'
+    fi
     chown --reference=example.env .env
 }
 
