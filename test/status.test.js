@@ -148,11 +148,13 @@ describe('Service status', function () {
       )
       const resultStr = result.toString()
       // Sometimes, seemingly at random, there are commas in the error messages
-      // coming from openssl, because that's what makes life interesting.
+      // coming from openssl, because that's what makes life interesting. Never
+      // enough ways to same the same thing, apparently.
       const failedLoad = resultStr.includes('Could not read private key from') ||
         resultStr.includes('Could not find private key from') ||
         resultStr.includes('Could not read, private key, from') ||
-        resultStr.includes('unable to load Private Key')
+        resultStr.includes('unable to load Private Key') ||
+        resultStr.includes('Could not find private key from')
       assert.isTrue(failedLoad, 'key should have failed to load')
     })
 

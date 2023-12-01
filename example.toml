@@ -84,6 +84,16 @@ bearer_token = 'keyboard cat'
 #
 # oidc_client_secret = undefined
 
+# Public key of the certificate used when initiating an authentication request
+# with an OIDC provider that supports private key JWT. If supported by the IdP,
+# the public/private key files can be used instead of the "client secret" value.
+#
+# oidc_client_cert_file = undefined
+
+# The private key that corresponds to CERT_FILE.
+#
+# oidc_client_key_file = undefined
+
 # The OIDC provider issuer URL.
 #
 # oidc_issuer_uri = undefined

@@ -5,6 +5,7 @@ import * as fs from 'node:fs/promises'
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, beforeEach, describe, it } from 'mocha'
+import { temporaryFile } from 'tempy'
 import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositories/DefaultsEnvRepository.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
@@ -127,14 +128,43 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].signingAlgo, 'RS256')
   })
 
-  it('should not read file properties if so desired', async function () {
+  it('should read OIDC client cert and key files', async function () {
     // arrange
-    await fs.writeFile('client-secret.txt', 'my client secret')
+    const clientCertFile = temporaryFile({ extension: 'crt' })
+    await fs.writeFile(clientCertFile, '-----BEGIN CERTIFICATE-----')
+    const clientKeyFile = temporaryFile({ extension: 'key' })
+    await fs.writeFile(clientKeyFile, '-----BEGIN PRIVATE KEY-----')
     const providers = [{
       label: 'Veritas Solutions',
       issuerUri: 'https://oidc.exmample.com',
       clientId: 'client-id',
-      clientSecretFile: 'client-secret.txt',
+      clientCertFile,
+      clientKeyFile,
+      protocol: 'oidc'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 1)
+    assert.equal(result[0].id, 'oidc-0')
+    assert.equal(result[0].label, 'Veritas Solutions')
+    assert.equal(result[0].protocol, 'oidc')
+    assert.isFalse(result[0].selectAccount)
+    assert.equal(result[0].signingAlgo, 'RS256')
+    assert.equal(result[0].clientCert, '-----BEGIN CERTIFICATE-----')
+    assert.equal(result[0].clientKey, '-----BEGIN PRIVATE KEY-----')
+  })
+
+  it('should not read file properties if so desired', async function () {
+    // arrange
+    const clientSecretFile = temporaryFile({ extension: 'txt' })
+    await fs.writeFile(clientSecretFile, 'my client secret')
+    const providers = [{
+      label: 'Veritas Solutions',
+      issuerUri: 'https://oidc.exmample.com',
+      clientId: 'client-id',
+      clientSecretFile,
       protocol: 'oidc'
     }]
     temporaryRepository.set('AUTH_PROVIDERS', providers)
@@ -147,10 +177,9 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].protocol, 'oidc')
     assert.notProperty(result[0], 'clientSecret')
     assert.property(result[0], 'clientSecretFile')
-    assert.equal(result[0].clientSecretFile, 'client-secret.txt')
+    assert.equal(result[0].clientSecretFile, clientSecretFile)
     assert.isFalse(result[0].selectAccount)
     assert.equal(result[0].signingAlgo, 'RS256')
-    fs.unlink('client-secret.txt')
   })
 
   it('should return classic OIDC with defaults', async function () {
