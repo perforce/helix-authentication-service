@@ -63,8 +63,8 @@ setTimeout(function () {
         .trustLocalhost(true)
         .expect(200)
         .expect(res => {
-          assert.include(res.text, '/oidc/login/fakereq123?provider=oidc')
-          assert.include(res.text, '/saml/login/fakereq123?provider=saml')
+          assert.include(res.text, '/oidc/login/fakereq123?providerId=oidc')
+          assert.include(res.text, '/saml/login/fakereq123?providerId=saml')
           assert.include(res.text, 'Acme Identity')
           assert.include(res.text, 'Federated Enterprises')
         })
