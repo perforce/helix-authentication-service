@@ -150,6 +150,7 @@ describe('Service status', function () {
       // Sometimes, seemingly at random, there are commas in the error messages
       // coming from openssl, because that's what makes life interesting.
       const failedLoad = resultStr.includes('Could not read private key from') ||
+        resultStr.includes('Could not find private key from') ||
         resultStr.includes('Could not read, private key, from') ||
         resultStr.includes('unable to load Private Key')
       assert.isTrue(failedLoad, 'key should have failed to load')
@@ -376,6 +377,8 @@ describe('Service status', function () {
       settingsRepository.set('P4PORT', 'ssl:localhost:70')
       settingsRepository.set('P4USER', 'bruno')
       settingsRepository.set('P4PASSWD', 'secret123')
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
@@ -388,6 +391,8 @@ describe('Service status', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', 'nosuchuser')
       settingsRepository.set('P4PASSWD', 'secret123')
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
@@ -400,6 +405,8 @@ describe('Service status', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', 'wrongpassword')
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
@@ -412,6 +419,8 @@ describe('Service status', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)

@@ -39,6 +39,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
     })
 
     after(async function () {
@@ -49,7 +51,9 @@ describe('HelixEntity repository', function () {
     it('should detect expired ticket and fail', async function () {
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: p4config.user
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       const logoutCmd = await p4.cmd('logout -a')
       assert.isOk(logoutCmd.info[0].data)
@@ -67,7 +71,9 @@ describe('HelixEntity repository', function () {
     it('should accept ticket with authenticated session', async function () {
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: p4config.user
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       // First run 'login -p' in order to get a ticket, but then log in again to
       // get an authenticated connection. Somehow an admin will do this but it
@@ -96,6 +102,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -293,7 +301,9 @@ describe('HelixEntity repository', function () {
       // assert
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: 'newpass'
+        P4USER: 'newpass',
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       const loginCmd4 = await p4.cmd('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
@@ -326,7 +336,9 @@ describe('HelixEntity repository', function () {
       // ensure user login successful
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: 'activeuser'
+        P4USER: 'activeuser',
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       const loginCmd1 = await p4.cmd('login', 'p4ssw0rd')
       assert.equal(loginCmd1.stat[0].TicketExpiration, '43200')
@@ -661,6 +673,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -777,6 +791,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.clear()
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -809,6 +825,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -843,6 +861,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
