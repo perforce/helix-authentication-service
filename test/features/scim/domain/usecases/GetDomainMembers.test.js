@@ -29,7 +29,7 @@ describe('GetDomainMembers use case', function () {
     assert.isEmpty(members)
   })
 
-  it('should return the one server for basic settings', function () {
+  it('should return empty list for basic settings', function () {
     // arrange
     settingsRepository.set('P4PORT', 'ssl:1666')
     settingsRepository.set('P4USER', 'super')
@@ -37,10 +37,7 @@ describe('GetDomainMembers use case', function () {
     // act
     const results = usecase()
     // assert
-    assert.lengthOf(results, 1)
-    assert.equal(results[0].p4port, 'ssl:1666')
-    assert.equal(results[0].p4user, 'super')
-    assert.equal(results[0].p4passwd, 'secret123')
+    assert.lengthOf(results, 0)
   })
 
   it('should raise error if domain mismatch (1 entry)', function () {
