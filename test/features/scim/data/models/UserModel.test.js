@@ -67,6 +67,56 @@ describe('User model', function () {
     assert.isTrue(tUserModel.active)
   })
 
+  it('should parse user with email for userName', function () {
+    // arrange
+    const rawJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      userName: 'asmith@p4test.com',
+      name: { givenName: 'Alton', familyName: 'Smith' },
+      emails: [
+        { primary: true, value: 'asmith@p4test.com', type: 'work' }
+      ],
+      displayName: 'Alton Smith',
+      locale: 'en-US',
+      externalId: '00udrvv438FuOd5oX5d7',
+      groups: [],
+      password: 'WchS9ac0',
+      active: true
+    }
+    const tUserModel = UserModel.fromJson(rawJson)
+    // assert
+    assert.equal(tUserModel.username, 'asmith')
+    assert.equal(tUserModel.email, 'asmith@p4test.com')
+    assert.equal(tUserModel.fullname, 'Alton Smith')
+    assert.isTrue(tUserModel.active)
+  })
+
+  it('should convert from model to entity to model again', function () {
+    // arrange
+    const rawJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      userName: 'asmith@p4test.com',
+      name: { givenName: 'Alton', familyName: 'Smith' },
+      emails: [
+        { primary: true, value: 'asmith@p4test.com', type: 'work' }
+      ],
+      displayName: 'Alton Smith',
+      locale: 'en-US',
+      externalId: '00udrvv438FuOd5oX5d7',
+      groups: [],
+      password: 'WchS9ac0',
+      active: true
+    }
+    const model1 = UserModel.fromJson(rawJson)
+    const model2 = UserModel.fromEntity(model1)
+    // assert
+    assert.equal(model2.username, 'asmith')
+    assert.equal(model2.email, 'asmith@p4test.com')
+    assert.equal(model2.fullname, 'Alton Smith')
+    assert.equal(model2.password, 'WchS9ac0')
+    assert.isTrue(model2.active)
+  })
+
   it('should read password from JSON formatted entity', function () {
     // arrange
     const rawJson = {

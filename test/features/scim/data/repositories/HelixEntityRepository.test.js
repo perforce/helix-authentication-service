@@ -187,6 +187,49 @@ describe('HelixEntity repository', function () {
       assert.isTrue(userByName.active)
     })
 
+    it('should add and retrieve a single user by model', async function () {
+      this.timeout(10000)
+      // arrange
+      const rawJson = {
+        schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+        userName: 'asmith@p4test.com',
+        name: { givenName: 'Alton', familyName: 'Smith' },
+        emails: [
+          { primary: true, value: 'asmith@p4test.com', type: 'work' }
+        ],
+        displayName: 'Alton Smith',
+        locale: 'en-US',
+        externalId: '00udrvv438FuOd5oX5d7',
+        groups: [],
+        password: 'WchS9ac0',
+        active: true
+      }
+      const tUser = UserModel.fromJson(rawJson)
+      const existing = await repository.getUser(tUser.username)
+      assert.isNull(existing)
+      const added = await repository.addUser(tUser)
+      assert.instanceOf(added, UserModel)
+      assert.equal(added.id, 'user-asmith')
+      // act
+      const userById = await repository.getUser(added.id)
+      // assert
+      assert.instanceOf(userById, UserModel)
+      assert.equal(userById.id, 'user-asmith')
+      assert.equal(userById.externalId, '00udrvv438FuOd5oX5d7')
+      assert.equal(userById.username, 'asmith')
+      assert.equal(userById.email, 'asmith@p4test.com')
+      assert.equal(userById.fullname, 'Alton Smith')
+      assert.isTrue(userById.active)
+      // retrieve by the plain p4d user name
+      const userByName = await repository.getUser(userById.username)
+      assert.instanceOf(userByName, UserModel)
+      assert.equal(userByName.username, 'asmith')
+      assert.equal(userByName.externalId, '00udrvv438FuOd5oX5d7')
+      assert.equal(userByName.email, 'asmith@p4test.com')
+      assert.equal(userByName.fullname, 'Alton Smith')
+      assert.isTrue(userByName.active)
+    })
+
     it('should add and retrieve user using original userName', async function () {
       this.timeout(10000)
       // arrange
