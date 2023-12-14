@@ -97,7 +97,7 @@ if [ ! -d "$HOMEDIR" ]; then
     chown -R perforce:perforce "$HOMEDIR"
 fi
 
-if [ ! -f "%{installprefix}/.env" ]; then
+if [ ! -f "%{installprefix}/.env" ] && [ ! -f "%{installprefix}/config.toml" ]; then
     PRINT="print \"LOGGING=%{installprefix}/logging.config.cjs\""
     # inject LOGGING if not already set; strip comments and blank lines
     awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env

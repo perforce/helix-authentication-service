@@ -352,8 +352,8 @@ WorkingDirectory=${INSTALL_PREFIX}
 [Install]
 WantedBy=multi-user.target
 __SERVICE_UNIT__
-    # create an example .env file if missing
-    if ! test -f .env; then
+    # create an example .env file if it and config.toml are missing
+    if [ ! -f .env ] && [ ! -f config.toml ]; then
         # strip comments and blank lines
         awk "/^$/{next} /^#/{next} {print}" example.env | sudo tee .env >/dev/null
         sudo chown --reference=example.env .env
