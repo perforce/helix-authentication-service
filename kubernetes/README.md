@@ -63,7 +63,7 @@ At this point, assuming your DNS and load balancer are set up correctly, visitin
 
 ### Determine if nginx has an external address
 
-This command will assist in confriming that the nginx ingress controller was able to register with the load balancer to get an exteranl address.
+This command will assist in confirming that the nginx ingress controller was able to register with the load balancer to get an external address.
 
 ```shell
 $ kubectl -n ingress-nginx get svc
