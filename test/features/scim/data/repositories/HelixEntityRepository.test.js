@@ -444,6 +444,54 @@ describe('HelixEntity repository', function () {
       assert.isNotNull(newuser)
     })
 
+    it('should rename a user while preserving extra data', async function () {
+      this.timeout(10000)
+      // arrange
+      const rawJson = {
+        schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+        userName: 'pparker@example.com',
+        name: { givenName: 'Peter', familyName: 'Parker' },
+        emails: [{ primary: true, value: 'pparker@example.com', type: 'work' }],
+        displayName: 'Peter Parker',
+        locale: 'en-US',
+        externalId: '00udrvv438FuOd5oX5d7',
+        groups: [],
+        password: 'iamspiderman',
+        active: true
+      }
+      const tUser = UserModel.fromJson(rawJson)
+      const added = await repository.addUser(tUser)
+      assert.instanceOf(added, UserModel)
+      assert.equal(added.id, 'user-pparker')
+      // act
+      await repository.renameUser('pparker@example.com', 'peteparker@example.com')
+      // assert
+      const olduser = await repository.getUser('pparker@example.com')
+      assert.isNull(olduser)
+      const newuser = await repository.getUser('peteparker@example.com')
+      assert.isNotNull(newuser)
+      assert.equal(newuser.id, 'user-peteparker')
+      assert.equal(newuser.userName, 'peteparker@example.com')
+      assert.equal(newuser.displayName, 'Peter Parker')
+      assert.equal(newuser.emails[0].value, 'pparker@example.com')
+      assert.isTrue(newuser.active)
+      // ensure user key data was updated appropriately
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
+      })
+      const loginCmd = await p4.cmd('login', 'p8ssword')
+      assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+      const keysOut = await p4.cmd('keys')
+      const oldKey = keysOut.stat.find((e) => e.key === 'scim-user-pparker')
+      assert.isUndefined(oldKey)
+      const newKey = keysOut.stat.find((e) => e.key === 'scim-user-peteparker')
+      assert.isDefined(newKey)
+      assert.include(newKey.value, '"userName":"peteparker@example.com"')
+    })
+
     it('should remove an existing user entity', async function () {
       this.timeout(10000)
       // arrange

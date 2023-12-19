@@ -535,9 +535,48 @@ setTimeout(function () {
         .end(done)
     })
 
+    it('should allower user rename if enabled', function (done) {
+      settings.set('ALLOW_USER_RENAME', true)
+      agent
+        .put('/scim/v2/Users/UserName123')
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .send({
+          UserName: 'UserNameOne1',
+          Active: true,
+          DisplayName: 'Ryan Leenay',
+          schemas: [
+            'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User',
+            'urn:ietf:params:scim:schemas:core:2.0:User'
+          ],
+          id: 'UserName123',
+          externalId: '6A8950C7-8510-41B6-B6F8-120F78FA9A62',
+          name: { formatted: 'Ryan P. Leenay' },
+          emails: [
+            { primary: true, value: 'testingwork@bob.com' },
+            { Primary: false, type: 'home', value: 'testinghome@bob.com' }
+          ]
+        })
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+          assert.equal(res.body.userName, 'UserNameOne1')
+          assert.equal(res.body.displayName, 'Ryan P. Leenay')
+          assert.equal(res.body.name.formatted, 'Ryan P. Leenay')
+          assert.lengthOf(res.body.emails, 1)
+          assert.equal(res.body.emails[0].value, 'testingwork@bob.com')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'User')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserNameOne1/)
+        })
+        .end(done)
+    })
+
     it('should delete the first user', function (done) {
       agent
-        .delete('/scim/v2/Users/UserName123')
+        .delete('/scim/v2/Users/UserNameOne1')
         .trustLocalhost(true)
         .set('Authorization', authToken)
         .expect(204, done)
