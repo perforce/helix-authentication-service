@@ -33,15 +33,20 @@ setTimeout(function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
-      p4config = await runner.startServer('./tmp/p4d/provisioning')
-      helpers.establishSuper(p4config)
-      settings.set('P4PORT', p4config.port)
-      settings.set('P4USER', p4config.user)
-      settings.set('P4PASSWD', p4config.password)
-      settings.set('P4TICKETS', p4config.tickets)
-      settings.set('ALLOW_USER_RENAME', true)
-      await registerLateBindings()
+      // this test requires p4d which is not included in the "unit" test environment
+      if (process.env.UNIT_ONLY) {
+        this.skip()
+      } else {
+        this.timeout(30000)
+        p4config = await runner.startServer('./tmp/p4d/provisioning')
+        helpers.establishSuper(p4config)
+        settings.set('P4PORT', p4config.port)
+        settings.set('P4USER', p4config.user)
+        settings.set('P4PASSWD', p4config.password)
+        settings.set('P4TICKETS', p4config.tickets)
+        settings.set('ALLOW_USER_RENAME', true)
+        await registerLateBindings()
+      }
     })
 
     after(async function () {
@@ -158,7 +163,7 @@ setTimeout(function () {
           .end(done)
       })
 
-      it('should have marked user as inactive in p4', async function() {
+      it('should have marked user as inactive in p4', async function () {
         const p4 = new P4({
           P4PORT: p4config.port,
           P4USER: p4config.user,
