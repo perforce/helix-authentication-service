@@ -50,8 +50,10 @@ setTimeout(function () {
     })
 
     after(async function () {
-      this.timeout(30000)
-      await runner.stopServer(p4config)
+      if (process.env.UNIT_ONLY === undefined) {
+        this.timeout(30000)
+        await runner.stopServer(p4config)
+      }
     })
 
     describe('Add, rename, deactivate', function () {
