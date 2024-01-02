@@ -39,6 +39,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
     })
 
     after(async function () {
@@ -49,7 +51,9 @@ describe('HelixEntity repository', function () {
     it('should detect expired ticket and fail', async function () {
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: p4config.user
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       const logoutCmd = await p4.cmd('logout -a')
       assert.isOk(logoutCmd.info[0].data)
@@ -67,7 +71,9 @@ describe('HelixEntity repository', function () {
     it('should accept ticket with authenticated session', async function () {
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: p4config.user
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       // First run 'login -p' in order to get a ticket, but then log in again to
       // get an authenticated connection. Somehow an admin will do this but it
@@ -96,6 +102,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -176,6 +184,49 @@ describe('HelixEntity repository', function () {
       assert.equal(userByName.externalId, '00u1esetdqu3kOXZc697')
       assert.equal(userByName.email, 'joe@example.com')
       assert.equal(userByName.fullname, 'Joe Q. User')
+      assert.isTrue(userByName.active)
+    })
+
+    it('should add and retrieve a single user by model', async function () {
+      this.timeout(10000)
+      // arrange
+      const rawJson = {
+        schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+        userName: 'asmith@p4test.com',
+        name: { givenName: 'Alton', familyName: 'Smith' },
+        emails: [
+          { primary: true, value: 'asmith@p4test.com', type: 'work' }
+        ],
+        displayName: 'Alton Smith',
+        locale: 'en-US',
+        externalId: '00udrvv438FuOd5oX5d7',
+        groups: [],
+        password: 'WchS9ac0',
+        active: true
+      }
+      const tUser = UserModel.fromJson(rawJson)
+      const existing = await repository.getUser(tUser.username)
+      assert.isNull(existing)
+      const added = await repository.addUser(tUser)
+      assert.instanceOf(added, UserModel)
+      assert.equal(added.id, 'user-asmith')
+      // act
+      const userById = await repository.getUser(added.id)
+      // assert
+      assert.instanceOf(userById, UserModel)
+      assert.equal(userById.id, 'user-asmith')
+      assert.equal(userById.externalId, '00udrvv438FuOd5oX5d7')
+      assert.equal(userById.username, 'asmith')
+      assert.equal(userById.email, 'asmith@p4test.com')
+      assert.equal(userById.fullname, 'Alton Smith')
+      assert.isTrue(userById.active)
+      // retrieve by the plain p4d user name
+      const userByName = await repository.getUser(userById.username)
+      assert.instanceOf(userByName, UserModel)
+      assert.equal(userByName.username, 'asmith')
+      assert.equal(userByName.externalId, '00udrvv438FuOd5oX5d7')
+      assert.equal(userByName.email, 'asmith@p4test.com')
+      assert.equal(userByName.fullname, 'Alton Smith')
       assert.isTrue(userByName.active)
     })
 
@@ -293,7 +344,9 @@ describe('HelixEntity repository', function () {
       // assert
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: 'newpass'
+        P4USER: 'newpass',
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       const loginCmd4 = await p4.cmd('login', 'p4ssw0rd')
       assert.equal(loginCmd4.stat[0].TicketExpiration, '43200')
@@ -326,7 +379,9 @@ describe('HelixEntity repository', function () {
       // ensure user login successful
       const p4 = new P4({
         P4PORT: p4config.port,
-        P4USER: 'activeuser'
+        P4USER: 'activeuser',
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
       })
       const loginCmd1 = await p4.cmd('login', 'p4ssw0rd')
       assert.equal(loginCmd1.stat[0].TicketExpiration, '43200')
@@ -387,6 +442,54 @@ describe('HelixEntity repository', function () {
       assert.isNull(olduser)
       const newuser = await repository.getUser('uzerrename@dot.com')
       assert.isNotNull(newuser)
+    })
+
+    it('should rename a user while preserving extra data', async function () {
+      this.timeout(10000)
+      // arrange
+      const rawJson = {
+        schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+        userName: 'pparker@example.com',
+        name: { givenName: 'Peter', familyName: 'Parker' },
+        emails: [{ primary: true, value: 'pparker@example.com', type: 'work' }],
+        displayName: 'Peter Parker',
+        locale: 'en-US',
+        externalId: '00udrvv438FuOd5oX5d7',
+        groups: [],
+        password: 'iamspiderman',
+        active: true
+      }
+      const tUser = UserModel.fromJson(rawJson)
+      const added = await repository.addUser(tUser)
+      assert.instanceOf(added, UserModel)
+      assert.equal(added.id, 'user-pparker')
+      // act
+      await repository.renameUser('pparker@example.com', 'peteparker@example.com')
+      // assert
+      const olduser = await repository.getUser('pparker@example.com')
+      assert.isNull(olduser)
+      const newuser = await repository.getUser('peteparker@example.com')
+      assert.isNotNull(newuser)
+      assert.equal(newuser.id, 'user-peteparker')
+      assert.equal(newuser.userName, 'peteparker@example.com')
+      assert.equal(newuser.displayName, 'Peter Parker')
+      assert.equal(newuser.emails[0].value, 'pparker@example.com')
+      assert.isTrue(newuser.active)
+      // ensure user key data was updated appropriately
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
+      })
+      const loginCmd = await p4.cmd('login', 'p8ssword')
+      assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+      const keysOut = await p4.cmd('keys')
+      const oldKey = keysOut.stat.find((e) => e.key === 'scim-user-pparker')
+      assert.isUndefined(oldKey)
+      const newKey = keysOut.stat.find((e) => e.key === 'scim-user-peteparker')
+      assert.isDefined(newKey)
+      assert.include(newKey.value, '"userName":"peteparker@example.com"')
     })
 
     it('should remove an existing user entity', async function () {
@@ -661,6 +764,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -777,6 +882,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.clear()
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -809,6 +916,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 
@@ -843,6 +952,8 @@ describe('HelixEntity repository', function () {
       settingsRepository.set('P4PORT', p4config.port)
       settingsRepository.set('P4USER', p4config.user)
       settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
       repository = new HelixEntityRepository({ getProvisioningServers })
     })
 

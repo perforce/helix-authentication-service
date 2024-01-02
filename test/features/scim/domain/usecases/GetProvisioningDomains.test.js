@@ -186,4 +186,24 @@ describe('GetProvisioningDomains use case', function () {
     assert.equal(results[0].bearerToken, 'frisbee dog')
     assert.equal(results[1].bearerToken, 'keyboard cat')
   })
+
+  it('should prefer new settings over classic BEARER_TOKEN', async function () {
+    // arrange
+    settingsRepository.set('BEARER_TOKEN', 'keyboard cat')
+    const tokenFile = temporaryFile({ extension: 'txt' })
+    await fs.writeFile(tokenFile, 'frisbee dog')
+    settingsRepository.set('PROVISIONING', {
+      providers: [
+        { bearerTokenFile: tokenFile, domain: 'canine' },
+        { bearerToken: 'musical meow', domain: 'feline' }
+      ]
+    })
+    // act
+    const results = await usecase()
+    assert.lengthOf(results, 2)
+    assert.equal(results[0].domain, 'canine')
+    assert.equal(results[1].domain, 'feline')
+    assert.equal(results[0].bearerToken, 'frisbee dog')
+    assert.equal(results[1].bearerToken, 'musical meow')
+  })
 })

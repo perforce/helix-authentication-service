@@ -18,7 +18,7 @@ COPY views views
 # to save space. Avoid the optional dependencies, especially unix-dgram which
 # requires node-gyp, which in turn requires Python, which would make this image
 # much larger (note unix-dgram is only needed by winston-syslog).
-RUN npm ci -q --only=prod --no-optional
+RUN npm ci -q --only=prod --omit=optional
 
 COPY containers/auth-svc/saml_idp.conf.cjs routes
 

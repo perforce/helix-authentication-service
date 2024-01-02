@@ -35,7 +35,7 @@ Important Notes
 Supported Platforms
 
     Linux (x86_64)
-        RHEL 7, 8
+        RHEL 7, 8, 9
         CentOS 7, 8.0
         Ubuntu 20.04, 22.04
 
@@ -111,6 +111,43 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-230 (Change #2487461)
+        Support client certificate via HTTP header for use with a reverse proxy
+        that terminates the TLS connection.
+
+    HAS-434 (Change #2482025)
+        Add support for the use of wildcards to specify the SP entity
+        identifiers in the `IDP_CONFIG_FILE` file.
+
+    HAS-495 (Change #2512934)
+        Allow multiplexing within the user provisioning feature, connecting
+        multiple cloud service providers to multiple Helix Core Servers.
+
+    HAS-501 (Change #2507978)
+        Support configuration via TOML file named config.toml as an alternative
+        to using the .env file and its numerous supporting files.
+
+----------------------------------------------------------------------
+Bugs fixed in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-489 (Change #2485834)
+        When not enabled, the static content for the administrative interface
+        will no longer be served to the client.
+
+----------------------------------------------------------------------
+Other changes in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-425 (Change #2522538)
+        Renaming a user via the user provisioning feature is now disabled by
+        default as that can cause complications that would otherwise be a
+        surprise to the administrator.
+
+    HAS-506 (Change #2521922)
+        The /status route can be disabled by setting STATUS_ENABLED=false
 
 ----------------------------------------------------------------------
 New functionality in 2023.2 (2023.2/2479541) (2023/08/24)

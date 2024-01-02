@@ -12,7 +12,8 @@ const defaultConfig = {
   password: 'p8ssword',
   prog: 'p4api',
   progv: '2024.1.0',
-  p4root: './tmp/p4d/nonssl'
+  p4root: './tmp/p4d/nonssl',
+  tickets: './tmp/tickets.txt'
 }
 
 const defaultSslConfig = {
@@ -20,7 +21,9 @@ const defaultSslConfig = {
   password: 'p8ssword',
   prog: 'p4api',
   progv: '2024.1.0',
-  p4root: './tmp/p4d/ssl'
+  p4root: './tmp/p4d/ssl',
+  tickets: './tmp/tickets.txt',
+  trust: './tmp/trust.txt'
 }
 
 function startServerGeneric (config, ssldir) {
@@ -98,8 +101,12 @@ function stopServerGeneric (config) {
       'admin',
       'stop'
     ]
+    const env = Object.assign({}, process.env, {
+      P4TICKETS: config.tickets,
+      P4TRUST: config.trust
+    })
     // eslint-disable-next-line no-unused-vars
-    exec(cmd.join(' '), (err, stdout, stderr) => {
+    exec(cmd.join(' '), { env }, (err, stdout, stderr) => {
       if (err) {
         reject(err)
       } else {

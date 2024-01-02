@@ -43,7 +43,7 @@ function create_user_group() {
 
 case "$1" in
     configure)
-        if [ ! -f "${INSTALLPREFIX}/.env" ]; then
+        if [ ! -f "${INSTALLPREFIX}/.env" ] && [ ! -f "${INSTALLPREFIX}/config.toml" ]; then
             PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
             # inject LOGGING if not already set; strip comments and blank lines
             awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env > ${INSTALLPREFIX}/.env

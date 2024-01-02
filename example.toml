@@ -465,6 +465,14 @@ key_file = 'certs/server.key'
 #
 # p4passwd = undefined
 
+# The path to the file containing the Perforce tickets. 
+#
+# p4tickets = undefined
+
+# The path to the Perforce trust file. 
+#
+# p4trust = undefined
+
 # Specify the URI that provides the JSON Web Key Sets used to validate an JSON
 # Web Token that was issued by the issuer identified in the oauth_issuer
 # setting.
@@ -541,9 +549,13 @@ key_file = 'certs/server.key'
 # p4passwd = "2E7092CC2CA6BCAC74EB364BF4C4AD99"
 # domains = [ "feline", "canine" ]
 # leader = [ "canine" ]
+# p4tickets = ".p4tickets"
+# p4trust = ".p4trust"
 
 # [[provisioning.servers]]
 # p4port = "ssl:tokyo:1666"
 # p4user = "super"
 # p4passwd = "C8478F3F32B62A84731ADDB5A2443E68"
 # domains = [ "canine" ]
+# p4tickets = ".p4tickets"
+# p4trust = ".p4trust"

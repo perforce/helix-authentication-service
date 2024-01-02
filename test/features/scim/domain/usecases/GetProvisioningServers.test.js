@@ -32,6 +32,8 @@ describe('GetProvisioningServers use case', function () {
     settingsRepository.set('P4PORT', 'ssl:1666')
     settingsRepository.set('P4USER', 'super')
     settingsRepository.set('P4PASSWD', 'secret123')
+    settingsRepository.set('P4TICKETS', '/opt/perforce/.p4tickets')
+    settingsRepository.set('P4TRUST', '/opt/perforce/.p4trust')
     // act
     const results = usecase()
     // assert
@@ -39,6 +41,8 @@ describe('GetProvisioningServers use case', function () {
     assert.equal(results[0].p4port, 'ssl:1666')
     assert.equal(results[0].p4user, 'super')
     assert.equal(results[0].p4passwd, 'secret123')
+    assert.equal(results[0].p4tickets, '/opt/perforce/.p4tickets')
+    assert.equal(results[0].p4trust, '/opt/perforce/.p4trust')
   })
 
   it('should raise error if missing servers list', function () {
@@ -74,9 +78,14 @@ describe('GetProvisioningServers use case', function () {
   it('should return a single server in new settings', function () {
     // arrange
     settingsRepository.set('PROVISIONING', {
-      servers: [
-        { p4port: 'ssl:1666', p4user: 'super', p4passwd: 'secret123', domains: ['corp'] }
-      ]
+      servers: [{
+        p4port: 'ssl:1666',
+        p4user: 'super',
+        p4passwd: 'secret123',
+        domains: ['corp'],
+        p4tickets: '/opt/perforce/.p4tickets',
+        p4trust: '/opt/perforce/.p4trust'
+      }]
     })
     // act
     const results = usecase()
@@ -87,6 +96,8 @@ describe('GetProvisioningServers use case', function () {
     assert.equal(results[0].p4passwd, 'secret123')
     assert.lengthOf(results[0].domains, 1)
     assert.equal(results[0].domains[0], 'corp')
+    assert.equal(results[0].p4tickets, '/opt/perforce/.p4tickets')
+    assert.equal(results[0].p4trust, '/opt/perforce/.p4trust')
   })
 
   it('should raise error if server without p4port', function () {

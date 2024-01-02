@@ -3,7 +3,7 @@
 //
 import * as fs from 'node:fs'
 import { assert } from 'chai'
-import { describe, it, run } from 'mocha'
+import { after, describe, it, run } from 'mocha'
 import request from 'supertest'
 // Load the test environment before the bulk of our code initializes, otherwise
 // it will be too late due to the `import` early-binding behavior.
@@ -34,6 +34,12 @@ dotenv.reload()
 //
 setTimeout(function () {
   describe('Settings requests', function () {
+
+    after(function () {
+      // remove the file to prevent other tests from failing
+      fs.unlinkSync(dotenvFile)
+    })
+
     describe('Success cases', function () {
       it('should retrieve configuration settings', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
