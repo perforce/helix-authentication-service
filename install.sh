@@ -156,10 +156,10 @@ function detect_platform() {
         PLATFORM=redhat
     elif [[ "$ID" == 'ubuntu' ]]; then
         PLATFORM=debian
-        # CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
-        # if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
-        #     NODE_VERSION=16
-        # fi
+        CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
+        if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
+            NODE_VERSION=16
+        fi
     fi
 }
 
