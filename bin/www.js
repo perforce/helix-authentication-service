@@ -160,6 +160,32 @@ function scrubSecrets(env) {
     } else if (name.match(/bearer_token/i)) {
       // but the "bearer_token" setting is not safe
       obj[name] = '[hidden]'
+    } else if (name === 'PROVISIONING') {
+      const provisioning = {}
+      for (const [key, value] of Object.entries(env.get('PROVISIONING'))) {
+        if (key === 'providers') {
+          provisioning.providers = []
+          for (const original of value) {
+            const provider = Object.assign({}, original)
+            if (provider.bearerToken) {
+              provider.bearerToken = '[hidden]'
+            }
+            provisioning.providers.push(provider)
+          }
+        } else if (key === 'servers') {
+          provisioning.servers = []
+          for (const original of value) {
+            const server = Object.assign({}, original)
+            if (server.p4passwd) {
+              server.p4passwd = '[hidden]'
+            }
+            provisioning.servers.push(server)
+          }
+        } else {
+          provisioning[name] = value
+        }
+      }
+      obj.PROVISIONING = provisioning
     } else {
       obj[name] = env.get(name)
     }
