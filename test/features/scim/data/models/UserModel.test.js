@@ -91,6 +91,28 @@ describe('User model', function () {
     assert.isTrue(tUserModel.active)
   })
 
+  it('should not require email value', function () {
+    // arrange
+    const rawJson = {
+      // actual request from Okta
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      userName: 'spwaters@example.com',
+      name: { givenName: 'Susan', familyName: 'Waters' },
+      emails: [{ primary: true, type: 'work' }],
+      displayName: 'Susan Waters',
+      locale: 'en-US',
+      externalId: '00uyuhjgm2DBUSSAE357',
+      groups: [],
+      active: true
+    }
+    const tUserModel = UserModel.fromJson(rawJson)
+    // assert
+    assert.equal(tUserModel.username, 'spwaters')
+    assert.equal(tUserModel.email, 'spwaters@example.com')
+    assert.equal(tUserModel.fullname, 'Susan Waters')
+    assert.isTrue(tUserModel.active)
+  })
+
   it('should convert from model to entity to model again', function () {
     // arrange
     const rawJson = {
