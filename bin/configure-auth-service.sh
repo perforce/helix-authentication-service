@@ -447,10 +447,10 @@ function ensure_readiness() {
 # Source selected P4 settings by use of the p4 set command.
 function source_enviro() {
     if $FOUND_P4; then
-        if [ -n "$(p4 set -q P4PORT)" ]; then
+        if [ -z "${P4PORT}" -a -n "$(p4 set -q P4PORT)" ]; then
             eval "$(p4 set -q P4PORT)"
         fi
-        if [ -n "$(p4 set -q P4USER)" ]; then
+        if [ -z "${P4USER}" -a -n "$(p4 set -q P4USER)" ]; then
             eval "$(p4 set -q P4USER)"
         fi
     fi
