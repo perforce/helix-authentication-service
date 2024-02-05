@@ -223,25 +223,28 @@ describe('UpdateUser use case', function () {
         return Promise.resolve(user)
       })
       // act
-      const updated = await usecase('joeuser', tUser)
+      const updated = await usecase('joeuser', tUser, 'canine')
       // assert
       assert.propertyVal(updated, 'username', 'joeuser')
       assert.isTrue(getStub.calledOnce)
       sinon.assert.calledWith(
         getStub,
         sinon.match('joeuser'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       assert.isTrue(updateStub.calledTwice)
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('userName', 'joeuser'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('userName', 'joeuser'),
-        sinon.match.has('p4port', 'ssl:tokyo:1666')
+        sinon.match.has('p4port', 'ssl:tokyo:1666'),
+        sinon.match('canine')
       )
       getStub.restore()
       updateStub.restore()

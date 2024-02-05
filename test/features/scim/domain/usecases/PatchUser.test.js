@@ -126,6 +126,33 @@ describe('PatchUser use case', function () {
       addStub.restore()
     })
 
+    it('should succeed when assigning externalId', async function () {
+      // arrange
+      const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
+        assert.equal(username, 'joeuser')
+        return Promise.resolve(new User('joeuser', 'joeuser@example.com', 'Joe Q. User'))
+      })
+      const addStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
+        assert.isNotNull(user)
+        return Promise.resolve(user)
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [
+          { op: 'add', path: 'externalId', value: 'joey12345' }
+        ]
+      }
+      const updated = await usecase('joeuser', patch)
+      // assert
+      assert.equal(updated.fullname, 'Joe Q. User')
+      assert.equal(updated.externalId, 'joey12345')
+      assert.isTrue(getStub.calledOnce)
+      assert.isTrue(addStub.calledOnce)
+      getStub.restore()
+      addStub.restore()
+    })
+
     it('should reject user rename by default', async function () {
       // arrange
       const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
@@ -290,7 +317,7 @@ describe('PatchUser use case', function () {
       sinon.restore()
     })
 
-    it('should add new group to all domain members', async function () {
+    it('should add new user to all domain members', async function () {
       // arrange
       const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake(() => {
         return Promise.resolve(new User('joeuser', 'joeuser@example.com', 'Joe Q. User'))
@@ -313,18 +340,21 @@ describe('PatchUser use case', function () {
       sinon.assert.calledWith(
         getStub,
         sinon.match('joeuser'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       assert.isTrue(updateStub.calledTwice)
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('username', 'joeuser'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('username', 'joeuser'),
-        sinon.match.has('p4port', 'ssl:tokyo:1666')
+        sinon.match.has('p4port', 'ssl:tokyo:1666'),
+        sinon.match('canine')
       )
       getStub.restore()
       updateStub.restore()
