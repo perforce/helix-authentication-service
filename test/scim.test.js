@@ -221,7 +221,7 @@ setTimeout(function () {
         }
       })
 
-      describe('Add user for feline domain', function () {
+      describe('Manage users and their externalId', function () {
         it('should POST user from feline domain', function (done) {
           agent
             .post('/scim/v2/Users')
@@ -424,6 +424,184 @@ setTimeout(function () {
               assert.lengthOf(res.body.Resources, 1)
               assert.equal(res.body.Resources[0].userName, 'pparker@example.com')
               assert.equal(res.body.Resources[0].externalId, '01hhmwt25stwkkv8kdbvvrt9a5')
+            })
+            .end(done)
+        })
+      })
+
+      describe('Manage groups and their externalId', function () {
+        it('should POST group from feline domain', function (done) {
+          agent
+            .post('/scim/v2/Groups')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenF)
+            .send({
+              schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+              externalId: '95a6875a-a187-4d60-8fef-3ceb574fce58',
+              displayName: 'Managers',
+              members: []
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-Managers/)
+            .expect(201)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'Managers')
+              assert.equal(res.body.externalId, '95a6875a-a187-4d60-8fef-3ceb574fce58')
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should GET group for feline domain', function (done) {
+          agent
+            .get('/scim/v2/Groups/group-Managers')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenF)
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-Managers/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'Managers')
+              assert.equal(res.body.externalId, '95a6875a-a187-4d60-8fef-3ceb574fce58')
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should GET group for bovine domain', function (done) {
+          agent
+            .get('/scim/v2/Groups/group-Managers')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenB)
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-Managers/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'Managers')
+              assert.isUndefined(res.body.externalId)
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should PATCH group externalId for bovine domain', function (done) {
+          agent
+            .patch('/scim/v2/Groups/group-Managers')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenB)
+            .send({
+              schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+              Operations: [
+                {
+                  op: 'add',
+                  path: 'externalId',
+                  value: 'AD7BFFD4-22EA-488D-AEEB-9A14C0802CF2'
+                }
+              ]
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'Managers')
+              assert.equal(res.body.externalId, 'AD7BFFD4-22EA-488D-AEEB-9A14C0802CF2')
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should GET group for bovine domain', function (done) {
+          agent
+            .get('/scim/v2/Groups/group-Managers')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenB)
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-Managers/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'Managers')
+              assert.equal(res.body.externalId, 'AD7BFFD4-22EA-488D-AEEB-9A14C0802CF2')
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should PUT updated group from feline domain', function (done) {
+          agent
+            .put('/scim/v2/Groups/group-Managers')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenF)
+            .send({
+              schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+              externalId: 'b2b3fe70-1f1b-41d2-8b0b-47d37c068b42',
+              displayName: 'Managers',
+              members: []
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-Managers/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'Managers')
+              assert.equal(res.body.externalId, 'b2b3fe70-1f1b-41d2-8b0b-47d37c068b42')
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should GET (unchanged) group for bovine domain', function (done) {
+          agent
+            .get('/scim/v2/Groups/group-Managers')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenB)
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-Managers/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'Managers')
+              assert.equal(res.body.externalId, 'AD7BFFD4-22EA-488D-AEEB-9A14C0802CF2')
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should GET groups for feline domain', function (done) {
+          agent
+            .get('/scim/v2/Groups')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenF)
+            .query({ filter: 'displayName eq "Managers"' })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect(200)
+            .expect(res => {
+              assert.equal(res.body.totalResults, 1)
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
+              assert.lengthOf(res.body.Resources, 1)
+              assert.equal(res.body.Resources[0].displayName, 'Managers')
+              assert.equal(res.body.Resources[0].externalId, 'b2b3fe70-1f1b-41d2-8b0b-47d37c068b42')
+            })
+            .end(done)
+        })
+
+        it('should GET groups for bovine domain', function (done) {
+          agent
+            .get('/scim/v2/Groups')
+            .trustLocalhost(true)
+            .set('Authorization', authTokenB)
+            .query({ filter: 'displayName eq "Managers"' })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect(200)
+            .expect(res => {
+              assert.equal(res.body.totalResults, 1)
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
+              assert.lengthOf(res.body.Resources, 1)
+              assert.equal(res.body.Resources[0].displayName, 'Managers')
+              assert.equal(res.body.Resources[0].externalId, 'AD7BFFD4-22EA-488D-AEEB-9A14C0802CF2')
             })
             .end(done)
         })

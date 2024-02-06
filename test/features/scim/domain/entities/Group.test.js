@@ -28,6 +28,16 @@ describe('Group entity', function () {
     assert.isTrue(original.equals(cloned))
   })
 
+  it('should notice changed externalId', function () {
+    // arrange
+    const original = new Group('staff', [])
+    original.externalId = 'staff123'
+    const cloned = original.clone()
+    cloned.externalId = 'grpstaff0'
+    // assert
+    assert.isFalse(original.equals(cloned))
+  })
+
   it('should treat identical groups as equal', function () {
     // arrange
     const groupa = new Group('staff', [{ value: 'joe' }, { value: 'susan' }])
