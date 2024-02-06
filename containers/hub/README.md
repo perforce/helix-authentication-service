@@ -17,6 +17,8 @@ To learn about the architecture, supported products and identity providers, as w
 
 ## How to use this image
 
+### Docker CLI
+
 The following are some examples of how to run the authentication service using
 Docker. The first and simplest option would be to use the Docker CLI to start
 the container:
@@ -34,6 +36,10 @@ DEFAULT_PROTOCOL=saml
 SAML_IDP_METADATA_URL=https://dev-123456.okta.com/app/abc123xyz456/sso/saml/metadata
 SAML_SP_ENTITY_ID=urn:example:sp
 ```
+
+Note that the values in the file named by the `--env-file` option must **not** be quoted at all. See https://github.com/docker/cli/issues/3630 for more information on this topic.
+
+### Docker Compose
 
 If you prefer Docker Compose, then create a `docker-compose.yml` file that might
 look something like this one:
