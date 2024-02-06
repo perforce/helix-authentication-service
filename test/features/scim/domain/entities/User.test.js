@@ -89,6 +89,18 @@ describe('User entity', function () {
     assert.isFalse(original.equals(patched))
   })
 
+  it('should notice changed externalId', function () {
+    // arrange
+    const original = new User('susan', 'susan@example.com', 'Susan Winters')
+    original.active = false
+    original.externalId = 'swinters'
+    original.password = 'Secret!23'
+    const cloned = original.clone()
+    cloned.externalId = 'susanw101'
+    // assert
+    assert.isFalse(original.equals(cloned))
+  })
+
   it('should notice changed active status', function () {
     // arrange
     const original = new User('susan', 'susan@example.com', 'Susan Winters')
