@@ -48,3 +48,6 @@ cert-or-key-*.pem
 providers.json
 data-*.xml
 secret-*.txt
+admin-passwd.txt
+client-secret.txt
+bearer-token.txt
