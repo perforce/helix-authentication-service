@@ -107,7 +107,8 @@ describe('GetGroup use case', function () {
       sinon.assert.calledWith(
         getStub,
         sinon.match('staff'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       getStub.restore()
     })

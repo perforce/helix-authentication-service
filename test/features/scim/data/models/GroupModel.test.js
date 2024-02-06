@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -35,7 +35,7 @@ describe('Group model', function () {
   it('should parse from JSON formatted entity', function () {
     // arrange
     const rawJson = {
-      externalId: '__UUID',
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
       displayName: 'Group1DisplayName',
       members: []
@@ -43,13 +43,14 @@ describe('Group model', function () {
     const group = GroupModel.fromJson(rawJson)
     // assert
     assert.equal(group.displayName, 'Group1DisplayName')
+    assert.equal(group.externalId, '30f06075-8ac7-450f-b74d-9a78d45c152d')
     assert.lengthOf(group.members, 0)
   })
 
   it('should parse JSON case insensitively', function () {
     // arrange
     const rawJson = {
-      EXTERNALID: '__UUID',
+      EXTERNALID: '30f06075-8ac7-450f-b74d-9a78d45c152d',
       ScheMaS: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
       DisplayName: 'Group1DisplayName',
       Members: []
@@ -57,6 +58,7 @@ describe('Group model', function () {
     const group = GroupModel.fromJson(rawJson)
     // assert
     assert.equal(group.displayName, 'Group1DisplayName')
+    assert.equal(group.externalId, '30f06075-8ac7-450f-b74d-9a78d45c152d')
     assert.lengthOf(group.members, 0)
   })
 
@@ -88,7 +90,7 @@ describe('Group model', function () {
   it('should round-trip JSON with members list', function () {
     // arrange
     const inputJson = {
-      externalId: '__UUID',
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
       displayName: 'staff',
       members: [
@@ -104,6 +106,7 @@ describe('Group model', function () {
     const expectedJson = {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
       id: 'group-staff',
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
       displayName: 'staff',
       members: [
         { value: 'joe', display: 'Joe Plumber' },

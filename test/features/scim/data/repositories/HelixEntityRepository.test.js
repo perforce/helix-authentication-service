@@ -870,6 +870,56 @@ describe('HelixEntity repository', function () {
       assert.equal(domainA.externalId, 'idA')
       assert.equal(domainA.email, 'joe@example.com')
     })
+
+    it('should add and retrieve group with externalId', async function () {
+      this.timeout(10000)
+      // arrange
+      const tGroup = new Group('domgroup', [])
+      tGroup.externalId = 'Group-123'
+      const added = await repository.addGroup(tGroup, undefined, 'canine')
+      assert.instanceOf(added, GroupModel)
+      assert.equal(added.id, 'group-domgroup')
+      assert.equal(added.externalId, 'Group-123')
+      // act
+      const groupById = await repository.getGroup(added.id, undefined, 'canine')
+      // assert
+      assert.instanceOf(groupById, GroupModel)
+      assert.equal(groupById.id, 'group-domgroup')
+      assert.equal(groupById.displayName, 'domgroup')
+      assert.lengthOf(groupById.members, 0)
+      assert.equal(groupById.externalId, 'Group-123')
+
+      // retrieve by the plain p4d group name
+      const group = await repository.getGroup('domgroup', undefined, 'canine')
+      assert.instanceOf(group, GroupModel)
+      assert.equal(group.displayName, 'domgroup')
+      assert.lengthOf(group.members, 0)
+      assert.equal(group.externalId, 'Group-123')
+
+      // get all groups by domain
+      const query = new Query()
+      const groups = await repository.getGroups(query, undefined, 'canine')
+      assert.isNotNull(groups)
+      const domgroup = groups.find((e) => e.displayName === 'domgroup')
+      assert.equal(domgroup.externalId, 'Group-123')
+    })
+
+    it('should update group with externalId', async function () {
+      this.timeout(10000)
+      // arrange
+      // act
+      const tGroupUpdate = new Group('domgroup', [])
+      tGroupUpdate.externalId = 'NewGroup456'
+      const updated = await repository.updateGroup(tGroupUpdate, undefined, 'canine')
+      assert.instanceOf(updated, GroupModel)
+      assert.equal(updated.id, 'group-domgroup')
+      assert.equal(updated.externalId, 'NewGroup456')
+      const group = await repository.getGroup('domgroup', undefined, 'canine')
+      // assert
+      assert.instanceOf(group, GroupModel)
+      assert.equal(group.displayName, 'domgroup')
+      assert.equal(group.externalId, 'NewGroup456')
+    })
   })
 
   describe('Missing P4PASSWD', function () {
