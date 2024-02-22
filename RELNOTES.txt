@@ -72,8 +72,9 @@ Requirements
 
 Documentation
 
-    The HAS Administrator's Guide is publicly available on perforce.com. The
-    guide details the steps for installation, upgrade, and configuration of the
+    Helix Authentication Service Administrator Guide at 
+    https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html 
+    details the steps for installation, upgrade, and configuration of the
     authentication service.
 
 
