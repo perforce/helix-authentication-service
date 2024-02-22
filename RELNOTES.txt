@@ -129,8 +129,8 @@ New functionality in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE}
         multiple cloud service providers to multiple Helix Core Servers.
 
     HAS-501 (Change #2507978)
-        Support configuration via TOML file named config.toml as an alternative
-        to using the .env file and its numerous supporting files.
+        Support configuration via a TOML file named config.toml as an
+        alternative to using the .env file and its numerous supporting files.
 
 ----------------------------------------------------------------------
 Bugs fixed in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
