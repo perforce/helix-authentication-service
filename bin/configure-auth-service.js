@@ -221,69 +221,75 @@ function readArguments() {
       type: 'boolean',
     },
   }
-  const { values } = parseArgs({ options })
-  if (values.monochrome) {
-    MONOCHROME = true
-  }
-  if (values.help) {
+  try {
+    const { values } = parseArgs({ options })
+    if (values.monochrome) {
+      MONOCHROME = true
+    }
+    if (values.help) {
+      usage()
+      return 1
+    }
+    if (values.debug) {
+      DEBUG = true
+    }
+    if (values['admin-user']) {
+      ALL_SETTINGS.set('ADMIN_USERNAME', values['admin-user'])
+    }
+    if (values['admin-passwd']) {
+      ALL_SETTINGS.set('ADMIN_PASSWD', values['admin-passwd'])
+    }
+    if (values['allow-root']) {
+      ALLOW_ROOT = true
+    }
+    if (values['base-url']) {
+      ALL_SETTINGS.set('SVC_BASE_URI', values['base-url'])
+    }
+    if (values['bearer-token']) {
+      ALL_SETTINGS.set('BEARER_TOKEN', values['bearer-token'])
+    }
+    if (values['enable-admin']) {
+      ALL_SETTINGS.set('ADMIN_ENABLED', 'yes')
+    }
+    if (values['p4port']) {
+      ALL_SETTINGS.set('P4PORT', values['p4port'])
+    }
+    if (values['super']) {
+      ALL_SETTINGS.set('P4USER', values['super'])
+    }
+    if (values['superpassword']) {
+      ALL_SETTINGS.set('P4PASSWD', values['superpassword'])
+    }
+    if (values['oidc-issuer-uri']) {
+      ALL_SETTINGS.set('OIDC_ISSUER_URI', values['oidc-issuer-uri'])
+    }
+    if (values['oidc-client-id']) {
+      ALL_SETTINGS.set('OIDC_CLIENT_ID', values['oidc-client-id'])
+    }
+    if (values['oidc-client-secret']) {
+      ALL_SETTINGS.set('OIDC_CLIENT_SECRET', values['oidc-client-secret'])
+    }
+    if (values['saml-idp-metadata-url']) {
+      ALL_SETTINGS.set('SAML_IDP_METADATA_URL', values['saml-idp-metadata-url'])
+    }
+    if (values['saml-idp-sso-url']) {
+      ALL_SETTINGS.set('SAML_IDP_SSO_URL', values['saml-idp-sso-url'])
+    }
+    if (values['saml-sp-entityid']) {
+      ALL_SETTINGS.set('SAML_SP_ENTITY_ID', values['saml-sp-entityid'])
+    }
+    if (values['default-protocol']) {
+      ALL_SETTINGS.set('DEFAULT_PROTOCOL', values['default-protocol'])
+    }
+    if (values['non-interactive']) {
+      INTERACTIVE = false
+    }
+    return 0
+  } catch (err) {
+    console.error(err.message || err)
     usage()
     return 1
   }
-  if (values.debug) {
-    DEBUG = true
-  }
-  if (values['admin-user']) {
-    ALL_SETTINGS.set('ADMIN_USERNAME', values['admin-user'])
-  }
-  if (values['admin-passwd']) {
-    ALL_SETTINGS.set('ADMIN_PASSWD', values['admin-passwd'])
-  }
-  if (values['allow-root']) {
-    ALLOW_ROOT = true
-  }
-  if (values['base-url']) {
-    ALL_SETTINGS.set('SVC_BASE_URI', values['base-url'])
-  }
-  if (values['bearer-token']) {
-    ALL_SETTINGS.set('BEARER_TOKEN', values['bearer-token'])
-  }
-  if (values['enable-admin']) {
-    ALL_SETTINGS.set('ADMIN_ENABLED', 'yes')
-  }
-  if (values['p4port']) {
-    ALL_SETTINGS.set('P4PORT', values['p4port'])
-  }
-  if (values['super']) {
-    ALL_SETTINGS.set('P4USER', values['super'])
-  }
-  if (values['superpassword']) {
-    ALL_SETTINGS.set('P4PASSWD', values['superpassword'])
-  }
-  if (values['oidc-issuer-uri']) {
-    ALL_SETTINGS.set('OIDC_ISSUER_URI', values['oidc-issuer-uri'])
-  }
-  if (values['oidc-client-id']) {
-    ALL_SETTINGS.set('OIDC_CLIENT_ID', values['oidc-client-id'])
-  }
-  if (values['oidc-client-secret']) {
-    ALL_SETTINGS.set('OIDC_CLIENT_SECRET', values['oidc-client-secret'])
-  }
-  if (values['saml-idp-metadata-url']) {
-    ALL_SETTINGS.set('SAML_IDP_METADATA_URL', values['saml-idp-metadata-url'])
-  }
-  if (values['saml-idp-sso-url']) {
-    ALL_SETTINGS.set('SAML_IDP_SSO_URL', values['saml-idp-sso-url'])
-  }
-  if (values['saml-sp-entityid']) {
-    ALL_SETTINGS.set('SAML_SP_ENTITY_ID', values['saml-sp-entityid'])
-  }
-  if (values['default-protocol']) {
-    ALL_SETTINGS.set('DEFAULT_PROTOCOL', values['default-protocol'])
-  }
-  if (values['non-interactive']) {
-    INTERACTIVE = false
-  }
-  return 0
 }
 
 // Show the argument values already provided.
