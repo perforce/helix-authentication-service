@@ -72,7 +72,7 @@ function usage() {
   console.info(`
 Usage:
 
-    configure-auth-service.sh [-n] [-m] ...
+    node configure-auth-service.js [-n] [-m] ...
 
 Description:
 
