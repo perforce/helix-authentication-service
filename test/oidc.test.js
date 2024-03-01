@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import * as fs from 'node:fs'
 import * as https from 'node:https'
@@ -10,7 +10,7 @@ import { Options } from 'selenium-webdriver/firefox.js'
 import { getRequestId } from 'helix-auth-svc/test/helpers.js'
 
 //
-// Selenium API: https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/
+// Selenium docs: https://www.selenium.dev/documentation/webdriver/
 //
 // Take a screenshot:
 //
@@ -36,7 +36,7 @@ describe('OIDC authentication', function () {
       this.timeout(30000)
       const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
       // fyi, going headless makes firefox 10x slower
-      const opts = new Options().headless()
+      const opts = new Options().addArguments('--headless')
       driver = new Builder()
         .forBrowser('firefox')
         .withCapabilities(caps)
