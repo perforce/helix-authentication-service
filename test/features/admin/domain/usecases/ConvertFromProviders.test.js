@@ -132,7 +132,7 @@ describe('ConvertFromProviders use case', function () {
     // act
     await usecase(settings, { shadow: true })
     // assert
-    assert.lengthOf(settings, 28)
+    assert.lengthOf(settings, 32)
     assert.isDefined(settings.get('AUTH_PROVIDERS'))
     const actualProviders = settings.get('AUTH_PROVIDERS')
     assert.lengthOf(actualProviders, 2)
@@ -141,6 +141,10 @@ describe('ConvertFromProviders use case', function () {
       'IDP_CERT_FILE',
       'IDP_CERT',
       'OIDC_CLIENT_ID',
+      'OIDC_CLIENT_CERT_FILE',
+      'OIDC_CLIENT_CERT',
+      'OIDC_CLIENT_KEY_FILE',
+      'OIDC_CLIENT_KEY',
       'OIDC_CLIENT_SECRET_FILE',
       'OIDC_CLIENT_SECRET',
       'OIDC_CODE_CHALLENGE_METHOD',

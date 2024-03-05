@@ -52,7 +52,9 @@ kubectl apply -f kubernetes/secrets/auth-ca-crt.yaml
 kubectl apply -f kubernetes/secrets/auth-svc-tls.yaml
 kubectl apply -f kubernetes/secrets/oidc-client-creds.yaml
 kubectl apply -f kubernetes/configmaps/auth-svc.yaml
+kubectl apply -f kubernetes/services/redis.yaml
 kubectl apply -f kubernetes/services/auth-svc.yaml
+kubectl apply -f kubernetes/deployments/redis.yaml
 kubectl apply -f kubernetes/deployments/auth-svc.yaml
 kubectl apply -f kubernetes/ingresses/auth-svc.yaml
 ```
@@ -84,16 +86,18 @@ Default backend:  <default>
 TLS:
   auth-svc-tls terminates auth-svc.cluster
 Rules:
-  Host            Path  Backends
-  ----            ----  --------
+  Host              Path  Backends
+  ----              ----  --------
   auth-svc.cluster
-                  /   auth-svc:80 (10.244.0.60:3000)
-Annotations:      nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
-                  nginx.ingress.kubernetes.io/auth-tls-verify-client: optional
+                    /   auth-svc:80 (10.244.0.156:3000,10.244.0.161:3000)
+Annotations:        nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
+                    nginx.ingress.kubernetes.io/auth-tls-secret: helix/auth-ca-crt
+                    nginx.ingress.kubernetes.io/auth-tls-verify-client: optional
 Events:
-  Type    Reason  Age                  From                      Message
-  ----    ------  ----                 ----                      -------
-  Normal  Sync    33m (x4 over 2d21h)  nginx-ingress-controller  Scheduled for sync
+  Type    Reason  Age    From                      Message
+  ----    ------  ----   ----                      -------
+  Normal  Sync    37m    nginx-ingress-controller  Scheduled for sync
+  Normal  Sync    5m17s  nginx-ingress-controller  Scheduled for sync
 ```
 
 ### Confirm delivery of client certificate to auth service
