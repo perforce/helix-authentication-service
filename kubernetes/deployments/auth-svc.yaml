@@ -36,4 +36,16 @@ spec:
             secretKeyRef:
               name: oidc-client-creds
               key: client_secret
+        readinessProbe:
+          httpGet:
+            path: /liveness
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
 ...
