@@ -98,7 +98,8 @@ setTimeout(function () {
         temporary.set('AUTH_PROVIDERS', [
           {
             clientId: 'unique-client-identifier',
-            clientSecret: 'shared secrets are bad',
+            clientCert: '-----BEGIN CERTIFICATE-----',
+            clientKey: '-----BEGIN PRIVATE KEY-----',
             issuerUri: 'https://oidc.example.com',
             selectAccount: 'false',
             signingAlgo: 'RS256',
@@ -121,6 +122,9 @@ setTimeout(function () {
               const oidcProvider = providers.find((e) => e.protocol === 'oidc')
               assert.exists(oidcProvider)
               assert.propertyVal(oidcProvider, 'signingAlgo', 'RS256')
+              assert.equal(oidcProvider.clientCert, '-----BEGIN CERTIFICATE-----')
+              // private key should be concealed
+              assert.notProperty(oidcProvider, 'clientKey')
             })
             .end(function (err) {
               temporary.delete('AUTH_PROVIDERS')
@@ -133,7 +137,8 @@ setTimeout(function () {
         temporary.set('AUTH_PROVIDERS', [
           {
             clientId: 'unique-client-identifier',
-            clientSecret: 'shared secrets are bad',
+            clientCert: '-----BEGIN CERTIFICATE-----',
+            clientKey: '-----BEGIN PRIVATE KEY-----',
             issuerUri: 'https://oidc.example.com',
             selectAccount: 'false',
             signingAlgo: 'RS256',
@@ -151,6 +156,15 @@ setTimeout(function () {
             .expect('Content-Type', /application\/json/)
             .expect(res => {
               assert.propertyVal(res.body, 'clientId', 'unique-client-identifier')
+              assert.equal(res.body.clientCert, '-----BEGIN CERTIFICATE-----')
+              assert.equal(res.body.issuerUri, 'https://oidc.example.com')
+              assert.isFalse(res.body.selectAccount)
+              assert.equal(res.body.signingAlgo, 'RS256')
+              assert.equal(res.body.label, 'oidc.example.com')
+              assert.equal(res.body.protocol, 'oidc')
+              assert.equal(res.body.id, 'oidc-1')
+              // private key should be concealed
+              assert.notProperty(res.body, 'clientKey')
             })
             .end(function (err) {
               temporary.delete('AUTH_PROVIDERS')

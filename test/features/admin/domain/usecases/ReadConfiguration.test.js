@@ -288,6 +288,79 @@ describe('ReadConfiguration use case', function () {
     }
   })
 
+  it('should conceal OIDC client key (classic)', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const clientCertFile = temporaryFile({ extension: 'crt' })
+    fs.writeFileSync(clientCertFile, '-----BEGIN CERTIFICATE-----')
+    const clientKeyFile = temporaryFile({ extension: 'key' })
+    fs.writeFileSync(clientKeyFile, '-----BEGIN PRIVATE KEY-----')
+    temporaryRepository.set('OIDC_ISSUER_URI', 'https://oidc.example.com')
+    temporaryRepository.set('OIDC_CLIENT_ID', 'client-id')
+    temporaryRepository.set('OIDC_CLIENT_CERT_FILE', clientCertFile)
+    temporaryRepository.set('OIDC_CLIENT_KEY_FILE', clientKeyFile)
+    try {
+      // act
+      const settings = await usecase()
+      // assert
+      assert.lengthOf(settings, 12)
+      assert.isFalse(settings.has('OIDC_CLIENT_KEY_FILE'))
+      assert.isFalse(settings.has('OIDC_CLIENT_CERT_FILE'))
+      const providers = settings.get('AUTH_PROVIDERS')
+      assert.lengthOf(providers, 1)
+      assert.equal(providers[0]['protocol'], 'oidc')
+      assert.equal(providers[0]['issuerUri'], 'https://oidc.example.com')
+      assert.equal(providers[0]['clientId'], 'client-id')
+      assert.property(providers[0], 'clientCert')
+      assert.notProperty(providers[0], 'clientKey')
+      assert.isTrue(readStub.calledOnce)
+    } finally {
+      readStub.restore()
+      temporaryRepository.clear()
+    }
+  })
+
+  it('should conceal OIDC client key (providers)', async function () {
+    // arrange
+    const clientCertFile = temporaryFile({ extension: 'crt' })
+    fs.writeFileSync(clientCertFile, '-----BEGIN CERTIFICATE-----')
+    const clientKeyFile = temporaryFile({ extension: 'key' })
+    fs.writeFileSync(clientKeyFile, '-----BEGIN PRIVATE KEY-----')
+    const providers = [{
+      issuerUri: 'https://oidc.example.com',
+      clientId: 'client-id',
+      clientCertFile,
+      clientKeyFile,
+      label: 'Veritas Solutions',
+      protocol: 'oidc'
+    }]
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
+    try {
+      // act
+      const settings = await usecase()
+      // assert
+      assert.lengthOf(settings, 12)
+      assert.isTrue(settings.has('AUTH_PROVIDERS'))
+      const actual = settings.get('AUTH_PROVIDERS')
+      assert.lengthOf(actual, 1)
+      assert.equal(actual[0].protocol, 'oidc')
+      assert.equal(actual[0].label, 'Veritas Solutions')
+      assert.equal(actual[0].issuerUri, 'https://oidc.example.com')
+      assert.equal(actual[0].clientId, 'client-id')
+      assert.equal(actual[0].clientCert, '-----BEGIN CERTIFICATE-----')
+      assert.notProperty(actual[0], 'clientKey')
+      assert.isTrue(readStub.calledOnce)
+    } finally {
+      readStub.restore()
+      temporaryRepository.clear()
+    }
+  })
+
   it('should read auth providers from setting', async function () {
     // arrange
     const providers = [{
