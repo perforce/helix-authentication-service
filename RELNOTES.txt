@@ -114,7 +114,7 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-230 (Change #2487461)
         Support client certificate via HTTP header for use with a reverse proxy
@@ -133,14 +133,14 @@ New functionality in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE}
         alternative to using the .env file and its numerous supporting files.
 
 ----------------------------------------------------------------------
-Bugs fixed in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-489 (Change #2485834)
         When not enabled, the static content for the administrative interface
         will no longer be served to the client.
 
 ----------------------------------------------------------------------
-Other changes in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Other changes in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-425 (Change #2522538)
         Renaming a user via the user provisioning feature is now disabled by
