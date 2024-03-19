@@ -1,2 +1,3 @@
 /opt/perforce/helix-auth-svc/logging.config.cjs
+/opt/perforce/helix-auth-svc/routes/saml_idp.conf.cjs
 /opt/perforce/helix-auth-svc/sentinel.config.cjs

@@ -75,6 +75,7 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 %docdir %{installprefix}/docs
 %config(noreplace) %{installprefix}/logging.config.cjs
 %config(noreplace) %{installprefix}/sentinel.config.cjs
+%config(noreplace) %{installprefix}/routes/saml_idp.conf.cjs
 %{installprefix}
 
 %post
