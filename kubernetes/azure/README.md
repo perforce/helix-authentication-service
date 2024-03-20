@@ -1,62 +1,57 @@
 # Kubernetes
 
-This directory contains example manifests for deploying the authentication service within a Google-managed [Kubernetes](https://kubernetes.io) cluster using the [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine). This document describes the overall setup and provides additional tips and information. Familiarity with the `kubectl` command is assumed.
+This directory contains example manifests for deploying the authentication service within an Azure-managed [Kubernetes](https://kubernetes.io) cluster using the [Azure Kubernetes Service](https://azure.microsoft.com/en-us/products/kubernetes-service). This document describes the overall setup and provides additional tips and information. Familiarity with the `kubectl` command is assumed.
 
-## Google Cloud Documentation
+## Azure Documentation
 
-Visit https://console.cloud.google.com/ and use the search box at the top of the page to quickly find documentation and other relevant information. This guide will only cover the bare minimum for setting up these services, and relies heavily on the existing documentation by Google.
+Visit https://portal.azure.com/ and use the search box at the top of the page to quickly find documentation and other relevant information. This guide will only cover the bare minimum for setting up these services, and relies heavily on the existing documentation by Microsoft.
 
 ## Initial Setup
 
 ### Create the Cluster
 
-1. Visit https://console.cloud.google.com/ in a browser
-1. Create a new project or use an existing one.
-1. Navigate to **Kubernetes Engine** and create a new cluster. There are no special requirements, the default selections will work fine.
+1. Visit the [Azure portal](https://portal.azure.com/) in a browser.
+1. Create an account if you do not have one already.
+1. Navigate to **All services** and search for *Kubernetes services* and click the link.
+1. Create a new cluster from that page. There are no special requirements, the default selections will work fine.
 
 ### Client Setup
 
-1. Install the Google Cloud CLI https://cloud.google.com/cli to your desktop or laptop.
-    * If using [Homebrew](https://brew.sh), you can run `brew install google-cloud-sdk`
-1. Update the installed components: `gcloud components update`
-1. Install the `kubectl` command-line tool:
-    * Using gcloud: `gcloud components install kubectl`
-    * Using Homebrew: `brew install kubernetes-cli`
-1. Install the GKE plugin for `kubectl` and authenticate with your cluster:
+From the cluster overview page in the Azure portal, find the **Get started** tab and click that to open a set of guides for setting up client access to the cluster. In particular, you may want to set up access using `kubectl` in order to easily use the instructions in this guide.
+
+Install the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) to your desktop or laptop. If using [Homebrew](https://brew.sh), you can run `brew install azure-cli`
 
 ```shell
-gcloud components install gke-gcloud-auth-plugin
-gcloud auth login
-gcloud config set project <name-of-project>
-gcloud container clusters get-credentials <your-cluster> --region=<your-region>
+az login
+az account set --subscription <your-subscription-id>
+az aks get-credentials --resource-group <your-resource-group> --name <preferred-name> --overwrite-existing
 ```
 
-### Artifact Registry
+At this point the `kubectl` CLI will work as expected with this cluster.
 
-In order to produce container images and push them to a private registry, you will need to create an *image registry* and use that address when pulling private container images into your cluster. Google Cloud offers this as the **Artifact Registry** service, which charges for disk and network usage. See these [instructions](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images) for details on the setup and usage.
+### Container Registry
 
-### Ingress NGINX
+In order to produce container images and push them to a private registry, you will need to create a *image registry* and use that address when pulling private container images into your cluster. Azure offers this as the **Azure Container Registry** service, which charges for disk and network usage. See the [overview](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-intro) for more information and links to instructions for creating a registry.
 
-While Google Cloud offers several options for ingress into a cluster, these example manifests were developed using the NGINX ingress controller to easily leverage the features it offers. As such, installing the `ingress-nginx` controller will be necessary, unless you choose to modify the service configuration. See the [documentation](https://kubernetes.github.io/ingress-nginx/deploy/) or simply use `helm` like so:
+### Application Routing
+
+Azure offers a version of the `ingress-nginx` controller via it's *application routing* feature. To enable this feature, follow their [instructions](https://learn.microsoft.com/en-us/azure/aks/app-routing), or simply run the `az` command like so:
 
 ```shell
-helm upgrade --install ingress-nginx ingress-nginx \
-  --repo https://kubernetes.github.io/ingress-nginx \
-  --namespace ingress-nginx --create-namespace
+az aks approuting enable -g <your-resource-group> -n <your-cluster>
 ```
 
-The command below will show that the nginx ingress controller was able to register with the load balancer to get an external address.
+The command below will show that the ingress controller was able to register with the load balancer to get an external address.
 
 ```shell
-$ kubectl -n ingress-nginx get svc
-NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)                      AGE
-ingress-nginx-controller             LoadBalancer   34.118.226.71    34.67.11.220   80:30977/TCP,443:30496/TCP   2m55s
-ingress-nginx-controller-admission   ClusterIP      34.118.231.171   <none>         443/TCP                      2m55s
+$ kubectl -n app-routing-system get svc
+NAME    TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)                                      AGE
+nginx   LoadBalancer   10.0.32.141   4.255.69.138   80:30092/TCP,443:31301/TCP,10254:31162/TCP   18m
 ```
 
 ### Domain name resolution
 
-These instructions assume that domain name resolution will be configured to resolve names like `auth-svc.pcloud` to the external IP address of services hosted in the Google cluster. Something like [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) or `systemd-resolved` might be useful here, as well as just editing your `/etc/hosts` file. For a production environment, Google, as well as other companies, offer services for this purpose.
+These instructions assume that domain name resolution will be configured to resolve names like `auth-svc.pcloud` to the external IP address of services hosted in the Azure cluster. Something like [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) or `systemd-resolved` might be useful here, as well as just editing your `/etc/hosts` file. For a production environment, Microsoft, as well as other companies, offer services for this purpose.
 
 ### Generate TLS certificates for nginx ingress
 
@@ -75,15 +70,15 @@ The output from last command (`get secret`) can be pasted into the `secrets/auth
 
 ### Build the service image
 
-Kubernetes will pull container images from [Docker Hub](https://hub.docker.com) by default, unless the image includes the address of a registry. These manifests assume that to be the case, using `us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo` as the address of a private artifact registry. The steps below will produce the image for the auth service and push it to that artifact registry.
+Kubernetes will pull container images from [Docker Hub](https://hub.docker.com) by default, unless the image includes the address of a registry. These manifests assume that to be the case, using `p4hastest.azurecr.io` as the address of a private artifact registry. The steps below will produce the image for the auth service and push it to that artifact registry.
 
 **Note:** You will need to create your own registry and modify the commands below to match.
 
 ```shell
 docker build -f containers/hub/Dockerfile -t helix-auth-svc .
-docker image rm us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo/helix-auth-svc
-docker image tag helix-auth-svc us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo/helix-auth-svc
-docker push us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo/helix-auth-svc
+docker image rm p4hastest.azurecr.io/helix-auth-svc
+docker image tag helix-auth-svc p4hastest.azurecr.io/helix-auth-svc
+docker push p4hastest.azurecr.io/helix-auth-svc
 ```
 
 ## Deploy
@@ -118,8 +113,8 @@ $ kubectl -n helix describe ingress auth-svc
 Name:             auth-svc
 Labels:           <none>
 Namespace:        helix
-Address:          34.67.11.220
-Ingress Class:    <none>
+Address:          4.255.69.138
+Ingress Class:    webapprouting.kubernetes.azure.com
 Default backend:  <default>
 TLS:
   auth-svc-tls terminates auth-svc.pcloud
@@ -127,9 +122,8 @@ Rules:
   Host             Path  Backends
   ----             ----  --------
   auth-svc.pcloud
-                   /   auth-svc:80 (10.44.0.140:3000,10.44.0.28:3000)
-Annotations:       kubernetes.io/ingress.class: nginx
-                   nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
+                   /   auth-svc:80 (10.244.0.12:3000,10.244.1.13:3000)
+Annotations:       nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: true
                    nginx.ingress.kubernetes.io/auth-tls-secret: helix/auth-ca-crt
                    nginx.ingress.kubernetes.io/auth-tls-verify-client: optional
 Events:            <none>
