@@ -151,7 +151,7 @@ function detect_platform() {
             NODE_VERSION=16
         fi
     elif [[ "$ID" == 'rocky' ]]; then
-        # For now, all Rocky releases support Node.js v18, otherwise examine the
+        # For now, all Rocky releases support Node.js LTS, otherwise examine the
         # VERSION_ID value and compare to something like "8.5" to decide.
         PLATFORM=redhat
     elif [[ "$ID" == 'ubuntu' ]]; then
@@ -400,10 +400,10 @@ then restart the service: sudo systemctl restart helix-auth
     ${INSTALLPREFIX}
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
-for your identity provider. The configure-auth-service.sh script may be
+for your identity provider. The configure-auth-service.js script may be
 helpful for this purpose.
 
-    ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
+    node ${INSTALLPREFIX}/bin/configure-auth-service.js --help
 
 For assistance, please contact support@perforce.com
 EOT

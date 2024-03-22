@@ -38,6 +38,7 @@ install -d %{buildroot}%{installprefix}/public
 install -d %{buildroot}%{installprefix}/routes
 install -d %{buildroot}%{installprefix}/views
 
+cp -p bin/configure-auth-service.js %{buildroot}%{installprefix}/bin/configure-auth-service.js
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
 install -m 0755 bin/node %{buildroot}%{installprefix}/bin/node
 install -m 0755 bin/www.js %{buildroot}%{installprefix}/bin/www.js
@@ -154,10 +155,10 @@ then restart the service: sudo systemctl restart helix-auth
     %{installprefix}
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
-for your identity provider. The configure-auth-service.sh script may be
+for your identity provider. The configure-auth-service.js script may be
 helpful for this purpose.
 
-    %{installprefix}/bin/configure-auth-service.sh --help
+    node %{installprefix}/bin/configure-auth-service.js --help
 
 For assistance, please contact support@perforce.com
 
@@ -177,10 +178,10 @@ by invoking './bin/node ./bin/www.js' from the directory shown below.
     %{installprefix}
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
-for your identity provider. The configure-auth-service.sh script may be
+for your identity provider. The configure-auth-service.js script may be
 helpful for this purpose.
 
-    %{installprefix}/bin/configure-auth-service.sh --help
+    node %{installprefix}/bin/configure-auth-service.js --help
 
 For assistance, please contact support@perforce.com
 

@@ -46,6 +46,7 @@ sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --oidc-client-secret client_secret
 
 # ensure configure script created the OIDC client secret file
+test -f helix-auth-svc/.env
 test -f helix-auth-svc/client-secret.txt
 sudo -u perforce grep -q 'client_secret' helix-auth-svc/client-secret.txt || { echo 'client secret missing' ; exit 1; }
 grep -q 'https://localhost:3000' helix-auth-svc/.env || { echo '.env missing URL' ; exit 1; }
@@ -56,6 +57,7 @@ sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --saml-idp-metadata-url https://saml.idp/metadata
 
+test -f helix-auth-svc/.env
 grep -q 'https://saml.idp/metadata' helix-auth-svc/.env || { echo '.env missing SAML' ; exit 1; }
 
 # run the configure script and set up web interface
@@ -63,8 +65,9 @@ sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 --enable-admin \
     --admin-user=scott --admin-passwd=tiger
 
-grep -q 'ADMIN_ENABLED=true' helix-auth-svc/.env || { echo '.env missing ADMIN_ENABLED' ; exit 1; }
-grep -q 'ADMIN_USERNAME=scott' helix-auth-svc/.env || { echo '.env missing ADMIN_USERNAME' ; exit 1; }
+test -f helix-auth-svc/.env
+grep -q "ADMIN_ENABLED='true'" helix-auth-svc/.env || { echo '.env missing ADMIN_ENABLED' ; exit 1; }
+grep -q "ADMIN_USERNAME='scott'" helix-auth-svc/.env || { echo '.env missing ADMIN_USERNAME' ; exit 1; }
 grep -q 'ADMIN_PASSWD_FILE' helix-auth-svc/.env || { echo '.env missing ADMIN_PASSWD_FILE' ; exit 1; }
 
 cat <<EOT

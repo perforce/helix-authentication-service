@@ -3,16 +3,12 @@
 //
 // Configuration script for Helix Authentication Service.
 //
-// This script is UNTESTED, UNSUPPORTED, and UNDOCUMENTED. Use the
-// configure-auth-service.sh script instead of this one.
-//
 import assert from 'node:assert'
 import { spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import readline from 'node:readline/promises'
-import readlineSync from 'node:readline'
+import readline from 'node:readline'
 import { parseArgs } from 'node:util'
 import { DotenvSource } from 'helix-auth-svc/lib/common/data/sources/DotenvSource.js'
 import { TomlSource } from 'helix-auth-svc/lib/common/data/sources/TomlSource.js'
@@ -22,8 +18,8 @@ let MONOCHROME = false
 let ALLOW_ROOT = false
 let SVC_RESTARTED = false
 let DEBUG = false
-let CONFIGURE_AUTH = true
-let CONFIGURE_SCIM = true
+let CONFIGURE_AUTH = false
+let CONFIGURE_SCIM = false
 let PROTOCOLS = []
 let FOUND_P4 = true
 let INJECT_P4TRUST = false
@@ -246,39 +242,50 @@ function readArguments() {
       ALL_SETTINGS.set('SVC_BASE_URI', values['base-url'])
     }
     if (values['bearer-token']) {
+      CONFIGURE_SCIM = true
       ALL_SETTINGS.set('BEARER_TOKEN', values['bearer-token'])
     }
     if (values['enable-admin']) {
       ALL_SETTINGS.set('ADMIN_ENABLED', 'yes')
     }
     if (values['p4port']) {
+      CONFIGURE_SCIM = true
       ALL_SETTINGS.set('P4PORT', values['p4port'])
     }
     if (values['super']) {
+      CONFIGURE_SCIM = true
       ALL_SETTINGS.set('P4USER', values['super'])
     }
     if (values['superpassword']) {
+      CONFIGURE_SCIM = true
       ALL_SETTINGS.set('P4PASSWD', values['superpassword'])
     }
     if (values['oidc-issuer-uri']) {
+      CONFIGURE_AUTH = true
       ALL_SETTINGS.set('OIDC_ISSUER_URI', values['oidc-issuer-uri'])
     }
     if (values['oidc-client-id']) {
+      CONFIGURE_AUTH = true
       ALL_SETTINGS.set('OIDC_CLIENT_ID', values['oidc-client-id'])
     }
     if (values['oidc-client-secret']) {
+      CONFIGURE_AUTH = true
       ALL_SETTINGS.set('OIDC_CLIENT_SECRET', values['oidc-client-secret'])
     }
     if (values['saml-idp-metadata-url']) {
+      CONFIGURE_AUTH = true
       ALL_SETTINGS.set('SAML_IDP_METADATA_URL', values['saml-idp-metadata-url'])
     }
     if (values['saml-idp-sso-url']) {
+      CONFIGURE_AUTH = true
       ALL_SETTINGS.set('SAML_IDP_SSO_URL', values['saml-idp-sso-url'])
     }
     if (values['saml-sp-entityid']) {
+      CONFIGURE_AUTH = true
       ALL_SETTINGS.set('SAML_SP_ENTITY_ID', values['saml-sp-entityid'])
     }
     if (values['default-protocol']) {
+      CONFIGURE_AUTH = true
       ALL_SETTINGS.set('DEFAULT_PROTOCOL', values['default-protocol'])
     }
     if (values['non-interactive']) {
@@ -546,13 +553,26 @@ async function readSettings() {
     }
     await readFileToSetting('BEARER_TOKEN_FILE', 'BEARER_TOKEN')
     await readFileToSetting('OIDC_CLIENT_SECRET_FILE', 'OIDC_CLIENT_SECRET')
-    if (ALL_SETTINGS.get('ADMIN_ENABLED') === 'true') {
-      ALL_SETTINGS.set('ADMIN_ENABLED', 'yes')
-    } else {
-      ALL_SETTINGS.set('ADMIN_ENABLED', 'no')
+    // ADMIN_ENABLED may have been set by command-line arguments
+    if (ALL_SETTINGS.get('ADMIN_ENABLED') !== 'yes') {
+      if (ALL_SETTINGS.get('ADMIN_ENABLED') === 'true') {
+        ALL_SETTINGS.set('ADMIN_ENABLED', 'yes')
+      } else {
+        ALL_SETTINGS.set('ADMIN_ENABLED', 'no')
+      }
     }
     await readFileToSetting('ADMIN_PASSWD_FILE', 'ADMIN_PASSWD')
   }
+}
+
+// async adapter for the readline callback API while we wait to finally and
+// fully drop support for Node.js v16
+async function question(rl, prompt) {
+  return new Promise((resolve) => {
+    rl.question(prompt, (answer) => {
+      resolve(answer)
+    })
+  })
 }
 
 // Prompt the user for information by showing a prompt string. Optionally calls
@@ -569,12 +589,12 @@ async function promptFor(name, prompt, defaultValue, validator) {
   let response
   do {
     if (defaultValue) {
-      response = await rl.question(`${prompt} [${defaultValue}]: `)
+      response = await question(rl, `${prompt} [${defaultValue}]: `)
       if (response === '') {
         response = defaultValue
       }
     } else {
-      response = await rl.question(`${prompt}: `)
+      response = await question(rl, `${prompt}: `)
     }
   } while (validator(response) !== 0)
   ALL_SETTINGS.set(name, response)
@@ -584,7 +604,7 @@ async function promptFor(name, prompt, defaultValue, validator) {
 // Prompts for a secret that is not echoed to the screen.
 async function readlineSecret(prompt) {
   return new Promise((resolve) => {
-    const rl = readlineSync.createInterface({
+    const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     })
@@ -675,12 +695,12 @@ async function promptForYesNo(name, prompt, defaultValue) {
   // read the yes/no input like any other input
   let response
   if (defaultValue) {
-    response = await rl.question(`${prompt} [${defaultValue}]: `)
+    response = await question(rl, `${prompt} [${defaultValue}]: `)
     if (response === '') {
       response = defaultValue
     }
   } else {
-    response = await rl.question(`${prompt}: `)
+    response = await question(rl, `${prompt}: `)
   }
   const lower = response.toLowerCase()
   ALL_SETTINGS.set(name, lower === 'yes' || lower === 'y' ? 'yes' : 'no')
@@ -768,7 +788,7 @@ wish to configure from the options below.
   }
   let response
   do {
-    response = await rl.question('1, 2, or 3: ')
+    response = await question(rl, '1, 2, or 3: ')
   } while (validator(response) !== 0)
   if (response === '1') {
     CONFIGURE_AUTH = true
@@ -809,7 +829,7 @@ configure from the options below.
   }
   let response
   do {
-    response = await rl.question('1, 2, or 3: ')
+    response = await question(rl, '1, 2, or 3: ')
   } while (validator(response) !== 0)
   if (response === '1') {
     PROTOCOLS['oidc'] = 1
@@ -1318,6 +1338,7 @@ function cleanInputs() {
   } else {
     ALL_SETTINGS.delete('ADMIN_ENABLED')
     ALL_SETTINGS.delete('ADMIN_USERNAME')
+    ALL_SETTINGS.delete('ADMIN_PASSWD')
     ALL_SETTINGS.delete('ADMIN_PASSWD_FILE')
   }
   if (!ALL_SETTINGS.has('P4PORT')) {
@@ -1349,7 +1370,7 @@ The operations involved are as follows:
     console.info('  * Enable the administrative web interface')
     console.info(`  * Set ADMIN_USERNAME to ${value('ADMIN_USERNAME')}`)
   }
-  if (isDefined('ADMIN_PASSWD')) {
+  if (isDefined('ADMIN_PASSWD_FILE')) {
     console.info(`  * Set ADMIN_PASSWD_FILE to ${value('ADMIN_PASSWD_FILE')}`)
     console.info('    (the file will contain the admin user password)')
   }
@@ -1396,7 +1417,7 @@ async function promptToProceed() {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
   let answer
   do {
-    answer = await rl.question('Do you wish to continue (yes/no)? ')
+    answer = await question(rl, 'Do you wish to continue (yes/no)? ')
   } while (answer !== 'yes' && answer !== 'y' && answer !== 'no' && answer !== 'n')
   rl.close()
   if (answer === 'n' || answer === 'no') {
