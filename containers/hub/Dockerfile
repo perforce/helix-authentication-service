@@ -3,9 +3,9 @@
 #
 # Build:
 #
-# $ docker build --pull -t helix-auth-svc:latest -t helix-auth-svc:2024.1 -f containers/hub/Dockerfile .
+# $ docker build --pull -t helix-auth-svc:latest -t helix-auth-svc:2024.1.1 -f containers/hub/Dockerfile .
 # $ docker tag helix-auth-svc:latest perforce/helix-auth-svc:latest
-# $ docker tag helix-auth-svc:2024.1 perforce/helix-auth-svc:2024.1
+# $ docker tag helix-auth-svc:2024.1.1 perforce/helix-auth-svc:2024.1.1
 # $ docker push --all-tags perforce/helix-auth-svc
 #
 # Run:
@@ -44,6 +44,7 @@ COPY defaults.env defaults.env
 COPY lib lib
 COPY package.json .
 COPY package-lock.json .
+COPY private private
 COPY public public
 COPY routes routes
 COPY views views
