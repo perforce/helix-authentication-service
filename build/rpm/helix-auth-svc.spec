@@ -68,6 +68,7 @@ cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
 sed -e "s/\"2024.1.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
+cp LICENSE.txt %{buildroot}%{installprefix}/LICENSE.txt
 cp README.md %{buildroot}%{installprefix}/README.md
 cp README.html %{buildroot}%{installprefix}/README.html
 cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
