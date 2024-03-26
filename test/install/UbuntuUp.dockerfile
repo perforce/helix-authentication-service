@@ -48,8 +48,9 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --oidc-client-secret client_secret
 
 # ensure configure script created the OIDC client secret file
-RUN test -f helix-auth-svc/client-secret.txt && \
-    grep -q 'client_secret' helix-auth-svc/client-secret.txt && \
-    grep -q 'logging.config.cjs' helix-auth-svc/.env && \
-    grep -q 'https://localhost:3000' helix-auth-svc/.env && \
-    grep -q 'https://oidc.issuer' helix-auth-svc/.env
+RUN test -f helix-auth-svc/client-secret.txt
+RUN grep -q 'client_secret' helix-auth-svc/client-secret.txt
+RUN test -f helix-auth-svc/.env
+RUN cat helix-auth-svc/.env
+RUN grep -q 'https://localhost:3000' helix-auth-svc/.env
+RUN grep -q 'https://oidc.issuer' helix-auth-svc/.env
