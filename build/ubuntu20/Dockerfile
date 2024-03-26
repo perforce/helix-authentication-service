@@ -57,6 +57,7 @@ COPY views views
 COPY defaults.env defaults.env
 COPY example.env example.env
 COPY example.toml example.toml
+COPY LICENSE.txt LICENSE.txt
 COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs
 COPY package-lock.json package-lock.json
