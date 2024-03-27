@@ -50,7 +50,7 @@ function main() {
     export PATH=$(pwd)/bin:${PATH}
     set -e
     ensure_readiness
-    node ./bin/configure-auth-service.js $@
+    node ./bin/configure-auth-service.js "$@"
 }
 
 main "$@"
