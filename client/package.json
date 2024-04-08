@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "licenses": "license-checker --production --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -28,6 +29,7 @@
     "@vitejs/plugin-react": "^4.0.0",
     "eslint": "^8.37.0",
     "eslint-config-react-app": "^7.0.1",
+    "license-checker": "^25.0.1",
     "vite": "^5.1.5",
     "vite-plugin-eslint": "^1.8.1"
   }
