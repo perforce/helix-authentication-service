@@ -24,10 +24,11 @@
     "react-router-dom": "^6.12.0"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/react": "^18.2.7",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^4.0.0",
-    "eslint": "^8.37.0",
+    "eslint": "^8.57.0",
     "eslint-config-react-app": "^7.0.1",
     "license-checker": "^25.0.1",
     "vite": "^5.1.5",

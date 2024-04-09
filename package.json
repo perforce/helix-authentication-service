@@ -71,8 +71,8 @@
   },
   "devDependencies": {
     "chai": "^5.1.0",
-    "eslint": "^8.41.0",
-    "eslint-plugin-unicorn": "^51.0.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-unicorn": "^52.0.0",
     "geckodriver": "^4.0.2",
     "get-port": "^7.0.0",
     "license-checker": "^25.0.1",
