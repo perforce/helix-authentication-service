@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Build package tarball for CentOS Stream 9 (using RockyLinux 9).
+# Build package tarball for RHEL 9 using a compatible OS.
 #
 set -e
 echo 'creating tar file...'

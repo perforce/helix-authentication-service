@@ -1,15 +1,9 @@
-FROM rockylinux:9 AS rocky9-sha1
+FROM rockylinux:9 AS rocky9-build
 #
 # $ docker build -f build/centos9/Dockerfile --output type=local,dest=. .
 #
 # Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
-
-# need to enable SHA1 support until NodeSource fixes their packages
-# (c.f. https://github.com/nodesource/distributions/issues/1653)
-RUN update-crypto-policies --set DEFAULT:SHA1
-
-FROM rocky9-sha1 AS rocky9-build
 
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
@@ -19,8 +13,8 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 #
 ADD https://rpm.nodesource.com/setup_20.x setup_20.x
 RUN bash setup_20.x
-RUN yum install -y nodejs
-RUN yum install -y rpmdevtools rpm-build
+RUN yum -y install nodejs
+RUN yum -q -y install rpmdevtools rpm-build
 
 ARG ID_REL_BASE=2024.1.0
 ARG ID_PATCH=9999999

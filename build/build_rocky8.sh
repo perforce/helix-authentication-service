@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Build package tarball for CentOS 8.
+# Build package tarball for RHEL 8 using a compatible OS.
 #
 set -e
 echo 'creating tar file...'
