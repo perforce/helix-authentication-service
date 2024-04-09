@@ -72,8 +72,8 @@ Requirements
 
 Documentation
 
-    Helix Authentication Service Administrator Guide at 
-    https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html 
+    Helix Authentication Service Administrator Guide at
+    https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html
     details the steps for installation, upgrade, and configuration of the
     authentication service.
 
