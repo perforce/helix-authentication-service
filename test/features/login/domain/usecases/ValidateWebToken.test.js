@@ -78,7 +78,7 @@ describe('ValidateWebToken use case', function () {
   })
 
   it('should approve token when using signing key', async function () {
-    this.timeout(10000)
+    this.timeout(120000)
     // arrange
     const keydata = await getSigningKey()
     const keyfile = temporaryFile({ extension: 'key' })
@@ -90,7 +90,7 @@ describe('ValidateWebToken use case', function () {
       tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
       aud: 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1'
     }
-    const token = await getToken(JSON.stringify(payload))
+    const token = await retryGetToken(JSON.stringify(payload), 100)
     // act
     const result = await usecase(token)
     // assert
@@ -323,6 +323,21 @@ describe('ValidateWebToken use case', function () {
   })
 })
 
+async function retryGetToken(payload, attempts) {
+  let counter = 0
+  while (counter < attempts) {
+    try {
+      // This request randomly fails with "socket hang up" on one particular
+      // test for no apparent reason; the jwt.doc container does not indicate
+      // any problem at all, and this has been happening intermittently on the
+      // test systems for many months.
+      return await getToken(payload)
+    } catch {
+      counter++
+    }
+  }
+}
+
 // connect to jwt.doc:3000 to get a JWT for testing
 function getToken(payload) {
   return new Promise((resolve, reject) => {
@@ -334,7 +349,9 @@ function getToken(payload) {
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload)
-      }
+      },
+      // sometimes the container takes a very long time to respond
+      timeout: 120000,
     }, (res) => {
       let data = ''
       res.setEncoding('utf8')
@@ -353,7 +370,7 @@ function getToken(payload) {
   })
 }
 
-function base64json (value) {
+function base64json(value) {
   const s = Buffer.from(JSON.stringify(value), 'utf-8').toString('base64')
   return s.replace(/=+$/, '');
 }
@@ -361,7 +378,7 @@ function base64json (value) {
 // Forge a token by using the jwt.doc public key as a shared secret, crafting a
 // new token whose keyid matches jwt.doc, but changing the algorithm to HS256 in
 // the hopes of tricking the verification routine into trusting this token.
-function forgedToken (payload) {
+function forgedToken(payload) {
   return new Promise((resolve, reject) => {
     const req = http.request({
       hostname: 'jwt.doc',
@@ -391,7 +408,7 @@ function forgedToken (payload) {
   })
 }
 
-function getKeyId () {
+function getKeyId() {
   return new Promise((resolve, reject) => {
     const req = http.request({
       hostname: 'jwt.doc',
@@ -416,7 +433,7 @@ function getKeyId () {
   })
 }
 
-function getSigningKey () {
+function getSigningKey() {
   return new Promise((resolve, reject) => {
     const req = http.request({
       hostname: 'jwt.doc',
