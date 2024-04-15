@@ -9,7 +9,7 @@ Name:           helix-auth-svc
 Version:        %{p4release}
 Release:        %{p4change}
 Summary:        Helix Authentication Service
-License:        BSD
+License:        MIT
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
 PreReq:         shadow-utils
@@ -74,6 +74,7 @@ cp README.html %{buildroot}%{installprefix}/README.html
 cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 
 %files
+%license %{installprefix}/LICENSE.txt
 %docdir %{installprefix}/docs
 %config(noreplace) %{installprefix}/logging.config.cjs
 %config(noreplace) %{installprefix}/sentinel.config.cjs
