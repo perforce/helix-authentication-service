@@ -2,7 +2,7 @@
 #
 # Authentication service installation script for Linux systems.
 #
-# Copyright 2023, Perforce Software Inc. All rights reserved.
+# Copyright 2024, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -142,13 +142,13 @@ function detect_platform() {
         PLATFORM=redhat
         VERSION_ID=$(awk -F= '/VERSION_ID/ {print $2}' /etc/os-release | tr -d '"')
         if [[ "$VERSION_ID" == '2' ]]; then
-            NODE_VERSION=16
+            die 'Cannot support this OS release any longer, lacks Node.js LTS support.'
         fi
     elif [[ "$ID" == 'centos' ]]; then
         PLATFORM=redhat
         VERSION_ID=$(awk -F= '/VERSION_ID/ {print $2}' /etc/os-release | tr -d '"')
         if [[ "$VERSION_ID" == '7' ]]; then
-            NODE_VERSION=16
+            die 'Cannot support this OS release any longer, lacks Node.js LTS support.'
         fi
     elif [[ "$ID" == 'rocky' ]]; then
         # For now, all Rocky releases support Node.js LTS, otherwise examine the
@@ -158,7 +158,7 @@ function detect_platform() {
         PLATFORM=debian
         CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
         if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
-            NODE_VERSION=16
+            die 'Cannot support this OS release any longer, lacks Node.js LTS support.'
         fi
     fi
 }
@@ -224,7 +224,7 @@ function prompt_to_proceed() {
 
 # If Node.js is installed, ensure that the version is supported.
 function check_nodejs() {
-    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(16|18|20)\.'; then
+    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(18|20)\.'; then
         # check if Node.js came from the package 'nodejs' package or not
         UPGRADABLE=true
         if [ $PLATFORM == "debian" ]; then
@@ -238,12 +238,12 @@ function check_nodejs() {
         fi
         if ! $UPGRADABLE; then
             error 'Found a version of Node.js that cannot be upgraded automatically.'
-            error 'Please upgrade Node.js to v16, v18, or v20 before proceeding.'
+            error 'Please upgrade Node.js to v18 or v20 before proceeding.'
             exit 1
         fi
         if $INTERACTIVE; then
             echo ''
-            echo 'Found a version of Node.js that is not the required v16/v18/v20.'
+            echo 'Found a version of Node.js that is not the required v18/v20.'
             echo 'Do you wish to upgrade the Node.js installation?'
             select yn in 'Yes' 'No'; do
                 case $yn in
@@ -252,7 +252,7 @@ function check_nodejs() {
                 esac
             done
         elif ! $UPGRADE_NODE; then
-            die 'Node.js v16, v18, or v20 is required, please upgrade.'
+            die 'Node.js v18 or v20 is required, please upgrade.'
         fi
         # else the script will automatically install the required version
     fi

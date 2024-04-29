@@ -472,8 +472,8 @@ async function ensureReadiness() {
     return 1
   }
 
-  if (process.version.match(/v(16|18|20)\./) === null) {
-    error('Node.js v16, v18, or v20 is required to run the service.')
+  if (process.version.match(/v(18|20)\./) === null) {
+    error('Node.js v18 or v20 is required to run the service.')
     error('Please run install.sh to install dependencies.')
     return 1
   }
@@ -565,8 +565,9 @@ async function readSettings() {
   }
 }
 
-// async adapter for the readline callback API while we wait to finally and
-// fully drop support for Node.js v16
+// async adapter for the readline callback API, temporary work-around for
+// support of Node.js v16, which can eventually be removed when we re-introduce
+// the use of the readline/promises API
 async function question(rl, prompt) {
   return new Promise((resolve) => {
     rl.question(prompt, (answer) => {

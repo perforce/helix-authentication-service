@@ -45,7 +45,7 @@ Supported Platforms
     Perforce.
 
     Amazon Linux (x86_64)
-        2, 2023
+        2023
 
     HAS is known to work on Amazon Linux when installed and configured using the
     provided shell scripts. Package installation may work but is not supported.
@@ -55,14 +55,6 @@ Supported Platforms
         Server 2019
 
     HAS is known to work on the Windows systems listed above.
-
-
-Important Platform End-of-Life Notice
-
-    HAS will no longer support Node.js v16 as of the next release (2024.2).
-    This specifically impacts the following platforms:
-        Amazon Linux 2
-        CentOS/RHEL 7
 
 
 Requirements
