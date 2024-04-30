@@ -33,7 +33,7 @@ function ensure_readiness() {
     if ! touch CHANGELOG.md >/dev/null 2>&1; then
         die 'You do not have permission to write to this directory.'
     fi
-    if ! which node >/dev/null 2>&1 || ! node --version | grep -Eq '^v(18|20)\.'; then
+    if ! command -v node >/dev/null 2>&1 || ! node --version | grep -Eq '^v(18|20)\.'; then
         error 'Node.js v18 or v20 is required to run the service.'
         error 'Please run install.sh to install dependencies.'
         exit 1

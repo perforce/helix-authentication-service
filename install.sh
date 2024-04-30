@@ -224,7 +224,7 @@ function prompt_to_proceed() {
 
 # If Node.js is installed, ensure that the version is supported.
 function check_nodejs() {
-    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(18|20)\.'; then
+    if command -v node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(18|20)\.'; then
         # check if Node.js came from the package 'nodejs' package or not
         UPGRADABLE=true
         if [ $PLATFORM == "debian" ]; then
@@ -261,7 +261,7 @@ function check_nodejs() {
 # Install or upgrade Node.js using a script from nodesource.com
 function install_nodejs() {
     # Both an upgrade and a new installation work in the same manner.
-    if $UPGRADE_NODE || ! which node >/dev/null 2>&1; then
+    if $UPGRADE_NODE || ! command -v node >/dev/null 2>&1; then
         echo "Preparing to install OS packages and Node.js..."
         if [ $PLATFORM == "debian" ]; then
             # Because apt-get will happily fail miserably _and_ return an exit code of
@@ -355,7 +355,7 @@ __SERVICE_UNIT__
         awk "/^$/{next} /^#/{next} {print}" example.env | sudo tee .env >/dev/null
         sudo chown --reference=example.env .env
     fi
-    if which systemctl >/dev/null 2>&1; then
+    if command -v systemctl >/dev/null 2>&1; then
         sudo systemctl daemon-reload
         sudo systemctl enable helix-auth.service
         sudo systemctl start helix-auth.service
