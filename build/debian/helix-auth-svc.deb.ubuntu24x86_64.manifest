@@ -1,0 +1,4 @@
+---
+distro: noble
+product-files:
+  - apt/ubuntu/noble/incoming/helix-auth-svc_<LONGREL>-<CHANGE><*>_amd64.deb
