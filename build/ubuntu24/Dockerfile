@@ -30,7 +30,7 @@ ARG ID_PATCH=9999999
 ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
 ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
-ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~jammy_amd64.deb
+ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~noble_amd64.deb
 ENV DEBEMAIL 'support+packaging@perforce.com'
 ENV DEBFULLNAME 'Perforce Software, Inc.'
 
@@ -96,7 +96,7 @@ RUN tar zcf ../${PKGNAME}.orig.tar.gz .
 #
 COPY build/debian debian
 RUN sed -e "s/ID_REL_BASE_REPLACE/${ID_REL_BASE}/" \
-        -e "s/ID_PATCH_REPLACE/${ID_PATCH}~jammy/" \
+        -e "s/ID_PATCH_REPLACE/${ID_PATCH}~noble/" \
         -e "s/DATE_STRING_REPLACE/`date +'%a, %d %b %Y %H:%M:%S %z'`/" \
         debian/changelog.in > debian/changelog
 RUN dpkg-buildpackage -b -rfakeroot -us -uc -ui
@@ -118,5 +118,5 @@ FROM scratch AS ubuntu24-export
 ARG ID_REL_BASE=2024.1.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
-ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~jammy_amd64.deb
+ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~noble_amd64.deb
 COPY --from=ubuntu24-build /build/${PACKAGE_FILENAME} ${PACKAGE_FILENAME}
