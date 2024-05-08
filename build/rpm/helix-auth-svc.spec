@@ -78,6 +78,12 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 %docdir %{installprefix}/docs
 %config(noreplace) %{installprefix}/logging.config.cjs
 %config(noreplace) %{installprefix}/sentinel.config.cjs
+%config(noreplace) %{installprefix}/certs/ca.crt
+%config(noreplace) %{installprefix}/certs/ca.key
+%config(noreplace) %{installprefix}/certs/encrypted.key
+%config(noreplace) %{installprefix}/certs/server.crt
+%config(noreplace) %{installprefix}/certs/server.key
+%config(noreplace) %{installprefix}/certs/server.p12
 %config(noreplace) %{installprefix}/routes/saml_idp.conf.cjs
 %{installprefix}
 
