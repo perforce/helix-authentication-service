@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import React, { useState } from 'react'
 import {
@@ -92,7 +92,6 @@ export const Login = () => {
                         onBlur={onBlur}
                         value={value}
                         forwardedRef={ref}
-                        tooltip="Secret value associated with the client ID, provided by the OIDC issuer."
                       />
                     )} />
                   <FormHelperText>{
