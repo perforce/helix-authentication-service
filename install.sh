@@ -323,8 +323,7 @@ function create_user_group() {
     fi
 
     # ensure perforce user can write to the installation path
-    INSTALL_PREFIX=$(pwd)
-    sudo chown -R perforce:perforce "$INSTALL_PREFIX"
+    sudo chown -R perforce:perforce "$INSTALLPREFIX"
 
     if ! sudo su - perforce -c "ls ${INSTALLPREFIX}" >/dev/null 2>&1; then
         error "\n\nUser perforce cannot access ${INSTALLPREFIX}, please fix permissions.\n"
@@ -332,9 +331,19 @@ function create_user_group() {
     fi
 }
 
+# Create a .env file if neither it nor the config.toml exist.
+function create_env_if_missing() {
+    # create an example .env file if it and config.toml are missing
+    if [ ! -f .env ] && [ ! -f config.toml ]; then
+        PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
+        # inject LOGGING if not already set; strip comments and blank lines
+        awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env | sudo tee .env >/dev/null
+        sudo chown --reference=example.env .env
+    fi
+}
+
 # Create the systemd service unit, enable, and start.
 function install_service_unit() {
-    INSTALL_PREFIX=$(pwd)
     sudo tee /etc/systemd/system/helix-auth.service >/dev/null <<__SERVICE_UNIT__
 [Unit]
 Description=Helix Authentication Service
@@ -343,18 +352,12 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=${INSTALL_PREFIX}/bin/www.js
-WorkingDirectory=${INSTALL_PREFIX}
+ExecStart=${INSTALLPREFIX}/bin/www.js
+WorkingDirectory=${INSTALLPREFIX}
 
 [Install]
 WantedBy=multi-user.target
 __SERVICE_UNIT__
-    # create an example .env file if it and config.toml are missing
-    if [ ! -f .env ] && [ ! -f config.toml ]; then
-        # strip comments and blank lines
-        awk "/^$/{next} /^#/{next} {print}" example.env | sudo tee .env >/dev/null
-        sudo chown --reference=example.env .env
-    fi
     if command -v systemctl >/dev/null 2>&1; then
         sudo systemctl daemon-reload
         sudo systemctl enable helix-auth.service
@@ -427,6 +430,7 @@ function main() {
     if $CREATE_USER; then
         create_user_group
     fi
+    create_env_if_missing
     if $INSTALL_SERVICE; then
         install_service_unit
     fi
