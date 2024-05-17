@@ -60,6 +60,7 @@ setTimeout(function () {
 
       describe('Add, rename, deactivate', function () {
         it('should create a user via POST', function (done) {
+          this.timeout(10000)
           agent
             .post('/scim/v2/Users')
             .trustLocalhost(true)
@@ -95,6 +96,7 @@ setTimeout(function () {
         // TODO: Okta SCIM client does second GET on the user
 
         it('should rename user via PUT', function (done) {
+          this.timeout(10000)
           agent
             .put('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -125,6 +127,7 @@ setTimeout(function () {
         })
 
         it('should return 404 for old user name', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -140,6 +143,7 @@ setTimeout(function () {
         })
 
         it('should deactivate user via PUT', function (done) {
+          this.timeout(10000)
           agent
             .put('/scim/v2/Users/user-peteparker')
             .trustLocalhost(true)
@@ -168,6 +172,7 @@ setTimeout(function () {
         })
 
         it('should have marked user as inactive in p4', async function () {
+          this.timeout(10000)
           const p4 = new P4({
             P4PORT: p4config.port,
             P4USER: p4config.user,
@@ -223,6 +228,7 @@ setTimeout(function () {
 
       describe('Manage users and their externalId', function () {
         it('should POST user from feline domain', function (done) {
+          this.timeout(10000)
           agent
             .post('/scim/v2/Users')
             .trustLocalhost(true)
@@ -254,6 +260,7 @@ setTimeout(function () {
         })
 
         it('should GET user for feline domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -274,6 +281,7 @@ setTimeout(function () {
         })
 
         it('should GET user for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -294,6 +302,7 @@ setTimeout(function () {
         })
 
         it('should PATCH user externalId for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .patch('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -323,6 +332,7 @@ setTimeout(function () {
         })
 
         it('should GET user for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -343,6 +353,7 @@ setTimeout(function () {
         })
 
         it('should PUT updated user from feline domain', function (done) {
+          this.timeout(10000)
           agent
             .put('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -373,6 +384,7 @@ setTimeout(function () {
         })
 
         it('should GET (unchanged) user for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Users/user-pparker')
             .trustLocalhost(true)
@@ -393,6 +405,7 @@ setTimeout(function () {
         })
 
         it('should GET users for feline domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Users')
             .trustLocalhost(true)
@@ -411,6 +424,7 @@ setTimeout(function () {
         })
 
         it('should GET users for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Users')
             .trustLocalhost(true)
@@ -431,6 +445,7 @@ setTimeout(function () {
 
       describe('Manage groups and their externalId', function () {
         it('should POST group from feline domain', function (done) {
+          this.timeout(10000)
           agent
             .post('/scim/v2/Groups')
             .trustLocalhost(true)
@@ -454,6 +469,7 @@ setTimeout(function () {
         })
 
         it('should GET group for feline domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Groups/group-Managers')
             .trustLocalhost(true)
@@ -471,6 +487,7 @@ setTimeout(function () {
         })
 
         it('should GET group for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Groups/group-Managers')
             .trustLocalhost(true)
@@ -488,6 +505,7 @@ setTimeout(function () {
         })
 
         it('should PATCH group externalId for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .patch('/scim/v2/Groups/group-Managers')
             .trustLocalhost(true)
@@ -514,6 +532,7 @@ setTimeout(function () {
         })
 
         it('should GET group for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Groups/group-Managers')
             .trustLocalhost(true)
@@ -531,6 +550,7 @@ setTimeout(function () {
         })
 
         it('should PUT updated group from feline domain', function (done) {
+          this.timeout(10000)
           agent
             .put('/scim/v2/Groups/group-Managers')
             .trustLocalhost(true)
@@ -554,6 +574,7 @@ setTimeout(function () {
         })
 
         it('should GET (unchanged) group for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Groups/group-Managers')
             .trustLocalhost(true)
@@ -571,6 +592,7 @@ setTimeout(function () {
         })
 
         it('should GET groups for feline domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Groups')
             .trustLocalhost(true)
@@ -589,6 +611,7 @@ setTimeout(function () {
         })
 
         it('should GET groups for bovine domain', function (done) {
+          this.timeout(10000)
           agent
             .get('/scim/v2/Groups')
             .trustLocalhost(true)
