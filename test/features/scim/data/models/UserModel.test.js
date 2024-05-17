@@ -67,6 +67,31 @@ describe('User model', function () {
     assert.isTrue(tUserModel.active)
   })
 
+  it('should parse from P4 user specification', function () {
+    // arrange
+    const spec = {
+      code: 'stat',
+      User: 'joeuser',
+      Email: 'joe@example.com',
+      Update: '2024/05/16 13:08:09',
+      Access: '2024/05/16 13:08:09',
+      FullName: 'Joe Q. User',
+      Type: 'standard',
+      AuthMethod: 'perforce',
+      extraTag0: 'passwordChange',
+      extraTagType0: 'date',
+      passwordChange: '2024/05/16 13:08:09'
+    }
+    const tUserModel = UserModel.fromSpec(spec)
+    // assert
+    assert.equal(tUserModel.username, 'joeuser')
+    assert.equal(tUserModel.email, 'joe@example.com')
+    assert.equal(tUserModel.fullname, 'Joe Q. User')
+    assert.isTrue(tUserModel.active)
+    assert.equal(tUserModel.Type, 'standard')
+    assert.equal(tUserModel.AuthMethod, 'perforce')
+  })
+
   it('should parse user with email for userName', function () {
     // arrange
     const rawJson = {
@@ -272,5 +297,68 @@ describe('User model', function () {
       active: true
     }
     assert.deepEqual(actualJson, expectedJson)
+  })
+
+  it('should round-trip P4 user specification', function () {
+    // arrange
+    const inputSpec = {
+      code: 'stat',
+      User: 'joeuser',
+      Email: 'joe@example.com',
+      Update: '2024/05/16 13:08:09',
+      Access: '2024/05/16 13:08:09',
+      FullName: 'Joe Q. User',
+      Type: 'standard',
+      AuthMethod: 'perforce',
+      extraTag0: 'passwordChange',
+      extraTagType0: 'date',
+      passwordChange: '2024/05/16 13:08:09'
+    }
+    const model = UserModel.fromSpec(inputSpec)
+    const spec = model.toSpec()
+    // assert
+    assert.equal(spec.User, 'joeuser')
+    assert.equal(spec.Email, 'joe@example.com')
+    assert.equal(spec.FullName, 'Joe Q. User')
+  })
+
+  it('should merge entity with P4 user specification', function () {
+    // arrange
+    const rawJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      userName: 'asmith@p4test.com',
+      name: { givenName: 'Alton', familyName: 'Smith' },
+      emails: [
+        { primary: true, value: 'asmith@p4test.com', type: 'work' }
+      ],
+      displayName: 'Alton Smith',
+      locale: 'en-US',
+      externalId: '00udrvv438FuOd5oX5d7',
+      groups: [],
+      password: 'WchS9ac0',
+      active: true
+    }
+    const tUserModel = UserModel.fromJson(rawJson)
+    // act
+    const inputSpec = {
+      code: 'stat',
+      User: 'asmith',
+      Email: 'asmith@p4test.com',
+      Update: '2024/05/16 13:08:09',
+      Access: '2024/05/16 13:08:09',
+      FullName: 'Alton Smith',
+      Type: 'standard',
+      AuthMethod: 'perforce',
+      extraTag0: 'passwordChange',
+      extraTagType0: 'date',
+      passwordChange: '2024/05/16 13:08:09'
+    }
+    const merged = tUserModel.mergeSpec(inputSpec)
+    // assert
+    assert.equal(merged.User, 'asmith')
+    assert.equal(merged.Email, 'asmith@p4test.com')
+    assert.equal(merged.FullName, 'Alton Smith')
+    assert.equal(merged.Type, 'standard')
+    assert.equal(merged.AuthMethod, 'perforce')
   })
 })

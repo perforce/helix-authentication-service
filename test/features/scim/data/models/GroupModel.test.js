@@ -47,6 +47,34 @@ describe('Group model', function () {
     assert.lengthOf(group.members, 0)
   })
 
+  it('should parse from P4 group specification', function () {
+    // arrange
+    const spec = {
+      code: 'stat',
+      Group: 'Group1DisplayName',
+      Description: '',
+      MaxResults: 'unset',
+      MaxScanRows: 'unset',
+      MaxLockTime: 'unset',
+      MaxOpenFiles: 'unset',
+      MaxMemory: 'unset',
+      Timeout: '43200',
+      PasswordTimeout: 'unset',
+      Subgroups0: 'admins',
+      Users0: 'joe',
+      Users1: 'mike',
+      Users2: 'susan'
+    }
+    const group = GroupModel.fromSpec(spec)
+    // assert
+    assert.equal(group.displayName, 'Group1DisplayName')
+    assert.lengthOf(group.members, 4)
+    assert.isTrue(group.members.some((g) => g.type === 'Group'))
+    assert.isTrue(group.members.some((g) => g.type === 'User'))
+    assert.isTrue(group.members.some((g) => g.value === 'group-admins'))
+    assert.isTrue(group.members.some((g) => g.value === 'user-mike'))
+  })
+
   it('should parse JSON case insensitively', function () {
     // arrange
     const rawJson = {
@@ -114,5 +142,84 @@ describe('Group model', function () {
       ]
     }
     assert.deepEqual(actualJson, expectedJson)
+  })
+
+  it('should round-trip P4 group specification', function () {
+    // arrange
+    const inputSpec = {
+      code: 'stat',
+      Group: 'Group1DisplayName',
+      Description: '',
+      MaxResults: 'unset',
+      MaxScanRows: 'unset',
+      MaxLockTime: 'unset',
+      MaxOpenFiles: 'unset',
+      MaxMemory: 'unset',
+      Timeout: '43200',
+      PasswordTimeout: 'unset',
+      Subgroups0: 'admins',
+      Users0: 'joe',
+      Users1: 'mike',
+      Users2: 'susan'
+    }
+    // act
+    const model = GroupModel.fromSpec(inputSpec)
+    const spec = model.toSpec()
+    // assert
+    assert.equal(spec.Group, 'Group1DisplayName')
+    assert.equal(spec.Subgroups0, 'admins')
+    assert.equal(spec.Users0, 'joe')
+    assert.equal(spec.Users1, 'mike')
+    assert.equal(spec.Users2, 'susan')
+  })
+
+  it('should merge entity with P4 group specification', function () {
+    // arrange
+    const rawJson = {
+      externalId: '__UUID',
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+      displayName: 'staff',
+      members: [
+        {
+          value: 'joe',
+          display: 'Joe Plumber'
+        },
+        {
+          value: 'susan',
+          display: 'Susan Winters'
+        }
+      ]
+    }
+    const model = GroupModel.fromJson(rawJson)
+    // act
+    const inputSpec = {
+      code: 'stat',
+      Group: 'staff',
+      Description: '',
+      MaxResults: 'unset',
+      MaxScanRows: 'unset',
+      MaxLockTime: 'unset',
+      MaxOpenFiles: 'unset',
+      MaxMemory: 'unset',
+      Timeout: '43200',
+      PasswordTimeout: 'unset',
+      Subgroups0: 'admins',
+      Users0: 'joe',
+      Users1: 'mike',
+      Users2: 'susan'
+    }
+    const merged = model.mergeSpec(inputSpec)
+    // assert
+    assert.equal(merged.Group, 'staff')
+    assert.equal(merged.Description, '')
+    assert.equal(merged.MaxResults, 'unset')
+    assert.equal(merged.MaxScanRows, 'unset')
+    assert.equal(merged.MaxLockTime, 'unset')
+    assert.equal(merged.MaxOpenFiles, 'unset')
+    assert.equal(merged.MaxMemory, 'unset')
+    assert.equal(merged.Timeout, '43200')
+    assert.equal(merged.PasswordTimeout, 'unset')
+    assert.equal(merged.Users0, 'joe')
+    assert.equal(merged.Users1, 'susan')
   })
 })
