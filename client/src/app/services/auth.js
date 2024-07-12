@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
@@ -47,6 +47,7 @@ export const auth = createApi({
     }),
     getAllProviders: builder.query({
       query: () => `settings/providers`,
+      // eslint-disable-next-line no-unused-vars
       transformResponse: (response, meta, arg) => {
         // convert certain properties for easier editing
         response.providers.forEach((e) => {
@@ -60,6 +61,7 @@ export const auth = createApi({
     }),
     getOneProvider: builder.query({
       query: (providerId) => `settings/providers/${providerId}`,
+      // eslint-disable-next-line no-unused-vars
       transformResponse: (response, meta, arg) => {
         // convert certain properties for easier editing
         if ('authnContext' in response) {

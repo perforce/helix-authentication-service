@@ -578,7 +578,7 @@ function getToken(username, password) {
       .trustLocalhost(true)
       .send({ grant_type: 'password', username, password })
       .expect(200)
-      // eslint-disable-next-line no-unused-vars
+       
       .end(function (err, res) {
         if (err) {
           reject(err)

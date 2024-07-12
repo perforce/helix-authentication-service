@@ -49,6 +49,7 @@ async function fileAccessible(filepath) {
   try {
     await fs.access(filepath)
     return true
+    // eslint-disable-next-line no-unused-vars
   } catch (err) {
     return false
   }

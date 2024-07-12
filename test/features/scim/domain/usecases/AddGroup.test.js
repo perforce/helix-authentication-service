@@ -97,7 +97,7 @@ describe('AddGroup use case', function () {
       const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((displayName) => {
         return Promise.resolve(null)
       })
-      // eslint-disable-next-line no-unused-vars
+       
       const addStub = sinon.stub(EntityRepository.prototype, 'addGroup').callsFake((group) => {
         return Promise.resolve(group)
       })
@@ -118,7 +118,7 @@ describe('AddGroup use case', function () {
       const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((displayName) => {
         return Promise.resolve(null)
       })
-      // eslint-disable-next-line no-unused-vars
+       
       const addStub = sinon.stub(EntityRepository.prototype, 'addGroup').callsFake((group) => {
         return Promise.resolve(group)
       })

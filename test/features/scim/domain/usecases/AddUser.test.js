@@ -81,7 +81,7 @@ describe('AddUser use case', function () {
       const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
         return Promise.resolve(null)
       })
-      // eslint-disable-next-line no-unused-vars
+       
       const addStub = sinon.stub(EntityRepository.prototype, 'addUser').callsFake((user) => {
         return Promise.resolve(user)
       })
@@ -134,7 +134,7 @@ describe('AddUser use case', function () {
       const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
         return Promise.resolve(null)
       })
-      // eslint-disable-next-line no-unused-vars
+       
       const addStub = sinon.stub(EntityRepository.prototype, 'addUser').callsFake((user) => {
         return Promise.resolve(user)
       })

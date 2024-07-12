@@ -70,11 +70,14 @@
     "winston-syslog": "^2.4.4"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.6.0",
     "chai": "^5.1.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-unicorn": "^52.0.0",
+    "eslint": "^9.6.0",
+    "eslint-plugin-unicorn": "^54.0.0",
     "geckodriver": "^4.0.2",
     "get-port": "^7.0.0",
+    "globals": "^15.8.0",
     "license-checker": "^25.0.1",
     "mocha": "^10.2.0",
     "mute": "^2.0.6",

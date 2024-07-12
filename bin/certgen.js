@@ -35,6 +35,7 @@ async function fileAccessible(filepath) {
   try {
     await fs.access(filepath)
     return true
+    // eslint-disable-next-line no-unused-vars
   } catch (err) {
     return false
   }
@@ -271,6 +272,7 @@ async function ensureReadiness() {
 
   try {
     await fs.access(process.cwd(), fs.constants.R_OK | fs.constants.W_OK)
+    // eslint-disable-next-line no-unused-vars
   } catch (err) {
     error('You do not have permission to write to this directory.')
     return 1
@@ -525,6 +527,7 @@ async function restartService() {
     if (await fileAccessible('/etc/systemd/system/helix-auth.service')) {
       try {
         await invokeSystemctl(['stop', 'helix-auth'])
+        // eslint-disable-next-line no-unused-vars
       } catch (err) {
         // ignore any errors as the service may not be running yet
       }
@@ -537,12 +540,14 @@ async function restartService() {
       if (svcoutput.includes('Helix Authentication')) {
         serviceAvailable = true
       }
+      // eslint-disable-next-line no-unused-vars
     } catch (err) {
       // ignore any errors, nothing we can do if this fails
     }
     if (serviceAvailable) {
       try {
         await invokeNetCmd(['stop', 'helixauthentication.exe'])
+        // eslint-disable-next-line no-unused-vars
       } catch (err) {
         // ignore any errors as the service may not be running yet
       }
