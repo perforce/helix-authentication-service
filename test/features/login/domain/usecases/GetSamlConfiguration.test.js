@@ -230,9 +230,9 @@ describe('GetSamlConfiguration use case', function () {
     const result = await usecase()
     // assert
     assert.equal(result.entryPoint, 'https://example.com/saml/sso')
-    assert.include(result.cert, 'MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv')
-    assert.notInclude(result.cert, '-BEGIN CERTIFICATE-')
-    assert.notInclude(result.cert, '-END CERTIFICATE-')
+    assert.include(result.idpCert, 'MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv')
+    assert.notInclude(result.idpCert, '-BEGIN CERTIFICATE-')
+    assert.notInclude(result.idpCert, '-END CERTIFICATE-')
   })
 
   it('should read IdP cert file via provider', async function () {
@@ -248,8 +248,8 @@ describe('GetSamlConfiguration use case', function () {
     const result = await usecase('shibbo123')
     // assert
     assert.equal(result.entryPoint, 'https://example.com/saml/sso')
-    assert.include(result.cert, 'MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv')
-    assert.notInclude(result.cert, '-BEGIN CERTIFICATE-')
-    assert.notInclude(result.cert, '-END CERTIFICATE-')
+    assert.include(result.idpCert, 'MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv')
+    assert.notInclude(result.idpCert, '-BEGIN CERTIFICATE-')
+    assert.notInclude(result.idpCert, '-END CERTIFICATE-')
   })
 })

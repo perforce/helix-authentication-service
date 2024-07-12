@@ -34,8 +34,8 @@
     "licenses": "license-checker --production --excludePrivatePackages --exclude='Apache,Apache-2.0,BSD-2-Clause,BSD-3-Clause,CC-BY-SA-2.0,ISC,LGPL,MIT,WTFPL'"
   },
   "dependencies": {
-    "@node-saml/node-saml": "^4.0.4",
-    "@node-saml/passport-saml": "^4.0.4",
+    "@node-saml/node-saml": "^5.0.0",
+    "@node-saml/passport-saml": "^5.0.0",
     "awilix": "^10.0.1",
     "connect-redis": "^7.1.0",
     "cors": "^2.8.5",
@@ -60,7 +60,7 @@
     "p4api": "^3.4.0",
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",
-    "passport-saml-metadata": "^3.1.2",
+    "passport-saml-metadata": "^4.0.0",
     "samlp": "^7.0.0",
     "scim-patch": "^0.8.0",
     "scim-query-filter-parser": "^2.0.4",
