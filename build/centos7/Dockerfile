@@ -8,6 +8,9 @@ FROM centos:7 AS centos7-build
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
 
+# switch from the retired repository to the archive
+RUN sed -i.bak -e "/mirrorlist=/d" -e "s/#baseurl=http:\/\/mirror.centos.org/baseurl=http:\/\/vault.centos.org/" /etc/yum.repos.d/CentOS-*
+
 #
 # install build and packaging prerequisites
 #
