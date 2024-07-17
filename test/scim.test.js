@@ -189,6 +189,94 @@ setTimeout(function () {
       })
     })
 
+    describe('Single-server w/SSL', function () {
+      const authToken = 'Bearer ZGFuZ2VyIG1vdXNl'
+      let p4config
+
+      before(async function () {
+        // this test requires p4d which is not included in the "unit" test environment
+        if (process.env.UNIT_ONLY) {
+          this.skip()
+        } else {
+          this.timeout(30000)
+          p4config = await runner.startSslServer('./tmp/p4d/ssl_provisioning')
+          helpers.establishTrust(p4config)
+          helpers.establishSuper(p4config)
+          // remove the trust so taht the service is forced to establish trust again
+          helpers.demolishTrust(p4config)
+          settings.set('P4PORT', p4config.port)
+          settings.set('P4USER', p4config.user)
+          settings.set('P4PASSWD', p4config.password)
+          settings.set('P4TICKETS', p4config.tickets)
+          settings.set('P4TRUST', p4config.trust)
+          settings.set('ALLOW_USER_RENAME', true)
+          await registerLateBindings()
+        }
+      })
+
+      after(async function () {
+        if (process.env.UNIT_ONLY === undefined) {
+          this.timeout(30000)
+          await runner.stopServer(p4config)
+        }
+      })
+
+      describe('Add and retrieve user', function () {
+        it('should create a user via POST', function (done) {
+          this.timeout(10000)
+          agent
+            .post('/scim/v2/Users')
+            .trustLocalhost(true)
+            .set('Authorization', authToken)
+            .send({
+              schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+              userName: 'pparker@example.com',
+              name: { familyName: 'Parker', givenName: 'Peter' },
+              emails: [{ primary: true, type: 'work', value: 'pparker@example.com' }],
+              displayName: 'Peter Parker',
+              locale: 'en-US',
+              externalId: '00udud1rtaDsrJ5rb5d7ssl',
+              groups: [],
+              password: 'iamSp!derm4n',
+              active: true
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Users\/user-pparker/)
+            .expect(201)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+              assert.equal(res.body.userName, 'pparker@example.com')
+              assert.equal(res.body.displayName, 'Peter Parker')
+              assert.lengthOf(res.body.emails, 1)
+              assert.equal(res.body.emails[0].value, 'pparker@example.com')
+              assert.isTrue(res.body.active)
+            })
+            .end(done)
+        })
+
+        it('should GET user', function (done) {
+          this.timeout(10000)
+          agent
+            .get('/scim/v2/Users/user-pparker')
+            .trustLocalhost(true)
+            .set('Authorization', authToken)
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Users\/user-pparker/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+              assert.equal(res.body.userName, 'pparker@example.com')
+              assert.equal(res.body.displayName, 'Peter Parker')
+              assert.lengthOf(res.body.emails, 1)
+              assert.equal(res.body.emails[0].value, 'pparker@example.com')
+              assert.isTrue(res.body.active)
+              assert.equal(res.body.externalId, '00udud1rtaDsrJ5rb5d7ssl')
+            })
+            .end(done)
+        })
+      })
+    })
+
     describe('Multiple servers', function () {
       const authTokenF = 'Bearer a2V5Ym9hcmQgY2F0'
       const authTokenB = 'Bearer c3VyZmluZyBib2Fy'

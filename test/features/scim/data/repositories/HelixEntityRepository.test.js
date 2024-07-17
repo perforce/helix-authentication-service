@@ -1048,7 +1048,7 @@ describe('HelixEntity repository', function () {
     })
   })
 
-  describe('SSL without trust', function () {
+  describe('SSL without trust, should establish', function () {
     let repository
     let p4config
 
@@ -1075,9 +1075,8 @@ describe('HelixEntity repository', function () {
       const query = new Query()
       try {
         await repository.getUsers(query)
-        assert.fail('should have raised Error')
       } catch (err) {
-        assert.include(err.message, 'p4 trust')
+        assert.include(err.message, 'User bruno doesn\'t exist')
       }
     })
   })
