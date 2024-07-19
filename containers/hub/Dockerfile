@@ -3,24 +3,23 @@
 #
 # Build:
 #
-# $ docker build --pull -t helix-auth-svc:latest -t helix-auth-svc:2024.1.1 -f containers/hub/Dockerfile .
+# $ docker build --pull -t helix-auth-svc:latest -t helix-auth-svc:2024.2 -f containers/hub/Dockerfile .
 # $ docker tag helix-auth-svc:latest perforce/helix-auth-svc:latest
-# $ docker tag helix-auth-svc:2024.1.1 perforce/helix-auth-svc:2024.1.1
+# $ docker tag helix-auth-svc:2024.2 perforce/helix-auth-svc:2024.2
 # $ docker push --all-tags perforce/helix-auth-svc
 #
 # Run:
 #
 # $ docker run -d -p 3000:3000 --name helix-auth-svc helix-auth-svc:latest
 #
-FROM ubuntu:20.04 AS p4cli_base
 
+#
+# get the p4 client via package to support SCIM
+#
+FROM ubuntu:20.04 AS p4cli
 ARG APT_URL="http://package.perforce.com/apt/ubuntu"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
-
-#
-# install p4 using packages to enable SCIM support
-#
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get -q -y install apt-utils lsb-release gnupg
 ADD ${PUB_KEY} perforce.pubkey
@@ -31,10 +30,22 @@ RUN apt-get update && \
     apt-get -q -y install helix-cli
 
 #
+# build the web-based admin interface
+#
+FROM node:20-slim AS webui
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get -q update --fix-missing && \
+    apt-get -q -y install curl git
+WORKDIR /build
+COPY client .
+RUN npm -q ci
+RUN npx vite build --outDir private/admin --emptyOutDir
+
+#
 # build the smallest feasible image for the service
 #
 FROM node:20-slim
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl git
 WORKDIR /srv
@@ -44,7 +55,7 @@ COPY defaults.env defaults.env
 COPY lib lib
 COPY package.json .
 COPY package-lock.json .
-COPY private private
+COPY --from=webui /build/private private
 COPY public public
 COPY routes routes
 COPY views views
@@ -55,13 +66,13 @@ COPY views views
 RUN npm ci -q --only=prod --omit=optional
 
 # SCIM support requires a p4 client binary to be present
-COPY --from=p4cli_base /opt/perforce/bin/p4 /usr/bin/p4
+COPY --from=p4cli /opt/perforce/bin/p4 /usr/bin/p4
 
-ENV CA_CERT_FILE certs/ca.crt
-ENV DEBUG "yes"
-ENV NODE_ENV development
-ENV PORT 3000
-ENV PROTOCOL http
+ENV CA_CERT_FILE=certs/ca.crt
+ENV DEBUG="yes"
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV PROTOCOL=http
 EXPOSE ${PORT}
 HEALTHCHECK CMD curl --insecure --fail --silent --head ${PROTOCOL}://localhost:${PORT}/ || exit 1
 
