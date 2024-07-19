@@ -16,12 +16,8 @@ services:
     image: auth-svc:latest
     container_name: auth-svc1.doc
     environment:
-      ADMIN_ENABLED: true
-      ADMIN_USERNAME: "scott"
-      ADMIN_PASSWD_FILE: 'password.txt'
       DEBUG: "1"
       DEBUG_PROXY: "1"
-      DEBUG_SCIM: "1"
       SVC_BASE_URI: "https://authen.doc"
       PORT: 3001
       PROTOCOL: "http"
@@ -53,12 +49,8 @@ services:
     image: auth-svc:latest
     container_name: auth-svc2.doc
     environment:
-      ADMIN_ENABLED: true
-      ADMIN_USERNAME: "scott"
-      ADMIN_PASSWD_FILE: 'password.txt'
       DEBUG: "1"
       DEBUG_PROXY: "1"
-      DEBUG_SCIM: "1"
       SVC_BASE_URI: "https://authen.doc"
       PORT: 3002
       PROTOCOL: "http"

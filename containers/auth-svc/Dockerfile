@@ -11,7 +11,6 @@ COPY defaults.env defaults.env
 COPY lib lib
 COPY package.json .
 COPY package-lock.json .
-COPY private private
 COPY public public
 COPY routes routes
 COPY views views
@@ -21,7 +20,6 @@ COPY views views
 # much larger (note unix-dgram is only needed by winston-syslog).
 RUN npm ci -q --only=prod --omit=optional
 
-RUN echo 'tiger' > password.txt
 COPY containers/auth-svc/saml_idp.conf.cjs routes
 
 EXPOSE ${PORT}
