@@ -1,4 +1,4 @@
-FROM has-build:centos8 AS centos8-build
+FROM rockylinux:8 AS centos8-build
 #
 # $ docker build -f build/centos8/Dockerfile --output type=local,dest=. .
 #
@@ -14,8 +14,7 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 ADD https://rpm.nodesource.com/setup_20.x setup_20.x
 RUN bash setup_20.x
 RUN yum install -y nodejs
-# (base image has rpmdevtools, rpm-build already)
-# RUN yum -q -y install rpmdevtools rpm-build
+RUN yum -q -y install rpmdevtools rpm-build
 
 ARG ID_REL_BASE=2024.1.0
 ARG ID_PATCH=9999999
