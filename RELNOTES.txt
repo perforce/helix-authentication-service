@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2024.1
+                            Version 2024.2
 
 
 Introduction
@@ -104,6 +104,42 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-523 (Change #2577281)
+        Add JavaScript version of configure script to enable easier
+        configuration on Windows platforms.
+
+    HAS-547 (Change #2569160)
+        Add /liveness route for orchestration systems such as Kubernetes.
+        Returns a 200 if the service, and its dependencies such as Redis, are
+        available to serve requests.
+
+----------------------------------------------------------------------
+Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-564 (Change #2597809)
+        Certificate files (server.crt and server.key) are now treated as
+        configuration files by the packages, and will no longer be overwritten
+        after this release.
+
+    HAS-567 (Change #2599531)
+        No longer reset unrelated fields in users and groups when making changes
+        via the SCIM-based user provisioning feature.
+
+----------------------------------------------------------------------
+Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-502 (Change #2590747)
+        Remove support for Node.js v16.
+
+    HAS-554 (Change #2583773)
+        Remove support for CentOS/RHEL 7.
+
+    HAS-559 (Change #2591399)
+        Add package builds for Ubuntu 24.04 (Noble Numbat).
 
 ----------------------------------------------------------------------
 New functionality in 2024.1 (2024.1/2571580) (2024/03/13)
