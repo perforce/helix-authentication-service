@@ -106,7 +106,7 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2024.2 (2024.2/2634404) (2024/08/05)
 
     HAS-523 (Change #2577281)
         Add JavaScript version of configure script to enable easier
@@ -118,7 +118,7 @@ New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         available to serve requests.
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2024.2 (2024.2/2634404) (2024/08/05)
 
     HAS-564 (Change #2597809)
         Certificate files (server.crt and server.key) are now treated as
@@ -130,7 +130,7 @@ Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         via the SCIM-based user provisioning feature.
 
 ----------------------------------------------------------------------
-Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Other changes in 2024.2 (2024.2/2634404) (2024/08/05)
 
     HAS-502 (Change #2590747)
         Remove support for Node.js v16.
