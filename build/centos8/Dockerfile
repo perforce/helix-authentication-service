@@ -1,4 +1,4 @@
-FROM has-build:centos8 AS centos8-build
+FROM rockylinux:8 AS rocky8-build
 #
 # $ docker build -f build/centos8/Dockerfile --output type=local,dest=. .
 #
@@ -11,12 +11,12 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 #
 # install build and packaging prerequisites
 #
-RUN yum install -y https://rpm.nodesource.com/pub_20.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
-RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
-# (base image has rpmdevtools, rpm-build already)
-# RUN yum -q -y install rpmdevtools rpm-build
+ADD https://rpm.nodesource.com/setup_20.x setup_20.x
+RUN bash setup_20.x
+RUN yum -y install nodejs
+RUN yum -q -y install rpmdevtools rpm-build
 
-ARG ID_REL_BASE=2024.1.0
+ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
@@ -44,6 +44,7 @@ COPY views views
 COPY defaults.env defaults.env
 COPY example.env example.env
 COPY example.toml example.toml
+COPY LICENSE.txt LICENSE.txt
 COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs
 COPY package-lock.json package-lock.json
@@ -87,9 +88,9 @@ RUN rpmbuild -bb /root/rpmbuild/SPECS/helix-auth-svc.spec
 # Produce an image that contains only the build artifact, allowing for the use
 # of the --output option to the `docker build` command.
 #
-FROM scratch AS centos8-export
-ARG ID_REL_BASE=2024.1.0
+FROM scratch AS rocky8-export
+ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc
 ENV PACKAGE_FILENAME ${PKGNAME}-${ID_REL_BASE}-${ID_PATCH}.x86_64.rpm
-COPY --from=centos8-build /root/rpmbuild/RPMS/x86_64/${PACKAGE_FILENAME} ${PACKAGE_FILENAME}
+COPY --from=rocky8-build /root/rpmbuild/RPMS/x86_64/${PACKAGE_FILENAME} ${PACKAGE_FILENAME}

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import * as fs from 'node:fs/promises'
@@ -43,6 +43,31 @@ describe('GetProvisioningDomains use case', function () {
     // arrange
     const tokenFile = temporaryFile({ extension: 'txt' })
     await fs.writeFile(tokenFile, 'keyboard cat')
+    settingsRepository.set('BEARER_TOKEN_FILE', tokenFile)
+    // act
+    const results = await usecase()
+    // assert
+    assert.lengthOf(results, 1)
+    assert.equal(results[0].bearerToken, 'keyboard cat')
+  })
+
+  it('should read token from file even if using wrong setting', async function () {
+    // arrange
+    const tokenFile = temporaryFile({ extension: 'txt' })
+    await fs.writeFile(tokenFile, 'keyboard cat')
+    // should be using BEARER_TOKEN_FILE, not BEARER_TOKEN
+    settingsRepository.set('BEARER_TOKEN', tokenFile)
+    // act
+    const results = await usecase()
+    // assert
+    assert.lengthOf(results, 1)
+    assert.equal(results[0].bearerToken, 'keyboard cat')
+  })
+
+  it('should trim bearer token when read from file', async function () {
+    // arrange
+    const tokenFile = temporaryFile({ extension: 'txt' })
+    await fs.writeFile(tokenFile, 'keyboard cat\n')
     settingsRepository.set('BEARER_TOKEN_FILE', tokenFile)
     // act
     const results = await usecase()

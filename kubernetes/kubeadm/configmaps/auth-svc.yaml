@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-svc
+  namespace: helix
+data:
+  DEBUG: '1'
+  CLIENT_CERT_HEADER: ssl-client-cert
+  CLIENT_CERT_FP: '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E'
+  # OIDC_CLIENT_ID and OIDC_CLIENT_SECRET are configured in the deployment
+  OIDC_ISSUER_URI: https://perforce-dev.onelogin.com/oidc/2
+  OIDC_INFO_LABEL: 'OneLogin OIDC'
+  PORT: '3000'
+  PROTOCOL: http
+  REDIS_URL: 'redis://redis.helix:6379'
+  SAML_IDP_METADATA_URL: https://app.onelogin.com/saml/metadata/a4987734-9edc-4103-a60b-53cecdb8dc95
+  SAML_SP_ENTITY_ID: urn:example:sp
+  SAML_WANT_ASSERTION_SIGNED: 'false'
+  SAML_INFO_LABEL: 'OneLogin SAML'
+  SVC_BASE_URI: https://auth-svc.cluster
+  TRUST_PROXY: 'true'
+...

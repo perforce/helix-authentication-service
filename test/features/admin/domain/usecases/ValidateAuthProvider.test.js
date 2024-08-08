@@ -37,6 +37,46 @@ describe('ValidateAuthProvider use case', function () {
     assert.isNull(result)
   })
 
+  it('should approve an oidc provider with cert/key', async function () {
+    // arrange
+    const provider = {
+      clientId: "client-id",
+      clientCert: "-----BEGIN CERTIFICATE-----",
+      clientKey: "-----BEGIN PRIVATE KEY-----",
+      issuerUri: "https://oidc.example.com",
+      selectAccount: "false",
+      signingAlgo: "RS256",
+      maxAge: 1024,
+      label: "Provider",
+      protocol: "oidc",
+      id: "oidc-1"
+    }
+    // act
+    const result = await usecase(provider)
+    // assert
+    assert.isNull(result)
+  })
+
+  it('should approve an oidc provider with cert/key files', async function () {
+    // arrange
+    const provider = {
+      clientId: "client-id",
+      clientCertFile: "certs/server.crt",
+      clientKeyFile: "certs/server.key",
+      issuerUri: "https://oidc.example.com",
+      selectAccount: "false",
+      signingAlgo: "RS256",
+      maxAge: 1024,
+      label: "Provider",
+      protocol: "oidc",
+      id: "oidc-1"
+    }
+    // act
+    const result = await usecase(provider)
+    // assert
+    assert.isNull(result)
+  })
+
   it('should approve a valid oidc(file) auth provider', async function () {
     // arrange
     const provider = {

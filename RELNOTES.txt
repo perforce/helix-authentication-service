@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2024.1
+                            Version 2024.2
 
 
 Introduction
@@ -35,9 +35,9 @@ Important Notes
 Supported Platforms
 
     Linux (x86_64)
-        RHEL 7, 8, 9
-        CentOS 7, 8.0
-        Ubuntu 20.04, 22.04
+        RHEL 8, 9
+        CentOS 8
+        Ubuntu 20.04, 22.04, 24.04
 
     The above platforms are tested and subject to regression testing on a
     frequent basis. Errors or bugs discovered in these platforms are prioritized
@@ -45,7 +45,7 @@ Supported Platforms
     Perforce.
 
     Amazon Linux (x86_64)
-        2, 2023
+        2023
 
     HAS is known to work on Amazon Linux when installed and configured using the
     provided shell scripts. Package installation may work but is not supported.
@@ -57,14 +57,6 @@ Supported Platforms
     HAS is known to work on the Windows systems listed above.
 
 
-Important Platform End-of-Life Notice
-
-    HAS will no longer support Node.js v16 as of the next release (2024.2).
-    This specifically impacts the following platforms:
-        Amazon Linux 2
-        CentOS/RHEL 7
-
-
 Requirements
 
     Node.js v20 (LTS)
@@ -72,8 +64,9 @@ Requirements
 
 Documentation
 
-    The HAS Administrator's Guide is publicly available on perforce.com. The
-    guide details the steps for installation, upgrade, and configuration of the
+    Helix Authentication Service Administrator Guide at
+    https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html
+    details the steps for installation, upgrade, and configuration of the
     authentication service.
 
 
@@ -113,7 +106,43 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2024.2 (2024.2/2634404) (2024/08/05)
+
+    HAS-523 (Change #2577281)
+        Add JavaScript version of configure script to enable easier
+        configuration on Windows platforms.
+
+    HAS-547 (Change #2569160)
+        Add /liveness route for orchestration systems such as Kubernetes.
+        Returns a 200 if the service, and its dependencies such as Redis, are
+        available to serve requests.
+
+----------------------------------------------------------------------
+Bugs fixed in 2024.2 (2024.2/2634404) (2024/08/05)
+
+    HAS-564 (Change #2597809)
+        Certificate files (server.crt and server.key) are now treated as
+        configuration files by the packages, and will no longer be overwritten
+        after this release.
+
+    HAS-567 (Change #2599531)
+        No longer reset unrelated fields in users and groups when making changes
+        via the SCIM-based user provisioning feature.
+
+----------------------------------------------------------------------
+Other changes in 2024.2 (2024.2/2634404) (2024/08/05)
+
+    HAS-502 (Change #2590747)
+        Remove support for Node.js v16.
+
+    HAS-554 (Change #2583773)
+        Remove support for CentOS/RHEL 7.
+
+    HAS-559 (Change #2591399)
+        Add package builds for Ubuntu 24.04 (Noble Numbat).
+
+----------------------------------------------------------------------
+New functionality in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-230 (Change #2487461)
         Support client certificate via HTTP header for use with a reverse proxy
@@ -128,18 +157,18 @@ New functionality in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE}
         multiple cloud service providers to multiple Helix Core Servers.
 
     HAS-501 (Change #2507978)
-        Support configuration via TOML file named config.toml as an alternative
-        to using the .env file and its numerous supporting files.
+        Support configuration via a TOML file named config.toml as an
+        alternative to using the .env file and its numerous supporting files.
 
 ----------------------------------------------------------------------
-Bugs fixed in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-489 (Change #2485834)
         When not enabled, the static content for the administrative interface
         will no longer be served to the client.
 
 ----------------------------------------------------------------------
-Other changes in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Other changes in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-425 (Change #2522538)
         Renaming a user via the user provisioning feature is now disabled by

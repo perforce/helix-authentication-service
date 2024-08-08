@@ -10,23 +10,6 @@ version: '3.7'
 # _must_ be run on a host that is using version 20.10 or higher.
 #
 services:
-  centos_7_test:
-    build:
-      context: ../..
-      dockerfile: test/packages/CentOS7.dockerfile
-    image: has-centos7-test
-    container_name: centos_7_test
-    privileged: true
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    stop_signal: SIGRTMIN+3
-    tmpfs:
-      - /run
-      - /run/lock
-      - /tmp
-
   centos_8_test:
     build:
       context: ../..
@@ -84,6 +67,23 @@ services:
       dockerfile: test/packages/Ubuntu22.dockerfile
     image: has-ubuntu22-test
     container_name: ubuntu_22_test
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    stop_signal: SIGRTMIN+3
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+
+  ubuntu_24_test:
+    build:
+      context: ../..
+      dockerfile: test/packages/Ubuntu24.dockerfile
+    image: has-ubuntu24-test
+    container_name: ubuntu_24_test
     privileged: true
     cap_add:
       - SYS_ADMIN

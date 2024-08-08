@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { createSlice } from '@reduxjs/toolkit'
 import { auth } from '~/app/services/auth'
@@ -14,6 +14,7 @@ const slice = createSlice({
     applyChanges(state, action) {
       state.modified = Object.assign({}, state.modified, action.payload)
     },
+    // eslint-disable-next-line no-unused-vars
     discardChanges(state, action) {
       state.modified = null
     },
@@ -28,6 +29,7 @@ const slice = createSlice({
     )
     builder.addMatcher(
       auth.endpoints.putProvider.matchFulfilled,
+      // eslint-disable-next-line no-unused-vars
       (state, { payload }) => {
         state.modified = null
       }

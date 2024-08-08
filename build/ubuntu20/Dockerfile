@@ -25,7 +25,7 @@ RUN apt-get -q -y install nodejs
 
 FROM ubuntu20_pkg_base AS ubuntu20-build
 
-ARG ID_REL_BASE=2024.1.0
+ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
 ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
 ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
@@ -57,11 +57,12 @@ COPY views views
 COPY defaults.env defaults.env
 COPY example.env example.env
 COPY example.toml example.toml
+COPY LICENSE.txt LICENSE.txt
 COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
-RUN sed -e "s/\"2024.1.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+RUN sed -e "s/\"2024.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
         -e "s|+MAIN+|${HAS_VERSION}|" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md
@@ -114,7 +115,7 @@ RUN rm -rf tmp
 # of the --output option to the `docker build` command.
 #
 FROM scratch AS ubuntu20-export
-ARG ID_REL_BASE=2024.1.0
+ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
 ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
 ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~focal_amd64.deb

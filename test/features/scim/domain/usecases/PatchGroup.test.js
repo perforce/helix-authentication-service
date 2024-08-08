@@ -296,6 +296,31 @@ describe('PatchGroup use case', function () {
       getStub.restore()
       addStub.restore()
     })
+
+    it('should successfully assign externalId', async function () {
+      // arrange
+      const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake(() => {
+        return Promise.resolve(new Group('staff', []))
+      })
+      const addStub = sinon.stub(EntityRepository.prototype, 'updateGroup').callsFake((group) => {
+        return Promise.resolve(group)
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [
+          { op: 'add', path: 'externalId', value: 'Staff-All' }
+        ]
+      }
+      const updated = await usecase('staff', patch)
+      // assert
+      assert.equal(updated.displayName, 'staff')
+      assert.equal(updated.externalId, 'Staff-All')
+      assert.isTrue(getStub.calledOnce)
+      assert.isTrue(addStub.calledOnce)
+      getStub.restore()
+      addStub.restore()
+    })
   })
 
   describe('multiple servers', function () {
@@ -359,18 +384,21 @@ describe('PatchGroup use case', function () {
       sinon.assert.calledWith(
         getStub,
         sinon.match('staff'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       assert.isTrue(updateStub.calledTwice)
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('displayName', 'staff'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('displayName', 'staff'),
-        sinon.match.has('p4port', 'ssl:tokyo:1666')
+        sinon.match.has('p4port', 'ssl:tokyo:1666'),
+        sinon.match('canine')
       )
       getStub.restore()
       updateStub.restore()

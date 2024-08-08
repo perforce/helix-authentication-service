@@ -1,2 +1,9 @@
 /opt/perforce/helix-auth-svc/logging.config.cjs
 /opt/perforce/helix-auth-svc/sentinel.config.cjs
+/opt/perforce/helix-auth-svc/certs/ca.crt
+/opt/perforce/helix-auth-svc/certs/ca.key
+/opt/perforce/helix-auth-svc/certs/encrypted.key
+/opt/perforce/helix-auth-svc/certs/server.crt
+/opt/perforce/helix-auth-svc/certs/server.key
+/opt/perforce/helix-auth-svc/certs/server.p12
+/opt/perforce/helix-auth-svc/routes/saml_idp.conf.cjs

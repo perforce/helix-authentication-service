@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Start p4d and test configuring the user provisioning.
 #
@@ -35,6 +35,7 @@ fi
     --bearer-token 'keyboard cat' \
     --p4port 0.0.0.0:1666 --super super --superpassword Rebar123
 
+test -f helix-auth-svc/.env || { echo 'missing .env configuration file' ; exit 1; }
 grep -q 'BEARER_TOKEN' helix-auth-svc/.env || { echo '.env missing BEARER_TOKEN' ; exit 1; }
 grep -q 'P4PORT' helix-auth-svc/.env || { echo '.env missing P4PORT' ; exit 1; }
 grep -q 'P4PASSWD' helix-auth-svc/.env || { echo '.env missing P4PASSWD' ; exit 1; }

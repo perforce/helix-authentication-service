@@ -176,7 +176,7 @@ describe('UpdateGroup use case', function () {
         { value: 'joe', display: 'Joe Plumber' },
         { value: 'susan', display: 'Susan Winters' }
       ])
-      const updated = await usecase('staff', tGroup)
+      const updated = await usecase('staff', tGroup, 'canine')
       // assert
       assert.propertyVal(updated, 'displayName', 'staff')
       assert.lengthOf(updated.members, 2)
@@ -184,18 +184,21 @@ describe('UpdateGroup use case', function () {
       sinon.assert.calledWith(
         getStub,
         sinon.match('staff'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       assert.isTrue(updateStub.calledTwice)
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('displayName', 'staff'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       sinon.assert.calledWith(
         updateStub,
         sinon.match.has('displayName', 'staff'),
-        sinon.match.has('p4port', 'ssl:tokyo:1666')
+        sinon.match.has('p4port', 'ssl:tokyo:1666'),
+        sinon.match('canine')
       )
       getStub.restore()
       updateStub.restore()

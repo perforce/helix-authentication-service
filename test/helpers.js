@@ -81,6 +81,13 @@ export function establishTrust (config) {
   assert.isTrue(added || already)
 }
 
+export function demolishTrust(config) {
+  const p4 = makeP4(config)
+  const trustCmd = p4.cmdSync('trust -d')
+  const removed = trustCmd.data.includes('Removed trust for P4PORT')
+  assert.isTrue(removed)
+}
+
 export function establishSuper (config) {
   const p4 = makeP4(config)
   const userOut = p4.cmdSync('user -o')

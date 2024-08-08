@@ -195,7 +195,8 @@ describe('GetUsers use case', function () {
       sinon.assert.calledWith(
         getStub,
         sinon.match.any,
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       getStub.restore()
     })

@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-svc
+  namespace: helix
+data:
+  DEBUG: '1'
+  CLIENT_CERT_HEADER: ssl-client-cert
+  CLIENT_CERT_FP: '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E'
+  # OIDC_CLIENT_ID and OIDC_CLIENT_SECRET are configured in the deployment
+  OIDC_ISSUER_URI: https://login.microsoftonline.com/719d88f3-f957-44cf-9aa5-0a1a3a44f7b9/v2.0
+  OIDC_INFO_LABEL: 'Azure OIDC'
+  PORT: '3000'
+  PROTOCOL: http
+  REDIS_URL: 'redis://redis.helix:6379'
+  SAML_IDP_METADATA_URL: https://login.microsoftonline.com/719d88f3-f957-44cf-9aa5-0a1a3a44f7b9/federationmetadata/2007-06/federationmetadata.xml?appid=a05dffdb-11a8-4b6c-a1e4-633d999fd2cd
+  SAML_SP_ENTITY_ID: https://auth-svc.pcloud
+  SAML_INFO_LABEL: 'Azure SAML'
+  SVC_BASE_URI: https://auth-svc.pcloud
+  TRUST_PROXY: 'true'
+...

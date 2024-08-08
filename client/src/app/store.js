@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
 import { auth } from './services/auth'
@@ -7,6 +7,8 @@ import authReducer from './reducers/authSlice'
 import settingsReducer from './reducers/settingsSlice'
 
 const persistMiddleware = createListenerMiddleware()
+
+/* global sessionStorage */
 
 persistMiddleware.startListening({
   predicate: (action, currentState, originalState) => {
@@ -34,6 +36,7 @@ function loadTokenFromStorage() {
       return null
     }
     return JSON.parse(serializedToken)
+    // eslint-disable-next-line no-unused-vars
   } catch (err) {
     return null
   }

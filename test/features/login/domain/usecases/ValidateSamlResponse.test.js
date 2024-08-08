@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import * as fs from 'node:fs'
 import { AssertionError } from 'node:assert'
@@ -33,6 +33,8 @@ describe('ValidateSamlResponse use case', function () {
       cert: fs.readFileSync('certs/server.crt', 'utf-8'),
       key: fs.readFileSync('certs/server.key', 'utf-8'),
       issuer: 'urn:auth-service:idp',
+      idpCert: fs.readFileSync('certs/server.crt', 'utf-8'),
+      callbackUrl: 'https://has.example.com:3000/callback',
       audience: 'urn:example:sp',
     }
     const user = {

@@ -2,7 +2,7 @@
 #
 # Authentication service installation script for Linux systems.
 #
-# Copyright 2023, Perforce Software Inc. All rights reserved.
+# Copyright 2024, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -142,24 +142,24 @@ function detect_platform() {
         PLATFORM=redhat
         VERSION_ID=$(awk -F= '/VERSION_ID/ {print $2}' /etc/os-release | tr -d '"')
         if [[ "$VERSION_ID" == '2' ]]; then
-            NODE_VERSION=16
+            die 'Cannot support this OS release any longer, lacks Node.js LTS support.'
         fi
     elif [[ "$ID" == 'centos' ]]; then
         PLATFORM=redhat
         VERSION_ID=$(awk -F= '/VERSION_ID/ {print $2}' /etc/os-release | tr -d '"')
         if [[ "$VERSION_ID" == '7' ]]; then
-            NODE_VERSION=16
+            die 'Cannot support this OS release any longer, lacks Node.js LTS support.'
         fi
     elif [[ "$ID" == 'rocky' ]]; then
-        # For now, all Rocky releases support Node.js v18, otherwise examine the
+        # For now, all Rocky releases support Node.js LTS, otherwise examine the
         # VERSION_ID value and compare to something like "8.5" to decide.
         PLATFORM=redhat
     elif [[ "$ID" == 'ubuntu' ]]; then
         PLATFORM=debian
-        # CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
-        # if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
-        #     NODE_VERSION=16
-        # fi
+        CODENAME=$(awk -F= '/VERSION_CODENAME/ {print $2}' /etc/os-release | tr -d '"')
+        if [[ "$CODENAME" == 'xenial' || "$CODENAME" == 'bionic' ]]; then
+            die 'Cannot support this OS release any longer, lacks Node.js LTS support.'
+        fi
     fi
 }
 
@@ -224,7 +224,7 @@ function prompt_to_proceed() {
 
 # If Node.js is installed, ensure that the version is supported.
 function check_nodejs() {
-    if which node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(16|18|20)\.'; then
+    if command -v node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(18|20)\.'; then
         # check if Node.js came from the package 'nodejs' package or not
         UPGRADABLE=true
         if [ $PLATFORM == "debian" ]; then
@@ -238,12 +238,12 @@ function check_nodejs() {
         fi
         if ! $UPGRADABLE; then
             error 'Found a version of Node.js that cannot be upgraded automatically.'
-            error 'Please upgrade Node.js to v16, v18, or v20 before proceeding.'
+            error 'Please upgrade Node.js to v18 or v20 before proceeding.'
             exit 1
         fi
         if $INTERACTIVE; then
             echo ''
-            echo 'Found a version of Node.js that is not the required v16/v18/v20.'
+            echo 'Found a version of Node.js that is not the required v18/v20.'
             echo 'Do you wish to upgrade the Node.js installation?'
             select yn in 'Yes' 'No'; do
                 case $yn in
@@ -252,7 +252,7 @@ function check_nodejs() {
                 esac
             done
         elif ! $UPGRADE_NODE; then
-            die 'Node.js v16, v18, or v20 is required, please upgrade.'
+            die 'Node.js v18 or v20 is required, please upgrade.'
         fi
         # else the script will automatically install the required version
     fi
@@ -261,7 +261,7 @@ function check_nodejs() {
 # Install or upgrade Node.js using a script from nodesource.com
 function install_nodejs() {
     # Both an upgrade and a new installation work in the same manner.
-    if $UPGRADE_NODE || ! which node >/dev/null 2>&1; then
+    if $UPGRADE_NODE || ! command -v node >/dev/null 2>&1; then
         echo "Preparing to install OS packages and Node.js..."
         if [ $PLATFORM == "debian" ]; then
             # Because apt-get will happily fail miserably _and_ return an exit code of
@@ -275,14 +275,10 @@ function install_nodejs() {
             fi
             set -e  # now go back to exiting if a command returns non-zero
             sudo apt-get -q update
-            sudo apt-get -q -y install build-essential ca-certificates curl git gnupg
-            sudo mkdir -p /etc/apt/keyrings
-            if [ -f /etc/apt/keyrings/nodesource.gpg ]; then
-                sudo rm /etc/apt/keyrings/nodesource.gpg
-            fi
-            curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/nodesource.gpg
-            echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-            sudo apt-get -q update
+            sudo apt-get -q -y install build-essential curl git
+            # Run a shell script from the internet as root to get Node.js
+            # directly from the vendor. This includes npm as well.
+            curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
             sudo apt-get -q -y install nodejs
         elif [ $PLATFORM == "redhat" ]; then
             # In the upgrade scenario, need to remove the repository package first.
@@ -295,9 +291,10 @@ function install_nodejs() {
             fi
             # Add --skip-broken for Oracle Linux and its redundant packages
             sudo yum -q -y install --skip-broken curl gcc-c++ git make
-            sudo yum clean all
-            sudo yum install -y https://rpm.nodesource.com/pub_${NODE_VERSION}.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
-            sudo yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
+            # Run a shell script from the internet as root to get Node.js
+            # directly from the vendor. This includes npm as well.
+            curl -fsSL https://rpm.nodesource.com/setup_${NODE_VERSION}.x | sudo bash -
+            sudo yum install -y nodejs
         fi
     fi
     # run npm once as the unprivileged user so it creates the ~/.config
@@ -326,8 +323,7 @@ function create_user_group() {
     fi
 
     # ensure perforce user can write to the installation path
-    INSTALL_PREFIX=$(pwd)
-    sudo chown -R perforce:perforce "$INSTALL_PREFIX"
+    sudo chown -R perforce:perforce "$INSTALLPREFIX"
 
     if ! sudo su - perforce -c "ls ${INSTALLPREFIX}" >/dev/null 2>&1; then
         error "\n\nUser perforce cannot access ${INSTALLPREFIX}, please fix permissions.\n"
@@ -335,9 +331,19 @@ function create_user_group() {
     fi
 }
 
+# Create a .env file if neither it nor the config.toml exist.
+function create_env_if_missing() {
+    # create an example .env file if it and config.toml are missing
+    if [ ! -f .env ] && [ ! -f config.toml ]; then
+        PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
+        # inject LOGGING if not already set; strip comments and blank lines
+        awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env | sudo tee .env >/dev/null
+        sudo chown --reference=example.env .env
+    fi
+}
+
 # Create the systemd service unit, enable, and start.
 function install_service_unit() {
-    INSTALL_PREFIX=$(pwd)
     sudo tee /etc/systemd/system/helix-auth.service >/dev/null <<__SERVICE_UNIT__
 [Unit]
 Description=Helix Authentication Service
@@ -346,19 +352,13 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=${INSTALL_PREFIX}/bin/www.js
-WorkingDirectory=${INSTALL_PREFIX}
+ExecStart=${INSTALLPREFIX}/bin/www.js
+WorkingDirectory=${INSTALLPREFIX}
 
 [Install]
 WantedBy=multi-user.target
 __SERVICE_UNIT__
-    # create an example .env file if it and config.toml are missing
-    if [ ! -f .env ] && [ ! -f config.toml ]; then
-        # strip comments and blank lines
-        awk "/^$/{next} /^#/{next} {print}" example.env | sudo tee .env >/dev/null
-        sudo chown --reference=example.env .env
-    fi
-    if which systemctl >/dev/null 2>&1; then
+    if command -v systemctl >/dev/null 2>&1; then
         sudo systemctl daemon-reload
         sudo systemctl enable helix-auth.service
         sudo systemctl start helix-auth.service
@@ -403,10 +403,10 @@ then restart the service: sudo systemctl restart helix-auth
     ${INSTALLPREFIX}
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
-for your identity provider. The configure-auth-service.sh script may be
+for your identity provider. The configure-auth-service.js script may be
 helpful for this purpose.
 
-    ${INSTALLPREFIX}/bin/configure-auth-service.sh --help
+    node ${INSTALLPREFIX}/bin/configure-auth-service.js --help
 
 For assistance, please contact support@perforce.com
 EOT
@@ -430,6 +430,7 @@ function main() {
     if $CREATE_USER; then
         create_user_group
     fi
+    create_env_if_missing
     if $INSTALL_SERVICE; then
         install_service_unit
     fi

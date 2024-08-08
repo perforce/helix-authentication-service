@@ -97,7 +97,7 @@ describe('AddGroup use case', function () {
       const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((displayName) => {
         return Promise.resolve(null)
       })
-      // eslint-disable-next-line no-unused-vars
+       
       const addStub = sinon.stub(EntityRepository.prototype, 'addGroup').callsFake((group) => {
         return Promise.resolve(group)
       })
@@ -118,7 +118,7 @@ describe('AddGroup use case', function () {
       const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((displayName) => {
         return Promise.resolve(null)
       })
-      // eslint-disable-next-line no-unused-vars
+       
       const addStub = sinon.stub(EntityRepository.prototype, 'addGroup').callsFake((group) => {
         return Promise.resolve(group)
       })
@@ -187,18 +187,21 @@ describe('AddGroup use case', function () {
       sinon.assert.calledWith(
         getStub,
         sinon.match('staff'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       assert.isTrue(addStub.calledTwice)
       sinon.assert.calledWith(
         addStub,
         sinon.match.has('displayName', 'staff'),
-        sinon.match.has('p4port', 'ssl:chicago:1666')
+        sinon.match.has('p4port', 'ssl:chicago:1666'),
+        sinon.match('canine')
       )
       sinon.assert.calledWith(
         addStub,
         sinon.match.has('displayName', 'staff'),
-        sinon.match.has('p4port', 'ssl:tokyo:1666')
+        sinon.match.has('p4port', 'ssl:tokyo:1666'),
+        sinon.match('canine')
       )
       getStub.restore()
       addStub.restore()

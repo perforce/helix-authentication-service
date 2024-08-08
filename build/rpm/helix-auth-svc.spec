@@ -9,7 +9,7 @@ Name:           helix-auth-svc
 Version:        %{p4release}
 Release:        %{p4change}
 Summary:        Helix Authentication Service
-License:        BSD
+License:        MIT
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
 PreReq:         shadow-utils
@@ -38,6 +38,7 @@ install -d %{buildroot}%{installprefix}/public
 install -d %{buildroot}%{installprefix}/routes
 install -d %{buildroot}%{installprefix}/views
 
+cp -p bin/configure-auth-service.js %{buildroot}%{installprefix}/bin/configure-auth-service.js
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
 install -m 0755 bin/node %{buildroot}%{installprefix}/bin/node
 install -m 0755 bin/www.js %{buildroot}%{installprefix}/bin/www.js
@@ -64,17 +65,26 @@ cp example.toml %{buildroot}%{installprefix}/example.toml
 cp logging.config.cjs %{buildroot}%{installprefix}/logging.config.cjs
 cp sentinel.config.cjs %{buildroot}%{installprefix}/sentinel.config.cjs
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
-sed -e "s/\"2024.1.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+sed -e "s/\"2024.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
+cp LICENSE.txt %{buildroot}%{installprefix}/LICENSE.txt
 cp README.md %{buildroot}%{installprefix}/README.md
 cp README.html %{buildroot}%{installprefix}/README.html
 cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 
 %files
+%license %{installprefix}/LICENSE.txt
 %docdir %{installprefix}/docs
 %config(noreplace) %{installprefix}/logging.config.cjs
 %config(noreplace) %{installprefix}/sentinel.config.cjs
+%config(noreplace) %{installprefix}/certs/ca.crt
+%config(noreplace) %{installprefix}/certs/ca.key
+%config(noreplace) %{installprefix}/certs/encrypted.key
+%config(noreplace) %{installprefix}/certs/server.crt
+%config(noreplace) %{installprefix}/certs/server.key
+%config(noreplace) %{installprefix}/certs/server.p12
+%config(noreplace) %{installprefix}/routes/saml_idp.conf.cjs
 %{installprefix}
 
 %post
@@ -153,10 +163,10 @@ then restart the service: sudo systemctl restart helix-auth
     %{installprefix}
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
-for your identity provider. The configure-auth-service.sh script may be
+for your identity provider. The configure-auth-service.js script may be
 helpful for this purpose.
 
-    %{installprefix}/bin/configure-auth-service.sh --help
+    node %{installprefix}/bin/configure-auth-service.js --help
 
 For assistance, please contact support@perforce.com
 
@@ -176,10 +186,10 @@ by invoking './bin/node ./bin/www.js' from the directory shown below.
     %{installprefix}
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
-for your identity provider. The configure-auth-service.sh script may be
+for your identity provider. The configure-auth-service.js script may be
 helpful for this purpose.
 
-    %{installprefix}/bin/configure-auth-service.sh --help
+    node %{installprefix}/bin/configure-auth-service.js --help
 
 For assistance, please contact support@perforce.com
 

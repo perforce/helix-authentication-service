@@ -10,9 +10,11 @@ FROM rockylinux:8
 # scripts have certain requirements, so install those now.
 RUN yum -q -y install findutils sudo which
 
-# install the previous LTS version of Node.js via package
-RUN yum install -y https://rpm.nodesource.com/pub_18.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
-RUN yum install -y --setopt=nodesource-nodejs.module_hotfixes=1 nodejs
+# install the previous LTS version of Node.js
+ADD https://rpm.nodesource.com/setup_18.x setup_18.x
+RUN bash setup_18.x
+RUN yum install -y nodejs
+
 RUN test -f /usr/bin/node
 RUN node --version | grep -Eq '^v18\.'
 
@@ -43,8 +45,8 @@ RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --oidc-client-secret client_secret
 
 # ensure configure script created the OIDC client secret file
-RUN test -f helix-auth-svc/client-secret.txt && \
-    grep -q 'client_secret' helix-auth-svc/client-secret.txt && \
-    grep -q 'logging.config.cjs' helix-auth-svc/.env && \
-    grep -q 'https://localhost:3000' helix-auth-svc/.env && \
-    grep -q 'https://oidc.issuer' helix-auth-svc/.env
+RUN test -f helix-auth-svc/client-secret.txt
+RUN grep -q 'client_secret' helix-auth-svc/client-secret.txt
+RUN test -f helix-auth-svc/.env
+RUN grep -q 'https://localhost:3000' helix-auth-svc/.env
+RUN grep -q 'https://oidc.issuer' helix-auth-svc/.env

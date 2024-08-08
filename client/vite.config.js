@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import {
   defineConfig,
   splitVendorChunkPlugin
@@ -27,7 +27,7 @@ export default defineConfig({
     alias: {
       // Would have used @ like everyone else except that there are real-world
       // module dependencies that start with @ already so that would be problem.
-      '~': path.resolve(__dirname, './src'),
+      '~': path.resolve(import.meta.dirname, './src'),
     },
   },
   server: {

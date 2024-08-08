@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import * as fs from 'node:fs/promises'
 import { assert } from 'chai'
@@ -96,10 +96,10 @@ name5=\`value5\`
     assert.equal(settings.get('name5'), 'value5')
   })
 
-  it('should load LOGGING contents from .env file', async function () {
+  it('should set LOGGING to "none" (.env)', async function () {
     // arrange
     const dotenvFile = temporaryFile({ extension: 'env' })
-    await fs.writeFile(dotenvFile, 'LOGGING=logging.config.cjs')
+    await fs.writeFile(dotenvFile, 'LOGGING=none')
     const source = new DotenvSource({ dotenvFile })
     const repository = new BasicConfigRepository({ configSource: source })
     // act
@@ -108,10 +108,71 @@ name5=\`value5\`
     assert.lengthOf(settings, 1)
     assert.isTrue(settings.has('LOGGING'))
     assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.equal(settings.get('LOGGING'), 'none')
+  })
+
+  it('should load LOGGING from file (.env)', async function () {
+    // arrange
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    await fs.writeFile(dotenvFile, 'LOGGING=logging.config.cjs')
+    const source = new DotenvSource({ dotenvFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 2) // LOGGING and LOGGING_FILE
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
     assert.include(settings.get('LOGGING'), 'auth-svc.log')
   })
 
-  it('should load LOGGING contents from TOML file', async function () {
+  it('should load LOGGING (encoded) contents (.env)', async function () {
+    // arrange
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    // base64 encoded logging config with 'debug' and 'console'
+    await fs.writeFile(dotenvFile, 'LOGGING=base64:bW9kdWxlLmV4cG9ydHMgPSB7CiAgbGV2ZWw6ICdkZWJ1ZycsCiAgdHJhbnNwb3J0OiAnY29uc29sZScKfQo=')
+    const source = new DotenvSource({ dotenvFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 1)
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.include(settings.get('LOGGING'), 'console')
+  })
+
+  it('should set LOGGING to "none" (TOML)', async function () {
+    // arrange
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    await fs.writeFile(tomlFile, 'logging = "none"')
+    const source = new TomlSource({ tomlFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 1)
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.equal(settings.get('LOGGING'), 'none')
+  })
+
+  it('should load LOGGING from file (TOML)', async function () {
+    // arrange
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    await fs.writeFile(tomlFile, 'logging = "logging.config.cjs"')
+    const source = new TomlSource({ tomlFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 2) // LOGGING and LOGGING_FILE
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.include(settings.get('LOGGING'), 'auth-svc.log')
+  })
+
+  it('should load LOGGING contents (TOML)', async function () {
     // arrange
     const tomlFile = temporaryFile({ extension: 'toml' })
     await fs.writeFile(tomlFile, `[logging]
@@ -165,7 +226,7 @@ hashed = 'value#3'
     assert.equal(settings.get('TRIMMED'), 'The quick brown fox jumps over the lazy dog.')
   })
 
-  it('should write values to dotenv file', async function () {
+  it('should write values to .env file', async function () {
     // arrange
     const dotenvFile = temporaryFile({ extension: 'env' })
     const source = new DotenvSource({ dotenvFile })
@@ -192,7 +253,7 @@ hashed = 'value#3'
     assert.equal(settings.get('NAME4'), 'multi\nline\nvalue')
   })
 
-  it('should read and write PEM encoded certificates', async function () {
+  it('should read and write PEM encoded certificates (.env)', async function () {
     // arrange
     const dotenvFile = temporaryFile({ extension: 'env' })
     const source = new DotenvSource({ dotenvFile })
@@ -211,7 +272,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
     assert.equal(settings.get('IDP_CERT'), rawCertificate)
   })
 
-  it('should read and write XML formatted metadata', async function () {
+  it('should read and write XML formatted metadata (.env)', async function () {
     // arrange
     const dotenvFile = temporaryFile({ extension: 'env' })
     const source = new DotenvSource({ dotenvFile })
@@ -248,7 +309,7 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     assert.equal(settings.get('SAML_IDP_METADATA'), rawMetadata)
   })
 
-  it('should read/write secrets in files if appropriate .env', async function () {
+  it('should read/write secrets in files if appropriate (.env)', async function () {
     // arrange
     const secretFile = temporaryFile({ extension: 'txt' })
     await fs.writeFile(secretFile, 'lioness')
@@ -272,7 +333,7 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     assert.equal(secret, 'tiger')
   })
 
-  it('should read/write secrets in files if appropriate TOML', async function () {
+  it('should read/write secrets in files if appropriate (TOML)', async function () {
     // arrange
     const secretFile = temporaryFile({ extension: 'txt' })
     await fs.writeFile(secretFile, 'lioness')
@@ -296,7 +357,7 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     assert.equal(secret, 'tiger')
   })
 
-  it('should write secrets only if different', async function () {
+  it('should write secrets only if different (.env)', async function () {
     // arrange
     const secretFile = temporaryFile({ extension: 'txt' })
     await fs.writeFile(secretFile, 'lioness\n')
@@ -317,7 +378,54 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     assert.equal(secret, 'lioness\n')
   })
 
-  it('should write auth providers configuration in .env', async function () {
+  it('should write LOGGING=none to .env', async function () {
+    // arrange
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    const source = new DotenvSource({ dotenvFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const incoming = new Map()
+    incoming.set('LOGGING', 'none')
+    await repository.write(incoming)
+    // assert
+    const contents = await fs.readFile(dotenvFile, 'utf8')
+    assert.equal(contents, "LOGGING='none'\n")
+  })
+
+  it('should write LOGGING=none to TOML', async function () {
+    // arrange
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    const source = new TomlSource({ tomlFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const incoming = new Map()
+    incoming.set('LOGGING', 'none')
+    await repository.write(incoming)
+    // assert
+    const contents = await fs.readFile(tomlFile, 'utf8')
+    assert.equal(contents, 'logging = "none"')
+  })
+
+  it('should write LOGGING contents to TOML', async function () {
+    // arrange
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    const source = new TomlSource({ tomlFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const incoming = new Map()
+    incoming.set('LOGGING', {
+      level: 'debug',
+      transport: 'console'
+    })
+    await repository.write(incoming)
+    // assert
+    const contents = await fs.readFile(tomlFile, 'utf8')
+    assert.equal(contents, `[logging]
+level = "debug"
+transport = "console"`)
+  })
+
+  it('should write auth providers configuration to .env', async function () {
     // arrange
     const dotenvFile = temporaryFile({ extension: 'env' })
     const source = new DotenvSource({ dotenvFile })
@@ -349,7 +457,7 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     assert.notProperty(providers[1], 'id')
   })
 
-  it('should write auth providers configuration in TOML', async function () {
+  it('should write auth providers configuration to TOML', async function () {
     // arrange
     const tomlFile = temporaryFile({ extension: 'toml' })
     const source = new TomlSource({ tomlFile })
@@ -417,7 +525,7 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     assert.notProperty(providers[1], 'id')
   })
 
-  it('should write auth providers as embedded vs file (TOML)', async function () {
+  it('should write auth providers as embedded (TOML)', async function () {
     // arrange
     const tomlFile = temporaryFile({ extension: 'toml' })
     const source = new TomlSource({ tomlFile })
@@ -448,5 +556,157 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     assert.equal(providers[1].protocol, 'saml')
     assert.equal(providers[1].metadataUrl, 'https://saml2.example.com')
     assert.notProperty(providers[1], 'id')
+  })
+
+  it('should read/write LOGGING when "none" (.env)', async function () {
+    // arrange
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    await fs.writeFile(dotenvFile, 'LOGGING=none')
+    const source = new DotenvSource({ dotenvFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 1)
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.equal(settings.get('LOGGING'), 'none')
+    // act
+    await repository.write(settings)
+    // assert
+    const contents = await fs.readFile(dotenvFile, 'utf8')
+    assert.equal(contents, "LOGGING='none'\n")
+  })
+
+  it('should read/write LOGGING as file (.env)', async function () {
+    // arrange
+    const loggingFile = temporaryFile({ extension: 'cjs' })
+    await fs.writeFile(loggingFile, `module.exports = {
+  level: 'debug',
+  transport: 'console'
+}`)
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    await fs.writeFile(dotenvFile, `LOGGING=${loggingFile}`)
+    const source = new DotenvSource({ dotenvFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 2) // LOGGING and LOGGING_FILE
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.include(settings.get('LOGGING'), "transport: 'console'")
+    // act
+    await repository.write(settings)
+    // assert
+    const contents = await fs.readFile(dotenvFile, 'utf8')
+    assert.equal(contents, `LOGGING='${loggingFile}'\n`)
+  })
+
+  it('should read/write LOGGING changes to file (.env)', async function () {
+    // arrange
+    const loggingFile = temporaryFile({ extension: 'cjs' })
+    await fs.writeFile(loggingFile, `module.exports = {
+  level: 'debug',
+  transport: 'console'
+}`)
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    await fs.writeFile(dotenvFile, `LOGGING=${loggingFile}`)
+    const source = new DotenvSource({ dotenvFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 2) // LOGGING and LOGGING_FILE
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.include(settings.get('LOGGING'), "level: 'debug'")
+    // act
+    settings.set('LOGGING', `module.exports = {
+  level: 'info',
+  transport: 'console'
+}`)
+    await repository.write(settings)
+    // assert
+    const contents = await fs.readFile(dotenvFile, 'utf8')
+    assert.equal(contents, `LOGGING='${loggingFile}'\n`)
+    const logconfig = await fs.readFile(loggingFile, 'utf8')
+    assert.include(logconfig, "level: 'info'")
+  })
+
+  it('should read/write LOGGING when "none" (TOML)', async function () {
+    // arrange
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    await fs.writeFile(tomlFile, 'logging = "none"')
+    const source = new TomlSource({ tomlFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 1)
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.equal(settings.get('LOGGING'), 'none')
+    // act
+    await repository.write(settings)
+    // assert
+    const contents = await fs.readFile(tomlFile, 'utf8')
+    assert.equal(contents, 'logging = "none"')
+  })
+
+  it('should read/write LOGGING as file (TOML)', async function () {
+    // arrange
+    const loggingFile = temporaryFile({ extension: 'cjs' })
+    await fs.writeFile(loggingFile, `module.exports = {
+  level: 'debug',
+  transport: 'console'
+}`)
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    await fs.writeFile(tomlFile, `logging = "${loggingFile}"`)
+    const source = new TomlSource({ tomlFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 2) // LOGGING and LOGGING_FILE
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.include(settings.get('LOGGING'), "transport: 'console'")
+    // act
+    await repository.write(settings)
+    // assert
+    const contents = await fs.readFile(tomlFile, 'utf8')
+    assert.equal(contents, `logging = "${loggingFile}"`)
+  })
+
+  it('should read/write LOGGING changes to file (TOML)', async function () {
+    // arrange
+    const loggingFile = temporaryFile({ extension: 'cjs' })
+    await fs.writeFile(loggingFile, `module.exports = {
+  level: 'debug',
+  transport: 'console'
+}`)
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    await fs.writeFile(tomlFile, `logging = "${loggingFile}"`)
+    const source = new TomlSource({ tomlFile })
+    const repository = new BasicConfigRepository({ configSource: source })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 2) // LOGGING and LOGGING_FILE
+    assert.isTrue(settings.has('LOGGING'))
+    assert.typeOf(settings.get('LOGGING'), 'string')
+    assert.include(settings.get('LOGGING'), "level: 'debug'")
+    // act
+    settings.set('LOGGING', `module.exports = {
+  level: 'info',
+  transport: 'console'
+}`)
+    await repository.write(settings)
+    // assert
+    const contents = await fs.readFile(tomlFile, 'utf8')
+    assert.equal(contents, `logging = "${loggingFile}"`)
+    const logconfig = await fs.readFile(loggingFile, 'utf8')
+    assert.include(logconfig, "level: 'info'")
   })
 })

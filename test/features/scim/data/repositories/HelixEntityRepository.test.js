@@ -325,6 +325,42 @@ describe('HelixEntity repository', function () {
       assert.equal(user.username, 'updateuser')
       assert.equal(user.email, 'juser@work.com')
       assert.equal(user.fullname, 'Joseph User')
+      assert.equal(user.AuthMethod, 'perforce')
+    })
+
+    it('should retain properties of an existing user', async function () {
+      this.timeout(10000)
+      // arrange
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
+      })
+      const p4user = {
+        User: 'authmethod',
+        Email: 'juser@example.com',
+        FullName: 'Joe Q. User',
+        AuthMethod: 'ldap',
+        Type: 'standard'
+      }
+      const userIn = await p4.cmd('user -i -f', p4user)
+      assert.isOk(userIn.info[0].data)
+      let user = await repository.getUser('user-authmethod')
+      assert.equal(user.AuthMethod, 'ldap')
+      // act
+      const tUserUpdate = new User('user-authmethod', 'juser@work.com', 'Joseph User')
+      const updated = await repository.updateUser(tUserUpdate)
+      assert.instanceOf(updated, UserModel)
+      assert.equal(updated.username, 'authmethod')
+      // assert
+      user = await repository.getUser('user-authmethod')
+      assert.instanceOf(user, UserModel)
+      assert.equal(user.id, 'user-authmethod')
+      assert.equal(user.username, 'authmethod')
+      assert.equal(user.email, 'juser@work.com')
+      assert.equal(user.fullname, 'Joseph User')
+      assert.equal(user.AuthMethod, 'ldap')
     })
 
     it('should reset password via external identifier', async function () {
@@ -576,7 +612,7 @@ describe('HelixEntity repository', function () {
       }
     })
 
-    it('should reject adding a group with a space character', async function () {
+    it('should reject getting a group with a space character', async function () {
       // arrange
       // act/assert
       try {
@@ -601,11 +637,68 @@ describe('HelixEntity repository', function () {
       assert.equal(groupById.id, 'group-newgroup')
       assert.equal(groupById.displayName, 'newgroup')
       assert.lengthOf(groupById.members, 0)
+      assert.equal(groupById.Timeout, 43200)
       // retrieve by the plain p4d group name
       const group = await repository.getGroup('newgroup')
       assert.instanceOf(group, GroupModel)
       assert.equal(group.displayName, 'newgroup')
       assert.lengthOf(group.members, 0)
+      assert.equal(group.Timeout, 43200)
+    })
+
+    it('should retain properties of an existing group', async function () {
+      this.timeout(10000)
+      // arrange
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
+      })
+      const p4group = {
+        Group: 'hastimeout',
+        Description: 'Group without timeout',
+        MaxResults: 'unset',
+        MaxScanRows: 'unset',
+        MaxLockTime: 'unset',
+        MaxOpenFiles: 'unset',
+        MaxMemory: 'unset',
+        Timeout: '172800',
+        PasswordTimeout: 'unset',
+        Users0: 'susan'
+      }
+      const groupIn = await p4.cmd('group -i', p4group)
+      assert.isOk(groupIn.info[0].data)
+      // act
+      const group = await repository.getGroup('hastimeout')
+      assert.equal(group.Timeout, 172800)
+      const usecase = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [{
+          op: 'Add',
+          path: 'members',
+          value: [{ value: 'user-joe' }]
+        }]
+      }
+      await usecase('group-hastimeout', patch)
+      // assert
+      const updated = await repository.getGroup('hastimeout')
+      assert.equal(updated.Timeout, 172800)
+      assert.equal(updated.Description, 'Group without timeout\n')
+      assert.equal(updated.MaxResults, 'unset')
+      assert.equal(updated.MaxScanRows, 'unset')
+      assert.equal(updated.MaxLockTime, 'unset')
+      assert.equal(updated.MaxOpenFiles, 'unset')
+      assert.equal(updated.MaxMemory, 'unset')
+      assert.equal(updated.PasswordTimeout, 'unset')
+      assert.lengthOf(updated.members, 2)
+      assert.isOk(updated.members.find((e) => e.value === 'user-joe'))
+      assert.isOk(updated.members.find((e) => e.value === 'user-susan'))
     })
 
     it('should add and retrieve multiple group entities', async function () {
@@ -870,6 +963,56 @@ describe('HelixEntity repository', function () {
       assert.equal(domainA.externalId, 'idA')
       assert.equal(domainA.email, 'joe@example.com')
     })
+
+    it('should add and retrieve group with externalId', async function () {
+      this.timeout(10000)
+      // arrange
+      const tGroup = new Group('domgroup', [])
+      tGroup.externalId = 'Group-123'
+      const added = await repository.addGroup(tGroup, undefined, 'canine')
+      assert.instanceOf(added, GroupModel)
+      assert.equal(added.id, 'group-domgroup')
+      assert.equal(added.externalId, 'Group-123')
+      // act
+      const groupById = await repository.getGroup(added.id, undefined, 'canine')
+      // assert
+      assert.instanceOf(groupById, GroupModel)
+      assert.equal(groupById.id, 'group-domgroup')
+      assert.equal(groupById.displayName, 'domgroup')
+      assert.lengthOf(groupById.members, 0)
+      assert.equal(groupById.externalId, 'Group-123')
+
+      // retrieve by the plain p4d group name
+      const group = await repository.getGroup('domgroup', undefined, 'canine')
+      assert.instanceOf(group, GroupModel)
+      assert.equal(group.displayName, 'domgroup')
+      assert.lengthOf(group.members, 0)
+      assert.equal(group.externalId, 'Group-123')
+
+      // get all groups by domain
+      const query = new Query()
+      const groups = await repository.getGroups(query, undefined, 'canine')
+      assert.isNotNull(groups)
+      const domgroup = groups.find((e) => e.displayName === 'domgroup')
+      assert.equal(domgroup.externalId, 'Group-123')
+    })
+
+    it('should update group with externalId', async function () {
+      this.timeout(10000)
+      // arrange
+      // act
+      const tGroupUpdate = new Group('domgroup', [])
+      tGroupUpdate.externalId = 'NewGroup456'
+      const updated = await repository.updateGroup(tGroupUpdate, undefined, 'canine')
+      assert.instanceOf(updated, GroupModel)
+      assert.equal(updated.id, 'group-domgroup')
+      assert.equal(updated.externalId, 'NewGroup456')
+      const group = await repository.getGroup('domgroup', undefined, 'canine')
+      // assert
+      assert.instanceOf(group, GroupModel)
+      assert.equal(group.displayName, 'domgroup')
+      assert.equal(group.externalId, 'NewGroup456')
+    })
   })
 
   describe('Missing P4PASSWD', function () {
@@ -905,7 +1048,7 @@ describe('HelixEntity repository', function () {
     })
   })
 
-  describe('SSL without trust', function () {
+  describe('SSL without trust, should establish', function () {
     let repository
     let p4config
 
@@ -932,9 +1075,8 @@ describe('HelixEntity repository', function () {
       const query = new Query()
       try {
         await repository.getUsers(query)
-        assert.fail('should have raised Error')
       } catch (err) {
-        assert.include(err.message, 'p4 trust')
+        assert.include(err.message, 'User bruno doesn\'t exist')
       }
     })
   })

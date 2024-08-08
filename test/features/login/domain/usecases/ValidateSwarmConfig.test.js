@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -311,6 +311,76 @@ return array(
     assert.equal(result.status, 'results')
     assert.lengthOf(result.results, 1)
     assert.isTrue(result.results.some((e) => e === 'saml.idp.x509cert does not match contents of CERT_FILE'))
+  })
+
+  it('should indicate success even if x509cert EOL characters differ', async function () {
+    // arrange
+    settingsRepository.set('CERT_FILE', 'certs/server.crt')
+    const idpConfig = {
+      'urn:swarm-example:sp': {
+        acsUrl: 'https://swarm.example.com/api/v10/session'
+      }
+    }
+    const usecase = ValidateSwarmConfig({ settingsRepository, getIdPConfiguration: () => idpConfig })
+    // act
+    const swarmConfig = `<?php
+return array(
+  'saml' => array(
+    'sp' => array(
+      'entityId' => 'urn:swarm-example:sp',
+      'assertionConsumerService' => array(
+        'url' => 'https://swarm.example.com/',
+      ),
+    ),
+    'idp' => array(
+      'entityId' => 'urn:auth-service:idp',
+      'singleSignOnService' => array(
+        'url' => 'https://has.example.com/saml/login',
+      ),
+      // x509cert is certs/server.crt with CR-LR end-of-line characters
+      'x509cert' => '-----BEGIN CERTIFICATE-----\r\nMIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv\r\ncml0eTAeFw0yMTExMDgyMjE1MzRaFw0zMTExMDYyMjE1MzRaMBUxEzARBgNVBAMM\r\nCmF1dGhlbi5kb2MwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDC0Whu\r\njXOzgiKRBFtu38BgQ+hujR0UGUS2DvbrTzHCODyFGudvjTXLKp+Ms/4okfuvWdcz\r\nPK5h0vy1lO/INlNDchRytIhrws9mIY9wuLJW3tgocDF2WARiON6ZABMx/JC2Qcs/\r\n/K8gu0KIbxa8r7jfCs9YChOuqG7CD3JuXZVv9TKgoPgXTYCu/LbNxpm92hBRyffJ\r\nK+DSdvdRnvnMrvR5LbED4Pk+k0DMXOtypgoC9KIvciIVS8TGPdpcyXxUg1ba7nik\r\nTgwaOvywYKJHyY46gFcRSq8CDlcRPAGzDubneT1r2K0LmshWTB8fg+2XgcbTLSGy\r\nit+Q6zRogU7ts/8dNk7wN1iGbP7jqrGYCUBZpnu97pNFFaHEB/2KZfNdIRF6ARJO\r\n4bwXnXeNEIxWV6mARvFvSVfeISu09NfZCQuY1WGiO7dgfOb3OLpnEun6VpkwRJ9m\r\nrZ6a4l2yHYCJTUlQchYbAzz40Ye2U1eW9UB0OMyXAbhPIIblNf8Uic8mDo98mG63\r\njdl+xrC9J1EbUej9v9NaqSfP09Pi6fgt3f6itCdoFaUgDJNrcCgKE09X4uvjL+sV\r\nISdBXE+C0ODMACCnpjnJ5QFHu+KoDsqdbArnm/cLU6Ck0wyOI72DqAuWR/SYXgkO\r\nP0AA8LDbKQo00/rbEr5SRv+ya4MlaW4vkB7qGwIDAQABMA0GCSqGSIb3DQEBCwUA\r\nA4ICAQBvjCCs8Xsi0U7KSrXq9q7Ysht7Jf+3a5JaA2gHU40CYIqRlReX3bcHAra5\r\n2eZu77pazxDDtlWQtdv2C0P4l5hl+IhaUipDNQEciYcVBsJp2Lizedla0IEgfyEv\r\ncJrvaULHRaNVhOkM2MJNE1xsP0yF34aXR85nmJ7K8qqHaxDokAyMqbVOwQW3nTaM\r\ncvpesfaRwE8+eIjohMFEyuc+qpV1titjXueQ9GulkSX20tsiOmnl3KtY3VGCTrXs\r\nmbbL46utMifkhYG6B3aQbcl16SeQth0Bihc9xfJHzrigwb4l+cfJe3eUPPclvTOs\r\n2eWKcuMxAipmCir52Lr1WIFzIkAn2UqP4aZo8+MM2bsOGI09dNUmflg/ZyI+F5tl\r\nkD5+gkn5fXwfQuVScYH7ecOIZhCvtsE0+FgqdMx5rkBKdxpGQqd8JpR6ENfJc2y6\r\nokBJ30ZSXKIpBXz8dDlSwDwA5dpICW8YR6aTQuWgriadXS6Abni2gsx1sAPpt7bg\r\nsvjqwGB+wnqvD7+oCjH3/kLKTgm6Rh8NMViS/O7kyIa+8B7lw2EhTb6yySxVZgs5\r\ngTw6pzhEX/3xGwgDOn4UK4gzk2xAkAUsh0IQNnfcj13P6VqslVLcI/2mqKT72Quo\r\nMZXNWXiBpf4CRHvtHBOD7Jae4d7mlqAZp9JUHbVxTv4lHT3fcw==\r\n-----END CERTIFICATE-----\r\n',
+    ),
+  ),
+);`
+    const result = await usecase('https://has.example.com', swarmConfig)
+    // assert
+    assert.equal(result.status, 'ok')
+    assert.lengthOf(result.results, 0)
+  })
+
+  it('should indicate success even if x509cert is one line', async function () {
+    // arrange
+    settingsRepository.set('CERT_FILE', 'certs/server.crt')
+    const idpConfig = {
+      'urn:swarm-example:sp': {
+        acsUrl: 'https://swarm.example.com/api/v10/session'
+      }
+    }
+    const usecase = ValidateSwarmConfig({ settingsRepository, getIdPConfiguration: () => idpConfig })
+    // act
+    const swarmConfig = `<?php
+return array(
+  'saml' => array(
+    'sp' => array(
+      'entityId' => 'urn:swarm-example:sp',
+      'assertionConsumerService' => array(
+        'url' => 'https://swarm.example.com/',
+      ),
+    ),
+    'idp' => array(
+      'entityId' => 'urn:auth-service:idp',
+      'singleSignOnService' => array(
+        'url' => 'https://has.example.com/saml/login',
+      ),
+      // x509cert is certs/server.crt collapsed into a single line w/o armor
+      'x509cert' => 'MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhvcml0eTAeFw0yMTExMDgyMjE1MzRaFw0zMTExMDYyMjE1MzRaMBUxEzARBgNVBAMMCmF1dGhlbi5kb2MwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDC0WhujXOzgiKRBFtu38BgQ+hujR0UGUS2DvbrTzHCODyFGudvjTXLKp+Ms/4okfuvWdczPK5h0vy1lO/INlNDchRytIhrws9mIY9wuLJW3tgocDF2WARiON6ZABMx/JC2Qcs//K8gu0KIbxa8r7jfCs9YChOuqG7CD3JuXZVv9TKgoPgXTYCu/LbNxpm92hBRyffJK+DSdvdRnvnMrvR5LbED4Pk+k0DMXOtypgoC9KIvciIVS8TGPdpcyXxUg1ba7nikTgwaOvywYKJHyY46gFcRSq8CDlcRPAGzDubneT1r2K0LmshWTB8fg+2XgcbTLSGyit+Q6zRogU7ts/8dNk7wN1iGbP7jqrGYCUBZpnu97pNFFaHEB/2KZfNdIRF6ARJO4bwXnXeNEIxWV6mARvFvSVfeISu09NfZCQuY1WGiO7dgfOb3OLpnEun6VpkwRJ9mrZ6a4l2yHYCJTUlQchYbAzz40Ye2U1eW9UB0OMyXAbhPIIblNf8Uic8mDo98mG63jdl+xrC9J1EbUej9v9NaqSfP09Pi6fgt3f6itCdoFaUgDJNrcCgKE09X4uvjL+sVISdBXE+C0ODMACCnpjnJ5QFHu+KoDsqdbArnm/cLU6Ck0wyOI72DqAuWR/SYXgkOP0AA8LDbKQo00/rbEr5SRv+ya4MlaW4vkB7qGwIDAQABMA0GCSqGSIb3DQEBCwUAA4ICAQBvjCCs8Xsi0U7KSrXq9q7Ysht7Jf+3a5JaA2gHU40CYIqRlReX3bcHAra52eZu77pazxDDtlWQtdv2C0P4l5hl+IhaUipDNQEciYcVBsJp2Lizedla0IEgfyEvcJrvaULHRaNVhOkM2MJNE1xsP0yF34aXR85nmJ7K8qqHaxDokAyMqbVOwQW3nTaMcvpesfaRwE8+eIjohMFEyuc+qpV1titjXueQ9GulkSX20tsiOmnl3KtY3VGCTrXsmbbL46utMifkhYG6B3aQbcl16SeQth0Bihc9xfJHzrigwb4l+cfJe3eUPPclvTOs2eWKcuMxAipmCir52Lr1WIFzIkAn2UqP4aZo8+MM2bsOGI09dNUmflg/ZyI+F5tlkD5+gkn5fXwfQuVScYH7ecOIZhCvtsE0+FgqdMx5rkBKdxpGQqd8JpR6ENfJc2y6okBJ30ZSXKIpBXz8dDlSwDwA5dpICW8YR6aTQuWgriadXS6Abni2gsx1sAPpt7bgsvjqwGB+wnqvD7+oCjH3/kLKTgm6Rh8NMViS/O7kyIa+8B7lw2EhTb6yySxVZgs5gTw6pzhEX/3xGwgDOn4UK4gzk2xAkAUsh0IQNnfcj13P6VqslVLcI/2mqKT72QuoMZXNWXiBpf4CRHvtHBOD7Jae4d7mlqAZp9JUHbVxTv4lHT3fcw==',
+    ),
+  ),
+);`
+    const result = await usecase('https://has.example.com', swarmConfig)
+    // assert
+    assert.equal(result.status, 'ok')
+    assert.lengthOf(result.results, 0)
   })
 
   it('should indicate success if everything is okay', async function () {
