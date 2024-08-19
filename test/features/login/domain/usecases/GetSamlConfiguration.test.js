@@ -112,6 +112,7 @@ describe('GetSamlConfiguration use case', function () {
     assert.isUndefined(result.disableRequestedAuthnContext)
     assert.isFalse(result.wantAssertionsSigned)
     assert.isTrue(result.wantAuthnResponseSigned)
+    assert.isUndefined(result.audience)
   })
 
   it('should interpret truthy values from provider', async function () {
@@ -134,6 +135,7 @@ describe('GetSamlConfiguration use case', function () {
     assert.isFalse(result.disableRequestedAuthnContext)
     assert.isFalse(result.wantAssertionsSigned)
     assert.isTrue(result.wantAuthnResponseSigned)
+    assert.isUndefined(result.audience)
   })
 
   it('should fetch metadata via URL with settings', async function () {

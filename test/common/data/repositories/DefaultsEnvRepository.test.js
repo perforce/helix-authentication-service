@@ -65,6 +65,7 @@ describe('DefaultsEnvRepository', function () {
     assert.equal(sut.get('SAML_DISABLE_CONTEXT'), 'false')
     assert.equal(sut.get('SAML_FORCE_AUTHN'), 'false')
     assert.equal(sut.get('SAML_NAMEID_FORMAT'), 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+    assert.isUndefined(sut.get('SAML_SP_AUDIENCE'))
     assert.equal(sut.get('SAML_SP_ENTITY_ID'), 'https://has.example.com')
     assert.equal(sut.get('SAML_WANT_ASSERTION_SIGNED'), 'true')
     assert.equal(sut.get('SAML_WANT_RESPONSE_SIGNED'), 'true')

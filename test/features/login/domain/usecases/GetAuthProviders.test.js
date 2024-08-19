@@ -86,6 +86,7 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].keyAlgorithm, 'sha256')
     assert.equal(result[0].authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
     assert.equal(result[0].nameIdFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+    assert.isUndefined(result[0].audience)
   })
 
   it('should return classic SAML with defaults', async function () {
@@ -105,6 +106,7 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].keyAlgorithm, 'sha256')
     assert.equal(result[0].authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
     assert.equal(result[0].nameIdFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+    assert.isUndefined(result[0].audience)
   })
 
   it('should return an OIDC provider with defaults', async function () {
