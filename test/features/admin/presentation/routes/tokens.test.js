@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it, run } from 'mocha'
@@ -28,6 +28,17 @@ const agent = request.agent(server)
 setTimeout(function () {
   describe('Web Token requests', function () {
     describe('Success cases', function () {
+      it('should support CORS', function (done) {
+        agent
+          .post('/tokens')
+          .trustLocalhost(true)
+          .send({ grant_type: 'password', username: 'scott', password: 'tiger' })
+          .set('Origin', 'https://localhost:3333')
+          .expect(200)
+          .expect('Access-Control-Allow-Origin', '*')
+          .end(done)
+      })
+
       it('should create and approve a JSON web token', function (done) {
         let accessToken
         agent

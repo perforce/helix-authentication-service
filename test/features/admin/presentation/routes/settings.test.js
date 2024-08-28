@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import * as fs from 'node:fs'
 import { assert } from 'chai'
@@ -41,6 +41,16 @@ setTimeout(function () {
     })
 
     describe('Success cases', function () {
+      it('should support CORS', function (done) {
+          agent
+            .get('/settings')
+            .trustLocalhost(true)
+            .set('Origin', 'https://localhost:3333')
+            .expect(401)
+            .expect('Access-Control-Allow-Origin', '*')
+            .end(done)
+      })
+
       it('should retrieve configuration settings', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
           agent
