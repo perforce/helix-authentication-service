@@ -62,7 +62,7 @@ COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
-RUN sed -e "s/\"2024.2.0\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+RUN sed -e "s/\"2024.2.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
         -e "s|+MAIN+|${HAS_VERSION}|" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md

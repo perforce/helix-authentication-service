@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2024.2
+                            Version 2024.2.1
 
 
 Introduction
@@ -104,6 +104,18 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-587 (Change #2644856)
+        Supports CORS requests to the /requests REST API to enable web-based
+        clients to use the authentication functionality.
+
+    HAS-588 (Change #2645859)
+        SAML requests would fail if key file contained attribute values before
+        the encapsulation boundary ("keyInfo is not in PEM format or in base64
+        format").
 
 ----------------------------------------------------------------------
 New functionality in 2024.2 (2024.2/2634404) (2024/08/05)
