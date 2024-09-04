@@ -71,6 +71,11 @@ bearer_token = 'keyboard cat'
 #
 # bearer_token_file = undefined
 
+# The Origin value for CORS requests to the REST API. Defaults to the service
+# base URI as computed from SVC_BASE_URI, PORT, and PROTOCOL.
+#
+# cors_origin = undefined
+
 # The client identifier as provided by the OIDC identity provider.
 #
 # oidc_client_id = undefined
