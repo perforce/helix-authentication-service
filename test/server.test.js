@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
@@ -32,6 +32,26 @@ describe('Server basics', function () {
       assert.equal(sut.normalizePort('abc'), 'abc')
       assert.equal(sut.normalizePort('3000'), 3000)
       assert.equal(sut.normalizePort('-8'), false)
+    })
+  })
+
+  describe('corsConfiguration', function () {
+    it('should use SVC_BASE_URI if defined', function () {
+      const settings = new Map([
+        ['SVC_BASE_URI', 'https://myhost']
+      ])
+      const expected = {
+        origin: 'https://myhost'
+      }
+      assert.deepEqual(sut.corsConfiguration(settings), expected)
+    })
+
+    it('should use CORS_ORIGIN if defined', function () {
+      const settings = new Map([
+        ['SVC_BASE_URI', 'https://myhost'],
+        ['CORS_ORIGIN', '*']
+      ])
+      assert.deepEqual(sut.corsConfiguration(settings), { origin: '*' })
     })
   })
 
