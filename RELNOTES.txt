@@ -106,7 +106,7 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2024.2.1 (2024.2.1/2646386) (2024/08/29)
 
     HAS-587 (Change #2644856)
         Supports CORS requests to the /requests REST API to enable web-based
