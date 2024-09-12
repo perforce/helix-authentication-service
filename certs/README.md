@@ -15,6 +15,12 @@ for development.
 The public (`server.crt`) and private (`server.key`) key pair for the TLS
 certificate of the authentication service, signed using the fake issuer above.
 
+### `server-rsa.key`
+
+A version of `server.key` with the traditional boundary lines for a private RSA
+key, for testing with third party libraries to ensure they work with all sorts
+of certificate file formats.
+
 ### `server.p12`
 
 A PKCS#12 certificate containing both the public and private keys defined in the
@@ -51,6 +57,7 @@ $ openssl x509 -sha256 -req -in server.csr -CA ca.crt -CAkey ca.key -out server.
 #
 # remove the server.csr
 #
+$ openssl rsa -in server.key -out server-rsa.key -traditional
 $ openssl pkcs12 -export -macalg sha256 -inkey server.key -in server.crt -out server.p12
 #
 # enter the passphrase mentioned above

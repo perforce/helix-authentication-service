@@ -72,7 +72,7 @@ describe('LoadAuthorityCerts use case', function () {
     const result = usecase()
     // assert
     assert.isDefined(result)
-    assert.lengthOf(result, 9)
+    assert.lengthOf(result, 10)
     assert.instanceOf(result[0], Buffer)
     assert.instanceOf(result[6], Buffer)
   })
