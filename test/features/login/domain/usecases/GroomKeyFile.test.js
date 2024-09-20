@@ -18,13 +18,12 @@ describe('GroomKeyFile use case', function () {
     }
   })
 
-  it('should pass other text through unchanged', function () {
-    const input = `this is not
-really a certificate
-file at all, just plain
-text`
+  it('should emit nothing if not a valid PEM certificate', function () {
+    const input = `this is
+just a plain
+text file`
     const result = usecase(input)
-    assert.equal(result, input)
+    assert.equal(result, '')
   })
 
   it('should pass good data through unchanged', function () {
@@ -57,6 +56,46 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
 -----END CERTIFICATE-----`
     const result = usecase(input)
     assert.equal(result, input)
+  })
+
+  it('should filter multiple instances of attributes', function () {
+    const input = `PropertyName1: propertyValue
+-----BEGIN CERTIFICATE-----
+MIIErDCCApQCCQCVmh2sP3DTFTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1G
+YWtlQXV0aG9yaXR5MB4XDTIxMTEwODIyMTUxM1oXDTMxMTEwNjIyMTUxM1owGDEW
+MBQGA1UEAwwNRmFrZUF1dGhvcml0eTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCC
+gyahMzg5NWD8gScaqv5zCEWgylDSdvGsaBu2nr7AjrkBgw4N0h6mhnwuCNAUT1GQ
+6bmXOI+wv5OZY72tTfCopeSkgA1J7IP86tXnnevvast67xonQ749Qc6uqpsUIKN2
+o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
+-----END CERTIFICATE-----
+PropertyName2: propertyValue
+-----BEGIN CERTIFICATE-----
+MIIErDCCApQCCQCVmh2sP3DTFTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1G
+YWtlQXV0aG9yaXR5MB4XDTIxMTEwODIyMTUxM1oXDTMxMTEwNjIyMTUxM1owGDEW
+MBQGA1UEAwwNRmFrZUF1dGhvcml0eTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCC
+gyahMzg5NWD8gScaqv5zCEWgylDSdvGsaBu2nr7AjrkBgw4N0h6mhnwuCNAUT1GQ
+6bmXOI+wv5OZY72tTfCopeSkgA1J7IP86tXnnevvast67xonQ749Qc6uqpsUIKN2
+o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
+-----END CERTIFICATE-----
+PropertyName3: propertyValue`
+    const expected = `-----BEGIN CERTIFICATE-----
+MIIErDCCApQCCQCVmh2sP3DTFTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1G
+YWtlQXV0aG9yaXR5MB4XDTIxMTEwODIyMTUxM1oXDTMxMTEwNjIyMTUxM1owGDEW
+MBQGA1UEAwwNRmFrZUF1dGhvcml0eTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCC
+gyahMzg5NWD8gScaqv5zCEWgylDSdvGsaBu2nr7AjrkBgw4N0h6mhnwuCNAUT1GQ
+6bmXOI+wv5OZY72tTfCopeSkgA1J7IP86tXnnevvast67xonQ749Qc6uqpsUIKN2
+o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIErDCCApQCCQCVmh2sP3DTFTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1G
+YWtlQXV0aG9yaXR5MB4XDTIxMTEwODIyMTUxM1oXDTMxMTEwNjIyMTUxM1owGDEW
+MBQGA1UEAwwNRmFrZUF1dGhvcml0eTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCC
+gyahMzg5NWD8gScaqv5zCEWgylDSdvGsaBu2nr7AjrkBgw4N0h6mhnwuCNAUT1GQ
+6bmXOI+wv5OZY72tTfCopeSkgA1J7IP86tXnnevvast67xonQ749Qc6uqpsUIKN2
+o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
+-----END CERTIFICATE-----`
+    const result = usecase(input)
+    assert.equal(result, expected)
   })
 
   it('should remove attribute data preceding encapsulation boundaries', function () {
