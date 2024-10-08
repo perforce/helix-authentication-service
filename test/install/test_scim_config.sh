@@ -25,7 +25,7 @@ if systemctl status dnf-makecache.timer >/dev/null 2>&1; then
 fi
 
 # p4d is already running
-# p4dctl start -o '-p 0.0.0.0:1666' despot
+p4dctl start -o '-p 0.0.0.0:1666' despot
 
 # run the install script non-interactively
 ./helix-auth-svc/install.sh -n
