@@ -4,9 +4,9 @@ FROM ubuntu:20.04
 # $ docker run --rm --entrypoint cat auth-svc:tarball /build/helix-authentication-service.tgz > helix-authentication-service.tgz
 #
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 #
 # install build prerequisites for admin interface

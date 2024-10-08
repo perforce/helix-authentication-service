@@ -18,8 +18,8 @@ RUN yum -q -y install rpmdevtools rpm-build
 
 ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
-ENV PKGNAME helix-auth-svc
-ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
+ENV PKGNAME=helix-auth-svc
+ENV DIRNAME=helix-auth-svc-${ID_REL_BASE}
 
 WORKDIR /build/${DIRNAME}
 
@@ -77,8 +77,8 @@ RUN cp /usr/bin/node ./bin
 #
 # build the rpm package
 #
-ENV ID_REL_BASE ${ID_REL_BASE}
-ENV ID_PATCH ${ID_PATCH}
+ENV ID_REL_BASE=${ID_REL_BASE}
+ENV ID_PATCH=${ID_PATCH}
 RUN rpmdev-setuptree
 RUN tar -C .. -z -c -f /root/rpmbuild/SOURCES/${PKGNAME}.tar.gz ${DIRNAME}
 COPY build/rpm /root/rpmbuild/SPECS
@@ -91,6 +91,6 @@ RUN rpmbuild -bb /root/rpmbuild/SPECS/helix-auth-svc.spec
 FROM scratch AS rocky8-export
 ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
-ENV PKGNAME helix-auth-svc
-ENV PACKAGE_FILENAME ${PKGNAME}-${ID_REL_BASE}-${ID_PATCH}.x86_64.rpm
+ENV PKGNAME=helix-auth-svc
+ENV PACKAGE_FILENAME=${PKGNAME}-${ID_REL_BASE}-${ID_PATCH}.x86_64.rpm
 COPY --from=rocky8-build /root/rpmbuild/RPMS/x86_64/${PACKAGE_FILENAME} ${PACKAGE_FILENAME}

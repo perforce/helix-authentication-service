@@ -7,7 +7,7 @@ FROM node:18-slim
 # $ docker build -t has-test-node18 -f test/backward/Node18.dockerfile .
 # $ docker image ls | grep has-test-node18
 #
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install build-essential git python3
 WORKDIR /srv

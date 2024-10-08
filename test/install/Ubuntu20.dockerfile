@@ -8,7 +8,7 @@ FROM ubuntu:20.04
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl iputils-ping sudo systemd-sysv
 

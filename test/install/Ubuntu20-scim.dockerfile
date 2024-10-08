@@ -15,15 +15,13 @@ RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl gawk iputils-ping patch sudo systemd-sysv
 
 # install p4 and p4d using packages
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get -q -y install apt-utils lsb-release gnupg
 ADD ${PUB_KEY} perforce.pubkey
 RUN apt-key add perforce.pubkey && \
     rm -f perforce.pubkey
-# temporary hack: no p4/p4d packages for focal yet, so use bionic
-# RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
-RUN echo "deb ${APT_URL} bionic release" > /etc/apt/sources.list.d/perforce.sources.list
+RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
 RUN apt-get update && \
     apt-get -q -y install helix-cli helix-p4d
 

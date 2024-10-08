@@ -5,8 +5,8 @@ FROM ubuntu:22.04 AS ubuntu22_pkg_base
 # Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
 ENV DEBIAN_FRONTEND noninteractive
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/path-exclude=\/usr\/share\/doc\/*/d' /etc/dpkg/dpkg.cfg.d/excludes
@@ -27,12 +27,12 @@ FROM ubuntu22_pkg_base AS ubuntu22-build
 
 ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
-ENV HAS_VERSION "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
-ENV DIRNAME helix-auth-svc-${ID_REL_BASE}
-ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
-ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~jammy_amd64.deb
-ENV DEBEMAIL 'support+packaging@perforce.com'
-ENV DEBFULLNAME 'Perforce Software, Inc.'
+ENV HAS_VERSION="HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
+ENV DIRNAME=helix-auth-svc-${ID_REL_BASE}
+ENV PKGNAME=helix-auth-svc_${ID_REL_BASE}
+ENV PACKAGE_FILENAME=${PKGNAME}-${ID_PATCH}~jammy_amd64.deb
+ENV DEBEMAIL='support+packaging@perforce.com'
+ENV DEBFULLNAME='Perforce Software, Inc.'
 
 WORKDIR /build/${DIRNAME}
 
@@ -117,6 +117,6 @@ RUN rm -rf tmp
 FROM scratch AS ubuntu22-export
 ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
-ENV PKGNAME helix-auth-svc_${ID_REL_BASE}
-ENV PACKAGE_FILENAME ${PKGNAME}-${ID_PATCH}~jammy_amd64.deb
+ENV PKGNAME=helix-auth-svc_${ID_REL_BASE}
+ENV PACKAGE_FILENAME=${PKGNAME}-${ID_PATCH}~jammy_amd64.deb
 COPY --from=ubuntu22-build /build/${PACKAGE_FILENAME} ${PACKAGE_FILENAME}

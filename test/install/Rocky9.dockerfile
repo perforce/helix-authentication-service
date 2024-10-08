@@ -11,7 +11,7 @@ FROM rockylinux:9 AS rocky9-sha1
 RUN update-crypto-policies --set DEFAULT:SHA1
 
 FROM rocky9-sha1
-ENV container docker
+ENV container=docker
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
