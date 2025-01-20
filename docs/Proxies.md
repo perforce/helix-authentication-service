@@ -25,7 +25,7 @@ For further explanation of these settings, see the sections below.
 
 In the example above, the `SVC_BASE_URI` setting starts with `https` while the `PROTOCOL` setting is `http` -- this tells the service that it will be listening for HTTP connections while a proxy will be handling the HTTPS connection with the client. This is commonly referred to as TLS termination, which offloads the work of the TLS connection to the proxy and leaves the auth service to focus on authentication.
 
-One tradeoff of using http is that the service will no longer validate the client certificate sent by the client applications (such as the login extension in Helix Core Server) since the certificate is not delivered to the service over HTTP. If this is a concern, then remove the `PROTOCOL` setting and the service will manage the HTTPS connection directly (and validate the client certs).
+One tradeoff of using HTTP is that the service will no longer validate the client certificate sent by the client applications (such as the login extension in Helix Core Server) since the certificate is not delivered to the service over HTTP. If this is a concern, then see the section titled [Client certificate](#client-certificate) for more informatin.
 
 ### Port Number
 
@@ -33,9 +33,17 @@ Since the proxy is handling the client connections, the service itself is free t
 
 ### Trusting the Proxy
 
-In order for the service to operate effectively when it is behind a reverse proxy, it is necessary to set the `TRUST_PROXY` environment variable. This value is then set in the `trust proxy` application setting, which is used by the Express.js framework to pick up the correct protocol (`http` or `https`). This in turn helps the `session-cookie` middleware correctly set the cookie as `secure` in responses. This is critical for the `SameSite=none` to have the desired effect during the login process -- see [Cookies.md](./Cookies.md) for more information on browser cookies and how they are used by the service.
+In order for the service to operate effectively when it is behind a reverse proxy, it is necessary to set the `TRUST_PROXY` environment variable. This value is then set in the `trust proxy` application setting, which is used by the Express.js framework to determine the correct protocol (`http` or `https`) from HTTP headers. This in turn helps the `session-cookie` middleware correctly set the cookie as `secure` in responses to the client. This is critical for the `SameSite=none` to have the desired effect during the login process -- see [Cookies.md](./Cookies.md) for more information on browser cookies and how they are used by the service.
 
 For values supported by the `TRUST_PROXY` setting, see [behind proxies](http://expressjs.com/en/guide/behind-proxies.html) on the Express.js web site. In addition to how `trust proxy` is used, the page also describes how the request headers are used by the framework to detect the connection protocol.
+
+### Client certificate
+
+Depending on the proxy and its configuration, it may be the case that the client certificate sent to the service is not passed through as part of the request. If the service is configured with `PROTOCOL=http` then the service will not be expecting a certificate anyway, so this is not a concern. However, this setup weakens the security a bit since it allows any client to retrieve the user profile data during the authentication procedure. To prevent this, you may configure the reverse proxy to pass the client certificate to the backend service via an HTTP header, and then add the setting `CLIENT_CERT_HEADER` to the `.env` configuration file. This setting takes the name of the HTTP header that contains the client certificate in base64 encoded form. Whether the client certificate is URI encoded or not, and includes the text armor or not, the service will make a best effort to decode the value and read the common name and compute the fingerprint of the client cer. These values can then be compared with either the `CLIENT_CERT_CN` or `CLIENT_CERT_FP` values given in the `.env` file.
+
+An example of this can be seen in the `docker-compose.yml` file and the setting of the `X-SSL-Client-Cert` HTTP header in the `containers/haproxy/haproxy.cfg` HAProxy configuration. Another example can be found in the Kubernetes example manifest `kubernetes/kubeadm/configmaps/auth-svc.yaml` which relies on the nginx proxy to set the `ssl-client-cert` HTTP header.
+
+If passing the client certificate to the service proves to be too difficult, the client validation can be disabled by setting `ASSUME_CLIENT_AUTHORIZED` to any value in the `.env` file. As mentioned above, this opens the service to possible abuse as any client can now attempt to retrieve the user profile data during authentication.
 
 ## Routing Options
 
