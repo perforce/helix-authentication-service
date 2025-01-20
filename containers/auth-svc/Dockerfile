@@ -20,8 +20,6 @@ COPY views views
 # much larger (note unix-dgram is only needed by winston-syslog).
 RUN npm ci -q --only=prod --omit=optional
 
-COPY containers/auth-svc/saml_idp.conf.cjs routes
-
 EXPOSE ${PORT}
 
 HEALTHCHECK CMD curl -k -f -s -I http://localhost:${PORT}/ || exit 1
