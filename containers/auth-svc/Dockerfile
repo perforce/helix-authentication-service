@@ -13,6 +13,9 @@ COPY package.json .
 COPY package-lock.json .
 COPY public public
 COPY routes routes
+# vvvvv DO NOT REMOVE, USED BY AUTOMATED TESTS vvvv
+COPY containers/auth-svc/saml_idp.conf.cjs routes
+# ^^^^^ DO NOT REMOVE, USED BY AUTOMATED TESTS ^^^^
 COPY views views
 # Use npm ci for a predictable install. Only install the production dependencies
 # to save space. Avoid the optional dependencies, especially unix-dgram which
