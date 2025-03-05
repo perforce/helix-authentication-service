@@ -4,6 +4,7 @@
 #
 # Copyright 2024, Perforce Software Inc. All rights reserved.
 #
+MONOCHROME=false
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -25,14 +26,6 @@ function warning() {
 
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
-    if [[ $EUID -eq 0 ]] && ! $ALLOW_ROOT; then
-        die 'This script should be run as a non-root user.'
-    fi
-
-    # Ensure write access to the configuration file.
-    if ! touch CHANGELOG.md >/dev/null 2>&1; then
-        die 'You do not have permission to write to this directory.'
-    fi
     if ! command -v node >/dev/null 2>&1 || ! node --version | grep -Eq '^v(18|20)\.'; then
         error 'Node.js v18 or v20 is required to run the service.'
         error 'Please run install.sh to install dependencies.'
