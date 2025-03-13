@@ -204,6 +204,8 @@ describe('Group model', function () {
       Timeout: '43200',
       PasswordTimeout: 'unset',
       Subgroups0: 'admins',
+      Owners0: 'super',
+      Owners1: 'bruno',
       Users0: 'joe',
       Users1: 'mike',
       Users2: 'susan'
@@ -219,6 +221,8 @@ describe('Group model', function () {
     assert.equal(merged.MaxMemory, 'unset')
     assert.equal(merged.Timeout, '43200')
     assert.equal(merged.PasswordTimeout, 'unset')
+    assert.equal(merged.Owners0, 'super')
+    assert.equal(merged.Owners1, 'bruno')
     assert.equal(merged.Users0, 'joe')
     assert.equal(merged.Users1, 'susan')
   })

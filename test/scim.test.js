@@ -15,6 +15,7 @@ import {
   default as container,
   registerLateBindings
 } from 'helix-auth-svc/lib/container.js'
+import { GroupModel } from 'helix-auth-svc/lib/features/scim/data/models/GroupModel.js'
 import p4pkg from 'p4api'
 const { P4 } = p4pkg
 
@@ -273,6 +274,175 @@ setTimeout(function () {
               assert.equal(res.body.externalId, '00udud1rtaDsrJ5rb5d7ssl')
             })
             .end(done)
+        })
+      })
+
+      describe('Create groups like a real client would', function () {
+        // 1. create an empty group
+        // 2. create users that will be added to the group
+        // 3. patch the group for each user to be added
+        it('should POST group with no members', function (done) {
+          this.timeout(10000)
+          agent
+            .post('/scim/v2/Groups')
+            .trustLocalhost(true)
+            .set('Authorization', authToken)
+            .send({
+              schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+              externalId: 'AC838315-F57A-4C58-9C6F-94B37B651FA6',
+              displayName: 'HasMembers',
+              members: []
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-HasMembers/)
+            .expect(201)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'HasMembers')
+              assert.equal(res.body.externalId, 'AC838315-F57A-4C58-9C6F-94B37B651FA6')
+              assert.lengthOf(res.body.members, 0)
+            })
+            .end(done)
+        })
+
+        it('should create first user via POST', function (done) {
+          this.timeout(10000)
+          agent
+            .post('/scim/v2/Users')
+            .trustLocalhost(true)
+            .set('Authorization', authToken)
+            .send({
+              schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+              userName: 'samjackson@example.com',
+              name: { familyName: 'Jackson', givenName: 'Samuel' },
+              emails: [{ primary: true, type: 'work', value: 'samjackson@example.com' }],
+              displayName: 'Samuel Jackson',
+              locale: 'en-US',
+              externalId: '261F3136-C5D0-4895-B63A-7A34CB416CC2',
+              groups: [],
+              password: 'SAMLisAw3s0m3!',
+              active: true
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Users\/user-samjackson/)
+            .expect(201)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+              assert.equal(res.body.userName, 'samjackson@example.com')
+              assert.equal(res.body.displayName, 'Samuel Jackson')
+              assert.lengthOf(res.body.emails, 1)
+              assert.equal(res.body.emails[0].value, 'samjackson@example.com')
+              assert.isTrue(res.body.active)
+            })
+            .end(done)
+        })
+
+        it('should create second user via POST', function (done) {
+          this.timeout(10000)
+          agent
+            .post('/scim/v2/Users')
+            .trustLocalhost(true)
+            .set('Authorization', authToken)
+            .send({
+              schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+              userName: 'openeyedee@example.com',
+              name: { familyName: 'Deedee', givenName: 'Openeye' },
+              emails: [{ primary: true, type: 'work', value: 'openeyedee@example.com' }],
+              displayName: 'Openeye Deedee',
+              locale: 'en-US',
+              externalId: '7FD39E71-3180-409B-B2FC-715B4E69C0C5',
+              groups: [],
+              password: 'OIDCisAw3s0m3!',
+              active: true
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Users\/user-openeyedee/)
+            .expect(201)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+              assert.equal(res.body.userName, 'openeyedee@example.com')
+              assert.equal(res.body.displayName, 'Openeye Deedee')
+              assert.lengthOf(res.body.emails, 1)
+              assert.equal(res.body.emails[0].value, 'openeyedee@example.com')
+              assert.isTrue(res.body.active)
+            })
+            .end(done)
+        })
+
+        it('should PATCH first user into group', function (done) {
+          this.timeout(10000)
+          agent
+            .patch('/scim/v2/Groups/HasMembers')
+            .trustLocalhost(true)
+            .set('Authorization', authToken)
+            .send({
+              schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+              Operations: [{
+                op: "Add",
+                path: "members",
+                value: [{ value: "user-samjackson" }]
+              }],
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-HasMembers/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'HasMembers')
+              assert.lengthOf(res.body.members, 1)
+              assert.equal(res.body.members[0].value, 'user-samjackson')
+              assert.match(res.body.members[0].$ref, /\/scim\/v2\/Users\/user-samjackson/)
+              assert.exists(res.body.meta.created)
+              assert.exists(res.body.meta.lastModified)
+              assert.equal(res.body.meta.resourceType, 'Group')
+              assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-HasMembers/)
+            })
+            .end(done)
+        })
+
+        it('should PATCH second user into group', function (done) {
+          this.timeout(10000)
+          agent
+            .patch('/scim/v2/Groups/HasMembers')
+            .trustLocalhost(true)
+            .set('Authorization', authToken)
+            .send({
+              schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+              Operations: [{
+                op: "Add",
+                path: "members",
+                value: [{ value: "user-openeyedee" }]
+              }],
+            })
+            .expect('Content-Type', /application\/scim\+json/)
+            .expect('Location', /\/scim\/v2\/Groups\/group-HasMembers/)
+            .expect(200)
+            .expect(res => {
+              assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+              assert.equal(res.body.displayName, 'HasMembers')
+              assert.lengthOf(res.body.members, 2)
+              assert.equal(res.body.members[0].value, 'user-samjackson')
+              assert.equal(res.body.members[1].value, 'user-openeyedee')
+            })
+            .end((err) => {
+              if (err) {
+                done(err)
+              } else {
+                // verify p4 group properties
+                const p4 = new P4({
+                  P4PORT: p4config.port,
+                  P4USER: p4config.user,
+                  P4TICKETS: p4config.tickets,
+                  P4TRUST: p4config.trust
+                })
+                const groupOut = p4.cmdSync('group -o HasMembers')
+                assert.equal(groupOut.stat[0].Owners0, 'bruno')
+                const group = GroupModel.fromSpec(groupOut.stat[0])
+                assert.isOk(group.members.find((e) => e.value === 'user-samjackson'))
+                assert.isOk(group.members.find((e) => e.value === 'user-openeyedee'))
+                done()
+              }
+            })
         })
       })
     })
