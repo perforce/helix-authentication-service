@@ -62,6 +62,15 @@ of time (since changing those involves changing the Swarm configuration).
 
 ## Validating Certificates
 
+### Computing the SHA256 fingerprint of a certificate
+
+The service can be configured to verify the client TLS certificate by its SHA256 fingerprint (see the `CLIENT_CERT_FP` setting). In order to compute that fingerprint, you can use the `openssl` command like so:
+
+```shell
+openssl x509 -in client.crt -sha256 -fingerprint -noout
+sha256 Fingerprint=01:B5:A0:D7:1A:D9:FC:07:37:86:9D:DD:D9:04:7B:7E:F4:AC:F2:2D:C9:4F:4D:FA:21:9F:D0:C3:C8:6D:AE:64
+```
+
 ### Verifying certificate was signed by authority
 
 The client certificate used to connect to the authentication service must be validating using the configured certificate authority (the `CA_CERT_FILE` or `CA_CERT_PATH` settings). To ensure that a client certificate can be validated using the expected CA certificate, use the `openssl` command as shown below:
