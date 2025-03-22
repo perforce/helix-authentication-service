@@ -6,11 +6,10 @@
 # https. HAProxy is configured to pass the client certificate to HAS via a
 # header and HAS is configured to validate that cert by its fingerprint.
 #
-FROM haproxy:2.8
+FROM haproxy:3.1
 
 # Note that since version 2.4 the haproxy image has `USER haproxy` which makes
-# it difficult to configure the server. The documentation is still out of date
-# as of version 2.9.
+# it difficult to configure the server.
 USER root
 
 RUN mkdir -p /etc/ssl/certs
