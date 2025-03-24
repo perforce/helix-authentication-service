@@ -51,7 +51,7 @@ export const auth = createApi({
       transformResponse: (response, meta, arg) => {
         // convert certain properties for easier editing
         response.providers.forEach((e) => {
-          if ('authnContext' in e) {
+          if ('authnContext' in e && Array.isArray(e.authnContext)) {
             e.authnContext = e.authnContext.join(', ')
           }
         })
@@ -64,7 +64,7 @@ export const auth = createApi({
       // eslint-disable-next-line no-unused-vars
       transformResponse: (response, meta, arg) => {
         // convert certain properties for easier editing
-        if ('authnContext' in response) {
+        if ('authnContext' in response && Array.isArray(response.authnContext)) {
           response.authnContext = response.authnContext.join(', ')
         }
         return response
