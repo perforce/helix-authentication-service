@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Perforce Software
+// Copyright 2024 Perforce Software
 //
 import * as fs from 'node:fs/promises'
 import { AssertionError } from 'node:assert'
@@ -77,6 +77,10 @@ describe('GetAuthProviders use case', function () {
     const result = await usecase()
     // assert
     assert.lengthOf(result, 1)
+    assert.hasAllKeys(result[0], [
+      'id', 'label', 'protocol', 'wantAssertionSigned', 'wantResponseSigned', 'forceAuthn',
+      'spEntityId', 'keyAlgorithm', 'authnContext', 'nameIdFormat', 'metadataUrl', 'disableContext'
+    ])
     assert.equal(result[0].id, 'saml-0')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'saml')
@@ -97,6 +101,10 @@ describe('GetAuthProviders use case', function () {
     const result = await usecase()
     // assert
     assert.lengthOf(result, 1)
+    assert.hasAllKeys(result[0], [
+      'id', 'label', 'protocol', 'wantAssertionSigned', 'wantResponseSigned', 'forceAuthn',
+      'spEntityId', 'keyAlgorithm', 'authnContext', 'nameIdFormat', 'metadataUrl', 'disableContext'
+    ])
     assert.equal(result[0].id, 'saml')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'saml')
@@ -123,6 +131,10 @@ describe('GetAuthProviders use case', function () {
     const result = await usecase()
     // assert
     assert.lengthOf(result, 1)
+    assert.hasAllKeys(result[0], [
+      'id', 'label', 'protocol', 'clientId', 'clientSecret',
+      'issuerUri', 'selectAccount', 'signingAlgo'
+    ])
     assert.equal(result[0].id, 'oidc-0')
     assert.equal(result[0].label, 'Veritas Solutions')
     assert.equal(result[0].protocol, 'oidc')
@@ -222,6 +234,10 @@ describe('GetAuthProviders use case', function () {
     const result = await usecase()
     // assert
     assert.lengthOf(result, 1)
+    assert.hasAllKeys(result[0], [
+      'id', 'label', 'protocol', 'clientId', 'clientSecret',
+      'issuerUri', 'selectAccount', 'signingAlgo'
+    ])
     assert.equal(result[0].id, 'oidc')
     assert.equal(result[0].label, 'Veritas Solutions')
     assert.equal(result[0].protocol, 'oidc')
@@ -291,6 +307,10 @@ describe('GetAuthProviders use case', function () {
     assert.property(result[0], 'id')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'oidc')
+    assert.hasAllKeys(result[0], [
+      'id', 'label', 'protocol', 'clientId', 'clientSecret',
+      'issuerUri', 'selectAccount', 'signingAlgo'
+    ])
   })
 
   it('should ignore OIDC defaults if properties defined', async function () {
@@ -308,10 +328,16 @@ describe('GetAuthProviders use case', function () {
     const result = await usecase()
     // assert
     assert.lengthOf(result, 1)
+    assert.hasAllKeys(result[0], [
+      'id', 'label', 'protocol', 'clientId', 'clientSecret',
+      'issuerUri', 'selectAccount', 'signingAlgo'
+    ])
     assert.equal(result[0].id, 'oidc-0')
     assert.equal(result[0].label, 'Acme Identity')
     assert.equal(result[0].protocol, 'oidc')
     assert.equal(result[0].issuerUri, 'https://oidc.example.com')
+    assert.equal(result[0].clientId, 'client-id')
+    assert.equal(result[0].clientSecret, 'client-secret')
     assert.isTrue(result[0].selectAccount)
     assert.equal(result[0].signingAlgo, 'HS512')
   })
@@ -368,6 +394,64 @@ describe('GetAuthProviders use case', function () {
       if (entry.id) {
         assert.isFalse(ids.has(entry.id))
         ids.add(entry.id)
+      }
+    }
+  })
+
+  it('should not inject irrelevant settings', async function () {
+    // arrange
+    const providers = [
+      {
+        // note the missing protocol
+        label: 'Okta',
+        issuerUri: 'https://dev-123456.okta.com',
+        clientId: '274489E7-33E0-4BCC-A28B-D824401AC608',
+        clientSecret: 'KXY8Q~R7iOHUOcnkRg6awmR.dIVTgYcdiWKqia~1'
+      },
+      {
+        // note the missing protocol
+        label: 'Azure',
+        metadataUrl: 'https://login.microsoftonline.com/719d88f3/metadata',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+        authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified'
+      }
+    ]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 2)
+    assert.isTrue(result.some((e) => e.protocol === 'oidc'))
+    assert.isTrue(result.some((e) => e.protocol === 'saml'))
+    for (const entry of result) {
+      if (entry.protocol === 'saml') {
+        assert.hasAllKeys(entry, [
+          'id', 'label', 'protocol', 'wantAssertionSigned', 'wantResponseSigned', 'forceAuthn',
+          'spEntityId', 'keyAlgorithm', 'authnContext', 'nameIdFormat', 'metadataUrl', 'disableContext'
+        ])
+        assert.propertyVal(entry, 'label', 'Azure')
+        assert.isTrue(entry.wantAssertionSigned)
+        assert.isTrue(entry.wantResponseSigned)
+        assert.isFalse(entry.forceAuthn)
+        assert.propertyVal(entry, 'keyAlgorithm', 'sha256')
+        assert.isArray(entry.authnContext)
+        assert.lengthOf(entry.authnContext, 1)
+        assert.equal(entry.authnContext[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified')
+        assert.propertyVal(entry, 'nameIdFormat', 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress')
+        assert.propertyVal(entry, 'metadataUrl', 'https://login.microsoftonline.com/719d88f3/metadata')
+        assert.isFalse(entry.disableContext)
+      } else if (entry.protocol === 'oidc') {
+        assert.hasAllKeys(entry, [
+          'id', 'label', 'protocol', 'clientId', 'clientSecret',
+          'issuerUri', 'selectAccount', 'signingAlgo'
+        ])
+        assert.propertyVal(entry, 'id', 'oidc-1')
+        assert.propertyVal(entry, 'label', 'Okta')
+        assert.propertyVal(entry, 'clientId', '274489E7-33E0-4BCC-A28B-D824401AC608')
+        assert.propertyVal(entry, 'clientSecret', 'KXY8Q~R7iOHUOcnkRg6awmR.dIVTgYcdiWKqia~1')
+        assert.propertyVal(entry, 'issuerUri', 'https://dev-123456.okta.com')
+        assert.isFalse(entry.selectAccount)
+        assert.equal(entry.signingAlgo, 'RS256')
       }
     }
   })

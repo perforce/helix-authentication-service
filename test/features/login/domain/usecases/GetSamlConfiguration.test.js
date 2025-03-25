@@ -115,6 +115,34 @@ describe('GetSamlConfiguration use case', function () {
     assert.isUndefined(result.audience)
   })
 
+  it('should inject sensible defaults for minimal provider', async function () {
+    // arrange
+    settingsRepository.set('AUTH_PROVIDERS', [{
+      id: 'shibbo123',
+      idpEntityId: 'urn:saml.example.com',
+      signonUrl: 'https://saml.example.com/saml/sso',
+      idpCert: `-----BEGIN CERTIFICATE-----
+MIIErDCCApQCCQCVmh2sP3DTFTANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1G
+o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
+-----END CERTIFICATE-----`
+    }])
+    // act
+    const result = await usecase('shibbo123')
+    // assert
+    assert.equal(result.entryPoint, 'https://saml.example.com/saml/sso')
+    assert.equal(result.issuer, 'https://has.example.com')
+    assert.equal(result.idpIssuer, 'urn:saml.example.com')
+    assert.isFalse(result.forceAuthn)
+    assert.isFalse(result.disableRequestedAuthnContext, false)
+    assert.equal(result.signatureAlgorithm, 'sha256')
+    assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+    assert.isFalse(result.disableRequestedAuthnContext)
+    assert.isTrue(result.wantAssertionsSigned)
+    assert.isTrue(result.wantAuthnResponseSigned)
+    assert.isUndefined(result.audience)
+    assert.equal(result.authnContext[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
+  })
+
   it('should interpret truthy values from provider', async function () {
     // arrange
     settingsRepository.set('AUTH_PROVIDERS', [{

@@ -283,15 +283,40 @@ setTimeout(function () {
               assert.property(res.body, 'providers')
               const providers = res.body.providers
               assert.lengthOf(providers, 2)
-              const oidcProvider = providers.find((e) => e.protocol === 'oidc')
-              assert.exists(oidcProvider)
-              assert.propertyVal(oidcProvider, 'clientId', 'client-id')
-              assert.propertyVal(oidcProvider, 'clientSecret', 'client-secret')
-              assert.propertyVal(oidcProvider, 'issuerUri', 'https://oidc.example.com')
-              assert.propertyVal(oidcProvider, 'label', 'Provider')
-              const samlProvider = providers.find((e) => e.protocol === 'saml')
-              assert.exists(samlProvider)
-              assert.propertyVal(samlProvider, 'metadataUrl', 'https://saml.example.com/metadata')
+              assert.isTrue(providers.some((e) => e.protocol === 'oidc'))
+              assert.isTrue(providers.some((e) => e.protocol === 'saml'))
+              for (const entry of providers) {
+                if (entry.protocol === 'saml') {
+                  assert.hasAllKeys(entry, [
+                    'id', 'label', 'protocol', 'wantAssertionSigned', 'wantResponseSigned', 'forceAuthn',
+                    'keyAlgorithm', 'authnContext', 'nameIdFormat', 'metadataUrl', 'disableContext'
+                  ])
+                  assert.propertyVal(entry, 'id', 'saml')
+                  assert.propertyVal(entry, 'label', 'saml.example.com')
+                  assert.isTrue(entry.wantAssertionSigned)
+                  assert.isTrue(entry.wantResponseSigned)
+                  assert.isFalse(entry.forceAuthn)
+                  assert.propertyVal(entry, 'keyAlgorithm', 'sha256')
+                  assert.isArray(entry.authnContext)
+                  assert.lengthOf(entry.authnContext, 1)
+                  assert.equal(entry.authnContext[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport')
+                  assert.propertyVal(entry, 'nameIdFormat', 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
+                  assert.propertyVal(entry, 'metadataUrl', 'https://saml.example.com/metadata')
+                  assert.isFalse(entry.disableContext)
+                } else if (entry.protocol === 'oidc') {
+                  assert.hasAllKeys(entry, [
+                    'id', 'label', 'protocol', 'clientId', 'clientSecret',
+                    'issuerUri', 'selectAccount', 'signingAlgo'
+                  ])
+                  assert.propertyVal(entry, 'id', 'oidc')
+                  assert.propertyVal(entry, 'label', 'Provider')
+                  assert.propertyVal(entry, 'clientId', 'client-id')
+                  assert.propertyVal(entry, 'clientSecret', 'client-secret')
+                  assert.propertyVal(entry, 'issuerUri', 'https://oidc.example.com')
+                  assert.isFalse(entry.selectAccount)
+                  assert.equal(entry.signingAlgo, 'RS256')
+                }
+              }
             })
             .end(function (err) {
               // simulate a restart by clearing all temporary settings

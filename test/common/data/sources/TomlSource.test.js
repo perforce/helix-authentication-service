@@ -71,7 +71,41 @@ hashed = 'value#3'
     assert.equal(settings.get('TRIMMED'), 'The quick brown fox jumps over the lazy dog.')
   })
 
-  it('should convert from TOML naming convention', async function () {
+  it('should convert from TOML naming convention (providers)', async function () {
+    // arrange
+    const tomlFile = temporaryFile({ extension: 'toml' })
+    await fs.writeFile(tomlFile, `# comment line
+debug = true
+svc_base_uri = 'https://has.example.com'
+
+# note that the property names are camelCase
+[[auth_providers]]
+label = "Okta"
+issuerUri = "https://okta.example.com"
+clientId = "okta-client-id"
+clientSecret = "okta-client-secret"
+
+[[auth_providers]]
+label = "Azure"
+issuer_uri = 'https://azure.example.com'
+client_id = 'azure-client-id'
+client_secret = 'azure-client-secret'
+`)
+    const repository = new TomlSource({ tomlFile })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 3)
+    assert.equal(settings.get('DEBUG'), true)
+    assert.equal(settings.get('SVC_BASE_URI'), 'https://has.example.com')
+    const providers = settings.get('AUTH_PROVIDERS')
+    assert.isArray(providers)
+    assert.lengthOf(providers, 2)
+    assert.hasAllKeys(providers[0], ['issuerUri', 'clientId', 'clientSecret', 'label'])
+    assert.hasAllKeys(providers[1], ['issuerUri', 'clientId', 'clientSecret', 'label'])
+  })
+
+  it('should convert from TOML naming convention (provisioning)', async function () {
     // arrange
     const tomlFile = temporaryFile({ extension: 'toml' })
     await fs.writeFile(tomlFile, `# comment line

@@ -29,25 +29,47 @@ describe('TidyAuthProviders use case', function () {
     }
   })
 
-  it('should add missing protocols', async function () {
+  it('should add missing protocols, and not inject irrelevant properties', async function () {
     // arrange
     const providers = [
       {
-        issuerUri: 'https://oidc.example.com/issuer',
-        clientId: 'client-id',
-        clientSecret: 'client-secret',
-        id: 'oidc'
+        label: 'Okta',
+        issuerUri: 'https://dev-123456.okta.com',
+        clientId: '274489E7-33E0-4BCC-A28B-D824401AC608',
+        clientSecret: 'KXY8Q~R7iOHUOcnkRg6awmR.dIVTgYcdiWKqia~1'
       },
       {
-        metadataUrl: 'https://saml.example.com/metadata',
-        id: 'saml'
+        label: 'Azure',
+        metadataUrl: 'https://login.microsoftonline.com/719d88f3/metadata',
+        nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+        authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified'
       }
     ]
     // act
     const results = await usecase(providers)
     // assert
-    assert.propertyVal(results[0], 'protocol', 'oidc')
-    assert.propertyVal(results[1], 'protocol', 'saml')
+    assert.isArray(results)
+    assert.lengthOf(results, 2)
+    assert.isTrue(results.some((e) => e.protocol === 'oidc'))
+    assert.isTrue(results.some((e) => e.protocol === 'saml'))
+    for (const entry of results) {
+      if (entry.protocol === 'saml') {
+        assert.hasAllKeys(entry, ['metadataUrl', 'id', 'label', 'protocol', 'nameIdFormat', 'authnContext'])
+        assert.propertyVal(entry, 'label', 'Azure')
+        assert.propertyVal(entry, 'nameIdFormat', 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress')
+        assert.isArray(entry.authnContext)
+        assert.lengthOf(entry.authnContext, 1)
+        assert.equal(entry.authnContext[0], 'urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified')
+        assert.propertyVal(entry, 'metadataUrl', 'https://login.microsoftonline.com/719d88f3/metadata')
+      } else if (entry.protocol === 'oidc') {
+        assert.hasAllKeys(entry, ['issuerUri', 'clientId', 'clientSecret', 'id', 'label', 'protocol'])
+        assert.propertyVal(entry, 'id', 'oidc-1')
+        assert.propertyVal(entry, 'label', 'Okta')
+        assert.propertyVal(entry, 'clientId', '274489E7-33E0-4BCC-A28B-D824401AC608')
+        assert.propertyVal(entry, 'clientSecret', 'KXY8Q~R7iOHUOcnkRg6awmR.dIVTgYcdiWKqia~1')
+        assert.propertyVal(entry, 'issuerUri', 'https://dev-123456.okta.com')
+      }
+    }
   })
 
   it('should add missing labels', async function () {
