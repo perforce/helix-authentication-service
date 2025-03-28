@@ -10,7 +10,7 @@ CREATE_USER=true
 ALLOW_ROOT=false
 HOMEDIR=/opt/perforce
 UPGRADE_NODE=false
-NODE_VERSION=20
+NODE_VERSION=22
 INSTALL_SERVICE=true
 
 # Print arguments to STDERR and exit.
@@ -224,7 +224,7 @@ function prompt_to_proceed() {
 
 # If Node.js is installed, ensure that the version is supported.
 function check_nodejs() {
-    if command -v node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(18|20)\.'; then
+    if command -v node >/dev/null 2>&1 && ! node --version | grep -Eq '^v(18|20|22)\.'; then
         # check if Node.js came from the package 'nodejs' package or not
         UPGRADABLE=true
         if [ $PLATFORM == "debian" ]; then
@@ -238,12 +238,12 @@ function check_nodejs() {
         fi
         if ! $UPGRADABLE; then
             error 'Found a version of Node.js that cannot be upgraded automatically.'
-            error 'Please upgrade Node.js to v18 or v20 before proceeding.'
+            error 'Please upgrade Node.js to v18 or v22 before proceeding.'
             exit 1
         fi
         if $INTERACTIVE; then
             echo ''
-            echo 'Found a version of Node.js that is not the required v18/v20.'
+            echo 'Found a version of Node.js that is not the required v18/v20/v22.'
             echo 'Do you wish to upgrade the Node.js installation?'
             select yn in 'Yes' 'No'; do
                 case $yn in
@@ -252,7 +252,7 @@ function check_nodejs() {
                 esac
             done
         elif ! $UPGRADE_NODE; then
-            die 'Node.js v18 or v20 is required, please upgrade.'
+            die 'Node.js v18, v20, or v22 is required, please upgrade.'
         fi
         # else the script will automatically install the required version
     fi

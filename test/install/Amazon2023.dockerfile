@@ -27,7 +27,7 @@ RUN ./helix-auth-svc/install.sh -n --no-create-user --no-systemd
 # ensure node has been installed as expected
 RUN test -f /usr/bin/node
 # ensure expected version of node was installed
-RUN node --version | grep -Eq '^v20\.'
+RUN node --version | grep -Eq '^v22\.'
 
 # run the configure script and set up OIDC
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \
