@@ -14,7 +14,7 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 ADD https://rpm.nodesource.com/setup_20.x setup_20.x
 RUN bash setup_20.x
 RUN yum -y install nodejs
-RUN yum -q -y install rpmdevtools rpm-build
+RUN yum -q -y install rpmdevtools rpm-build gcc-c++ git make
 
 ARG ID_REL_BASE=2024.2.0
 ARG ID_PATCH=9999999
