@@ -55,6 +55,7 @@ describe('TidyAuthProviders use case', function () {
     for (const entry of results) {
       if (entry.protocol === 'saml') {
         assert.hasAllKeys(entry, ['metadataUrl', 'id', 'label', 'protocol', 'nameIdFormat', 'authnContext'])
+        assert.propertyVal(entry, 'id', 'saml-0')
         assert.propertyVal(entry, 'label', 'Azure')
         assert.propertyVal(entry, 'nameIdFormat', 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress')
         assert.isArray(entry.authnContext)
@@ -95,24 +96,94 @@ describe('TidyAuthProviders use case', function () {
     assert.propertyVal(results[1], 'label', 'saml.example.com')
   })
 
-  it('should add missing identifiers', async function () {
+  it('should ignore default protocol-based identifiers', async function () {
     // arrange
     const providers = [
       {
-        issuerUri: 'https://oidc.example.com/issuer',
+        issuerUri: 'https://abc.example.com/issuer',
         clientId: 'client-id',
         clientSecret: 'client-secret',
-        protocol: 'oidc'
+        protocol: 'oidc',
+        id: 'oidc'
       },
       {
-        metadataUrl: 'https://saml.example.com/metadata',
-        protocol: 'saml'
+        metadataUrl: 'https://xyz.example.com/metadata',
+        protocol: 'saml',
+        id: 'saml'
       }
     ]
     // act
     const results = await usecase(providers)
     // assert
-    assert.notEqual(results[0].id, results[1].id)
+    assert.isArray(results)
+    assert.lengthOf(results, 2)
+    assert.propertyVal(results[0], 'id', 'oidc')
+    assert.propertyVal(results[1], 'id', 'saml')
+  })
+
+  it('should add missing identifiers, OIDC', async function () {
+    // arrange
+    const providers = [
+      {
+        issuerUri: 'https://abc.example.com/issuer',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        protocol: 'oidc',
+        // id == protocol _and_ more than one OIDC provider, will be overwritten
+        id: 'oidc'
+      },
+      {
+        issuerUri: 'https://xyz.example.com/issuer',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        protocol: 'oidc'
+      },
+      {
+        metadataUrl: 'https://samla.example.com/metadata',
+        protocol: 'saml',
+        // id != protocol will be overwritten
+        id: 'sammy'
+      }
+    ]
+    // act
+    const results = await usecase(providers)
+    // assert
+    assert.isArray(results)
+    assert.lengthOf(results, 3)
+    assert.propertyVal(results[0], 'id', 'oidc-0')
+    assert.propertyVal(results[1], 'id', 'saml-1')
+    assert.propertyVal(results[2], 'id', 'oidc-2')
+  })
+
+  it('should add missing identifiers, SAML', async function () {
+    // arrange
+    const providers = [
+      {
+        issuerUri: 'https://xyz.example.com/issuer',
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        protocol: 'oidc',
+      },
+      {
+        metadataUrl: 'https://samla.example.com/metadata',
+        protocol: 'saml',
+        id: 'sammy'
+      },
+      {
+        metadataUrl: 'https://samlb.example.com/metadata',
+        protocol: 'saml',
+        // id == protocol _and_ more than one SAML provider, id must be overwritten
+        id: 'saml'
+      }
+    ]
+    // act
+    const results = await usecase(providers)
+    // assert
+    assert.isArray(results)
+    assert.lengthOf(results, 3)
+    assert.propertyVal(results[0], 'id', 'saml-0')
+    assert.propertyVal(results[1], 'id', 'saml-1')
+    assert.propertyVal(results[2], 'id', 'oidc-2')
   })
 
   it('should ensure boolean values are boolean', async function () {

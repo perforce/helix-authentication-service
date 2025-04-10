@@ -87,6 +87,11 @@ describe('MergedSettingsRepository', function () {
       assert.isTrue(temporary.has('MSR_TEST_BOOL'))
       assert.isTrue(temporary.has('MSR_TEST_INT'))
       assert.isTrue(temporary.has('MSR_TEST_STR'))
+      // should allow setting "falsey" values, including undefined
+      sut.set('MSR_TEST_BOOL', false)
+      assert.isFalse(sut.getBool('MSR_TEST_BOOL'))
+      sut.set('MSR_TEST_STR', undefined)
+      assert.isTrue(sut.has('MSR_TEST_STR'))
       // no need to assert with defaults, it is not writable
     })
   })

@@ -131,18 +131,16 @@ describe('GenerateLoginUrl use case', function () {
       label: 'Acme Identity',
       metadataUrl: 'https://saml.example.com/idp/metadata',
       protocol: 'saml',
-      id: 'saml-1',
       default: true
     }, {
       label: 'Maximum Security',
       metadataUrl: 'https://saml.example.com/idp/metadata',
-      protocol: 'saml',
-      id: 'saml-2'
+      protocol: 'saml'
     }])
     // act
     const result = await usecase('http://host', 'request123', 'foobar')
     // assert
-    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml-1')
+    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml-0')
   })
 
   it('should produce specific URL if specified provider found', async function () {
@@ -151,17 +149,15 @@ describe('GenerateLoginUrl use case', function () {
       label: 'Acme Identity',
       metadataUrl: 'https://saml.example.com/idp/metadata',
       protocol: 'saml',
-      id: 'saml-1',
       default: true
     }, {
       label: 'Maximum Security',
       metadataUrl: 'https://saml.example.com/idp/metadata',
-      protocol: 'saml',
-      id: 'saml-2'
+      protocol: 'saml'
     }])
     // act
-    const result = await usecase('http://host', 'request123', 'foobar', 'saml-2')
+    const result = await usecase('http://host', 'request123', 'foobar', 'saml-1')
     // assert
-    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml-2')
+    assert.equal(result, 'http://host/saml/login/request123?instanceId=foobar&providerId=saml-1')
   })
 })

@@ -63,7 +63,7 @@ describe('DeleteAuthProvider use case', function () {
         signingAlgo: 'RS256',
         label: 'oidc.example.com',
         protocol: 'oidc',
-        id: 'xid123'
+        id: 'oidc'
       }
     ])
     const provider = {
@@ -72,12 +72,12 @@ describe('DeleteAuthProvider use case', function () {
       issuerUri: 'https://oidc2.example.com',
       label: 'Provider',
       protocol: 'oidc',
-      id: 'xid321'
+      id: 'oidc-1'
     }
     // act
     const updated = await usecase(provider)
     assert.lengthOf(updated, 1)
-    assert.equal(updated[0].id, 'xid123')
+    assert.equal(updated[0].id, 'oidc')
   })
 
   it('should remove matching provider from the list', async function () {
@@ -91,7 +91,7 @@ describe('DeleteAuthProvider use case', function () {
         signingAlgo: 'RS256',
         label: 'oidc.example.com',
         protocol: 'oidc',
-        id: 'xid123'
+        id: 'oidc-0'
       },
       {
         clientId: 'client-id',
@@ -99,7 +99,7 @@ describe('DeleteAuthProvider use case', function () {
         issuerUri: 'https://oidc2.example.com',
         label: 'Provider',
         protocol: 'oidc',
-        id: 'xid321'
+        id: 'oidc-1'
       }
     ])
     const provider = {
@@ -108,12 +108,12 @@ describe('DeleteAuthProvider use case', function () {
       issuerUri: 'https://oidc2.example.com',
       label: 'Provider',
       protocol: 'oidc',
-      id: 'xid321'
+      id: 'oidc-1'
     }
     // act
     const updated = await usecase(provider)
     assert.lengthOf(updated, 1)
-    assert.equal(updated[0].id, 'xid123')
+    assert.equal(updated[0].id, 'oidc-0')
   })
 
   it('should remove a provider but ignore associated files', async function () {
@@ -127,7 +127,7 @@ describe('DeleteAuthProvider use case', function () {
         signingAlgo: 'RS256',
         label: 'oidc.example.com',
         protocol: 'oidc',
-        id: 'xid123'
+        id: 'oidc-0'
       },
       {
         clientId: 'client-id',
@@ -135,7 +135,7 @@ describe('DeleteAuthProvider use case', function () {
         issuerUri: 'https://oidc2.example.com',
         label: 'Provider',
         protocol: 'oidc',
-        id: 'xid321'
+        id: 'oidc-1'
       }
     ])
     const provider = {
@@ -144,12 +144,12 @@ describe('DeleteAuthProvider use case', function () {
       issuerUri: 'https://oidc2.example.com',
       label: 'Provider',
       protocol: 'oidc',
-      id: 'xid321'
+      id: 'oidc-1'
     }
     // act
     const updated = await usecase(provider)
     assert.lengthOf(updated, 1)
-    assert.equal(updated[0].id, 'xid123')
+    assert.equal(updated[0].id, 'oidc-0')
     const stats = await fs.stat('test/passwd.txt')
     assert.isDefined(stats)
   })

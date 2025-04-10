@@ -93,6 +93,48 @@ describe('CleanAuthProviders use case', function () {
     assert.equal(providers[3].issuerUri, 'https://oidc2.example.com')
   })
 
+  it('should filter mixed OIDC and SAML defaults', async function () {
+    // arrange
+    // act
+    const settings = new Map()
+    const input = [{
+      label: 'Acme Identity',
+      protocol: 'saml',
+      id: 'saml-0',
+      metadataUrl: 'https://saml1.example.com',
+      wantAssertionSigned: true,
+      wantResponseSigned: true,
+      spEntityId: 'https://has.example.com',
+      keyAlgorithm: 'sha256',
+      authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+      nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+      selectAccount: false,
+      signingAlgo: 'RS256',
+      forceAuthn: false,
+      disableContext: false,
+    }, {
+      label: 'Pong Anonymous',
+      protocol: 'oidc',
+      id: 'oidc-0',
+      issuerUri: 'https://oidc1.example.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      selectAccount: false,
+      signingAlgo: 'RS256',
+      forceAuthn: false,
+      disableContext: false,
+      authnContext: []
+    }]
+    settings.set('AUTH_PROVIDERS', input)
+    await usecase(settings)
+    // assert
+    assert.isTrue(settings.has('AUTH_PROVIDERS'))
+    const providers = settings.get('AUTH_PROVIDERS')
+    assert.lengthOf(providers, 2)
+    assert.hasAllKeys(providers[0], ['label', 'protocol', 'metadataUrl'])
+    assert.hasAllKeys(providers[1], ['label', 'protocol', 'clientId', 'clientSecret', 'issuerUri'])
+  })
+
   it('should encode certain fields for JSON safety', async function () {
     // arrange
     //

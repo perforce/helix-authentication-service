@@ -118,7 +118,7 @@ describe('GetSamlConfiguration use case', function () {
   it('should inject sensible defaults for minimal provider', async function () {
     // arrange
     settingsRepository.set('AUTH_PROVIDERS', [{
-      id: 'shibbo123',
+      id: 'saml',
       idpEntityId: 'urn:saml.example.com',
       signonUrl: 'https://saml.example.com/saml/sso',
       idpCert: `-----BEGIN CERTIFICATE-----
@@ -127,7 +127,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
 -----END CERTIFICATE-----`
     }])
     // act
-    const result = await usecase('shibbo123')
+    const result = await usecase('saml')
     // assert
     assert.equal(result.entryPoint, 'https://saml.example.com/saml/sso')
     assert.equal(result.issuer, 'https://has.example.com')
@@ -146,7 +146,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
   it('should interpret truthy values from provider', async function () {
     // arrange
     settingsRepository.set('AUTH_PROVIDERS', [{
-      id: 'shibbo123',
+      id: 'saml',
       label: 'Shibboleth',
       protocol: 'saml',
       metadataFile: 'test/fixtures/idp-metadata.xml',
@@ -156,7 +156,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
       wantResponseSigned: 'TRUE'
     }])
     // act
-    const result = await usecase('shibbo123')
+    const result = await usecase('saml')
     // assert
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
     assert.isTrue(result.forceAuthn)
@@ -196,7 +196,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
     } else {
       // arrange
       settingsRepository.set('AUTH_PROVIDERS', [{
-        id: 'shibbo123',
+        id: 'saml',
         label: 'Shibboleth',
         protocol: 'saml',
         metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth',
@@ -208,7 +208,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
       // mute the warning from node about disabling TLS validation
       const unmute = mute(process.stderr)
-      const result = await usecase('shibbo123')
+      const result = await usecase('saml')
       unmute()
       delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
       // assert
@@ -237,7 +237,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
   it('should fetch metadata via file with provider', async function () {
     // arrange
     settingsRepository.set('AUTH_PROVIDERS', [{
-      id: 'shibbo123',
+      id: 'saml',
       label: 'Shibboleth',
       protocol: 'saml',
       metadataFile: 'test/fixtures/idp-metadata.xml',
@@ -245,7 +245,7 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
       authnContext: 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password'
     }])
     // act
-    const result = await usecase('shibbo123')
+    const result = await usecase('saml')
     // assert
     assert.equal(result.entryPoint, 'https://shibboleth.doc:4443/idp/profile/SAML2/Redirect/SSO')
     assert.equal(result.identifierFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified')
@@ -268,14 +268,14 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
   it('should read IdP cert file via provider', async function () {
     // arrange
     settingsRepository.set('AUTH_PROVIDERS', [{
-      id: 'shibbo123',
+      id: 'saml',
       label: 'Acme Identity',
       protocol: 'saml',
       signonUrl: 'https://example.com/saml/sso',
       idpCertFile: 'certs/server.crt'
     }])
     // act
-    const result = await usecase('shibbo123')
+    const result = await usecase('saml')
     // assert
     assert.equal(result.entryPoint, 'https://example.com/saml/sso')
     assert.include(result.idpCert, 'MIIEoTCCAokCAQEwDQYJKoZIhvcNAQELBQAwGDEWMBQGA1UEAwwNRmFrZUF1dGhv')

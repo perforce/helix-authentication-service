@@ -2,8 +2,9 @@
 // Copyright 2024 Perforce Software
 //
 import * as fs from 'node:fs'
+import * as awilix from 'awilix'
 import { assert } from 'chai'
-import { after, describe, it, run } from 'mocha'
+import { after, before, describe, it, run } from 'mocha'
 import request from 'supertest'
 // Load the test environment before the bulk of our code initializes, otherwise
 // it will be too late due to the `import` early-binding behavior.
@@ -22,10 +23,17 @@ const dotenv = container.resolve('configuredRepository')
 const app = createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
-// create a test dot.env file every time for repeatability
 const dotenvFile = 'test/test-dot.env'
-fs.writeFileSync(dotenvFile, 'HAS_UNIT_OLD1="oldvalue"')
-dotenv.reload()
+
+container.register({
+  applyChanges: awilix.asFunction(() => {
+    return () => {
+      // simulate the server restarting
+      dotenv.reload()
+      temporary.clear()
+    }
+  })
+})
 
 //
 // Give the server a chance to start up asynchronously. This works in concert
@@ -35,20 +43,26 @@ dotenv.reload()
 setTimeout(function () {
   describe('Settings requests', function () {
 
+    before(function () {
+      // create a test dot.env file every time for repeatability
+      fs.writeFileSync(dotenvFile, 'HAS_UNIT_OLD1="oldvalue"')
+      dotenv.reload()
+    })
+
     after(function () {
-      // remove the file to prevent other tests from failing
-      fs.unlinkSync(dotenvFile)
+      // clear the dot.env file to prevent other tests from failing
+      fs.writeFileSync(dotenvFile, '')
     })
 
     describe('Success cases', function () {
       it('should support CORS', function (done) {
-          agent
-            .get('/settings')
-            .trustLocalhost(true)
-            .set('Origin', 'https://localhost:3333')
-            .expect(401)
-            .expect('Access-Control-Allow-Origin', 'https://localhost:3333')
-            .end(done)
+        agent
+          .get('/settings')
+          .trustLocalhost(true)
+          .set('Origin', 'https://localhost:3333')
+          .expect(401)
+          .expect('Access-Control-Allow-Origin', 'https://localhost:3333')
+          .end(done)
       })
 
       it('should retrieve configuration settings', function (done) {
@@ -154,12 +168,12 @@ setTimeout(function () {
             signingAlgo: 'RS256',
             label: 'oidc.example.com',
             protocol: 'oidc',
-            id: 'oidc-1'
+            id: 'oidc-0'
           }
         ])
         getToken('scott', 'tiger').then((webToken) => {
           agent
-            .get('/settings/providers/oidc-1')
+            .get('/settings/providers/oidc-0')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .expect(200)
@@ -172,7 +186,7 @@ setTimeout(function () {
               assert.equal(res.body.signingAlgo, 'RS256')
               assert.equal(res.body.label, 'oidc.example.com')
               assert.equal(res.body.protocol, 'oidc')
-              assert.equal(res.body.id, 'oidc-1')
+              assert.equal(res.body.id, 'oidc-0')
               // private key should be concealed
               assert.notProperty(res.body, 'clientKey')
             })
@@ -336,12 +350,12 @@ setTimeout(function () {
             signingAlgo: 'RS256',
             label: 'oidc.example.com',
             protocol: 'oidc',
-            id: 'oidc-1'
+            id: 'oidc-0'
           }
         ])
         getToken('scott', 'tiger').then((webToken) => {
           agent
-            .put('/settings/providers/oidc-1')
+            .put('/settings/providers/oidc-0')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .send({
@@ -352,7 +366,7 @@ setTimeout(function () {
               signingAlgo: 'RS256',
               label: 'Provider',
               protocol: 'oidc',
-              id: 'oidc-1'
+              id: 'oidc-0'
             })
             .expect(200, { status: 'ok' })
             .end(function (err) {
@@ -436,7 +450,7 @@ setTimeout(function () {
             signingAlgo: 'RS256',
             label: 'oidc.example.com',
             protocol: 'oidc',
-            id: 'oidc-1'
+            id: 'oidc-0'
           },
           {
             metadataUrl: 'https://saml.example.com/metadata',
@@ -448,7 +462,7 @@ setTimeout(function () {
         ])
         getToken('scott', 'tiger').then((webToken) => {
           agent
-            .delete('/settings/providers/oidc-1')
+            .delete('/settings/providers/oidc-0')
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .expect(200, { status: 'ok' })
@@ -601,6 +615,222 @@ setTimeout(function () {
         })
       })
     })
+
+    describe('Provider lifecycle', function () {
+      before(function () {
+        // create an empty dot.env file every time for repeatability
+        fs.writeFileSync(dotenvFile, '')
+        dotenv.reload()
+        temporary.clear()
+      })
+
+      after(function () {
+        // clear the dot.env file to prevent other tests from failing
+        fs.writeFileSync(dotenvFile, '')
+      })
+
+      it('should have zero providers initially', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.lengthOf(providers, 0)
+            })
+            .end(done)
+        })
+      })
+
+      it('should add new SAML provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              authnContext: ['urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified'],
+              metadataUrl: 'https://example.auth0.com/samlp/metadata/ExAMpLE',
+              label: 'example.auth0.com',
+              nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+              spEntityId: 'urn:example:sp',
+              wantAssertionSigned: false,
+              wantResponseSigned: false,
+              protocol: 'saml'
+            })
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              assert.equal(res.body.status, 'ok')
+              assert.equal(res.body.id, 'saml-0')
+              done()
+            })
+        })
+      })
+
+      it('should apply changes to configuration file', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/apply')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect('Location', /localhost/)
+            .expect(200, { status: 'ok' }, done)
+        })
+      })
+
+      it('should add new OIDC provider when SAML already exists', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: '0oa84g5ccjhTcLiPr357',
+              clientSecret: 'dIVTgYc6awmRR7iOdiWKqia',
+              issuerUri: 'https://dev-example.okta.com',
+              selectAccount: 'false',
+              signingAlgo: 'RS256',
+              label: 'Okta Example',
+              protocol: 'oidc'
+            })
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              assert.equal(res.body.status, 'ok')
+              assert.equal(res.body.id, 'oidc-1')
+              done()
+            })
+        })
+      })
+
+      it('should apply changes to configuration file', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/apply')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect('Location', /localhost/)
+            .expect(200, { status: 'ok' }, done)
+        })
+      })
+
+      it('should add another OIDC provider', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: 'WPHyLwfzGHdC0g76CksZ4hKmqn0iIGJ3',
+              clientSecret: 'qfvb7G8Wi6fCinf010lBXsO_PaSmt',
+              issuerUri: 'https://example.google.com/',
+              protocol: 'oidc'
+            })
+            .expect(200)
+            .end(function (err, res) {
+              if (err) {
+                return done(err)
+              }
+              assert.equal(res.body.status, 'ok')
+              assert.equal(res.body.id, 'oidc-1')
+              done()
+            })
+        })
+      })
+
+      it('should apply changes to configuration file', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/apply')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect('Location', /localhost/)
+            .expect(200, { status: 'ok' }, done)
+        })
+      })
+
+      it('should remove one of the OIDC providers', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .delete('/settings/providers/oidc-1')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200, { status: 'ok' })
+            .end(done)
+        })
+      })
+
+      it('should apply changes to configuration file', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/apply')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect('Location', /localhost/)
+            .expect(200, { status: 'ok' }, done)
+        })
+      })
+
+      it('should return the two remaining providers', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .get('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+            .expect(res => {
+              assert.property(res.body, 'providers')
+              const providers = res.body.providers
+              assert.isArray(providers)
+              assert.lengthOf(providers, 2)
+              assert.isTrue(providers.some((e) => e.id === 'saml'))
+              assert.isTrue(providers.some((e) => e.id === 'oidc'))
+              for (const entry of providers) {
+                if (entry.label === 'example.auth0.com') {
+                  assert.hasAllKeys(entry, [
+                    'id', 'label', 'protocol', 'wantAssertionSigned', 'wantResponseSigned', 'forceAuthn',
+                    'spEntityId', 'keyAlgorithm', 'authnContext', 'nameIdFormat', 'metadataUrl', 'disableContext'
+                  ])
+                  assert.equal(entry.id, 'saml')
+                  assert.equal(entry.protocol, 'saml')
+                  assert.isFalse(entry.wantAssertionSigned)
+                  assert.isFalse(entry.wantResponseSigned)
+                  assert.isFalse(entry.forceAuthn)
+                  assert.equal(entry.spEntityId, 'urn:example:sp')
+                  assert.equal(entry.keyAlgorithm, 'sha256')
+                  assert.equal(entry.authnContext, 'urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified')
+                  assert.equal(entry.nameIdFormat, 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress')
+                  assert.equal(entry.metadataUrl, 'https://example.auth0.com/samlp/metadata/ExAMpLE')
+                  assert.isFalse(entry.disableContext)
+                } else if (entry.label === 'example.google.com') {
+                  assert.hasAllKeys(entry, [
+                    'id', 'label', 'protocol', 'clientId', 'clientSecret',
+                    'issuerUri', 'selectAccount', 'signingAlgo'
+                  ])
+                  assert.equal(entry.id, 'oidc')
+                  assert.equal(entry.protocol, 'oidc')
+                  assert.equal(entry.clientId, 'WPHyLwfzGHdC0g76CksZ4hKmqn0iIGJ3')
+                  assert.equal(entry.clientSecret, 'qfvb7G8Wi6fCinf010lBXsO_PaSmt')
+                  assert.equal(entry.issuerUri, 'https://example.google.com/')
+                  assert.isFalse(entry.selectAccount)
+                  assert.equal(entry.signingAlgo, 'RS256')
+                }
+              }
+            })
+            .end(done)
+        })
+      })
+    })
   })
 
   run()
@@ -613,7 +843,6 @@ function getToken(username, password) {
       .trustLocalhost(true)
       .send({ grant_type: 'password', username, password })
       .expect(200)
-       
       .end(function (err, res) {
         if (err) {
           reject(err)

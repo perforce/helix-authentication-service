@@ -119,7 +119,7 @@ describe('AddAuthProvider use case', function () {
       'signingAlgo': 'RS256',
       'label': 'oidc.example.com',
       'protocol': 'oidc',
-      'id': 'xid123'
+      'id': 'oidc-0'
     }])
     const provider = {
       clientId: 'client-id',
@@ -129,7 +129,7 @@ describe('AddAuthProvider use case', function () {
       signingAlgo: 'RS256',
       label: 'Provider',
       protocol: 'oidc',
-      id: 'xid123'
+      id: 'oidc-0'
     }
     // act
     const providers = await usecase(provider)
@@ -138,7 +138,7 @@ describe('AddAuthProvider use case', function () {
     assert.lengthOf(providers, 1)
     const actual = providers.find((e) => e.clientId === 'client-id')
     assert.isNotNull(actual)
-    assert.equal(actual.id, 'xid123')
+    assert.equal(actual.id, 'oidc-0')
   })
 
   it('should ignore default provider settings', async function () {
@@ -172,8 +172,8 @@ describe('AddAuthProvider use case', function () {
     assert.isArray(providers)
     assert.lengthOf(providers, 3)
     assert.isTrue(providers.some((e) => e.id === 'saml'))
+    assert.isTrue(providers.some((e) => e.id === 'oidc-0'))
     assert.isTrue(providers.some((e) => e.id === 'oidc-1'))
-    assert.isTrue(providers.some((e) => e.id === 'oidc-2'))
   })
 
   it('should ignore files from old version of provider', async function () {
@@ -185,7 +185,7 @@ describe('AddAuthProvider use case', function () {
         issuerUri: 'https://oidc2.example.com',
         label: 'Provider',
         protocol: 'oidc',
-        id: 'xid123'
+        id: 'oidc-0'
       }
     ])
     const provider = {
@@ -194,12 +194,12 @@ describe('AddAuthProvider use case', function () {
       issuerUri: 'https://oidc2.example.com',
       label: 'Provider',
       protocol: 'oidc',
-      id: 'xid123'
+      id: 'oidc-0'
     }
     // act
     const updated = await usecase(provider)
     assert.lengthOf(updated, 1)
-    assert.equal(updated[0].id, 'xid123')
+    assert.equal(updated[0].id, 'oidc-0')
     assert.property(updated[0], 'clientSecret')
     assert.notProperty(updated[0], 'clientSecretFile')
     const stats = await fs.stat('test/passwd.txt')

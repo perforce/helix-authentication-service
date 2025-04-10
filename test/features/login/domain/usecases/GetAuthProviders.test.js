@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Perforce Software
+// Copyright 2025 Perforce Software
 //
 import * as fs from 'node:fs/promises'
 import { AssertionError } from 'node:assert'
@@ -429,6 +429,7 @@ describe('GetAuthProviders use case', function () {
           'id', 'label', 'protocol', 'wantAssertionSigned', 'wantResponseSigned', 'forceAuthn',
           'spEntityId', 'keyAlgorithm', 'authnContext', 'nameIdFormat', 'metadataUrl', 'disableContext'
         ])
+        assert.propertyVal(entry, 'id', 'saml-0')
         assert.propertyVal(entry, 'label', 'Azure')
         assert.isTrue(entry.wantAssertionSigned)
         assert.isTrue(entry.wantResponseSigned)
@@ -540,5 +541,37 @@ describe('GetAuthProviders use case', function () {
     assert.equal(result[0].protocol, 'saml')
     assert.equal(result[0].metadataUrl, 'https://saml.example.com/idp/metadata')
     assert.isUndefined(result[0].authnContext)
+  })
+
+  it('should consistently merge new and classic settings', async function () {
+    // arrange
+    const providers = [{
+      label: 'Acme Identity',
+      issuerUri: 'https://oidc.example.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
+    temporaryRepository.set('SAML_IDP_METADATA_URL', 'https://saml.example.com/idp/metadata')
+    // act; invoke 3 times to test consistency
+    await usecase()
+    await usecase()
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 2)
+    assert.property(result[0], 'id')
+    assert.equal(result[0].label, 'Acme Identity')
+    assert.equal(result[0].protocol, 'oidc')
+    assert.hasAllKeys(result[0], [
+      'id', 'label', 'protocol', 'clientId', 'clientSecret',
+      'issuerUri', 'selectAccount', 'signingAlgo'
+    ])
+    assert.property(result[1], 'id')
+    assert.equal(result[1].label, 'saml.example.com')
+    assert.equal(result[1].protocol, 'saml')
+    assert.hasAllKeys(result[1], [
+      'id', 'label', 'protocol', 'wantAssertionSigned', 'wantResponseSigned', 'forceAuthn',
+      'spEntityId', 'keyAlgorithm', 'authnContext', 'nameIdFormat', 'metadataUrl', 'disableContext'
+    ])
   })
 })

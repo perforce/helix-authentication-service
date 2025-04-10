@@ -35,6 +35,9 @@ const agent = request.agent(server)
 setTimeout(function () {
   describe('Multi-Login requests', function () {
     it('should indicate error if no AUTH_PROVIDERS', function (done) {
+      settings.set('AUTH_PROVIDERS', undefined)
+      settings.set('SAML_IDP_METADATA_URL', undefined)
+      settings.set('OIDC_ISSUER_URI', undefined)
       agent
         .get('/multi/login/fakereq123')
         .trustLocalhost(true)
@@ -48,14 +51,12 @@ setTimeout(function () {
           issuerUri: 'https://oidc.example.com',
           clientId: 'client-id',
           clientSecret: 'client-secret',
-          protocol: 'oidc',
-          id: 'oidc'
+          protocol: 'oidc'
         },
         {
           label: 'Federated Enterprises',
           metadataUrl: 'https://saml.example.com',
-          protocol: 'saml',
-          id: 'saml'
+          protocol: 'saml'
         },
       ])
       agent
