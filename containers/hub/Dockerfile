@@ -3,9 +3,9 @@
 #
 # Build:
 #
-# $ docker build --pull -t helix-auth-svc:latest -t helix-auth-svc:2024.2.1 -f containers/hub/Dockerfile .
+# $ docker build --pull -t helix-auth-svc:latest -t helix-auth-svc:2025.1 -f containers/hub/Dockerfile .
 # $ docker tag helix-auth-svc:latest perforce/helix-auth-svc:latest
-# $ docker tag helix-auth-svc:2024.2.1 perforce/helix-auth-svc:2024.2.1
+# $ docker tag helix-auth-svc:2025.1 perforce/helix-auth-svc:2025.1
 # $ docker push --all-tags perforce/helix-auth-svc
 #
 # Run:
@@ -16,7 +16,7 @@
 #
 # get the p4 client via package to support SCIM
 #
-FROM ubuntu:20.04 AS p4cli
+FROM ubuntu:24.04 AS p4cli
 ARG APT_URL="http://package.perforce.com/apt/ubuntu"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
 ENV DEBIAN_FRONTEND=noninteractive
@@ -32,7 +32,7 @@ RUN apt-get update && \
 #
 # build the web-based admin interface
 #
-FROM node:20-slim AS webui
+FROM node:22-slim AS webui
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl git
@@ -44,7 +44,7 @@ RUN npx vite build --outDir private/admin --emptyOutDir
 #
 # build the smallest feasible image for the service
 #
-FROM node:20-slim
+FROM node:22-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl git

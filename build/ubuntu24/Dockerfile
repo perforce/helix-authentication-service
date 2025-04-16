@@ -25,7 +25,7 @@ RUN apt-get -q -y install nodejs
 
 FROM ubuntu24_pkg_base AS ubuntu24-build
 
-ARG ID_REL_BASE=2024.2.0
+ARG ID_REL_BASE=2025.1.0
 ARG ID_PATCH=9999999
 ENV HAS_VERSION="HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
 ENV DIRNAME=helix-auth-svc-${ID_REL_BASE}
@@ -62,7 +62,7 @@ COPY logging.config.cjs logging.config.cjs
 COPY sentinel.config.cjs sentinel.config.cjs
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
-RUN sed -e "s/\"2024.2.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+RUN sed -e "s/\"2025.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
         -e "s|+MAIN+|${HAS_VERSION}|" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md
@@ -115,7 +115,7 @@ RUN rm -rf tmp
 # of the --output option to the `docker build` command.
 #
 FROM scratch AS ubuntu24-export
-ARG ID_REL_BASE=2024.2.0
+ARG ID_REL_BASE=2025.1.0
 ARG ID_PATCH=9999999
 ENV PKGNAME=helix-auth-svc_${ID_REL_BASE}
 ENV PACKAGE_FILENAME=${PKGNAME}-${ID_PATCH}~noble_amd64.deb

@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Service (HAS)
-                            Version 2024.2.1
+                            Version 2025.1
 
 
 Introduction
@@ -44,6 +44,8 @@ Supported Platforms
     for correction. Any platform not listed above is not actively tested by
     Perforce.
 
+    Support for Ubuntu 20.04 will be removed in the next release.
+
     Amazon Linux (x86_64)
         2023
 
@@ -59,7 +61,7 @@ Supported Platforms
 
 Requirements
 
-    Node.js v20 (LTS)
+    Node.js v22 (LTS)
 
 
 Documentation
@@ -104,6 +106,23 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    No new features in this release.
+
+----------------------------------------------------------------------
+Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-607 (Change #2739014)
+        Administrative web interface would show an error message stating
+        "i.authnContext.join is not a function" when defining more than one
+        OIDC identity provider.
+
+    HAS-623 (Change #2749087)
+        Trailing blank lines in certificate files caused SAML authentication
+        to fail with "keyInfo is not in PEM format or in base64 format".
 
 ----------------------------------------------------------------------
 Bugs fixed in 2024.2.1 (2024.2/2646386) (2024/08/29)
