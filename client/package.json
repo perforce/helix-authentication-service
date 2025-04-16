@@ -31,7 +31,7 @@
     "eslint": "^8.57.0",
     "eslint-config-react-app": "^7.0.1",
     "license-checker": "^25.0.1",
-    "vite": "^5.1.5",
+    "vite": "^5.4.7",
     "vite-plugin-eslint": "^1.8.1"
   }
 }
