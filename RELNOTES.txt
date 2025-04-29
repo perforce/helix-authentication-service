@@ -120,6 +120,10 @@ Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         "i.authnContext.join is not a function" when defining more than one
         OIDC identity provider.
 
+    HAS-616 (Change #2741276)
+        Ensure unix-dgram module is installed in RPM packages to allow for
+        logging via the syslog utility.
+
     HAS-623 (Change #2749087)
         Trailing blank lines in certificate files caused SAML authentication
         to fail with "keyInfo is not in PEM format or in base64 format".
