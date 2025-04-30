@@ -28,7 +28,7 @@ fi
 p4dctl start -o '-p 0.0.0.0:1666' despot
 
 # run the install script non-interactively
-./helix-auth-svc/install.sh -n
+./helix-auth-svc/install.sh -n --no-ping
 
 ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \

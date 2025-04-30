@@ -28,7 +28,7 @@ if systemctl status dnf-makecache.timer >/dev/null 2>&1; then
 fi
 
 # run the install script non-interactively
-./helix-auth-svc/install.sh -n
+./helix-auth-svc/install.sh -n --no-ping
 
 # ensure the systemd service is running
 sudo systemctl status helix-auth | grep -q 'Active: active' || { echo 'service not active' ; exit 1; }

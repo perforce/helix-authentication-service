@@ -32,7 +32,7 @@ RUN tar zxf helix-authentication-service.tgz && \
     mv helix-authentication-service helix-auth-svc
 
 # run the install script non-interactively
-RUN ./helix-auth-svc/install.sh -n --no-create-user --no-systemd --upgrade
+RUN ./helix-auth-svc/install.sh -n --no-ping --no-create-user --no-systemd --upgrade
 
 # ensure latest version of node has been installed as expected
 RUN node --version | grep -Eq '^v22\.'
