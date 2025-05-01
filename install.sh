@@ -12,6 +12,7 @@ HOMEDIR=/opt/perforce
 UPGRADE_NODE=false
 NODE_VERSION=22
 INSTALL_SERVICE=true
+PING_UBUNTU=true
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -101,6 +102,10 @@ function read_arguments() {
             ;;
         --allow-root)
             ALLOW_ROOT=true
+            shift
+            ;;
+        --no-ping)
+            PING_UBUNTU=false
             shift
             ;;
         -n)
@@ -267,13 +272,18 @@ function install_nodejs() {
             # Because apt-get will happily fail miserably _and_ return an exit code of
             # 0, we are forced to check for a functional network connection rather than
             # relying on set -e to work effectively with the apt-get command.
-            echo 'Checking network connection...'
-            set +e  # don't exit due to ping returning non-zero, we want that code
-            ping -c 3 ubuntu.com > /dev/null 2>&1
-            if [ $? != 0 ]; then
-                die 'Unable to reach ubuntu.com, please check your connection'
+            #
+            # However, our VM cluster has unreliable network connectivity, so for the
+            # sake of the automated builds, disable the ping that fails very often.
+            if $PING_UBUNTU; then
+                echo 'Checking network connection...'
+                set +e  # don't exit due to ping returning non-zero, we want that code
+                ping -c 3 ubuntu.com > /dev/null 2>&1
+                if [ $? != 0 ]; then
+                    die 'Unable to reach ubuntu.com, please check your connection'
+                fi
+                set -e  # now go back to exiting if a command returns non-zero
             fi
-            set -e  # now go back to exiting if a command returns non-zero
             sudo apt-get -q update
             sudo apt-get -q -y install build-essential curl git
             # Run a shell script from the internet as root to get Node.js
