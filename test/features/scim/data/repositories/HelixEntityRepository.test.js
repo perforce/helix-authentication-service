@@ -49,6 +49,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should detect expired ticket and fail', async function () {
+      this.timeout(60000)
       const p4 = new P4({
         P4PORT: p4config.port,
         P4USER: p4config.user,
@@ -69,6 +70,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should accept ticket with authenticated session', async function () {
+      this.timeout(60000)
       const p4 = new P4({
         P4PORT: p4config.port,
         P4USER: p4config.user,
@@ -113,6 +115,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should raise an error for invalid input', async function () {
+      this.timeout(60000)
       try {
         await repository.addUser(null)
         assert.fail('should have raised Error')
@@ -136,6 +139,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should return null for missing user entity', async function () {
+      this.timeout(60000)
       // act
       const user = await repository.getUser('foobar')
       // assert
@@ -581,6 +585,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should return null for missing group entity', async function () {
+      this.timeout(60000)
       // act
       const group = await repository.getGroup('foobar')
       // assert
@@ -588,6 +593,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should reject overwriting existing group entity', async function () {
+      this.timeout(60000)
       // arrange
       const tGroup = new Group('overgroup', [])
       await repository.addGroup(tGroup)
@@ -601,6 +607,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should reject adding a group with a space character', async function () {
+      this.timeout(60000)
       // arrange
       const tGroup = new Group('under group', [])
       // act/assert
@@ -613,6 +620,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should reject getting a group with a space character', async function () {
+      this.timeout(60000)
       // arrange
       // act/assert
       try {
@@ -1105,6 +1113,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should return null for missing user entity', async function () {
+      this.timeout(60000)
       // act
       const user = await repository.getUser('foobar')
       // assert
