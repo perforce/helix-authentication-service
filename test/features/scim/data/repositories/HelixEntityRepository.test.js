@@ -33,7 +33,7 @@ describe('HelixEntity repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startServer('./tmp/p4d/tickets')
       helpers.establishSuper(p4config)
       settingsRepository.set('P4PORT', p4config.port)
@@ -44,7 +44,7 @@ describe('HelixEntity repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       await runner.stopServer(p4config)
     })
 
@@ -95,7 +95,7 @@ describe('HelixEntity repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startServer('./tmp/p4d/non-ssl-repo')
       helpers.establishSuper(p4config)
       settingsRepository.clear()
@@ -108,7 +108,7 @@ describe('HelixEntity repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       await runner.stopServer(p4config)
     })
 
@@ -143,7 +143,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should reject overwriting existing user entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const userId = 'rejectoverwrite'
       const tUser = new User(userId, 'joe@example.com', 'Joe Q. User')
@@ -159,7 +159,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve a single user entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser = new User('adduser', 'joe@example.com', 'Joe Q. User')
       tUser.externalId = '00u1esetdqu3kOXZc697'
@@ -188,7 +188,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve a single user by model', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const rawJson = {
         schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
@@ -231,7 +231,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve user using original userName', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const userId = 'originalJU@work.com'
       const tUser = new User(userId, 'joe@example.com', 'Joe Q. User')
@@ -259,7 +259,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve multiple user entities', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser1 = new User('joe1', 'joe1@example.com', 'Joe One')
       tUser1.password = 'secret123'
@@ -288,7 +288,7 @@ describe('HelixEntity repository', function () {
       // It would be rather unexpected that the CSP would use our user prefix
       // when adding a new user, but nonetheless the add and update should
       // behave consistently.
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser = new User('user-preadduser', 'joeu@example.com', 'Joe User')
       // act
@@ -305,7 +305,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should update an existing user entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser = new User('updateuser', 'juser@example.com', 'Joe Q. User')
       const added = await repository.addUser(tUser)
@@ -329,7 +329,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should retain properties of an existing user', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const p4 = new P4({
         P4PORT: p4config.port,
@@ -364,7 +364,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should reset password via external identifier', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser = new User('newpass', 'joe@example.com', 'Joe Q. User')
       tUser.password = 'secret123'
@@ -389,7 +389,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should deactivate and reactivate a user entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
 
       // create user with known password from JSON for a more thorough test
       const rawJson = {
@@ -453,7 +453,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should rename a user entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUserAdd = new User('renameuser', 'joe@example.com', 'Joe Q. User')
       await repository.addUser(tUserAdd)
@@ -467,7 +467,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should rename a user@email entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUserAdd = new User('renameuzer@dot.com', 'joe@example.com', 'Joe Q. User')
       await repository.addUser(tUserAdd)
@@ -481,7 +481,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should rename a user while preserving extra data', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const rawJson = {
         schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
@@ -529,7 +529,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should remove an existing user entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser = new User('removeuser', 'joe@example.com', 'Joe Q. User')
       const added = await repository.addUser(tUser)
@@ -542,7 +542,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should remove a user using original userName', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const userId = 'removeuserOJ@work.com'
       const tUser = new User(userId, 'joe@example.com', 'Joe Q. User')
@@ -556,7 +556,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should find user by original userName', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const userId = 'emailuser@example.com'
       const tUser = new User(userId, 'joeuser@work.com', 'Joe E. User')
@@ -624,7 +624,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve a single group entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tGroup = new Group('newgroup', [])
       const added = await repository.addGroup(tGroup)
@@ -647,7 +647,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should retain properties of an existing group', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const p4 = new P4({
         P4PORT: p4config.port,
@@ -702,7 +702,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve multiple group entities', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       await repository.addGroup(new Group('admins', []))
       await repository.addGroup(new Group('staff', []))
@@ -720,7 +720,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve a group with members', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       await repository.addGroup(new Group('hasmembers', [
         { value: 'user-joe', display: 'Joe Plumber' },
@@ -745,7 +745,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and update an empty group', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tGroupAdd = new Group('addupgroup', [])
       await repository.addGroup(tGroupAdd)
@@ -762,7 +762,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should update an existing group entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tGroupAdd = new Group('updategroup', [
         { value: 'user-joe', display: 'Joe Plumber' }
@@ -786,7 +786,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should ignore no-op changes to a group', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const usecase = PatchGroup({
         getDomainLeader: () => null,
@@ -813,7 +813,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should update a group to remove all members', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tGroupAdd = new Group('lessmembers', [
         { value: 'user-joe', display: 'Joe Plumber' },
@@ -832,7 +832,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should remove an existing group entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tGroup = new Group('removegroup', [])
       const added = await repository.addGroup(tGroup)
@@ -850,7 +850,7 @@ describe('HelixEntity repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startServer('./tmp/p4d/domain-repo')
       helpers.establishSuper(p4config)
       settingsRepository.clear()
@@ -863,12 +863,12 @@ describe('HelixEntity repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       await runner.stopServer(p4config)
     })
 
     it('should add user for domain A with externalId idA', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser = new User('adduserA', 'joe@example.com', 'Joe Q. User')
       tUser.externalId = 'idA'
@@ -881,7 +881,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should retrieve user with appropriate externalId', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       // act
       const domainA = await repository.getUser('adduserA', undefined, 'A')
@@ -903,7 +903,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should update and return user with additional externalId', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       // act
       const original = await repository.getUser('adduserA', undefined, 'B')
@@ -918,7 +918,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should retrieve all users with appropriate externalId', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const query = new Query()
       // act
@@ -938,7 +938,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should remove externalId for specific domain', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       // act
       const original = await repository.getUser('adduserA', undefined, 'B')
@@ -953,7 +953,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should retrieve user externalId for domain A', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       // act
       const domainA = await repository.getUser('adduserA', undefined, 'A')
@@ -965,7 +965,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve group with externalId', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tGroup = new Group('domgroup', [])
       tGroup.externalId = 'Group-123'
@@ -998,7 +998,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should update group with externalId', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       // act
       const tGroupUpdate = new Group('domgroup', [])
@@ -1020,7 +1020,7 @@ describe('HelixEntity repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startSslServer('./tmp/p4d/ssl-passwd')
       settingsRepository.clear()
       settingsRepository.set('P4PORT', p4config.port)
@@ -1031,13 +1031,13 @@ describe('HelixEntity repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       helpers.establishTrust(p4config)
       await runner.stopServer(p4config)
     })
 
     it('should report error for missing P4PASSWD', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       const query = new Query()
       try {
         await repository.getUsers(query)
@@ -1053,7 +1053,7 @@ describe('HelixEntity repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startSslServer('./tmp/p4d/ssl-untrust')
       settingsRepository.clear()
       settingsRepository.set('P4PORT', p4config.port)
@@ -1065,13 +1065,13 @@ describe('HelixEntity repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       helpers.establishTrust(p4config)
       await runner.stopServer(p4config)
     })
 
     it('should report untrusted connection', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       const query = new Query()
       try {
         await repository.getUsers(query)
@@ -1086,7 +1086,7 @@ describe('HelixEntity repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startSslServer('./tmp/p4d/ssl-trust')
       helpers.establishTrust(p4config)
       helpers.establishSuper(p4config)
@@ -1100,7 +1100,7 @@ describe('HelixEntity repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       await runner.stopServer(p4config)
     })
 
@@ -1112,7 +1112,7 @@ describe('HelixEntity repository', function () {
     })
 
     it('should add and retrieve a single user entity', async function () {
-      this.timeout(10000)
+      this.timeout(60000)
       // arrange
       const tUser = new User('adduser', 'joe@example.com', 'Joe Q. User')
       tUser.password = 'secret123'

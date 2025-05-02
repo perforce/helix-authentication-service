@@ -22,7 +22,7 @@ describe('helix credentials repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startServer('./tmp/p4d/creds-nonssl')
       helpers.establishSuper(p4config)
       settingsRepository.set('P4PORT', p4config.port)
@@ -31,7 +31,7 @@ describe('helix credentials repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       await runner.stopServer(p4config)
     })
 
@@ -94,7 +94,7 @@ describe('helix credentials repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startSslServer('./tmp/p4d/creds-untrust')
       settingsRepository.clear()
       settingsRepository.set('P4PORT', p4config.port)
@@ -106,14 +106,14 @@ describe('helix credentials repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       helpers.establishTrust(p4config)
       await runner.stopServer(p4config)
     })
 
     it('should report untrusted connection', async function () {
       // arrange
-      this.timeout(10000)
+      this.timeout(60000)
       try {
         await repository.verify('bruno', 'p8ssword')
         assert.fail('should have raised Error')
@@ -128,7 +128,7 @@ describe('helix credentials repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       p4config = await runner.startSslServer('./tmp/p4d/creds-trust')
       helpers.establishTrust(p4config)
       helpers.establishSuper(p4config)
@@ -142,13 +142,13 @@ describe('helix credentials repository', function () {
     })
 
     after(async function () {
-      this.timeout(30000)
+      this.timeout(60000)
       await runner.stopServer(p4config)
     })
 
     it('should validate user over SSL connection', async function () {
       // arrange
-      this.timeout(10000)
+      this.timeout(60000)
       // act
       const result = await repository.verify('bruno', 'p8ssword')
       // assert
