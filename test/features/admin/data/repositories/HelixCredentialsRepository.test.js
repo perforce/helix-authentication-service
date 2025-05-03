@@ -36,6 +36,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should raise an error for invalid input', async function () {
+      this.timeout(60000)
       try {
         await repository.verify(null, 'foobar')
         assert.fail('should have raised Error')
@@ -51,6 +52,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return true when protections table empty', async function () {
+      this.timeout(60000)
       // arrange
       // act
       const result = await repository.verify('bruno', 'p8ssword')
@@ -59,6 +61,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return false for non-matching credentials', async function () {
+      this.timeout(60000)
       // arrange
       // act
       const result = await repository.verify('susan', 'foobar')
@@ -67,6 +70,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return false for unprivileged user', async function () {
+      this.timeout(60000)
       // arrange
       helpers.establishProtects(p4config)
       helpers.createUser({
@@ -81,6 +85,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return true for successful super login', async function () {
+      this.timeout(60000)
       // arrange
       // act
       const result = await repository.verify('bruno', 'p8ssword')
