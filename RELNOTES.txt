@@ -108,12 +108,12 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2025.1 (2025.1/2758427) (2025/05/05)
 
     No new features in this release.
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2025.1 (2025.1/2758427) (2025/05/05)
 
     HAS-607 (Change #2739014)
         Administrative web interface would show an error message stating
