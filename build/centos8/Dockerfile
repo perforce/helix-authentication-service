@@ -4,6 +4,7 @@ FROM rockylinux:8 AS rocky8-build
 #
 # Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
+ARG NODE_VERSION=22
 
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
@@ -11,8 +12,8 @@ RUN sed -i '/nodocs/d' /etc/yum.conf
 #
 # install build and packaging prerequisites
 #
-ADD https://rpm.nodesource.com/setup_20.x setup_20.x
-RUN bash setup_20.x
+ADD https://rpm.nodesource.com/setup_${NODE_VERSION}.x setup_${NODE_VERSION}.x
+RUN bash setup_${NODE_VERSION}.x
 RUN yum -y install nodejs
 RUN yum -q -y install rpmdevtools rpm-build curl gcc-c++ git make
 

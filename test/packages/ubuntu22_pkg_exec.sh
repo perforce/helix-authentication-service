@@ -37,6 +37,7 @@ test -f /opt/perforce/helix-auth-svc/.env
 test -f /opt/perforce/helix-auth-svc/README.html
 test -x /opt/perforce/helix-auth-svc/bin/configure-auth-service.sh
 test -x /opt/perforce/helix-auth-svc/bin/node
+/opt/perforce/helix-auth-svc/bin/node --version | grep -Eq '^v22\.' || { echo 'Node version wrong!'; exit 1; }
 test -f /opt/perforce/helix-auth-svc/private/admin/assets/index-*.js
 
 # ensure the systemd service is running
@@ -46,4 +47,10 @@ systemctl status helix-auth | grep 'Active: active' || { echo 'service not activ
 echo -e '\nRemoving helix-auth-svc package...\n'
 apt-get -q -y remove helix-auth-svc
 test ! -f /etc/systemd/system/helix-auth.service
-echo -e '\nTest completed successfully!\n'
+cat <<EOT
+
+==============================================================================
+PACKAGE TESTS PASSED
+==============================================================================
+
+EOT

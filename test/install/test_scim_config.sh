@@ -30,6 +30,10 @@ p4dctl start -o '-p 0.0.0.0:1666' despot
 # run the install script non-interactively
 ./helix-auth-svc/install.sh -n --no-ping
 
+# ensure latest version of node has been installed as expected
+test -f /usr/bin/node
+node --version | grep -Eq '^v22\.'
+
 ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --bearer-token 'keyboard cat' \
