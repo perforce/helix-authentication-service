@@ -392,6 +392,42 @@ setTimeout(function () {
         .end(done)
     })
 
+    it('should update a user when using user- prefix', function (done) {
+      agent
+        .put('/scim/v2/Users/user-UserName123')
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .send({
+          schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+          id: 'UserName123',
+          UserName: 'UserName123',
+          displayName: 'Ryan Leenay',
+          name: { formatted: 'Ryan Leenay', givenName: 'Ryan', familyName: 'Leenay' },
+          emails: [
+            { value: 'testingwork@bob.com' },
+            { primary: true, value: 'testingwork@bob.com', type: 'work' }
+          ],
+          locale: 'en-US',
+          externalId: '00u817r7wlQHRQFTB357'
+        })
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect('Location', /\/scim\/v2\/Users\/user-UserName123/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+          assert.equal(res.body.id, 'user-UserName123')
+          assert.equal(res.body.externalId, '00u817r7wlQHRQFTB357')
+          assert.equal(res.body.userName, 'UserName123')
+          assert.equal(res.body.displayName, 'Ryan Leenay')
+          assert.equal(res.body.name.formatted, 'Ryan Leenay')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'User')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Users\/user-UserName123/)
+        })
+        .end(done)
+    })
+
     it('should return the updated user', function (done) {
       agent
         .get('/scim/v2/Users/UserName123')
@@ -403,8 +439,8 @@ setTimeout(function () {
         .expect(res => {
           assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.equal(res.body.userName, 'UserName123')
-          assert.equal(res.body.displayName, 'Ryan P. Leenay')
-          assert.equal(res.body.name.formatted, 'Ryan P. Leenay')
+          assert.equal(res.body.displayName, 'Ryan Leenay')
+          assert.equal(res.body.name.formatted, 'Ryan Leenay')
           assert.lengthOf(res.body.emails, 1)
           assert.equal(res.body.emails[0].value, 'testingwork@bob.com')
           assert.exists(res.body.meta.created)

@@ -126,6 +126,32 @@ describe('PatchUser use case', function () {
       addStub.restore()
     })
 
+    it('should ignore user- prefix when changing user', async function () {
+      // arrange
+      const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
+        assert.equal(username, 'user-joeuser')
+        return Promise.resolve(new User('joeuser', 'joeuser@example.com', 'Joe Q. User'))
+      })
+      const addStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
+        assert.isNotNull(user)
+        return Promise.resolve(user)
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [
+          { op: 'replace', path: 'name.formatted', value: 'Joe Plumber' }
+        ]
+      }
+      const updated = await usecase('user-joeuser', patch)
+      // assert
+      assert.equal(updated.fullname, 'Joe Plumber')
+      assert.isTrue(getStub.calledOnce)
+      assert.isTrue(addStub.calledOnce)
+      getStub.restore()
+      addStub.restore()
+    })
+
     it('should succeed when assigning externalId', async function () {
       // arrange
       const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {

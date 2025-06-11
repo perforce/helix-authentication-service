@@ -59,7 +59,7 @@ describe('UpdateUser use case', function () {
       await usecase(null)
       assert.fail('should have raised error')
     } catch (err) {
-      assert.include(err.message, 'username must be defined')
+      assert.include(err.message, 'identifier must be defined')
     }
     try {
       await usecase('username', null)
@@ -107,6 +107,27 @@ describe('UpdateUser use case', function () {
     })
     // act
     const updated = await usecase('joeuser', tUser)
+    // assert
+    assert.propertyVal(updated, 'username', 'joeuser')
+    assert.isTrue(getStub.calledOnce)
+    assert.isTrue(updateStub.calledOnce)
+    getStub.restore()
+    updateStub.restore()
+  })
+
+  it('should ignore user- prefix when updating user', async function () {
+    // arrange
+    const tUser = new User('joeuser', 'joeuser@example.com', 'Joe Q. User')
+    const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
+      assert.equal(username, 'user-joeuser')
+      return Promise.resolve(tUser)
+    })
+    const updateStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
+      assert.isNotNull(user)
+      return Promise.resolve(user)
+    })
+    // act
+    const updated = await usecase('user-joeuser', tUser)
     // assert
     assert.propertyVal(updated, 'username', 'joeuser')
     assert.isTrue(getStub.calledOnce)
