@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Perforce Software
+// Copyright 2021 Perforce Software
 //
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
@@ -14,10 +14,10 @@ describe('Group model', function () {
 
   it('should return expected property values', function () {
     // arrange
-    const tGroup = new GroupModel('staff', ['joe'])
+    const tGroup = new GroupModel('staff', [{ value: 'joe' }])
     // assert
     assert.equal(tGroup.displayName, 'staff')
-    assert.equal(tGroup.members[0], 'joe')
+    assert.equal(tGroup.members[0].value, 'joe')
   })
 
   it('should reject unknown SCIM group schema', function () {

@@ -21,11 +21,21 @@ describe('Group entity', function () {
 
   it('should produce identical clones', function () {
     // arrange
-    const original = new Group('staff', [])
+    const original = new Group('staff', [{ value: 'joe' }, { value: 'susan' }])
     const cloned = original.clone()
     // assert
     assert.isFalse(original === cloned)
     assert.isTrue(original.equals(cloned))
+  })
+
+  it('should produce independent clones', function () {
+    // arrange
+    const original = new Group('staff', [{ value: 'joe' }, { value: 'susan' }])
+    const cloned = original.clone()
+    original.members[0] = { value: 'mike' }
+    // assert
+    assert.equal(original.members[0].value, 'mike')
+    assert.equal(cloned.members[0].value, 'joe')
   })
 
   it('should notice changed externalId', function () {

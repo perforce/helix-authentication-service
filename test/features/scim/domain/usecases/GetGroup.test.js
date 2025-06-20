@@ -52,7 +52,7 @@ describe('GetGroup use case', function () {
 
     it('should find an existing group entity', async function () {
       // arrange
-      const tGroup = new Group('staff', ['sam', 'frodo'])
+      const tGroup = new Group('staff', [{ value: 'sam' }, { value: 'frodo' }])
       // eslint-disable-next-line no-unused-vars
       const stub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake((id) => {
         return Promise.resolve(tGroup)
@@ -62,8 +62,8 @@ describe('GetGroup use case', function () {
       // assert
       assert.equal(group.displayName, 'staff')
       assert.lengthOf(group.members, 2)
-      assert.isOk(group.members.find((e) => e === 'sam'))
-      assert.isOk(group.members.find((e) => e === 'frodo'))
+      assert.isOk(group.members.find((e) => e.value === 'sam'))
+      assert.isOk(group.members.find((e) => e.value === 'frodo'))
       assert.isTrue(stub.calledOnce)
       stub.restore()
     })

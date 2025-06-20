@@ -13,6 +13,7 @@ import { Query } from 'helix-auth-svc/lib/features/scim/domain/entities/Query.js
 import { Group } from 'helix-auth-svc/lib/features/scim/domain/entities/Group.js'
 import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
 import GetUsers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetUsers.js'
+import AddGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/AddGroup.js'
 import PatchGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/PatchGroup.js'
 import { HelixEntityRepository } from 'helix-auth-svc/lib/features/scim/data/repositories/HelixEntityRepository.js'
 import GetProvisioningServers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetProvisioningServers.js'
@@ -1142,6 +1143,141 @@ describe('HelixEntity repository', function () {
       assert.equal(userByName.username, 'adduser')
       assert.equal(userByName.email, 'joe@example.com')
       assert.equal(userByName.fullname, 'Joe Q. User')
+    })
+  })
+
+  describe('PatchGroup operations', function () {
+    let repository
+    let p4config
+
+    before(async function () {
+      this.timeout(60000)
+      p4config = await runner.startServer('./tmp/p4d/patch-group')
+      helpers.establishSuper(p4config)
+      settingsRepository.clear()
+      settingsRepository.set('P4PORT', p4config.port)
+      settingsRepository.set('P4USER', p4config.user)
+      settingsRepository.set('P4PASSWD', p4config.password)
+      settingsRepository.set('P4TICKETS', p4config.tickets)
+      settingsRepository.set('P4TRUST', p4config.trust)
+      repository = new HelixEntityRepository({ getProvisioningServers })
+    })
+
+    after(async function () {
+      this.timeout(60000)
+      await runner.stopServer(p4config)
+    })
+
+    it('should create a new empty group using AddGroup', async function () {
+      this.timeout(60000)
+      // arrange
+      const usecase = AddGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
+      // act
+      const incoming = new Group('group-patchgroup', [])
+      const updated = await usecase(incoming)
+      // assert
+      assert.equal(updated.displayName, 'patchgroup')
+      assert.lengthOf(updated.members, 0)
+      const actual = await repository.getGroup('patchgroup')
+      assert.equal(actual.displayName, 'patchgroup')
+      assert.lengthOf(actual.members, 0)
+    })
+
+    it('should add a member to the group', async function () {
+      this.timeout(60000)
+      // arrange
+      const usecase = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [{
+          op: 'Add',
+          path: 'members',
+          value: [{ value: 'user-joe' }]
+        }]
+      }
+      const updated = await usecase('group-patchgroup', patch)
+      // assert
+      assert.equal(updated.displayName, 'patchgroup')
+      assert.lengthOf(updated.members, 1)
+      assert.isOk(updated.members[0].value === 'user-joe')
+      assert.isTrue(updated.changed)
+      const actual = await repository.getGroup('patchgroup')
+      assert.equal(actual.displayName, 'patchgroup')
+      assert.lengthOf(actual.members, 1)
+      assert.isOk(actual.members[0].value === 'user-joe')
+    })
+
+    it('should add a second member to the group', async function () {
+      this.timeout(60000)
+      // arrange
+      const usecase = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [{
+          op: 'Add',
+          path: 'members',
+          value: [{ value: 'user-susan' }]
+        }]
+      }
+      const updated = await usecase('group-patchgroup', patch)
+      // assert
+      assert.equal(updated.displayName, 'patchgroup')
+      assert.lengthOf(updated.members, 2)
+      assert.isOk(updated.members.find((e) => e.value === 'user-joe'))
+      assert.isOk(updated.members.find((e) => e.value === 'user-susan'))
+      assert.isTrue(updated.changed)
+      const actual = await repository.getGroup('patchgroup')
+      assert.equal(actual.displayName, 'patchgroup')
+      assert.lengthOf(actual.members, 2)
+      assert.isOk(actual.members.find((e) => e.value === 'user-joe'))
+      assert.isOk(actual.members.find((e) => e.value === 'user-susan'))
+    })
+
+    it('should ignore no-op changes to a group', async function () {
+      this.timeout(60000)
+      // arrange
+      const usecase = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        // user-joe is already a member of the group; this may happen if the
+        // provider is attempting to clear up previously failed operations.
+        Operations: [{
+          op: 'Add',
+          path: 'members',
+          value: [{ value: 'user-joe' }]
+        }]
+      }
+      const updated = await usecase('group-patchgroup', patch)
+      // assert
+      assert.equal(updated.displayName, 'patchgroup')
+      assert.lengthOf(updated.members, 2)
+      assert.isOk(updated.members.find((e) => e.value === 'user-joe'))
+      assert.isOk(updated.members.find((e) => e.value === 'user-susan'))
+      assert.isUndefined(updated.changed)
+      const actual = await repository.getGroup('patchgroup')
+      assert.equal(actual.displayName, 'patchgroup')
+      assert.lengthOf(actual.members, 2)
+      assert.isOk(actual.members.find((e) => e.value === 'user-joe'))
+      assert.isOk(actual.members.find((e) => e.value === 'user-susan'))
     })
   })
 })
