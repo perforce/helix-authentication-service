@@ -61,6 +61,7 @@
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",
     "passport-saml-metadata": "^4.0.0",
+    "proxy-agent": "^6.5.0",
     "samlp": "^7.0.0",
     "scim-patch": "^0.8.0",
     "scim-query-filter-parser": "^2.0.4",
