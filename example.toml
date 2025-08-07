@@ -44,7 +44,7 @@
 # An array of tables containing the configuration for multiple identity
 # providers. See the documentation for examples and all of the available
 # property names. Note that an array of tables of indicated by the double
-# brackets around the table name. 
+# brackets around the table name.
 #
 # [[auth_providers]]
 # issuer_uri = 'https://oidc.example.com'
@@ -321,7 +321,7 @@ key_file = 'certs/server.key'
 
 # Passphrase to be used to decrypt the private key given in key_file
 # or pfx_file, if the private key is encrypted.
-# 
+#
 # key_passphrase = undefined
 
 # File containing the passphrase to be used to decrypt the private key given in
@@ -388,7 +388,7 @@ key_file = 'certs/server.key'
 # Public key of the certificate used by HAS when connecting to Redis, if the
 # redis_url starts with "rediss://" (note the extra 's'). If not set, falls back
 # to the CERT_FILE setting, and in turn default for that setting.
-# 
+#
 # redis_cert_file = undefined
 
 # The private key that corresponds to redis_cert_file.
@@ -480,11 +480,11 @@ key_file = 'certs/server.key'
 #
 # p4passwd = undefined
 
-# The path to the file containing the Perforce tickets. 
+# The path to the file containing the Perforce tickets.
 #
 # p4tickets = undefined
 
-# The path to the Perforce trust file. 
+# The path to the Perforce trust file.
 #
 # p4trust = undefined
 
