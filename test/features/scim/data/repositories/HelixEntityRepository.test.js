@@ -1279,5 +1279,50 @@ describe('HelixEntity repository', function () {
       assert.isOk(actual.members.find((e) => e.value === 'user-joe'))
       assert.isOk(actual.members.find((e) => e.value === 'user-susan'))
     })
+
+    it('should remove a member from a group', async function () {
+      this.timeout(60000)
+      // arrange
+      const usecase = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
+      // act
+      //
+      // Microsoft Azure sends this format, but it is wrong (see RFC 7644 3.5.2.2)
+      // and the scim-patch module does not recognize this peculiar invention.
+      //
+      // const patch = {
+      //   schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+      //   Operations: [{
+      //     op: 'Remove',
+      //     path: 'members',
+      //     value: [{ value: 'user-joe' }]
+      //   }]
+      // }
+      //
+      // This is the correct format for removing group members.
+      //
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [{
+          op: 'Remove',
+          path: 'members[value eq "user-joe"]'
+        }]
+      }
+      const updated = await usecase('group-patchgroup', patch)
+      // assert
+      assert.equal(updated.displayName, 'patchgroup')
+      assert.lengthOf(updated.members, 1)
+      assert.isUndefined(updated.members.find((e) => e.value === 'user-joe'))
+      assert.isOk(updated.members.find((e) => e.value === 'user-susan'))
+      assert.isTrue(updated.changed)
+      const actual = await repository.getGroup('patchgroup')
+      assert.equal(actual.displayName, 'patchgroup')
+      assert.lengthOf(actual.members, 1)
+      assert.isUndefined(updated.members.find((e) => e.value === 'user-joe'))
+      assert.isOk(updated.members.find((e) => e.value === 'user-susan'))
+    })
   })
 })
