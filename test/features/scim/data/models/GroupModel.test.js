@@ -144,6 +144,60 @@ describe('Group model', function () {
     assert.deepEqual(actualJson, expectedJson)
   })
 
+  it('should exclude members property in toJson', function () {
+    // arrange
+    const inputJson = {
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+      displayName: 'staff',
+      members: [
+        { value: 'joe', display: 'Joe Plumber' },
+        { value: 'susan', display: 'Susan Winters' }
+      ]
+    }
+    const group = GroupModel.fromJson(inputJson)
+    const actualJson = group.toJson({ excludedAttributes: ["members"] })
+    // cannot compare the internally generated dates
+    delete actualJson.meta
+    // assert
+    const expectedJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+      id: 'group-staff',
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
+      displayName: 'staff'
+    }
+    assert.deepEqual(actualJson, expectedJson)
+  })
+
+  it('should include displayName even if excluded in toJson', function () {
+    // arrange
+    const inputJson = {
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+      displayName: 'staff',
+      members: [
+        { value: 'joe', display: 'Joe Plumber' },
+        { value: 'susan', display: 'Susan Winters' }
+      ]
+    }
+    const group = GroupModel.fromJson(inputJson)
+    const actualJson = group.toJson({ excludedAttributes: ["displayName"] })
+    // cannot compare the internally generated dates
+    delete actualJson.meta
+    // assert
+    const expectedJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+      id: 'group-staff',
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
+      displayName: 'staff',
+      members: [
+        { value: 'joe', display: 'Joe Plumber' },
+        { value: 'susan', display: 'Susan Winters' }
+      ]
+    }
+    assert.deepEqual(actualJson, expectedJson)
+  })
+
   it('should round-trip P4 group specification', function () {
     // arrange
     const inputSpec = {

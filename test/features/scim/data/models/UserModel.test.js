@@ -299,6 +299,64 @@ describe('User model', function () {
     assert.deepEqual(actualJson, expectedJson)
   })
 
+  it('should exclude members property in toJson', function () {
+    // arrange
+    const inputJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      externalId: 'c0726250-b78e-4171-a358-b9a0de8fcd96',
+      active: true,
+      userName: 'joeuser@email.addr',
+      name: { formatted: 'Joe Plumber', familyName: 'Plumber', givenName: 'Joe' },
+      emails: [
+        { value: 'joe@example.com', type: 'work', primary: true },
+        { value: 'joey@example.com', primary: false }
+      ]
+    }
+    const user = UserModel.fromJson(inputJson)
+    const actualJson = user.toJson({ excludedAttributes: ["emails", "displayName", "name"] })
+    // cannot compare the internally generated dates
+    delete actualJson.meta
+    // assert
+    const expectedJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      id: 'user-joeuser',
+      userName: 'joeuser@email.addr',
+      externalId: 'c0726250-b78e-4171-a358-b9a0de8fcd96',
+      active: true
+    }
+    assert.deepEqual(actualJson, expectedJson)
+  })
+
+  it('should include userName even if excluded in toJson', function () {
+    // arrange
+    const inputJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      externalId: 'c0726250-b78e-4171-a358-b9a0de8fcd96',
+      active: true,
+      userName: 'joeuser@email.addr',
+      name: { formatted: 'Joe Plumber', familyName: 'Plumber', givenName: 'Joe' },
+      emails: [
+        { value: 'joe@example.com', type: 'work', primary: true },
+        { value: 'joey@example.com', primary: false }
+      ]
+    }
+    const user = UserModel.fromJson(inputJson)
+    const actualJson = user.toJson({ excludedAttributes: ["emails", "userName"] })
+    // cannot compare the internally generated dates
+    delete actualJson.meta
+    // assert
+    const expectedJson = {
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+      id: 'user-joeuser',
+      displayName: 'Joe Plumber',
+      userName: 'joeuser@email.addr',
+      externalId: 'c0726250-b78e-4171-a358-b9a0de8fcd96',
+      name: { formatted: 'Joe Plumber' },
+      active: true
+    }
+    assert.deepEqual(actualJson, expectedJson)
+  })
+
   it('should round-trip P4 user specification', function () {
     // arrange
     const inputSpec = {

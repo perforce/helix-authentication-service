@@ -172,7 +172,7 @@ setTimeout(function () {
         .expect(409, done)
     })
 
-    it('should return the one group created so far', function (done) {
+    it('should return the one group created (Groups)', function (done) {
       agent
         .get('/scim/v2/Groups')
         .trustLocalhost(true)
@@ -185,6 +185,68 @@ setTimeout(function () {
           assert.lengthOf(res.body.Resources, 1)
           assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
           assert.include(res.body.Resources[0].displayName, 'Group1DisplayName')
+          assert.lengthOf(res.body.Resources[0].members, 0)
+        })
+        .end(done)
+    })
+
+    it('should return the one group created (Group)', function (done) {
+      agent
+        .get('/scim/v2/Groups/Group1DisplayName')
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+          assert.equal(res.body.displayName, 'Group1DisplayName')
+          assert.lengthOf(res.body.members, 0)
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'Group')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
+        })
+        .end(done)
+    })
+
+    it('should exclude members even when no members (Groups)', function (done) {
+      // in other words, the server should quietly function correctly even when
+      // there is nothing to do (filter non-existent members)
+      agent
+        .get('/scim/v2/Groups')
+        .query({ excludedAttributes: ['members'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.equal(res.body.totalResults, 1)
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
+          assert.lengthOf(res.body.Resources, 1)
+          assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+          assert.include(res.body.Resources[0].displayName, 'Group1DisplayName')
+          assert.isUndefined(res.body.Resources[0].members)
+        })
+        .end(done)
+    })
+
+    it('should exclude members even when no members (Group)', function (done) {
+      // in other words, the server should quietly function correctly even when
+      // there is nothing to do (filter non-existent members)
+      agent
+        .get('/scim/v2/Groups/Group1DisplayName')
+        .query({ excludedAttributes: ['members'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+          assert.equal(res.body.displayName, 'Group1DisplayName')
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'Group')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-Group1DisplayName/)
         })
         .end(done)
     })
@@ -214,6 +276,92 @@ setTimeout(function () {
           assert.isOk(res.body.members.every(e => e.$ref.match(/\/scim\/v2\/Users\//)))
           assert.isOk(res.body.members.find((e) => e.value === 'UserName123'))
           assert.isOk(res.body.members.find((e) => e.value === 'UserName222'))
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'Group')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
+        })
+        .end(done)
+    })
+
+    it('should exclude members from all Groups', function (done) {
+      agent
+        .get('/scim/v2/Groups')
+        .query({ excludedAttributes: ['members'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.equal(res.body.totalResults, 2)
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
+          assert.lengthOf(res.body.Resources, 2)
+          assert.isOk(res.body.Resources.every((e) => {
+            return e.schemas.includes('urn:ietf:params:scim:schemas:core:2.0:Group')
+          }))
+          assert.isOk(res.body.Resources.find((e) => e.displayName === 'Group1DisplayName'))
+          assert.isOk(res.body.Resources.find((e) => e.displayName === 'GroupDisplayName2'))
+          assert.isUndefined(res.body.Resources[0].members)
+          assert.isUndefined(res.body.Resources[1].members)
+        })
+        .end(done)
+    })
+
+    it('should exclude members from all Groups (required field)', function (done) {
+      agent
+        .get('/scim/v2/Groups')
+        .query({ excludedAttributes: ['members', 'displayName'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.equal(res.body.totalResults, 2)
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
+          assert.lengthOf(res.body.Resources, 2)
+          assert.isOk(res.body.Resources.every((e) => {
+            return e.schemas.includes('urn:ietf:params:scim:schemas:core:2.0:Group')
+          }))
+          assert.isOk(res.body.Resources.find((e) => e.displayName === 'Group1DisplayName'))
+          assert.isOk(res.body.Resources.find((e) => e.displayName === 'GroupDisplayName2'))
+          assert.isUndefined(res.body.Resources[0].members)
+          assert.isUndefined(res.body.Resources[1].members)
+        })
+        .end(done)
+    })
+
+    it('should exclude members from single Group', function (done) {
+      agent
+        .get('/scim/v2/Groups/GroupDisplayName2')
+        .query({ excludedAttributes: ['members'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+          assert.equal(res.body.displayName, 'GroupDisplayName2')
+          assert.isUndefined(res.body.members)
+          assert.exists(res.body.meta.created)
+          assert.exists(res.body.meta.lastModified)
+          assert.equal(res.body.meta.resourceType, 'Group')
+          assert.match(res.body.meta.location, /\/scim\/v2\/Groups\/group-GroupDisplayName2/)
+        })
+        .end(done)
+    })
+
+    it('should exclude members from single Group (required field)', function (done) {
+      agent
+        .get('/scim/v2/Groups/GroupDisplayName2')
+        .query({ excludedAttributes: ['members', 'displayName'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:Group')
+          assert.equal(res.body.displayName, 'GroupDisplayName2')
+          assert.isUndefined(res.body.members)
           assert.exists(res.body.meta.created)
           assert.exists(res.body.meta.lastModified)
           assert.equal(res.body.meta.resourceType, 'Group')

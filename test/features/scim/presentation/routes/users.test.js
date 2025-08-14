@@ -171,6 +171,79 @@ setTimeout(function () {
           assert.lengthOf(res.body.Resources, 1)
           assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
           assert.include(res.body.Resources[0].userName, 'UserName123')
+          assert.isOk(res.body.Resources[0].emails)
+        })
+        .end(done)
+    })
+
+    it('should excludes emails property from all Users', function (done) {
+      agent
+        .get('/scim/v2/Users')
+        .query({ excludedAttributes: ['emails'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.equal(res.body.totalResults, 1)
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
+          assert.lengthOf(res.body.Resources, 1)
+          assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+          assert.include(res.body.Resources[0].userName, 'UserName123')
+          assert.isUndefined(res.body.Resources[0].emails)
+        })
+        .end(done)
+    })
+
+    it('should include userName even if excluded from all Users', function (done) {
+      agent
+        .get('/scim/v2/Users')
+        .query({ excludedAttributes: ['emails', 'userName'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.equal(res.body.totalResults, 1)
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:ListResponse')
+          assert.lengthOf(res.body.Resources, 1)
+          assert.include(res.body.Resources[0].schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+          assert.include(res.body.Resources[0].userName, 'UserName123')
+          assert.isUndefined(res.body.Resources[0].emails)
+        })
+        .end(done)
+    })
+
+    it('should excludes emails property from single User', function (done) {
+      agent
+        .get('/scim/v2/Users/UserName123')
+        .query({ excludedAttributes: ['emails'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+          assert.equal(res.body.userName, 'UserName123')
+          assert.equal(res.body.name.formatted, 'Ryan Leenay')
+          assert.isUndefined(res.body.emails)
+        })
+        .end(done)
+    })
+
+    it('should include userName if even excluded from single User', function (done) {
+      agent
+        .get('/scim/v2/Users/UserName123')
+        .query({ excludedAttributes: ['emails', 'userName'] })
+        .trustLocalhost(true)
+        .set('Authorization', authToken)
+        .expect('Content-Type', /application\/scim\+json/)
+        .expect(200)
+        .expect(res => {
+          assert.include(res.body.schemas, 'urn:ietf:params:scim:schemas:core:2.0:User')
+          assert.equal(res.body.userName, 'UserName123')
+          assert.equal(res.body.name.formatted, 'Ryan Leenay')
+          assert.isUndefined(res.body.emails)
         })
         .end(done)
     })
