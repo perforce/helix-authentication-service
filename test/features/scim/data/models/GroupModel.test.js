@@ -144,6 +144,44 @@ describe('Group model', function () {
     assert.deepEqual(actualJson, expectedJson)
   })
 
+  it('should trim members list for logging', function () {
+    // arrange
+    const inputJson = {
+      externalId: '30f06075-8ac7-450f-b74d-9a78d45c152d',
+      schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
+      displayName: 'staff',
+      members: [
+        { value: 'joe1', display: 'Joe Plumber' },
+        { value: 'joe2', display: 'Joe Plumber' },
+        { value: 'joe3', display: 'Joe Plumber' },
+        { value: 'joe4', display: 'Joe Plumber' },
+        { value: 'joe5', display: 'Joe Plumber' },
+        { value: 'joe6', display: 'Joe Plumber' },
+        { value: 'joe7', display: 'Joe Plumber' },
+        { value: 'joe8', display: 'Joe Plumber' },
+        { value: 'joe9', display: 'Joe Plumber' },
+        { value: 'joe10', display: 'Joe Plumber' },
+        { value: 'joe11', display: 'Joe Plumber' },
+        { value: 'joe12', display: 'Joe Plumber' },
+        { value: 'joe13', display: 'Joe Plumber' },
+        { value: 'joe14', display: 'Joe Plumber' },
+        { value: 'joe15', display: 'Joe Plumber' },
+        { value: 'joe16', display: 'Joe Plumber' },
+        { value: 'joe17', display: 'Joe Plumber' },
+        { value: 'joe18', display: 'Joe Plumber' },
+        { value: 'joe19', display: 'Joe Plumber' },
+        { value: 'susan', display: 'Susan Winters' }
+      ]
+    }
+    const group = GroupModel.fromJson(inputJson)
+    assert.lengthOf(group.members, 20)
+    const actualJson = group.forLogging()
+    // cannot compare the internally generated dates
+    delete actualJson.meta
+    // assert
+    assert.lengthOf(actualJson.members, 10)
+  })
+
   it('should exclude members property in toJson', function () {
     // arrange
     const inputJson = {
