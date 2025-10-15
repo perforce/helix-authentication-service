@@ -1187,6 +1187,43 @@ describe('HelixEntity repository', function () {
       assert.lengthOf(actual.members, 0)
     })
 
+    it('should ignore malformed group keys in PatchGroup', async function () {
+      // earlier version of auth service was updated and the old group key
+      // caused a problem (group keys were merely numbers but later became JSON
+      // blobs) when an update was performed on that group
+      this.timeout(60000)
+      // arrange
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user,
+        P4TICKETS: p4config.tickets,
+        P4TRUST: p4config.trust
+      })
+      const keysetCmd = await p4.cmd('key scim-group-mynewgroup 1')
+      assert.equal(keysetCmd.stat[0].code, 'stat')
+      const usecase = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [{
+          op: 'Add',
+          path: 'externalId',
+          value: '47615e53-3ec0-44d9-aabb-ebb1e2c73b28'
+        }]
+      }
+      const updated = await usecase('group-mynewgroup', patch)
+      // assert
+      assert.equal(updated.displayName, 'mynewgroup')
+      assert.lengthOf(updated.members, 0)
+      const actual = await repository.getGroup('mynewgroup')
+      assert.equal(actual.displayName, 'mynewgroup')
+      assert.lengthOf(actual.members, 0)
+    })
+
     it('should add a member to the group', async function () {
       this.timeout(60000)
       // arrange
