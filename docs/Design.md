@@ -1,6 +1,6 @@
 # Design
 
-This document is intended for developers who are interested in the inner workings of the Helix Authentication Service.
+This document is intended for developers who are interested in the inner workings of the P4 Authentication Service.
 
 ## Overview
 

@@ -11,5 +11,5 @@ Package: helix-auth-svc
 Architecture: any
 Depends:
  ${misc:Depends}
-Description: Helix Authentication Service
+Description: P4 Authentication Service
  Authentication integration and user provisioning service.

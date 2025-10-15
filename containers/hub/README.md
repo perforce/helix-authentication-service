@@ -13,7 +13,7 @@ three dot separated numbers, such as `2020.1.1` or `2019.1.2`.
 
 ## Documentation
 
-To learn about the architecture, supported products and identity providers, as well as the configuration steps for the current version, see the <a href="https://www.perforce.com/manuals/helix-auth-svc/" target="_blank">Helix Authentication Service Administrator Guide</a>.
+To learn about the architecture, supported products and identity providers, as well as the configuration steps for the current version, see the <a href="https://www.perforce.com/manuals/helix-auth-svc/" target="_blank">P4 Authentication Service Documentation</a>.
 
 ## How to use this image
 
@@ -119,7 +119,7 @@ that you need assistance with configuring these systems, please contact
 
 ## License
 
-View [license information](https://github.com/perforce/helix-authentication-service/blob/master/LICENSE.txt) for Helix Authentication Service.
+View [license information](https://github.com/perforce/helix-authentication-service/blob/master/LICENSE.txt) for P4 Authentication Service.
 
 As with all Docker images, this likely also contains other software which may be
 under other licenses (such as Bash, etc from the base distribution, along with

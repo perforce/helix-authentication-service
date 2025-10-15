@@ -1,6 +1,6 @@
 [![Support](https://img.shields.io/badge/Support-Official-green.svg)](mailto:support@perforce.com)
 
-# Helix Authentication Service
+# P4 Authentication Service
 
 This [Node.js](http://nodejs.org) based application implements a simple
 authentication protocol integration service that may be used in concert with
@@ -23,7 +23,7 @@ documentation, and these versions are limited to Community Support.
 
 ## Documentation
 
-To learn about the architecture, supported products and identity providers, as well as the  configuration steps for the current version, see the [Helix Authentication Service Administrator Guide](https://www.perforce.com/manuals/helix-auth-svc/). Older versions of the guide are in the [docs](./docs) directory.
+To learn about the architecture, supported products and identity providers, as well as the  configuration steps for the current version, see the [P4 Authentication Service Documentation](https://www.perforce.com/manuals/helix-auth-svc/). Older versions of the guide are in the [docs](./docs) directory.
 
 ## How to Get Help
 

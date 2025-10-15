@@ -134,11 +134,11 @@ bearer_token = 'keyboard cat'
 #
 # saml_idp_slo_url = undefined
 
-# The entity identifier (entityID) for the Helix Authentication Service.
+# The entity identifier (entityID) for the authentication service.
 #
 # saml_sp_entity_id = 'https://has.example.com'
 
-# Public key of the certificate used by HAS when connecting to the IdP, and when
+# Public key of the certificate used by P4AS when connecting to the IdP, and when
 # responding to HTTPS requests from clients.
 #
 # Renamed from sp_cert_file, which will take effect if CERT_FILE is not defined.
@@ -246,7 +246,7 @@ key_file = 'certs/server.key'
 #
 # prompt_for_authorization = undefined
 
-# Public key of the certificate used by HAS when connecting to the SAML IdP, and
+# Public key of the certificate used by P4AS when connecting to the SAML IdP, and
 # when servicing SAML authentication requests from other applications (such as
 # Swarm). If this setting is not defined, then CERT_FILE will be used.
 #
@@ -385,7 +385,7 @@ key_file = 'certs/server.key'
 #
 # cache_ttl = 300
 
-# Public key of the certificate used by HAS when connecting to Redis, if the
+# Public key of the certificate used by P4AS when connecting to Redis, if the
 # redis_url starts with "rediss://" (note the extra 's'). If not set, falls back
 # to the CERT_FILE setting, and in turn default for that setting.
 #
@@ -461,7 +461,7 @@ key_file = 'certs/server.key'
 #
 # token_ttl = 3600
 
-# To configure HAS to trust a reverse proxy for terminating SSL connections,
+# To configure P4AS to trust a reverse proxy for terminating SSL connections,
 # specify the address of the proxy here.
 #
 # c.f. https://expressjs.com/en/guide/behind-proxies.html

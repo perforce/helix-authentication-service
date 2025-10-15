@@ -1,5 +1,5 @@
 #
-# Container for running nginx as a reverse proxy in front of HAS.
+# Container for running nginx as a reverse proxy in front of P4AS.
 #
 FROM nginx:1.25
 

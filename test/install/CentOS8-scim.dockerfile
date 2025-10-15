@@ -29,7 +29,7 @@ RUN echo 'perforce ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/perforce
 
 # The install and configure scripts want to run as non-root user, and npm
 # expects a home directory that the user has permissions to write to. Also, the
-# HAS directory itself must be writable by the test user.
+# P4AS directory itself must be writable by the test user.
 RUN mkdir /install_sh
 WORKDIR /install_sh
 COPY test/install/test_scim_config.sh .

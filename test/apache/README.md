@@ -1,13 +1,13 @@
-# Testing HAS with Apache
+# Testing P4AS with Apache
 
 ## Apache as a reverse proxy
 
 The [Docker](https://www.docker.com) containers defined in `docker-compose.yml`
-provide an example of running multiple instances of HAS behind Apache, which is
+provide an example of running multiple instances of P4AS behind Apache, which is
 configured as a reverse proxy with load balancing.
 
 It is important to note that Apache has been configured to set certain headers so
-that the session middleware used by HAS can recognize that it is running behind
+that the session middleware used by P4AS can recognize that it is running behind
 a secure proxy, and thereby set a secure cookie. Without this, user login will
 fail with certain web browsers.
 

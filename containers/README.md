@@ -1,4 +1,4 @@
-# HAS Docker Containers
+# P4AS Docker Containers
 
 This document describes a setup for testing the authentication service using [Docker](https://www.docker.com), which is relatively easy to use, but comes with the cavaet that you will need to work through some complicated setup for container name resolution. Be sure to read through this entire document before attempting to use these containers.
 
@@ -7,7 +7,7 @@ This document describes a setup for testing the authentication service using [Do
 This directory contains definitions for several Docker containers for testing the authentication service.
 
 * **auth-svc:** the authentication service itself.
-* **haproxy:** HAProxy for load balancing between two instances of HAS.
+* **haproxy:** HAProxy for load balancing between two instances of P4AS.
 * **ldap:** OpenLDAP directory which serves as the user data source to Shibboleth.
 * **oidc:** IdentityServer4 for OpenID Connect authentication.
 * **redis:** [Valkey](https://github.com/valkey-io/valkey) (formerly Redis) server with TLS enabled and configured to expect client certificates.

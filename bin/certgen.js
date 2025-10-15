@@ -143,14 +143,14 @@ Description:
  
     --saml
         Create a new certificate for use with SAML identity providers and
-        applications that connect to HAS via SAML, such as Swarm. The
+        applications that connect to P4AS via SAML, such as Swarm. The
         certificate created will be written to the file named by the
         SAML_CERT_FILE setting. If that setting is missing, an error is
         reported.
         
     --saml-path <filepath>
         Create a new certificate for use with SAML identity providers and
-        applications that connect to HAS via SAML, such as Swarm, at the given
+        applications that connect to P4AS via SAML, such as Swarm, at the given
         file path, signed by the certificate specified by either the
         CA_CERT_FILE setting or the --capath option.
   
@@ -170,7 +170,7 @@ Description:
         some files owned and readable only by the root user, which can cause
         other problems.
 
-See the Helix Authentication Service Administrator Guide for additional
+See the P4 Authentication Service Administrator Guide for additional
 information pertaining to configuring and running the service.
 `)
 }
@@ -523,7 +523,7 @@ function invokeNetCmd(params) {
 // Restart the service for the configuration changes to take effect.
 async function restartService() {
   if (process.platform === 'linux') {
-    // Try stopping HAS using systemctl if the service unit is present.
+    // Try stopping P4AS using systemctl if the service unit is present.
     if (await fileAccessible('/etc/systemd/system/helix-auth.service')) {
       try {
         await invokeSystemctl(['stop', 'helix-auth'])

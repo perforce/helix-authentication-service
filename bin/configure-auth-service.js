@@ -1,7 +1,7 @@
 //
 // Copyright 2024, Perforce Software Inc. All rights reserved.
 //
-// Configuration script for Helix Authentication Service.
+// Configuration script for P4 Authentication Service.
 //
 import assert from 'node:assert'
 import { spawn } from 'node:child_process'
@@ -72,7 +72,7 @@ Usage:
 
 Description:
 
-    Configuration script for Helix Authentication Service.
+    Configuration script for P4 Authentication Service.
 
     This script will modify the .env file according to the values provided
     via arguments or interactive input, and then restart the service using
@@ -146,7 +146,7 @@ Description:
     --superpassword <password>
         Helix Core super user's password for user provisioning.
 
-See the Helix Authentication Service Administrator Guide for additional
+See the P4 Authentication Service Documentation for additional
 information pertaining to configuring and running the service.
 `)
 }
@@ -924,7 +924,7 @@ async function promptForSamlSpEntityId() {
   console.info(`
 
 
-The SAML entity identifier (entityID) for the Helix Authentication Service.
+The SAML entity identifier (entityID) for the P4 Authentication Service.
 This value may be defined by the SAML identity provider (e.g. Azure). It is
 important that this value matches exactly what is configured in the identity
 provider, as it uniquely identifies the service application.
@@ -1498,7 +1498,7 @@ async function modifyConfig() {
 // Restart the service for the configuration changes to take effect.
 async function restartService() {
   if (process.platform === 'linux') {
-    // Try stopping HAS using systemctl if the service unit is present.
+    // Try stopping P4AS using systemctl if the service unit is present.
     if (await fileAccessible('/etc/systemd/system/helix-auth.service')) {
       try {
         await invokeSystemctl(['stop', 'helix-auth'])

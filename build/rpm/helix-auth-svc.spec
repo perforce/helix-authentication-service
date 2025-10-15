@@ -8,7 +8,7 @@
 Name:           helix-auth-svc
 Version:        %{p4release}
 Release:        %{p4change}
-Summary:        Helix Authentication Service
+Summary:        P4 Authentication Service
 License:        MIT
 URL:            http://www.perforce.com/
 Source0:        helix-auth-svc.tar.gz
@@ -122,15 +122,15 @@ chown -R perforce:perforce "%{installprefix}"
 # If this fails, it means either systemd is not installed or it does not have
 # privileged access (to the container), in which case we will skip setting up
 # the service unit.
-HAS_SYSTEMD=true
+P4AS_SYSTEMD=true
 if ! systemctl list-units >/dev/null 2>&1; then
-    HAS_SYSTEMD=false
+    P4AS_SYSTEMD=false
 fi
 
-if $HAS_SYSTEMD; then
+if $P4AS_SYSTEMD; then
     cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
 [Unit]
-Description=Helix Authentication Service
+Description=P4 Authentication Service
 After=network.target
 
 [Service]
@@ -153,7 +153,7 @@ cat <<EOF
 Package installation complete!
 ===============================================================================
 
-The Helix Authentication Service is now running via systemd using the service
+The P4 Authentication Service is now running via systemd using the service
 name 'helix-auth'. Use the command 'sudo systemctl status helix-auth' to get
 the status of the service.
 
@@ -179,7 +179,7 @@ cat <<EOF
 Package installation complete!
 ===============================================================================
 
-The Helix Authentication Service is now installed. To configure the service,
+The P4 Authentication Service is now installed. To configure the service,
 edit the .env file in the directory shown below, and then start the service
 by invoking './bin/node ./bin/www.js' from the directory shown below.
 

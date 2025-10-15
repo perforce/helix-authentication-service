@@ -1,4 +1,4 @@
-# HAS Docker Containers
+# P4AS Docker Containers
 
 This document describes a setup for testing the authentication service using [Docker](https://www.docker.com), which is relatively easy to use, but comes with the cavaet that you will need to work through some complicated setup for container name resolution. Be sure to read through this entire document before attempting to use these containers.
 

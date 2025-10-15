@@ -35,7 +35,7 @@ export const ButtonAppBar = () => {
         <Toolbar>
           <img src="/admin/images/apps-p4mfa-dark.png" alt="logo" height="24" width="24" />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, mx: 2 }}>
-            Helix Authentication Service
+            P4 Authentication Service
           </Typography>
           <Button onClick={handleOpenDocs} variant='text' color="inherit">
             Documentation

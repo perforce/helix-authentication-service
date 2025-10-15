@@ -6,7 +6,7 @@ Placing a reverse proxy or load balancer between the client and the authenticati
 
 There are two basic methods for directing traffic to multiple service instances. One is to configure rule-based routing within the reverse proxy, while the alternative is to let the proxy send requests to any available instance. The former is suitable if the uptime of a service instance is good enough and you do not want to install and configure additional software. For high availability, however, the better solution is to set up an instance of a [Redis](https://redis.io) server that will be used to store the session data that facilitates the authentication process. With Redis in place, incoming requests can be directed to any available instance of the service.
 
-## Configuring HAS
+## Configuring P4AS
 
 ### Common Settings
 
@@ -63,7 +63,7 @@ Support for Redis is enabled in the authentication service by setting the `REDIS
 REDIS_URL=redis://192.168.1.1:6389'
 ```
 
-See the [Configuring Helix Authentication Service](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html) chapter of the admin guide for more information on the `REDIS_URL` setting, as well as `REDIS_CERT_FILE` and `REDIS_KEY_FILE` settings for enabling a TLS connection to Redis.
+See the [Configuring P4 Authentication Service](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html) chapter of the admin guide for more information on the `REDIS_URL` setting, as well as `REDIS_CERT_FILE` and `REDIS_KEY_FILE` settings for enabling a TLS connection to Redis.
 
 Additionally, if the Redis server is configured to expect a username and password, those can be provided in the `REDIS_URL` value:
 

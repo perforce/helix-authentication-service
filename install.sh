@@ -75,7 +75,7 @@ Description:
     -h / --help
         Display this help message.
 
-See the Helix Authentication Service Administrator Guide for additional
+See the P4 Authentication Service Administrator Guide for additional
 information pertaining to configuring and running the service.
 
 EOS
@@ -140,7 +140,7 @@ function detect_platform() {
     # support for the latest Node.js from the nodesource.com repository.
     #
     # Looking for /etc/os-release is assuming that systemd is installed, which
-    # should be a given for the platforms that HAS supports.
+    # should be a given for the platforms that P4AS supports.
     #
     ID=$(awk -F= '/^ID=/ {print $2}' /etc/os-release | tr -d '"')
     if [[ "$ID" == 'amzn' ]]; then
@@ -356,7 +356,7 @@ function create_env_if_missing() {
 function install_service_unit() {
     sudo tee /etc/systemd/system/helix-auth.service >/dev/null <<__SERVICE_UNIT__
 [Unit]
-Description=Helix Authentication Service
+Description=P4 Authentication Service
 After=network.target
 
 [Service]
@@ -403,7 +403,7 @@ function print_summary() {
 Automated install complete! Now a few final bits to do manually.
 ===============================================================================
 
-The Helix Authentication Service is now running via systemd using the service
+The P4 Authentication Service is now running via systemd using the service
 name 'helix-auth'. Use the command 'sudo systemctl status helix-auth' to get
 the status of the service.
 

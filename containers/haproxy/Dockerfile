@@ -1,10 +1,10 @@
 #
-# Container for running HAProxy in front of HAS.
+# Container for running HAProxy in front of P4AS.
 #
-# This serves as an example of running a load balancer in front of HAS, while
-# keeping the session cookie secure, despite running HAS on http instead of
-# https. HAProxy is configured to pass the client certificate to HAS via a
-# header and HAS is configured to validate that cert by its fingerprint.
+# This serves as an example of running a load balancer in front of P4AS, while
+# keeping the session cookie secure, despite running P4AS on http instead of
+# https. HAProxy is configured to pass the client certificate to P4AS via a
+# header and P4AS is configured to validate that cert by its fingerprint.
 #
 FROM haproxy:3.1
 

@@ -39,7 +39,7 @@ getent group perforce
 getent passwd perforce
 
 # ensure the package.json has the expected version string
-grep -qE 'HAS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json || { echo 'package.json missing version' ; exit 1; }
+grep -qE 'P4AS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json || { echo 'package.json missing version' ; exit 1; }
 
 # ensure certain files are present
 echo -e '\nTesting for presence of certain files...\n'

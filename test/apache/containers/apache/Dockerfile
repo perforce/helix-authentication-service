@@ -1,9 +1,9 @@
 #
-# Container for running Apache as a reverse proxy in front of HAS.
+# Container for running Apache as a reverse proxy in front of P4AS.
 #
-# This serves as an example of running a load balancer in front of HAS, while
-# keeping the session cookie secure, despite running HAS on http instead of
-# https. Note that configuring HAS to use http will mean that the certificate
+# This serves as an example of running a load balancer in front of P4AS, while
+# keeping the session cookie secure, despite running P4AS on http instead of
+# https. Note that configuring P4AS to use http will mean that the certificate
 # verification logic in /requests/status will be bypassed, allowing any client
 # to request the user profile data.
 #

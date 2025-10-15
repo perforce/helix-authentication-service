@@ -1,8 +1,8 @@
 //
-// Default logging configuration file for Helix Authentication Service.
+// Default logging configuration file for P4 Authentication Service.
 //
 // See the setting named LOGGING and the Logging section in the documentation
-// https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html
+// https://help.perforce.com/helix-core/integrations-plugins/helix-auth-svc/current/Content/HAS/Home-has.html
 // for more information.
 //
 module.exports = {

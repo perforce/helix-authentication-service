@@ -28,7 +28,7 @@ FROM ubuntu22_pkg_base AS ubuntu22-build
 
 ARG ID_REL_BASE=2025.1.0
 ARG ID_PATCH=9999999
-ENV HAS_VERSION="HAS/noarch/${ID_REL_BASE}/${ID_PATCH}"
+ENV P4AS_VERSION="P4AS/noarch/${ID_REL_BASE}/${ID_PATCH}"
 ENV DIRNAME=helix-auth-svc-${ID_REL_BASE}
 ENV PKGNAME=helix-auth-svc_${ID_REL_BASE}
 ENV PACKAGE_FILENAME=${PKGNAME}-${ID_PATCH}~jammy_amd64.deb
@@ -64,7 +64,7 @@ COPY sentinel.config.cjs sentinel.config.cjs
 COPY package-lock.json package-lock.json
 COPY package.json package.json.in
 RUN sed -e "s/\"2025.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
-        -e "s|+MAIN+|${HAS_VERSION}|" package.json.in > package.json && \
+        -e "s|+MAIN+|${P4AS_VERSION}|" package.json.in > package.json && \
     rm -f package.json.in
 COPY README.md README.md
 COPY RELNOTES.txt RELNOTES.txt

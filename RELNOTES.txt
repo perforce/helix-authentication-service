@@ -1,11 +1,11 @@
                             Release Notes for
-                        Helix Authentication Service (HAS)
+                        P4 Authentication Service (P4AS)
                             Version 2025.1
 
 
 Introduction
 
-    The Helix Authentication Service is a Node.js application that facilitates
+    The P4 Authentication Service is a Node.js application that facilitates
     the integration of identity providers supporting either the OpenID Connect
     or SAML 2.0 authentication protocols.
 
@@ -23,7 +23,7 @@ Important Notes
     starting a Helix Core or Helix ALM client might result with the user being
     logged in again without the user being prompted to provide credentials.
 
-    HAS now requires, by default, that both the SAML response and the SAML
+    P4AS now requires, by default, that both the SAML response and the SAML
     assertion be signed by the identity provider. This addresses vulnerability
     CVE-2022-39299 in the third-party library, node-saml. If your identity
     provider only signs the response, then set SAML_WANT_ASSERTION_SIGNED=false
@@ -49,14 +49,14 @@ Supported Platforms
     Amazon Linux (x86_64)
         2023
 
-    HAS is known to work on Amazon Linux when installed and configured using the
+    P4AS is known to work on Amazon Linux when installed and configured using the
     provided shell scripts. Package installation may work but is not supported.
 
     Windows (x86_64)
         10 Pro
         Server 2019
 
-    HAS is known to work on the Windows systems listed above.
+    P4AS is known to work on the Windows systems listed above.
 
 
 Requirements
@@ -66,8 +66,8 @@ Requirements
 
 Documentation
 
-    Helix Authentication Service Administrator Guide at
-    https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/Home-has.html
+    P4 Authentication Service Documentation at
+    https://www.perforce.com/manuals/helix-auth-svc/
     details the steps for installation, upgrade, and configuration of the
     authentication service.
 
@@ -77,7 +77,7 @@ Installation
     Linux
 
         1. From the download page, select the appropriate Linux distribution
-           option. For Linux, HAS is packaged in DEB and RPM formats.
+           option. For Linux, P4AS is packaged in DEB and RPM formats.
 
         2. To install, use the appropriate package install command for the
            system, such as `yum` or `apt` for CentOS and Ubuntu respectively.
@@ -365,26 +365,26 @@ New functionality in 2021.1 (2021.1/2135349) (2021/05/27)
 Other changes in 2021.1 (2021.1/2135349) (2021/05/27)
 
     HAS-164 (Change #2082598)
-        Use systemd to manage the HAS instance instead of pm2. Configure
-        script and packages will install and start HAS as a service unit.
+        Use systemd to manage the P4AS instance instead of pm2. Configure
+        script and packages will install and start P4AS as a service unit.
 
     HAS-181 (Change #2075199)
-        Single binary build of HAS for Linux packages, no need for Node.js.
+        Single binary build of P4AS for Linux packages, no need for Node.js.
 
 ----------------------------------------------------------------------
 New functionality in 2020.2 (2020.2/2065968) (2021/01/28)
 
     HAS-21 (Change #2041029)
-        Scripts are now available to install and remove HAS as a Windows
+        Scripts are now available to install and remove P4AS as a Windows
         service.
 
     HAS-79 (Change #2035660, 2035664, 2035665)
-        You can now run HAS behind a proxy, with the option of storing
+        You can now run P4AS behind a proxy, with the option of storing
         session information in Redis to enable failover, with the addition
         of rule-based routing without Redis.
 
     HAS-141 (Change #2037047)
-        You can now run HAS in a Docker container, which is available on
+        You can now run P4AS in a Docker container, which is available on
         Docker Hub (https://hub.docker.com/r/perforce/helix-auth-svc).
 
 ----------------------------------------------------------------------

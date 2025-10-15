@@ -1,7 +1,7 @@
 # Failover
 
 This document is intended for developers who are interested in learning how to
-modify and test the Helix Authentication Service. Be sure to start by reading
+modify and test the P4 Authentication Service. Be sure to start by reading
 the `Development.md` document in this directory for the development setup.
 
 ## Design
@@ -25,19 +25,19 @@ in-memory stores are used.
 
 For convenience, there is a container for Redis defined in the Compose file
 (`docker-compose.yml`) named `redis.doc`, running on the default port (6379).
-The HAS instances defined in the Compose file are configured to use the Redis
+The P4AS instances defined in the Compose file are configured to use the Redis
 store for the request/user mapping and the session data.
 
 ## Proxy Configuration
 
-When using the Redis-based failover support in HAS, the load balancer or web
-proxy in front of HAS should _not_ have session affinity enabled. Instead,
-incoming requests can go to any of the configured HAS instances.
+When using the Redis-based failover support in P4AS, the load balancer or web
+proxy in front of P4AS should _not_ have session affinity enabled. Instead,
+incoming requests can go to any of the configured P4AS instances.
 
 ## Testing
 
 1. Start all docker containers: `docker compose up --build -d`
-1. Stop one of the HAS instances, either `auth-svc1.doc` or `auth-svc2.doc`
+1. Stop one of the P4AS instances, either `auth-svc1.doc` or `auth-svc2.doc`
     * e.g. `docker compose stop auth-svc1.doc`
 1. Open https://authen.doc/requests/new/foobar in a web browser
     * Firefox is very easy to use for this purpose
@@ -46,20 +46,20 @@ incoming requests can go to any of the configured HAS instances.
     * If you do not see the login page and instead are shown the success page,
       clear the browser's cached data and try again. With Firefox, usually
       exiting and launching again will be sufficient.
-1. Stop the _other_ HAS instance that served the initial request
+1. Stop the _other_ P4AS instance that served the initial request
     * e.g. `docker compose stop auth-svc2.doc`
-1. Start the _first_ HAS instance that was stopped before the login began
+1. Start the _first_ P4AS instance that was stopped before the login began
     * e.g. `docker compose start auth-svc1.doc`
 1. In the browser, complete the identity provider login for the user
 
-If you see the HAS login success page, then it worked.
+If you see the P4AS login success page, then it worked.
 
-What actually happened during this test? The login started with the only HAS
+What actually happened during this test? The login started with the only P4AS
 instance that was available, to which HAProxy directed the start of login
-procedure. While the user was away from HAS, on the IdP login page, the initial
-HAS instance was stopped and the other one was started. When the login result
-came back from the IdP, it was directed to the new HAS instance (via HAProxy).
+procedure. While the user was away from P4AS, on the IdP login page, the initial
+P4AS instance was stopped and the other one was started. When the login result
+came back from the IdP, it was directed to the new P4AS instance (via HAProxy).
 Because the session state and request/user mapping is stored in a separate
-key/value store (Redis), the new HAS instance was able to complete the login
-procedure. Without the external session store, HAS would only know about those
+key/value store (Redis), the new P4AS instance was able to complete the login
+procedure. Without the external session store, P4AS would only know about those
 login requests that it had handled while the instance was running.

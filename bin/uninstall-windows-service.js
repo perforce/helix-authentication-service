@@ -9,7 +9,7 @@ const bindir = path.dirname(fileURLToPath(import.meta.url))
 const scriptPath = path.join(bindir, 'www.js')
 const svc = new Service({
   name: 'Helix Authentication',
-  description: 'Helix Authentication Service',
+  description: 'P4 Authentication Service',
   script: scriptPath
 })
 svc.on('alreadyuninstalled', () => {

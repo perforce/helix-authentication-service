@@ -1,6 +1,6 @@
 # Shibboleth
 
-This document is intended for developers who are setting up an instance of the Shibboleth SAML IdP for testing the Helix Authentication Service. [Shibboleth](https://www.shibboleth.net) is one of the oldest SAML 2.0 implementations, and freely available under an open source license.
+This document is intended for developers who are setting up an instance of the Shibboleth SAML IdP for testing the P4 Authentication Service. [Shibboleth](https://www.shibboleth.net) is one of the oldest SAML 2.0 implementations, and freely available under an open source license.
 
 ## Requirements
 
