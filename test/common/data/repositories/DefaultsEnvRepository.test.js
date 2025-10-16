@@ -14,7 +14,7 @@ describe('DefaultsEnvRepository', function () {
 
   it('should return all available entries', function () {
     const result = Object.fromEntries(sut.entries())
-    assert.equal(Object.keys(result).length, 24)
+    assert.equal(Object.keys(result).length, 25)
     assert.property(result, 'ADMIN_USERNAME')
     assert.property(result, 'OIDC_TOKEN_SIGNING_ALGO')
     assert.property(result, 'TOKEN_TTL')
@@ -52,6 +52,7 @@ describe('DefaultsEnvRepository', function () {
     assert.equal(sut.get('BEARER_TOKEN'), 'keyboard cat')
     assert.equal(sut.get('CACHE_TTL'), '300')
     assert.isTrue(sut.has('CERT_FILE'))
+    assert.equal(sut.get('HOME_PAGE_ENABLED'), 'true')
     assert.include(sut.get('IDP_CONFIG'), 'urn:swarm-example:sp')
     assert.isFalse(sut.has('IDP_CONFIG_FILE'))
     assert.equal(sut.get('INSTANCE_ID'), 'none')

@@ -41,21 +41,6 @@
 #
 # admin_p4_auth = undefined
 
-# An array of tables containing the configuration for multiple identity
-# providers. See the documentation for examples and all of the available
-# property names. Note that an array of tables of indicated by the double
-# brackets around the table name.
-#
-# [[auth_providers]]
-# issuer_uri = 'https://oidc.example.com'
-# client_id = 'client-id'
-# client_secret = 'client-secret'
-#
-# [[auth_providers]]
-# sp_entity_id = 'urn:example:sp'
-# want_assertion_signed = false
-# metadata_url = 'https://saml.example.com'
-
 # Path of certificate authority file for service to use when verifying client
 # certificates, in particular the Helix Server loginhook extension.
 #
@@ -263,57 +248,11 @@ key_file = 'certs/server.key'
 #
 # idp_cert_file = undefined
 
-# Tables that define SAML service providers that will be connecting to the
-# authentication service. Note that the SAML entity identifiers should be
-# wrapped in single-quotes (') to avoid interpretation by the TOML parser.
-#
-# [idp_config.'urn:swarm-example:sp']
-# acs_url = 'https://swarm.example.com/api/v10/session'
-#
-# [idp_config.'http://hth.example.com/account/saml/hth/metadata']
-# acs_url = 'https://hth.example.com/account/saml/hth/consume'
-#
-# [idp_config.'urn:swarm-201?.*:sp']
-# acs_url = 'https://swarm.example.com/login'
-#
-# [idp_config.'urn:swarm-group:sp']
-# acs_urls = [
-#   'http://swarm.example.com/chicago/api/v10/session',
-#   'http://swarm.example.com/tokyo/api/v10/session'
-# ]
-#
-# [idp_config.'urn:swarm-cluster:sp']
-# acs_url_re = 'https://swarm\.example\.com/[^/]+/api/v10/session'
-
 # This value is added to the login URL as a query parameter named 'instanceId'
 # which can be used with a rule-based reverse proxy to achieve session affinity
 # without relying on browser cookies.
 #
 # instance_id = 'none'
-
-# Table defining the logging configuration. Use "logging = none" to disable logging.
-#
-# Changing this setting may require restarting the service.
-#
-# [logging]
-# level = 'info'
-# transport = 'file'
-# [logging.file]
-# filename = 'auth-svc.log'
-# maxsize = 1048576
-# maxfiles = 4
-#
-# Logging configuration specific to the user provisioning feature must be nested
-# within a table named 'scim' so that it may be configured appropriately.
-#
-# [logging.scim]
-# level = 'info'
-# transport = 'file'
-# format = 'json'
-# [logging.scim.file]
-# filename = 'provisioning.log'
-# maxsize = 1048576
-# maxfiles = 4
 
 # How long in seconds to wait for user to successfully authenticate.
 #
@@ -350,34 +289,6 @@ key_file = 'certs/server.key'
 # The URL of a redis server which will be used to cache session data.
 #
 # redis_url = undefined
-
-# Table that defines the configuration for use with Redis Sentinel. See
-# sentinel.config.cjs for an example. Available options are documented at
-# https://github.com/luin/ioredis (note that the original names are in
-# "camelCase" while here they are camel_case instead, either will work).
-#
-# Changing this setting may require restarting the service.
-#
-# [sentinel_config]
-# name = 'mymaster'
-# sentinel_password = 'keyboard cat'
-# sentinels = [
-#   { host = '192.168.56.31', port = 26379 },
-#   { host = '192.168.56.32', port = 26379 },
-#   { host = '192.168.56.33', port = 26379 }
-# ]
-#
-# [sentinel_config.tls]
-# cert = 'containers/redis/client.crt'
-# key = 'containers/redis/client.key'
-# ca = ['containers/redis/ca.crt']
-# reject_unauthorized = false
-#
-# [sentinel_config.sentinel_tls]
-# cert = 'containers/redis/client.crt'
-# key = 'containers/redis/client.key'
-# ca = ['containers/redis/ca.crt']
-# reject_unauthorized = false
 
 # Time to live for cached requests and user profile data, in seconds. Defaults
 # to five minutes (300 seconds). This applies to both the in-memory cache as
@@ -538,10 +449,103 @@ key_file = 'certs/server.key'
 #
 # status_enabled = true
 
+# If set to 'true' (the default) then the / (home page) route will be enabled.
+#
+# home_page_enabled = true
+
 # If set to true, the user provisioning feature will allow the client to rename
 # user accounts, which normally can be very detrimental.
 #
 # allow_user_rename = false
+
+# An array of tables containing the configuration for multiple identity
+# providers. See the documentation for examples and all of the available
+# property names. Note that an array of tables of indicated by the double
+# brackets around the table name.
+#
+# [[auth_providers]]
+# issuer_uri = 'https://oidc.example.com'
+# client_id = 'client-id'
+# client_secret = 'client-secret'
+#
+# [[auth_providers]]
+# sp_entity_id = 'urn:example:sp'
+# want_assertion_signed = false
+# metadata_url = 'https://saml.example.com'
+
+# Tables that define SAML service providers that will be connecting to the
+# authentication service. Note that the SAML entity identifiers should be
+# wrapped in single-quotes (') to avoid interpretation by the TOML parser.
+#
+# [idp_config.'urn:swarm-example:sp']
+# acs_url = 'https://swarm.example.com/api/v10/session'
+#
+# [idp_config.'http://hth.example.com/account/saml/hth/metadata']
+# acs_url = 'https://hth.example.com/account/saml/hth/consume'
+#
+# [idp_config.'urn:swarm-201?.*:sp']
+# acs_url = 'https://swarm.example.com/login'
+#
+# [idp_config.'urn:swarm-group:sp']
+# acs_urls = [
+#   'http://swarm.example.com/chicago/api/v10/session',
+#   'http://swarm.example.com/tokyo/api/v10/session'
+# ]
+#
+# [idp_config.'urn:swarm-cluster:sp']
+# acs_url_re = 'https://swarm\.example\.com/[^/]+/api/v10/session'
+
+# Table defining the logging configuration. Use "logging = none" to disable logging.
+#
+# Changing this setting may require restarting the service.
+#
+# [logging]
+# level = 'info'
+# transport = 'file'
+# [logging.file]
+# filename = 'auth-svc.log'
+# maxsize = 1048576
+# maxfiles = 4
+#
+# Logging configuration specific to the user provisioning feature must be nested
+# within a table named 'scim' so that it may be configured appropriately.
+#
+# [logging.scim]
+# level = 'info'
+# transport = 'file'
+# format = 'json'
+# [logging.scim.file]
+# filename = 'provisioning.log'
+# maxsize = 1048576
+# maxfiles = 4
+
+# Table that defines the configuration for use with Redis Sentinel. See
+# sentinel.config.cjs for an example. Available options are documented at
+# https://github.com/luin/ioredis (note that the original names are in
+# "camelCase" while here they are camel_case instead, either will work).
+#
+# Changing this setting may require restarting the service.
+#
+# [sentinel_config]
+# name = 'mymaster'
+# sentinel_password = 'keyboard cat'
+# sentinels = [
+#   { host = '192.168.56.31', port = 26379 },
+#   { host = '192.168.56.32', port = 26379 },
+#   { host = '192.168.56.33', port = 26379 }
+# ]
+#
+# [sentinel_config.tls]
+# cert = 'containers/redis/client.crt'
+# key = 'containers/redis/client.key'
+# ca = ['containers/redis/ca.crt']
+# reject_unauthorized = false
+#
+# [sentinel_config.sentinel_tls]
+# cert = 'containers/redis/client.crt'
+# key = 'containers/redis/client.key'
+# ca = ['containers/redis/ca.crt']
+# reject_unauthorized = false
 
 #
 # User provisioning configuration that supports multiple cloud service providers

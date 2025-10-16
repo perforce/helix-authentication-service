@@ -93,7 +93,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 13)
+      assert.lengthOf(settings, 14)
       assert.equal(settings.get('NAME1'), 'VALUE1')
       assert.isUndefined(settings.get('ADMIN_USERNAME'))
       assert.isFalse(settings.has('KEY'))
@@ -156,7 +156,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 0)
       assert.isTrue(settings.has('CERT_FILE'))
@@ -181,7 +181,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 2)
       // providers sorted by label...
@@ -213,7 +213,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 2)
       assert.equal(providers[0]['protocol'], 'oidc')
@@ -236,7 +236,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       const providers = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(providers, 0)
       assert.isTrue(readStub.calledOnce)
@@ -269,7 +269,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       assert.isFalse(settings.has('SP_CERT_FILE'))
       assert.isFalse(settings.has('SP_KEY_FILE'))
       assert.isTrue(settings.has('CERT_FILE'))
@@ -305,7 +305,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       assert.isFalse(settings.has('OIDC_CLIENT_KEY_FILE'))
       assert.isFalse(settings.has('OIDC_CLIENT_CERT_FILE'))
       const providers = settings.get('AUTH_PROVIDERS')
@@ -344,7 +344,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(actual, 1)
@@ -376,7 +376,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(actual, 1)
@@ -408,7 +408,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(actual, 1)
@@ -446,7 +446,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       assert.isTrue(settings.has('AUTH_PROVIDERS'))
       const actual = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(actual, 1)
@@ -473,7 +473,7 @@ describe('ReadConfiguration use case', function () {
       // act
       const settings = await usecase()
       // assert
-      assert.lengthOf(settings, 12)
+      assert.lengthOf(settings, 13)
       const actual = settings.get('AUTH_PROVIDERS')
       assert.lengthOf(actual, 1)
       assert.equal(actual[0]['protocol'], 'saml')
