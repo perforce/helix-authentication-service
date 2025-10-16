@@ -1016,6 +1016,7 @@ The user provisioning feature will need the Helix Core Server address
 and credentials for a super user that can manage users and groups.
 
 `)
+  await sourceP4settings()
   await promptForP4port()
   while ((await checkHelixServer()) !== 0) {
     await promptForP4port()
@@ -1600,7 +1601,6 @@ async function main() {
   } else if ((await ensureReadiness()) !== 0) {
     process.exitCode = 1
   } else {
-    await sourceP4settings()
     if (INTERACTIVE || DEBUG) {
       displayArguments()
     }
