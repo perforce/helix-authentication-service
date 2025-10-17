@@ -278,8 +278,8 @@ async function ensureReadiness() {
     return 1
   }
 
-  if (process.version.match(/v(18|20|22)\./) === null) {
-    error('Node.js v18, v20, or v22 is required to run this script.')
+  if (process.version.match(/v(20|22)\./) === null) {
+    error('Node.js v20 or v22 is required to run this script.')
     error('Please run install.sh to install dependencies.')
     return 1
   }

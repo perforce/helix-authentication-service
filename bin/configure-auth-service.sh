@@ -26,8 +26,8 @@ function warning() {
 
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
-    if ! command -v node >/dev/null 2>&1 || ! node --version | grep -Eq '^v(18|20|22)\.'; then
-        error 'Node.js v18, v20, or v22 is required to run the service.'
+    if ! command -v node >/dev/null 2>&1 || ! node --version | grep -Eq '^v(20|22)\.'; then
+        error 'Node.js v20 or v22 is required to run the service.'
         error 'Please run install.sh to install dependencies.'
         exit 1
     fi
