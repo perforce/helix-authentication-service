@@ -1,7 +1,7 @@
 //
 // Copyright 2024 Perforce Software
 //
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 
 //
 // REST API endpoints for interacting with access-controlled content, which
@@ -9,7 +9,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 // token expiring while accessing protected endpoints.
 //
 export const auth = createApi({
-  baseQuery: fetchBaseQuery({
+  baseQuery: retry(fetchBaseQuery({
     baseUrl: '/',
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token
@@ -19,6 +19,13 @@ export const auth = createApi({
       return headers
     },
     responseHandler: 'content-type'
+  }), {
+    maxRetries: 8,
+    backoff: () => {
+      return new Promise(resolve => {
+        setTimeout(resolve, 1000)
+      })
+    },
   }),
   tagTypes: ['Providers', 'Status'],
   endpoints: (builder) => ({
