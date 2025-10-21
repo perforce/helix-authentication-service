@@ -24,7 +24,7 @@ const { P4 } = p4pkg
 // mocha no longer exits after the tests complete.
 
 const settings = container.resolve('settingsRepository')
-const app = createApp()
+const app = await createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
 

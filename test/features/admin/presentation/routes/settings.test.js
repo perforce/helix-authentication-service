@@ -20,7 +20,7 @@ import container from 'helix-auth-svc/lib/container.js'
 const settings = container.resolve('settingsRepository')
 const temporary = container.resolve('temporaryRepository')
 const dotenv = container.resolve('configuredRepository')
-const app = createApp()
+const app = await createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
 const dotenvFile = 'test/test-dot.env'

@@ -16,7 +16,7 @@ import container from 'helix-auth-svc/lib/container.js'
 // mocha no longer exits after the tests complete.
 
 const settings = container.resolve('settingsRepository')
-const app = createApp()
+const app = await createApp()
 const server = createServer(app, settings)
 const agent = request.agent(server)
 

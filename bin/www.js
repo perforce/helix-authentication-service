@@ -18,10 +18,10 @@ const configuredRepository = container.resolve('configuredRepository')
 const temporaryRepository = container.resolve('temporaryRepository')
 const settings = container.resolve('settingsRepository')
 
-function startServer() {
+async function startServer() {
   // Get port from environment and store in Express.
   const port = normalizePort(getPort(settings))
-  const app = createApp()
+  const app = await createApp()
   app.set('port', port)
 
   // Create HTTP/S server.
@@ -108,7 +108,7 @@ function startServer() {
     })
   })
 }
-startServer()
+await startServer()
 
 // Register a lightweight usecase that will signal the process to refresh the
 // environment on demand, while allowing unit tests to quietly do nothing rather
