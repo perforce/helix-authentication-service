@@ -11,12 +11,12 @@ FROM rockylinux:8
 RUN yum -q -y install findutils sudo which
 
 # install the previous LTS version of Node.js
-ADD https://rpm.nodesource.com/setup_18.x setup_18.x
-RUN bash setup_18.x
+ADD https://rpm.nodesource.com/setup_22.x setup_22.x
+RUN bash setup_22.x
 RUN yum install -y nodejs
 
 RUN test -f /usr/bin/node
-RUN node --version | grep -Eq '^v18\.'
+RUN node --version | grep -Eq '^v22\.'
 
 # install (and configure) script(s) want to run as non-root user, and npm
 # expects a home directory that the user has permissions to write to
@@ -35,7 +35,7 @@ RUN tar zxf helix-authentication-service.tgz && \
 RUN ./helix-auth-svc/install.sh -n --no-ping --no-create-user --no-systemd --upgrade
 
 # ensure latest version of node has been installed as expected
-RUN node --version | grep -Eq '^v22\.'
+RUN node --version | grep -Eq '^v24\.'
 
 # run the configure script and set up OIDC
 RUN ./helix-auth-svc/bin/configure-auth-service.sh -n \

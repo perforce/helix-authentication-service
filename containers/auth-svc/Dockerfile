@@ -1,4 +1,4 @@
-FROM node:22-slim
+FROM node:24-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -q update --fix-missing && \

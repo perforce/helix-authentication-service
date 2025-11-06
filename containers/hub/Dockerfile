@@ -32,7 +32,7 @@ RUN apt-get update && \
 #
 # build the web-based admin interface
 #
-FROM node:22-slim AS webui
+FROM node:24-slim AS webui
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl git
@@ -44,7 +44,7 @@ RUN npx vite build --outDir private/admin --emptyOutDir
 #
 # build the smallest feasible image for the service
 #
-FROM node:22-slim
+FROM node:24-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install curl git

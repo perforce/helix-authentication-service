@@ -1,6 +1,6 @@
 %define p4release %(echo -n $ID_REL_BASE)
 %define p4change %(echo -n $ID_PATCH)
-%define hasversion %(echo -n "HAS/noarch/${ID_REL_BASE}/${ID_PATCH}")
+%define hasversion %(echo -n "P4AS/noarch/${ID_REL_BASE}/${ID_PATCH}")
 %define installprefix /opt/perforce/helix-auth-svc
 # CentOS 8 cleverly tries to include what we already have.
 %define __requires_exclude /usr/bin/node

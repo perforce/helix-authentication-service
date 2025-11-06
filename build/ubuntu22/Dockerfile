@@ -4,7 +4,7 @@ FROM ubuntu:22.04 AS ubuntu22_pkg_base
 #
 # Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8

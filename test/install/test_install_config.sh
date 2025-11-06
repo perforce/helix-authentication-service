@@ -32,7 +32,7 @@ fi
 
 # ensure latest version of node has been installed as expected
 test -f /usr/bin/node
-node --version | grep -Eq '^v22\.'
+node --version | grep -Eq '^v24\.'
 
 # ensure the systemd service is running
 sudo systemctl status helix-auth | grep -q 'Active: active' || { echo 'service not active' ; exit 1; }

@@ -59,7 +59,7 @@ Supported Platforms
 
 Requirements
 
-    Node.js v22 (LTS)
+    Node.js v24 (LTS)
 
 
 Documentation

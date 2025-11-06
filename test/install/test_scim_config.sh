@@ -32,7 +32,7 @@ p4dctl start -o '-p 0.0.0.0:1666' despot
 
 # ensure latest version of node has been installed as expected
 test -f /usr/bin/node
-node --version | grep -Eq '^v22\.'
+node --version | grep -Eq '^v24\.'
 
 # configure _without_ SCIM to ensure P4 settings are _not_ in the .env file
 ./helix-auth-svc/bin/configure-auth-service.sh -n \

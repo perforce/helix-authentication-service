@@ -4,7 +4,7 @@ FROM rockylinux:9 AS rocky9-build
 #
 # Should also set ID_REL_BASE and ID_PATCH using --build-arg option.
 #
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 
 # Enable package documentation as we need the Node.js license file.
 RUN sed -i '/nodocs/d' /etc/yum.conf
