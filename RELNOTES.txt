@@ -65,9 +65,8 @@ Requirements
 Documentation
 
     P4 Authentication Service Documentation at
-    https://www.perforce.com/manuals/helix-auth-svc/
-    details the steps for installation, upgrade, and configuration of the
-    authentication service.
+    https://www.perforce.com/manuals/helix-auth-svc/ details the steps for
+    installation, upgrade, and configuration of the authentication service.
 
 
 Installation
@@ -83,8 +82,8 @@ Installation
 
 Upgrade
 
-    The names of the configuration files for IDP_CONFIG_FILE and LOGGING
-    in releases prior to 2022.1 ended with the .js extension. With release
+    The names of the configuration files for IDP_CONFIG_FILE and LOGGING in
+    releases prior to 2022.1 ended with the .js extension. With release
     2022.1 the names must now be changed to end with the .cjs extension.
 
     Package upgrades from releases prior to 2022.1 on CentOS/RHEL systems
@@ -134,9 +133,9 @@ Bugs fixed in 2024.2.1 (2024.2/2646386) (2024/08/29)
         clients to use the authentication functionality.
 
     HAS-588 (Change #2645859)
-        SAML requests would fail if key file contained attribute values before
-        the encapsulation boundary ("keyInfo is not in PEM format or in base64
-        format").
+        SAML requests would fail if key file contained attribute values
+        before the encapsulation boundary ("keyInfo is not in PEM format or
+        in base64 format").
 
 ----------------------------------------------------------------------
 New functionality in 2024.2 (2024.2/2634404) (2024/08/05)
@@ -147,20 +146,20 @@ New functionality in 2024.2 (2024.2/2634404) (2024/08/05)
 
     HAS-547 (Change #2569160)
         Add /liveness route for orchestration systems such as Kubernetes.
-        Returns a 200 if the service, and its dependencies such as Redis, are
-        available to serve requests.
+        Returns a 200 if the service, and its dependencies such as Redis,
+        are available to serve requests.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2024.2 (2024.2/2634404) (2024/08/05)
 
     HAS-564 (Change #2597809)
         Certificate files (server.crt and server.key) are now treated as
-        configuration files by the packages, and will no longer be overwritten
-        after this release.
+        configuration files by the packages, and will no longer be
+        overwritten after this release.
 
     HAS-567 (Change #2599531)
-        No longer reset unrelated fields in users and groups when making changes
-        via the SCIM-based user provisioning feature.
+        No longer reset unrelated fields in users and groups when making
+        changes via the SCIM-based user provisioning feature.
 
 ----------------------------------------------------------------------
 Other changes in 2024.2 (2024.2/2634404) (2024/08/05)
@@ -178,8 +177,8 @@ Other changes in 2024.2 (2024.2/2634404) (2024/08/05)
 New functionality in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-230 (Change #2487461)
-        Support client certificate via HTTP header for use with a reverse proxy
-        that terminates the TLS connection.
+        Support client certificate via HTTP header for use with a reverse
+        proxy that terminates the TLS connection.
 
     HAS-434 (Change #2482025)
         Add support for the use of wildcards to specify the SP entity
@@ -191,14 +190,15 @@ New functionality in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-501 (Change #2507978)
         Support configuration via a TOML file named config.toml as an
-        alternative to using the .env file and its numerous supporting files.
+        alternative to using the .env file and its numerous supporting
+        files.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-489 (Change #2485834)
-        When not enabled, the static content for the administrative interface
-        will no longer be served to the client.
+        When not enabled, the static content for the administrative
+        interface will no longer be served to the client.
 
 ----------------------------------------------------------------------
 Other changes in 2024.1 (2024.1/2571580) (2024/03/13)
@@ -233,47 +233,47 @@ Other changes in 2023.2 (2023.2/2479541) (2023/08/24)
         Support for Node.js v14 has been removed from install script.
 
     HAS-466 (Change #2467457)
-        Configure script will write the bearer token to a file rather
-        than storing in the configuration file.
+	Configure script will write the bearer token to a file rather than
+        storing in the configuration file.
 
     HAS-468 (Change #2467458)
-        Configure script will put the p4 ticket as the P4PASSWD in the
-        .env configuration file.
+        Configure script will put the p4 ticket as the P4PASSWD in the .env
+        configuration file.
 
 ----------------------------------------------------------------------
 New functionality in 2023.1 (2023.1/2422401) (2023/03/24)
 
     HAS-216 (Change #2387345)
         New setting PROMPT_FOR_AUTHORIZATION that when set to any value will
-        prompt the user during the authentication process before proceeding to
-        the configured identity provider. This prevents phishing attacks.
+        prompt the user during the authentication process before proceeding
+        to the configured identity provider. This prevents phishing attacks.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2023.1 (2023.1/2422401) (2023/03/24)
 
     HAS-420 (Change #2415543)
-        Replace UNLINK Redis command usage with DEL to support older releases of
-        Redis, such as on CentOS 7.4 when installing Redis from the EPEL
-        repository. This fixes an issue in which the cached user object would
-        remain in the Redis store for up to 5 minutes rather than being removed
-        immediately.
+        Replace UNLINK Redis command usage with DEL to support older
+        releases of Redis, such as on CentOS 7.4 when installing Redis from
+        the EPEL repository. This fixes an issue in which the cached user
+        object would remain in the Redis store for up to 5 minutes rather
+        than being removed immediately.
 
 ----------------------------------------------------------------------
 Other changes in 2023.1 (2023.1/2422401) (2023/03/24)
 
     HAS-249 (Change #2373094)
         Support for the pm2 process manager was removed from the install and
-        configure scripts. The use of pm2 is still possible by writing your own
-        ecosystem configuration file.
+        configure scripts. The use of pm2 is still possible by writing your
+        own ecosystem configuration file.
 
     HAS-314 (Change #2373224)
         Packages for Ubuntu 16.04 are no longer provided.
 
     HAS-377 (Change #2371506)
-        The SAML_WANT_RESPONSE_SIGNED and SAML_WANT_ASSERTION_SIGNED settings
-        will now default to `true` such that the SAML response and assertion
-        from the identity provider must be signed. Previous releases only
-        required that one of these was signed.
+        The SAML_WANT_RESPONSE_SIGNED and SAML_WANT_ASSERTION_SIGNED
+        settings will now default to `true` such that the SAML response and
+        assertion from the identity provider must be signed. Previous
+        releases only required that one of these was signed.
 
 ----------------------------------------------------------------------
 New functionality in 2022.2 (2022.2/2369727) (2022/11/14)
@@ -283,16 +283,16 @@ New functionality in 2022.2 (2022.2/2369727) (2022/11/14)
         Sentinel, allowing failover support with multiple Redis instances.
 
     HAS-282 (Change #2252496)
-        New acsUrls and acsUrlRe settings in the IDP_CONFIG_FILE to allow for
-        multiple Swarm instances connecting with the same SP entity ID.
+        New acsUrls and acsUrlRe settings in the IDP_CONFIG_FILE to allow
+        for multiple Swarm instances connecting with the same SP entity ID.
 
     HAS-298 (Change #2266157)
         New setting OIDC_TOKEN_SIGNING_ALGO to specify the signing algorithm
         used by the identity provider to sign the ID token.
 
     HAS-300 (Change #2299350)
-        New setting named OIDC_SELECT_ACCOUNT that will enable users logging in
-        via OIDC to select an account with which to authenticate.
+        New setting named OIDC_SELECT_ACCOUNT that will enable users logging
+        in via OIDC to select an account with which to authenticate.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2022.2 (2022.2/2369727) (2022/11/14)
@@ -334,8 +334,8 @@ Bugs fixed in 2022.1 (2022.1/2354333) (2022/06/09)
 New functionality in 2021.2 (2021.2/2186511) (2021/09/23)
 
     HAS-217 (Change #2148535)
-        Allow using [] for setting multiple values for SAML_AUTHN_CONTEXT
-        in the .env configuration file.
+        Allow using [] for setting multiple values for SAML_AUTHN_CONTEXT in
+        the .env configuration file.
 
     HAS-218 (Change #2147565)
         Support PFX certificate files as well as a passphrase for the
@@ -349,15 +349,15 @@ Bugs fixed in 2021.2 (2021.2/2186511) (2021/09/23)
         service in such a manner as to allow a SAML MITM attack.
 
     HAS-226 (Change #2168428)
-        Configure script now recommends setting IDP_CERT_FILE when configuring
-        for SAML to avoid a possible MITM attack.
+        Configure script now recommends setting IDP_CERT_FILE when
+        configuring for SAML to avoid a possible MITM attack.
 
 ----------------------------------------------------------------------
 New functionality in 2021.1 (2021.1/2135349) (2021/05/27)
 
     HAS-187 (Change #2090469)
-        New setting SAML_IDP_METADATA_FILE to specify IdP metadata from
-        a file, as an alternative to the SAML_IDP_METADATA_URL setting.
+        New setting SAML_IDP_METADATA_FILE to specify IdP metadata from a
+        file, as an alternative to the SAML_IDP_METADATA_URL setting.
 
 ----------------------------------------------------------------------
 Other changes in 2021.1 (2021.1/2135349) (2021/05/27)
