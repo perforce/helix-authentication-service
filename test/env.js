@@ -7,4 +7,4 @@ import dotenv from 'dotenv'
 // environment is properly prepared, despite using the early-binding import.
 
 // Override any existing .env file by loading our test configuration.
-dotenv.config({ quiet: false, path: 'test/dot.env' })
+dotenv.config({ quiet: true, path: 'test/dot.env' })
