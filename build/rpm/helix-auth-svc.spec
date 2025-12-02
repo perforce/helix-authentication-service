@@ -65,7 +65,7 @@ cp example.toml %{buildroot}%{installprefix}/example.toml
 cp logging.config.cjs %{buildroot}%{installprefix}/logging.config.cjs
 cp sentinel.config.cjs %{buildroot}%{installprefix}/sentinel.config.cjs
 cp package-lock.json %{buildroot}%{installprefix}/package-lock.json
-sed -e "s/\"2025.1\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
+sed -e "s/\"2025.2\"/\"${ID_REL_BASE}-${ID_PATCH}\"/" \
     -e "s|+MAIN+|%{hasversion}|" \
     package.json > %{buildroot}%{installprefix}/package.json
 cp LICENSE.txt %{buildroot}%{installprefix}/LICENSE.txt

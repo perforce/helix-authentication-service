@@ -1,6 +1,6 @@
 {
   "name": "helix-auth-svc",
-  "version": "2025.1",
+  "version": "2025.2",
   "description": "P4 Authentication Service: +MAIN+",
   "bin": {
     "auth-svc": "./bin/www.js"

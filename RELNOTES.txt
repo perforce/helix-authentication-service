@@ -1,6 +1,6 @@
                             Release Notes for
                         P4 Authentication Service (P4AS)
-                            Version 2025.1
+                            Version 2025.2
 
 
 Introduction
@@ -47,8 +47,9 @@ Supported Platforms
     Amazon Linux (x86_64)
         2023
 
-    P4AS is known to work on Amazon Linux when installed and configured using the
-    provided shell scripts. Package installation may work but is not supported.
+    P4AS is known to work on Amazon Linux 2023 when installed and configured
+    using the provided shell scripts. Package installation may work but is not
+    supported.
 
     Windows (x86_64)
         10 Pro
@@ -103,6 +104,55 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-195 (Change #2806856)
+        Add untested/undoc support for outbound proxy via the proxy-from-env
+        JavaScript module (https://github.com/Rob--W/proxy-from-env).
+
+    HAS-637 (Change #2840402)
+        Allow hiding the home page via a configuration setting.
+
+----------------------------------------------------------------------
+Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-606 (Change #2841753)
+        Setting PROMPT_FOR_AUTHORIZATION no longer results in an infinite loop
+        during the authentication process in which the user is continually
+        prompted to allow authentication to proceed.
+
+    HAS-631 (Change #2839547)
+        Ignore old user and group provisioning key values when upgrading from
+        earlier releases.
+
+    HAS-639 (Change #2839258)
+        Service will not request client certificates if configuration setting
+        ASSUME_CLIENT_AUTHORIZED has been defined.
+
+    HAS-645 (Change #2814147)
+        Service honors excludedAttributes for /Users and /Groups via SCIM.
+
+    HAS-632 (Change #2778683)
+        Ignore "user-" prefix when updating Perforce user via SCIM.
+
+----------------------------------------------------------------------
+Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-625 (Change #2839582)
+        Helix Authentication Service is now named P4 Authentication Service, and
+        HAS is now P4AS. Package names and configuration settings will still use
+        the original names for backward compatibility.
+
+    HAS-655 (Change #2849784)
+        Update to Node.js v24 in install scripts and Linux packages.
+
+    HAS-620 (Change #2840399)
+        Remove support for Ubuntu 20.04.
+
+    HAS-575 (Change #2840438)
+        Remove support for Node.js v18.
 
 ----------------------------------------------------------------------
 New functionality in 2025.1 (2025.1/2758427) (2025/05/05)
