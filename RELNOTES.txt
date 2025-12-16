@@ -106,7 +106,7 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2025.2 (2025.2/2867560) (2025/12/10)
 
     HAS-195 (Change #2806856)
         Add untested/undoc support for outbound proxy via the proxy-from-env
@@ -116,7 +116,7 @@ New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         Allow hiding the home page via a configuration setting.
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2025.2 (2025.2/2867560) (2025/12/10)
 
     HAS-606 (Change #2841753)
         Setting PROMPT_FOR_AUTHORIZATION no longer results in an infinite loop
@@ -138,7 +138,7 @@ Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         Ignore "user-" prefix when updating Perforce user via SCIM.
 
 ----------------------------------------------------------------------
-Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Other changes in 2025.2 (2025.2/2867560) (2025/12/10)
 
     HAS-625 (Change #2839582)
         Helix Authentication Service is now named P4 Authentication Service, and
