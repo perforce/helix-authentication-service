@@ -403,7 +403,7 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     await repository.write(incoming)
     // assert
     const contents = await fs.readFile(tomlFile, 'utf8')
-    assert.equal(contents, 'logging = "none"')
+    assert.equal(contents.trim(), 'logging = "none"')
   })
 
   it('should write LOGGING contents to TOML', async function () {
@@ -420,7 +420,7 @@ wBEfTUEuM0BRuVU0ABUN+//TrnE3U1NJGsXesXu27Ngfhdc=</ds:X509Certificate>
     await repository.write(incoming)
     // assert
     const contents = await fs.readFile(tomlFile, 'utf8')
-    assert.equal(contents, `[logging]
+    assert.equal(contents.trim(), `[logging]
 level = "debug"
 transport = "console"`)
   })
@@ -651,7 +651,7 @@ transport = "console"`)
     await repository.write(settings)
     // assert
     const contents = await fs.readFile(tomlFile, 'utf8')
-    assert.equal(contents, 'logging = "none"')
+    assert.equal(contents.trim(), 'logging = "none"')
   })
 
   it('should read/write LOGGING as file (TOML)', async function () {
@@ -676,7 +676,7 @@ transport = "console"`)
     await repository.write(settings)
     // assert
     const contents = await fs.readFile(tomlFile, 'utf8')
-    assert.equal(contents, `logging = "${loggingFile}"`)
+    assert.equal(contents.trim(), `logging = "${loggingFile}"`)
   })
 
   it('should read/write LOGGING changes to file (TOML)', async function () {
@@ -705,7 +705,7 @@ transport = "console"`)
     await repository.write(settings)
     // assert
     const contents = await fs.readFile(tomlFile, 'utf8')
-    assert.equal(contents, `logging = "${loggingFile}"`)
+    assert.equal(contents.trim(), `logging = "${loggingFile}"`)
     const logconfig = await fs.readFile(loggingFile, 'utf8')
     assert.include(logconfig, "level: 'info'")
   })

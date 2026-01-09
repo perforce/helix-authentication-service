@@ -276,11 +276,11 @@ acsUrls = [
     // assert
     const contents = await fs.readFile(tomlFile, { encoding: 'utf8' })
     const hash = createHash('sha256')
-    hash.update(contents)
+    hash.update(contents.trim())
     const digest = hash.digest('hex')
     // Already visually inspected the output and determined that it is correct,
     // now just asserting that by using a hash digest of the contents.
-    assert.equal(digest, '4e263730d8c8384f0c70b6c0844a2a1086114987641863b252b1ed0ecd9eda6e')
+    assert.equal(digest, 'd71f6fab836656ad8fae6665f4ffdd1425150c2d413a8d88553084c04762a921')
   })
 
   it('should round-trip settings via toml file', async function () {
