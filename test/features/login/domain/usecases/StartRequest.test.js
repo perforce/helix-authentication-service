@@ -32,7 +32,7 @@ describe('StartRequest use case', function () {
     const request = usecase('joe', false)
     // assert
     assert.isNotNull(request.id)
-    assert.equal(request.id.length, 26)
+    assert.equal(request.id.length, 22)
     assert.equal(request.userId, 'joe')
     assert.isFalse(request.forceAuthn)
     assert.isTrue(stub.calledOnce)

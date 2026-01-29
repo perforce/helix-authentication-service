@@ -94,7 +94,7 @@ setTimeout(function () {
           .trustLocalhost(true)
           .expect(200)
           .expect(res => {
-            assert.equal(res.body.request.length, 26)
+            assert.equal(res.body.request.length, 22)
             assert.isTrue(res.body.loginUrl.startsWith('https://localhost:3333/'))
             const suffix = `/${res.body.request}?instanceId=none`
             assert.isTrue(res.body.loginUrl.endsWith(suffix))
@@ -114,7 +114,7 @@ setTimeout(function () {
           .trustLocalhost(true)
           .expect(200)
           .expect(res => {
-            assert.equal(res.body.request.length, 26)
+            assert.equal(res.body.request.length, 22)
             assert.isTrue(res.body.loginUrl.startsWith('https://localhost:3333/'))
             const suffix = `/${res.body.request}?instanceId=trueU`
             assert.isTrue(res.body.loginUrl.endsWith(suffix))
