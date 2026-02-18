@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import RemoveGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/RemoveGroup.js'
 import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
 
@@ -17,7 +18,8 @@ describe('RemoveGroup use case', function () {
       usecase = RemoveGroup({ 
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 
@@ -29,17 +31,26 @@ describe('RemoveGroup use case', function () {
       assert.throws(() => RemoveGroup({
         getDomainLeader: null,
         getDomainMembers: () => [],
-        entityRepository: {}
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
       }), AssertionError)
       assert.throws(() => RemoveGroup({
         getDomainLeader: () => { return null },
         getDomainMembers: null,
-        entityRepository: {}
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
       }), AssertionError)
       assert.throws(() => RemoveGroup({
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
-        entityRepository: null
+        entityRepository: null,
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => RemoveGroup({
+        getDomainLeader: () => { return null },
+        getDomainMembers: () => [],
+        entityRepository: {},
+        entityRepositoryLock: null
       }), AssertionError)
       try {
         await usecase(null)
@@ -99,7 +110,8 @@ describe('RemoveGroup use case', function () {
             domains: ['canine']
           }
         ],
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 

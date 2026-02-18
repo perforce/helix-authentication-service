@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
 import GetUser from 'helix-auth-svc/lib/features/scim/domain/usecases/GetUser.js'
 import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
@@ -17,7 +18,8 @@ describe('GetUser use case', function () {
       const entityRepository = new EntityRepository()
       usecase = GetUser({
         getDomainLeader: () => { return null },
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 
@@ -26,8 +28,21 @@ describe('GetUser use case', function () {
     })
 
     it('should raise an error for invalid input', async function () {
-      assert.throws(() => GetUser({ getDomainLeader: {}, entityRepository: null }), AssertionError)
-      assert.throws(() => GetUser({ getDomainLeader: null, entityRepository: {} }), AssertionError)
+      assert.throws(() => GetUser({
+        getDomainLeader: {},
+        entityRepository: null,
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => GetUser({
+        getDomainLeader: null,
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => GetUser({
+        getDomainLeader: {},
+        entityRepository: {},
+        entityRepositoryLock: null
+      }), AssertionError)
       try {
         await usecase(null)
         assert.fail('should have raised error')
@@ -81,7 +96,8 @@ describe('GetUser use case', function () {
             leader: ['canine']
           }
         },
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 

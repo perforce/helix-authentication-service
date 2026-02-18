@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
 import AddUser from 'helix-auth-svc/lib/features/scim/domain/usecases/AddUser.js'
 import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
@@ -18,7 +19,8 @@ describe('AddUser use case', function () {
       usecase = AddUser({
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 
@@ -30,17 +32,26 @@ describe('AddUser use case', function () {
       assert.throws(() => AddUser({
         getDomainLeader: null,
         getDomainMembers: () => [],
-        entityRepository: {}
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
       }), AssertionError)
       assert.throws(() => AddUser({
         getDomainLeader: () => { return null },
         getDomainMembers: null,
-        entityRepository: {}
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
       }), AssertionError)
       assert.throws(() => AddUser({
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
-        entityRepository: null
+        entityRepository: null,
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => AddUser({
+        getDomainLeader: () => { return null },
+        getDomainMembers: () => [],
+        entityRepository: {},
+        entityRepositoryLock: null
       }), AssertionError)
       try {
         await usecase(null)
@@ -120,7 +131,8 @@ describe('AddUser use case', function () {
             domains: ['canine']
           }
         ],
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 

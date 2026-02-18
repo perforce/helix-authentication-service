@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
 import { MutabilityError } from 'helix-auth-svc/lib/features/scim/domain/errors/MutabilityError.js'
@@ -23,6 +24,7 @@ describe('PatchUser use case', function () {
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
         entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock(),
         settingsRepository
       })
     })
@@ -36,25 +38,36 @@ describe('PatchUser use case', function () {
         getDomainLeader: null,
         getDomainMembers: () => [],
         entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock(),
         settingsRepository: {}
       }), AssertionError)
       assert.throws(() => PatchUser({
         getDomainLeader: () => { return null },
         getDomainMembers: null,
         entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock(),
         settingsRepository: {}
       }), AssertionError)
       assert.throws(() => PatchUser({
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
         entityRepository: null,
+        entityRepositoryLock: new ReadWriteLock(),
         settingsRepository: {}
       }), AssertionError)
       assert.throws(() => PatchUser({
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
         entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock(),
         settingsRepository: null
+      }), AssertionError)
+      assert.throws(() => PatchUser({
+        getDomainLeader: () => { return null },
+        getDomainMembers: () => [],
+        entityRepository: {},
+        entityRepositoryLock: null,
+        settingsRepository: {}
       }), AssertionError)
       try {
         await usecase(null, null)
@@ -335,6 +348,7 @@ describe('PatchUser use case', function () {
           }
         ],
         entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock(),
         settingsRepository
       })
     })

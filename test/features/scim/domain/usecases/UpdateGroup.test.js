@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { Group } from 'helix-auth-svc/lib/features/scim/domain/entities/Group.js'
 import { MutabilityError } from 'helix-auth-svc/lib/features/scim/domain/errors/MutabilityError.js'
 import { NoSuchGroupError } from 'helix-auth-svc/lib/features/scim/domain/errors/NoSuchGroupError.js'
@@ -20,7 +21,8 @@ describe('UpdateGroup use case', function () {
       usecase = UpdateGroup({
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 
@@ -32,17 +34,26 @@ describe('UpdateGroup use case', function () {
       assert.throws(() => UpdateGroup({
         getDomainLeader: null,
         getDomainMembers: () => [],
-        entityRepository: {}
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
       }), AssertionError)
       assert.throws(() => UpdateGroup({
         getDomainLeader: () => { return null },
         getDomainMembers: null,
-        entityRepository: {}
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
       }), AssertionError)
       assert.throws(() => UpdateGroup({
         getDomainLeader: () => { return null },
         getDomainMembers: () => [],
-        entityRepository: null
+        entityRepository: null,
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => UpdateGroup({
+        getDomainLeader: () => { return null },
+        getDomainMembers: () => [],
+        entityRepository: {},
+        entityRepositoryLock: null
       }), AssertionError)
       try {
         await usecase(null, null)
@@ -154,7 +165,8 @@ describe('UpdateGroup use case', function () {
             domains: ['canine']
           }
         ],
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 

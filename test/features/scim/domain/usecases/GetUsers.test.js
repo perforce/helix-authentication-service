@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { Query } from 'helix-auth-svc/lib/features/scim/domain/entities/Query.js'
 import { User } from 'helix-auth-svc/lib/features/scim/domain/entities/User.js'
 import GetUsers from 'helix-auth-svc/lib/features/scim/domain/usecases/GetUsers.js'
@@ -18,7 +19,8 @@ describe('GetUsers use case', function () {
       const entityRepository = new EntityRepository()
       usecase = GetUsers({
         getDomainLeader: () => { return null },
-        entityRepository
+        entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 
@@ -27,8 +29,21 @@ describe('GetUsers use case', function () {
     })
 
     it('should raise an error for invalid input', async function () {
-      assert.throws(() => GetUsers({ getDomainLeader: {}, entityRepository: null }), AssertionError)
-      assert.throws(() => GetUsers({ getDomainLeader: null, entityRepository: {} }), AssertionError)
+      assert.throws(() => GetUsers({
+        getDomainLeader: {},
+        entityRepository: null,
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => GetUsers({
+        getDomainLeader: null,
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => GetUsers({
+        getDomainLeader: {},
+        entityRepository: {},
+        entityRepositoryLock: null
+      }), AssertionError)
       try {
         await usecase(null)
         assert.fail('should have raised error')
@@ -171,7 +186,8 @@ describe('GetUsers use case', function () {
             leader: ['canine']
           }
         },
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 

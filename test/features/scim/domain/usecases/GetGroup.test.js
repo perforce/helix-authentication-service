@@ -5,6 +5,7 @@ import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import sinon from 'sinon'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { Group } from 'helix-auth-svc/lib/features/scim/domain/entities/Group.js'
 import GetGroup from 'helix-auth-svc/lib/features/scim/domain/usecases/GetGroup.js'
 import { EntityRepository } from 'helix-auth-svc/lib/features/scim/domain/repositories/EntityRepository.js'
@@ -17,7 +18,8 @@ describe('GetGroup use case', function () {
       const entityRepository = new EntityRepository()
       usecase = GetGroup({
         getDomainLeader: () => { return null },
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 
@@ -26,8 +28,21 @@ describe('GetGroup use case', function () {
     })
 
     it('should raise an error for invalid input', async function () {
-      assert.throws(() => GetGroup({ getDomainLeader: {}, entityRepository: null }), AssertionError)
-      assert.throws(() => GetGroup({ getDomainLeader: null, entityRepository: {} }), AssertionError)
+      assert.throws(() => GetGroup({
+        getDomainLeader: {},
+        entityRepository: null,
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => GetGroup({
+        getDomainLeader: null,
+        entityRepository: {},
+        entityRepositoryLock: new ReadWriteLock()
+      }), AssertionError)
+      assert.throws(() => GetGroup({
+        getDomainLeader: {},
+        entityRepository: {},
+        entityRepositoryLock: null
+      }), AssertionError)
       try {
         await usecase(null)
         assert.fail('should have raised error')
@@ -84,7 +99,8 @@ describe('GetGroup use case', function () {
             leader: ['canine']
           }
         },
-        entityRepository: entityRepository
+        entityRepository: entityRepository,
+        entityRepositoryLock: new ReadWriteLock()
       })
     })
 

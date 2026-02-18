@@ -6,6 +6,7 @@ import { assert } from 'chai'
 import { after, before, describe, it } from 'mocha'
 import * as helpers from 'helix-auth-svc/test/helpers.js'
 import * as runner from 'helix-auth-svc/test/runner.js'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { GroupModel } from 'helix-auth-svc/lib/features/scim/data/models/GroupModel.js'
 import { UserModel } from 'helix-auth-svc/lib/features/scim/data/models/UserModel.js'
@@ -567,7 +568,11 @@ describe('HelixEntity repository', function () {
       const tUser = new User(userId, 'joeuser@work.com', 'Joe E. User')
       await repository.addUser(tUser)
       // act
-      const usecase = GetUsers({ getDomainLeader: () => null, entityRepository: repository })
+      const usecase = GetUsers({
+        getDomainLeader: () => null,
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
+      })
       const query = new Query({
         filter: 'userName eq "emailuser@example.com"'
       })
@@ -684,7 +689,8 @@ describe('HelixEntity repository', function () {
       const usecase = PatchGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       const patch = {
         schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
@@ -800,7 +806,8 @@ describe('HelixEntity repository', function () {
       const usecase = PatchGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       // act
       const patch = {
@@ -1174,7 +1181,8 @@ describe('HelixEntity repository', function () {
       const usecase = AddGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       // act
       const incoming = new Group('group-patchgroup', [])
@@ -1204,7 +1212,8 @@ describe('HelixEntity repository', function () {
       const usecase = PatchGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       // act
       const patch = {
@@ -1230,7 +1239,8 @@ describe('HelixEntity repository', function () {
       const usecase = PatchGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       // act
       const patch = {
@@ -1259,7 +1269,8 @@ describe('HelixEntity repository', function () {
       const usecase = PatchGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       // act
       const patch = {
@@ -1290,7 +1301,8 @@ describe('HelixEntity repository', function () {
       const usecase = PatchGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       // act
       const patch = {
@@ -1323,7 +1335,8 @@ describe('HelixEntity repository', function () {
       const usecase = PatchGroup({
         getDomainLeader: () => null,
         getDomainMembers: () => [],
-        entityRepository: repository
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
       })
       // act
       //
@@ -1360,6 +1373,56 @@ describe('HelixEntity repository', function () {
       assert.lengthOf(actual.members, 1)
       assert.isUndefined(updated.members.find((e) => e.value === 'user-joe'))
       assert.isOk(updated.members.find((e) => e.value === 'user-susan'))
+    })
+
+    it('should add many members to the group', async function () {
+      // attempt to reproduce the issue of overlapping operations resulting in
+      // missing members once the entire set of changes has completed
+      this.timeout(60000)
+
+      // arrange
+      const addGroup = AddGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
+      })
+      const incoming = new Group('group-many-users', [])
+      const updated = await addGroup(incoming)
+      assert.equal(updated.displayName, 'many-users')
+      assert.lengthOf(updated.members, 0)
+
+      // act
+      const patchGroup = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
+      })
+      const promises = []
+      // just 20 is enough to reproduce the problem, where instead of 20 members
+      // there might be as few as 2 (tried with 100 and only 3 were added)
+      for (let index = 1; index <= 20; index++) {
+        promises.push(new Promise((resolve, reject) => {
+          const patch = {
+            schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+            Operations: [{
+              op: 'Add',
+              path: 'members',
+              value: [{ value: 'user-many-' + index }]
+            }]
+          }
+          patchGroup('group-many-users', patch).then(resolve).catch(reject)
+        }))
+      }
+      assert.lengthOf(promises, 20)
+      const results = await Promise.allSettled(promises)
+      assert.lengthOf(results, 20)
+
+      // assert
+      const actual = await repository.getGroup('many-users')
+      assert.equal(actual.displayName, 'many-users')
+      assert.lengthOf(actual.members, 20)
     })
   })
 })

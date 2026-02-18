@@ -4,6 +4,7 @@
 import { AssertionError } from 'node:assert'
 import { assert } from 'chai'
 import { before, describe, it } from 'mocha'
+import { ReadWriteLock } from 'helix-auth-svc/lib/locking.js'
 import { GroupModel } from 'helix-auth-svc/lib/features/scim/data/models/GroupModel.js'
 import { UserModel } from 'helix-auth-svc/lib/features/scim/data/models/UserModel.js'
 import { Query } from 'helix-auth-svc/lib/features/scim/domain/entities/Query.js'
@@ -212,7 +213,11 @@ describe('InMemoryEntity repository', function () {
     const tUser = new User(userId, 'joeuser@work.com', 'Joe E. User')
     await repository.addUser(tUser)
     // act
-    const usecase = GetUsers({ getDomainLeader: () => null, entityRepository: repository })
+    const usecase = GetUsers({
+      getDomainLeader: () => null,
+      entityRepository: repository,
+      entityRepositoryLock: new ReadWriteLock()
+    })
     const query = new Query({
       filter: 'userName eq "emailuser@example.com"'
     })
