@@ -20,13 +20,33 @@ describe('DotenvSource', function () {
     assert.isFalse(repository.supportsCollections())
   })
 
-  it('should return empty set for missing file', async function () {
+  it('should return process environment for missing file', async function () {
     // arrange
+    process.env.HAS_666_TEST_VALUE = 'logging.config.cjs'
     const repository = new DotenvSource({ dotenvFile: 'nosuchfile.env' })
-    // act
-    const settings = await repository.read()
-    // assert
-    assert.isEmpty(settings)
+    try {
+      // act
+      const settings = await repository.read()
+      // assert: falls back to the process environment so that file-based
+      // settings can still be resolved when no .env file exists (HAS-666)
+      assert.equal(settings.get('HAS_666_TEST_VALUE'), 'logging.config.cjs')
+    } finally {
+      delete process.env.HAS_666_TEST_VALUE
+    }
+  })
+
+  it('should return process environment synchronously for missing file', function () {
+    // arrange
+    process.env.HAS_666_TEST_VALUE = 'logging.config.cjs'
+    const repository = new DotenvSource({ dotenvFile: 'nosuchfile.env' })
+    try {
+      // act
+      const settings = repository.readSync()
+      // assert
+      assert.equal(settings.get('HAS_666_TEST_VALUE'), 'logging.config.cjs')
+    } finally {
+      delete process.env.HAS_666_TEST_VALUE
+    }
   })
 
   it('should return empty set for "empty" file', async function () {

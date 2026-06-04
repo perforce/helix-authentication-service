@@ -27,14 +27,31 @@ describe('BasicConfigRepository', function () {
     }
   })
 
-  it('should return empty set for missing .env file', async function () {
-    // arrange
+  it('should resolve file-based LOGGING from env without a .env file', async function () {
+    // arrange: simulate a container deployment that configures the service
+    // using only environment variables and has no .env file (HAS-666). The
+    // LOGGING setting names a file whose contents must be read into the value.
+    const loggingFile = temporaryFile({ extension: 'cjs' })
+    const loggingContents = `module.exports = { level: 'debug', transport: 'console' }`
+    await fs.writeFile(loggingFile, loggingContents)
+    const savedLogging = process.env.LOGGING
+    process.env.LOGGING = loggingFile
     const source = new DotenvSource({ dotenvFile: 'nosuchfile.env' })
     const repository = new BasicConfigRepository({ configSource: source })
-    // act
-    const settings = await repository.read()
-    // assert
-    assert.isEmpty(settings)
+    try {
+      // act
+      const settings = await repository.read()
+      // assert: LOGGING holds the file contents, not the raw path, and the
+      // original path is preserved in LOGGING_FILE for writing back later
+      assert.equal(settings.get('LOGGING'), loggingContents)
+      assert.equal(settings.get('LOGGING_FILE'), loggingFile)
+    } finally {
+      if (savedLogging === undefined) {
+        delete process.env.LOGGING
+      } else {
+        process.env.LOGGING = savedLogging
+      }
+    }
   })
 
   it('should return empty set for missing TOML file', async function () {
