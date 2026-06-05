@@ -55,6 +55,8 @@ test -f helix-auth-svc/client-secret.txt || { echo 'missing client secret file' 
 sudo -u perforce grep -q 'client_secret' helix-auth-svc/client-secret.txt || { echo 'client secret missing' ; exit 1; }
 grep -q 'https://localhost:3000' helix-auth-svc/.env || { echo '.env missing URL' ; exit 1; }
 grep -q 'https://oidc.issuer' helix-auth-svc/.env || { echo '.env missing OIDC' ; exit 1; }
+grep -q 'SESSION_SECRET' helix-auth-svc/.env || { echo '.env missing SESSION_SECRET' ; exit 1; }
+grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET' ; exit 1; }
 
 # run the configure script and set up SAML
 sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \

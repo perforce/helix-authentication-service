@@ -5,6 +5,7 @@
 //
 import assert from 'node:assert'
 import { spawn } from 'node:child_process'
+import crypto from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
@@ -566,6 +567,13 @@ async function readSettings() {
       }
     }
     await readFileToSetting('ADMIN_PASSWD_FILE', 'ADMIN_PASSWD')
+  }
+  // Generate a random value for SESSION_SECRET if one has not already been
+  // configured, so that each installation has a unique, unguessable secret
+  // rather than relying on the well-known default value (HAS-669). Existing
+  // installations that have set this value will retain their configured secret.
+  if (!ALL_SETTINGS.has('SESSION_SECRET')) {
+    ALL_SETTINGS.set('SESSION_SECRET', crypto.randomBytes(16).toString('base64url'))
   }
 }
 
