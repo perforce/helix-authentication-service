@@ -33,7 +33,28 @@ describe('GetIdPConfiguration use case', function () {
       assert.fail('should have raised error')
     } catch (err) {
       // assert
-      assert.include(err.message, 'Unexpected identifier')
+      assert.include(err.message, 'JSON5')
+    }
+  })
+
+  it('should not execute code embedded in the configuration', async function () {
+    // arrange: a value that would run code if the configuration were evaluated
+    // as JavaScript rather than parsed as data (see HAS-678)
+    globalThis.__has678 = false
+    const config = "module.exports = (() => { globalThis.__has678 = true; return {} })()"
+    const settingsRepository = new MapSettingsRepository()
+    settingsRepository.set('IDP_CONFIG', config)
+    const usecase = GetIdPConfiguration({ settingsRepository })
+    try {
+      // act
+      await usecase()
+      assert.fail('should have raised error')
+    } catch (err) {
+      // assert: parsing fails and, crucially, the side effect never ran
+      assert.include(err.message, 'JSON5')
+      assert.isFalse(globalThis.__has678)
+    } finally {
+      delete globalThis.__has678
     }
   })
 

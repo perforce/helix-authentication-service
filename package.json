@@ -49,6 +49,7 @@
     "http-errors": "^2.0.0",
     "ioredis": "^5.9.2",
     "jose": "^6.1.0",
+    "json5": "^2.2.3",
     "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^3.2.2",
     "lokijs": "^1.5.12",
