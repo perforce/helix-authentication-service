@@ -575,6 +575,14 @@ async function readSettings() {
   if (!ALL_SETTINGS.has('SESSION_SECRET')) {
     ALL_SETTINGS.set('SESSION_SECRET', crypto.randomBytes(16).toString('base64url'))
   }
+  // Likewise generate a random value for BEARER_TOKEN if one has not already
+  // been configured, so the SCIM shared secret is unique and unguessable rather
+  // than relying on the well-known default value (HAS-670). The token is written
+  // to BEARER_TOKEN_FILE by modifyConfig. Existing installations that have set
+  // this value will retain their configured token.
+  if (!ALL_SETTINGS.has('BEARER_TOKEN')) {
+    ALL_SETTINGS.set('BEARER_TOKEN', crypto.randomBytes(16).toString('base64url'))
+  }
 }
 
 // async adapter for the readline callback API, temporary work-around for

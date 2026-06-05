@@ -57,6 +57,8 @@ grep -q 'https://localhost:3000' helix-auth-svc/.env || { echo '.env missing URL
 grep -q 'https://oidc.issuer' helix-auth-svc/.env || { echo '.env missing OIDC' ; exit 1; }
 grep -q 'SESSION_SECRET' helix-auth-svc/.env || { echo '.env missing SESSION_SECRET' ; exit 1; }
 grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET' ; exit 1; }
+test -f helix-auth-svc/bearer-token.txt || { echo 'missing bearer token file' ; exit 1; }
+sudo -u perforce grep -q 'keyboard cat' helix-auth-svc/bearer-token.txt && { echo 'bearer token is default' ; exit 1; }
 
 # run the configure script and set up SAML
 sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
