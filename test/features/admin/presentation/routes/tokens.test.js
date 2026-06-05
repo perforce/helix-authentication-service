@@ -35,7 +35,7 @@ setTimeout(function () {
           .send({ grant_type: 'password', username: 'scott', password: 'tiger' })
           .set('Origin', 'https://localhost:3333')
           .expect(200)
-          .expect('Access-Control-Allow-Origin', '*')
+          .expect('Access-Control-Allow-Origin', 'https://localhost:3333')
           .end(done)
       })
 
