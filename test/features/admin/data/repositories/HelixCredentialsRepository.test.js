@@ -112,7 +112,10 @@ describe('helix credentials repository', function () {
 
     after(async function () {
       this.timeout(60000)
+      // trust the server, then bootstrap a super user so the secure-by-default
+      // server can be stopped with valid credentials
       helpers.establishTrust(p4config)
+      helpers.establishSuper(p4config)
       await runner.stopServer(p4config)
     })
 

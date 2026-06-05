@@ -6,6 +6,46 @@ import * as path from 'node:path'
 import * as process from 'node:process'
 import { exec, spawn } from 'node:child_process'
 import getPort from 'get-port'
+import p4pkg from 'p4api'
+const { P4 } = p4pkg
+
+// Errors that indicate the server is not yet accepting connections, as opposed
+// to errors that indicate the server is up (e.g. an SSL trust error).
+function isConnectionError (text) {
+  return /connect to server failed|Connection refused|TCP|too many tries|Operation took too long/i.test(text)
+}
+
+// Poll the server until it responds to a command, so that the first command in
+// a test does not run before the freshly started server is ready. A server
+// reached over SSL without trust responds with a trust error, which still
+// indicates that the server is up and reachable.
+async function waitForServer (config) {
+  const p4 = new P4({
+    P4PORT: config.port,
+    P4USER: config.user,
+    P4TICKETS: config.tickets,
+    P4TRUST: config.trust
+  })
+  const deadline = Date.now() + 10000
+  for (;;) {
+    let ready = true
+    try {
+      const info = await p4.cmd('info')
+      if (info.error && info.error.some((e) =>
+        typeof e.data === 'string' && isConnectionError(e.data))) {
+        ready = false
+      }
+    } catch (err) {
+      if (isConnectionError(String(err && err.message ? err.message : err))) {
+        ready = false
+      }
+    }
+    if (ready || Date.now() > deadline) {
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+}
 
 const defaultConfig = {
   user: 'bruno',
@@ -44,12 +84,14 @@ function startServerGeneric (config, ssldir) {
       env
     })
     p4d.on('error', (err) => reject(err))
+    let started = false
     p4d.stdout.on('data', (data) => {
-      if (data.toString().includes('Perforce Server starting...')) {
+      if (!started && data.toString().includes('Perforce Server starting...')) {
+        started = true
         p4d.unref()
-        // give the server a little more time before we try connecting,
-        // otherwise random tests will intermittently fail on the first call
-        setTimeout(() => resolve(config), 100)
+        // wait until the server actually accepts connections before resolving,
+        // otherwise the first command in a test may run before it is ready
+        waitForServer(config).then(() => resolve(config)).catch(reject)
       }
     })
     p4d.stderr.on('data', (data) => {

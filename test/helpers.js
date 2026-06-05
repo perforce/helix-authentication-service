@@ -90,18 +90,27 @@ export function demolishTrust(config) {
 
 export function establishSuper (config) {
   const p4 = makeP4(config)
+  // On a secure-by-default server the database starts empty, so the first user
+  // to run 'passwd' is automatically added to the protections table with
+  // 'super' access. Set the password, then log in to get a valid ticket before
+  // running any other commands.
+  const passwdCmd = p4.cmdSync('passwd', 'p8ssword\np8ssword')
+  assert.equal(passwdCmd.info[0].data, 'Password updated.')
+  const loginCmd = p4.cmdSync('login', 'p8ssword')
+  assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+  // now that we are authenticated, fill in the user spec details
   const userOut = p4.cmdSync('user -o')
   const userSpec = userOut.stat[0]
   userSpec.Email = 'bruno@example.com'
   userSpec.FullName = 'Bruno Venus'
   const userIn = p4.cmdSync('user -i', userSpec)
   assert.equal(userIn.info[0].data, 'User bruno saved.')
-  const passwdCmd = p4.cmdSync('passwd', 'p8ssword\np8ssword')
-  assert.equal(passwdCmd.info[0].data, 'Password updated.')
-  const loginCmd = p4.cmdSync('login', 'p8ssword')
-  assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
   const configCmd = p4.cmdSync('configure set security=3')
   assert.equal(configCmd.stat[0].Action, 'set')
+  // Do not force users to reset an admin-assigned password on first login,
+  // otherwise test users created via 'passwd' cannot authenticate.
+  const resetCmd = p4.cmdSync('configure set dm.user.resetpassword=0')
+  assert.equal(resetCmd.stat[0].Action, 'set')
 }
 
 export function establishProtects(config) {
@@ -109,7 +118,11 @@ export function establishProtects(config) {
   // by default the calling user will be given super protections
   const protectOut = p4.cmdSync('protect -o')
   const protectIn = p4.cmdSync('protect -i', protectOut.stat[0])
-  assert.equal(protectIn.info[0].data, 'Protections saved.')
+  // On a secure-by-default server the super user is already present in the
+  // protections table, so writing it back unchanged yields "not changed".
+  const saved = protectIn.info[0].data === 'Protections saved.'
+  const unchanged = protectIn.info[0].data === 'Protections not changed.'
+  assert.isTrue(saved || unchanged)
 }
 
 export function createUser (user, password, config) {

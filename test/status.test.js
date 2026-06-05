@@ -398,8 +398,9 @@ describe('Service status', function () {
       const repository = new HelixEntityRepository({ getProvisioningServers })
       // act
       const result = await sut.validatePerforce(repository)
-      // assert
-      assert.include(result, "User nosuchuser doesn't exist")
+      // assert: a secure-by-default server reports an invalid password rather
+      // than revealing whether the user exists
+      assert.match(result, /User nosuchuser doesn't exist|Password invalid/)
     })
 
     it('should report not ok for wrong password', async function () {

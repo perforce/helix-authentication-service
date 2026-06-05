@@ -1048,7 +1048,10 @@ describe('HelixEntity repository', function () {
 
     after(async function () {
       this.timeout(60000)
+      // trust the server, then bootstrap a super user so the secure-by-default
+      // server can be stopped with valid credentials
       helpers.establishTrust(p4config)
+      helpers.establishSuper(p4config)
       await runner.stopServer(p4config)
     })
 
@@ -1082,7 +1085,10 @@ describe('HelixEntity repository', function () {
 
     after(async function () {
       this.timeout(60000)
+      // trust the server, then bootstrap a super user so the secure-by-default
+      // server can be stopped with valid credentials
       helpers.establishTrust(p4config)
+      helpers.establishSuper(p4config)
       await runner.stopServer(p4config)
     })
 
@@ -1092,7 +1098,10 @@ describe('HelixEntity repository', function () {
       try {
         await repository.getUsers(query)
       } catch (err) {
-        assert.include(err.message, 'User bruno doesn\'t exist')
+        // having auto-established trust, the connection proceeds far enough to
+        // fail authentication; a secure-by-default server reports an invalid
+        // password rather than revealing whether the user exists
+        assert.match(err.message, /User bruno doesn't exist|Password invalid/)
       }
     })
   })
