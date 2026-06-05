@@ -379,4 +379,55 @@ describe('ValidateAuthProvider use case', function () {
     // assert
     assert.include(result, 'must have one of: metadata, metadataUrl,')
   })
+
+  it('should allow file path properties by default', async function () {
+    // arrange
+    const provider = {
+      clientId: "client-id",
+      clientSecretFile: "package.json",
+      issuerUri: "https://oidc.example.com",
+      label: "Provider",
+      protocol: "oidc",
+      id: "oidc-1"
+    }
+    // act (no rejectFilePaths option)
+    const result = await usecase(provider)
+    // assert
+    assert.isNull(result)
+  })
+
+  it('should reject file path properties when rejectFilePaths set', async function () {
+    // each filesystem-path property must be rejected when validating API input
+    for (const field of ['clientCertFile', 'clientKeyFile', 'clientSecretFile', 'idpCertFile', 'metadataFile']) {
+      // arrange
+      const provider = {
+        clientId: "client-id",
+        issuerUri: "https://oidc.example.com",
+        label: "Provider",
+        protocol: "oidc",
+        id: "oidc-1",
+        [field]: "/etc/passwd"
+      }
+      // act
+      const result = await usecase(provider, { rejectFilePaths: true })
+      // assert
+      assert.equal(result, `file path property not permitted: ${field}`)
+    }
+  })
+
+  it('should allow inline values when rejectFilePaths set', async function () {
+    // arrange
+    const provider = {
+      clientId: "client-id",
+      clientSecret: "client-secret",
+      issuerUri: "https://oidc.example.com",
+      label: "Provider",
+      protocol: "oidc",
+      id: "oidc-1"
+    }
+    // act
+    const result = await usecase(provider, { rejectFilePaths: true })
+    // assert
+    assert.isNull(result)
+  })
 })

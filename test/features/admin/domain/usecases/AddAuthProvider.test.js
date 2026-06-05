@@ -86,6 +86,26 @@ describe('AddAuthProvider use case', function () {
     }
   })
 
+  it('should reject a provider with a file path property', async function () {
+    // arrange
+    const provider = {
+      clientId: 'client-id',
+      clientSecretFile: '/etc/passwd',
+      issuerUri: 'https://oidc.example.com',
+      label: 'Provider',
+      protocol: 'oidc'
+    }
+    try {
+      // act
+      await usecase(provider)
+      assert.fail('should have raised error')
+    } catch (err) {
+      // assert
+      assert.instanceOf(err, AssertionError)
+      assert.include(err.message, 'file path property not permitted: clientSecretFile')
+    }
+  })
+
   it('should add a new provider and assign identifier', async function () {
     // arrange
     const provider = {

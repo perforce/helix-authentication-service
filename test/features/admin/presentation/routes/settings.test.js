@@ -596,6 +596,43 @@ setTimeout(function () {
         })
       })
 
+      it('should reject a provider with a file path via POST', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings/providers')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              clientId: 'client-id',
+              clientSecretFile: '/etc/passwd',
+              issuerUri: 'https://oidc.example.com',
+              label: 'Provider',
+              protocol: 'oidc'
+            })
+            .expect(400, /file path property not permitted: clientSecretFile/, done)
+        })
+      })
+
+      it('should reject AUTH_PROVIDERS with a file path via settings POST', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({
+              AUTH_PROVIDERS: [
+                {
+                  clientId: 'client-id',
+                  metadataFile: '/etc/passwd',
+                  protocol: 'saml',
+                  label: 'Provider'
+                }
+              ]
+            })
+            .expect(400, /file path property not permitted: metadataFile/, done)
+        })
+      })
+
       it('should reject PUT of a new auth provider', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
           agent
