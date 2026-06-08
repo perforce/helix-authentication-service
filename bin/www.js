@@ -67,13 +67,20 @@ async function startServer() {
 
   server.on('listening', () => {
     // After successfully binding to the port, switch user/group if possible and
-    // if configured to do so (set the group first lest we lose the privilege to
-    // change the group after changing the user).
+    // if configured to do so. While still privileged, load the supplementary
+    // group list for SVC_USER (process.setuid does not do this on its own), then
+    // set the group (first, lest we lose the privilege to change the group after
+    // changing the user), then the user. This matches the standard privilege-drop
+    // sequence used by daemons such as nginx and Apache, so that the SVC_USER
+    // group memberships are in effect at runtime. (HAS-691)
     const svcGroup = settings.get('SVC_GROUP')
+    const svcUser = settings.get('SVC_USER')
+    if (svcUser && process.initgroups) {
+      process.initgroups(svcUser, svcGroup || svcUser)
+    }
     if (svcGroup && process.setgid) {
       process.setgid(svcGroup)
     }
-    const svcUser = settings.get('SVC_USER')
     if (svcUser && process.setuid) {
       process.setuid(svcUser)
     }
