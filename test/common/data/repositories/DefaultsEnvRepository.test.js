@@ -72,7 +72,7 @@ describe('DefaultsEnvRepository', function () {
     assert.equal(sut.get('SAML_WANT_RESPONSE_SIGNED'), 'true')
     assert.equal(sut.get('SESSION_SECRET'), 'keyboard cat')
     assert.equal(sut.get('SP_KEY_ALGO'), 'sha256')
-    assert.equal(sut.get('STATUS_ENABLED'), 'true')
+    assert.equal(sut.get('STATUS_ENABLED'), 'false')
     assert.equal(sut.get('TOKEN_TTL'), '3600')
   })
 })
