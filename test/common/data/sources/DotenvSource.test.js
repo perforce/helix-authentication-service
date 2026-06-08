@@ -110,6 +110,22 @@ name5=\`value5\`
     assert.equal(settings.get('NAME4'), 'multi\nline\nvalue')
   })
 
+  it('should not allow values to inject additional keys', async function () {
+    // arrange: a crafted value that attempts to break out of the single-quoted
+    // value and inject an additional env key (HAS-679)
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    const repository = new DotenvSource({ dotenvFile })
+    // act
+    const incoming = new Map()
+    incoming.set('NAME1', "value'\nINJECTED='evil")
+    await repository.write(incoming)
+    const settings = await repository.read()
+    // assert: only the original key exists and its value round-trips intact
+    assert.lengthOf(settings, 1)
+    assert.equal(settings.get('NAME1'), "value'\nINJECTED='evil")
+    assert.isUndefined(settings.get('INJECTED'))
+  })
+
   it('should read and write PEM encoded certificates', async function () {
     // arrange
     const dotenvFile = temporaryFile({ extension: 'env' })
