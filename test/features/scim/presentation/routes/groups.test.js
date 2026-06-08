@@ -63,7 +63,7 @@ setTimeout(function () {
         .expect(res => {
           assert.equal(res.body.status, '400')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
-          assert.equal(res.body.detail, 'group name cannot contain spaces')
+          assert.equal(res.body.detail, 'group name must not contain whitespace, quotes, or backslashes')
         })
         .end(done)
     })
@@ -126,7 +126,7 @@ setTimeout(function () {
         .expect(res => {
           assert.equal(res.body.status, '400')
           assert.include(res.body.schemas, 'urn:ietf:params:scim:api:messages:2.0:Error')
-          assert.include(res.body.detail, 'group name cannot contain spaces')
+          assert.include(res.body.detail, 'group name must not contain whitespace, quotes, or backslashes')
         })
         .end(done)
     })

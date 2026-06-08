@@ -31,6 +31,26 @@ describe('InMemoryEntity repository', function () {
     assert.throws(() => repository.getGroups(null), AssertionError)
   })
 
+  it('should reject names that could inject p4 arguments', function () {
+    // names that would be split into multiple p4 arguments or interpreted as
+    // flags must be rejected before reaching the p4 command line (HAS-685)
+    const malicious = [
+      'foo bar',        // whitespace splits into separate arguments
+      'foo\tbar',       // any whitespace, not just spaces
+      '-a',             // leading hyphen looks like a flag
+      'foo"bar',        // double quote confuses the p4api parser
+      'foo\\bar'        // backslash is an escape for the p4api parser
+    ]
+    for (const name of malicious) {
+      assert.throws(() => repository.addUser(new User(name, 'e@example.com', 'Full Name')), AssertionError)
+      assert.throws(() => repository.getUser(name), AssertionError)
+      assert.throws(() => repository.removeUser(name), AssertionError)
+      assert.throws(() => repository.addGroup(new Group(name, [])), AssertionError)
+      assert.throws(() => repository.getGroup(name), AssertionError)
+      assert.throws(() => repository.removeGroup(name), AssertionError)
+    }
+  })
+
   it('should return null for missing user entity', async function () {
     // act
     const user = await repository.getUser('foobar')

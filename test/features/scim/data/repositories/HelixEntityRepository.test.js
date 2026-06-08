@@ -621,7 +621,7 @@ describe('HelixEntity repository', function () {
         await repository.addGroup(tGroup)
         assert.fail('should have raised Error')
       } catch (err) {
-        assert.equal(err.message, 'group name must not contain spaces')
+        assert.equal(err.message, 'group name must not contain whitespace, quotes, or backslashes')
       }
     })
 
@@ -633,7 +633,7 @@ describe('HelixEntity repository', function () {
         await repository.getGroup('has spaces')
         assert.fail('should have raised Error')
       } catch (err) {
-        assert.equal(err.message, 'group name cannot contain spaces')
+        assert.equal(err.message, 'group name must not contain whitespace, quotes, or backslashes')
       }
     })
 
