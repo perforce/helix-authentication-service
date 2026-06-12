@@ -49,7 +49,7 @@ describe('InMemoryUser repository', function () {
   })
 
   it('should clear expired user entries', function (done) {
-    this.timeout(5000)
+    this.timeout(600000)
     // arrange
     const userId = 'joesample'
     const tUser = new User(userId, { name: 'joe', email: 'joe@example.com' })

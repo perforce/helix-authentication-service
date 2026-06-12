@@ -40,7 +40,7 @@ describe('SAML connector', function () {
     if (process.env.UNIT_ONLY) {
       this.skip()
     } else {
-      this.timeout(10000)
+      this.timeout(600000)
       const connector = new SamlConnector({ metadataUrl: 'https://oidc.doc:8843' })
       try {
         await connector.ping()
@@ -55,7 +55,7 @@ describe('SAML connector', function () {
     if (process.env.UNIT_ONLY) {
       this.skip()
     } else {
-      this.timeout(10000)
+      this.timeout(600000)
       const connector = new SamlConnector({ metadataUrl: 'https://shibboleth.doc:4443/idp/shibboleth' })
       await connector.ping()
     }

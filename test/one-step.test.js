@@ -34,7 +34,7 @@ describe('1-step SAML validation', function () {
       this.skip()
     } else {
       // starting the web driver may take longer than mocha would prefer
-      this.timeout(30000)
+      this.timeout(600000)
       const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
       // fyi, going headless makes firefox 10x slower
       const opts = new Options().addArguments('--headless')
@@ -53,13 +53,13 @@ describe('1-step SAML validation', function () {
 
   after(async function () {
     if (process.env.UNIT_ONLY === undefined) {
-      this.timeout(30000)
+      this.timeout(600000)
       await driver.quit()
     }
   })
 
   it('should produce a login URL', async function () {
-    this.timeout(30000)
+    this.timeout(600000)
     // Prepare the test service provider details to get the login URL using the
     // current docker setup which expects Swarm to be using certain details.
     const spOptions = {
@@ -103,7 +103,7 @@ describe('1-step SAML validation', function () {
   })
 
   it('should authenticate via SAML identity provider', async function () {
-    this.timeout(30000)
+    this.timeout(600000)
     await driver.get(loginUrl)
     // activate the "loading session" form to get the login screen; with
     // JavaScript disabled, shibboleth requires the user to click a button

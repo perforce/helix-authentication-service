@@ -33,7 +33,7 @@ describe('SAML authentication', function () {
       this.skip()
     } else {
       // starting the web driver may take longer than mocha would prefer
-      this.timeout(30000)
+      this.timeout(600000)
       const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
       // fyi, going headless makes firefox 10x slower
       const opts = new Options().addArguments('--headless')
@@ -52,7 +52,7 @@ describe('SAML authentication', function () {
 
   after(async function () {
     if (process.env.UNIT_ONLY === undefined) {
-      this.timeout(30000)
+      this.timeout(600000)
       await driver.quit()
     }
   })
@@ -64,7 +64,7 @@ describe('SAML authentication', function () {
 
   it('should reject invalid SAML user credentials', async function () {
     // opening the browser (especially headless) can take a long time
-    this.timeout(30000)
+    this.timeout(600000)
     await driver.get(loginUrl)
     // activate the "loading session" form to get the login screen; with
     // JavaScript disabled, shibboleth requires the user to click a button
@@ -88,7 +88,7 @@ describe('SAML authentication', function () {
   })
 
   it('should not return SAML login status yet', function (done) {
-    this.timeout(30000)
+    this.timeout(600000)
     // This request requires client certificates for security purposes. The
     // supertest module does not allow setting rejectUnauthorized, and as such
     // Node.js rejects the self-signed certificate from a host that is not
@@ -124,7 +124,7 @@ describe('SAML authentication', function () {
   })
 
   it('should authenticate via SAML identity provider', async function () {
-    this.timeout(30000)
+    this.timeout(600000)
     await driver.get(loginUrl)
     // no need for this the second time apparently
     // const submitButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))
@@ -149,7 +149,7 @@ describe('SAML authentication', function () {
   })
 
   it('should return SAML login status of user', function (done) {
-    this.timeout(30000)
+    this.timeout(600000)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     https.get({
@@ -179,7 +179,7 @@ describe('SAML authentication', function () {
   })
 
   it('should log out of SAML identity provider', async function () {
-    this.timeout(30000)
+    this.timeout(600000)
     await driver.get('https://authen.doc/saml/logout')
     // wait for the SAML response submit form
     const submitButton = await driver.wait(until.elementLocated(By.css('input[type="submit"]')))

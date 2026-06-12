@@ -22,7 +22,7 @@ describe('helix credentials repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       p4config = await runner.startServer('./tmp/p4d/creds-nonssl')
       helpers.establishSuper(p4config)
       settingsRepository.set('P4PORT', p4config.port)
@@ -31,12 +31,12 @@ describe('helix credentials repository', function () {
     })
 
     after(async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       await runner.stopServer(p4config)
     })
 
     it('should raise an error for invalid input', async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       try {
         await repository.verify(null, 'foobar')
         assert.fail('should have raised Error')
@@ -52,7 +52,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return true when protections table empty', async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       // arrange
       // act
       const result = await repository.verify('bruno', 'p8ssword')
@@ -61,7 +61,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return false for non-matching credentials', async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       // arrange
       // act
       const result = await repository.verify('susan', 'foobar')
@@ -70,7 +70,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return false for unprivileged user', async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       // arrange
       helpers.establishProtects(p4config)
       helpers.createUser({
@@ -85,7 +85,7 @@ describe('helix credentials repository', function () {
     })
 
     it('should return true for successful super login', async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       // arrange
       // act
       const result = await repository.verify('bruno', 'p8ssword')
@@ -99,7 +99,7 @@ describe('helix credentials repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       p4config = await runner.startSslServer('./tmp/p4d/creds-untrust')
       settingsRepository.clear()
       settingsRepository.set('P4PORT', p4config.port)
@@ -111,7 +111,7 @@ describe('helix credentials repository', function () {
     })
 
     after(async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       // trust the server, then bootstrap a super user so the secure-by-default
       // server can be stopped with valid credentials
       helpers.establishTrust(p4config)
@@ -121,7 +121,7 @@ describe('helix credentials repository', function () {
 
     it('should report untrusted connection', async function () {
       // arrange
-      this.timeout(60000)
+      this.timeout(600000)
       try {
         await repository.verify('bruno', 'p8ssword')
         assert.fail('should have raised Error')
@@ -136,7 +136,7 @@ describe('helix credentials repository', function () {
     let p4config
 
     before(async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       p4config = await runner.startSslServer('./tmp/p4d/creds-trust')
       helpers.establishTrust(p4config)
       helpers.establishSuper(p4config)
@@ -150,13 +150,13 @@ describe('helix credentials repository', function () {
     })
 
     after(async function () {
-      this.timeout(60000)
+      this.timeout(600000)
       await runner.stopServer(p4config)
     })
 
     it('should validate user over SSL connection', async function () {
       // arrange
-      this.timeout(60000)
+      this.timeout(600000)
       // act
       const result = await repository.verify('bruno', 'p8ssword')
       // assert

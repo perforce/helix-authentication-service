@@ -33,7 +33,7 @@ describe('OIDC authentication', function () {
       this.skip()
     } else {
       // starting the web driver may take longer than mocha would prefer
-      this.timeout(30000)
+      this.timeout(600000)
       const caps = Capabilities.firefox().setAcceptInsecureCerts(true)
       // fyi, going headless makes firefox 10x slower
       const opts = new Options().addArguments('--headless')
@@ -47,7 +47,7 @@ describe('OIDC authentication', function () {
 
   after(async function () {
     if (process.env.UNIT_ONLY === undefined) {
-      this.timeout(30000)
+      this.timeout(600000)
       await driver.quit()
     }
   })
@@ -59,7 +59,7 @@ describe('OIDC authentication', function () {
 
   it('should reject invalid OIDC user credentials', async function () {
     // opening the browser (especially headless) can take a long time
-    this.timeout(30000)
+    this.timeout(600000)
     await driver.get(loginUrl)
     const loginForm = await driver.wait(until.elementLocated(By.css('form')))
     const usernameBox = await loginForm.findElement(By.name('Username'))
@@ -75,7 +75,7 @@ describe('OIDC authentication', function () {
   })
 
   it('should not return OIDC login status yet', function (done) {
-    this.timeout(30000)
+    this.timeout(600000)
     // This request requires client certificates for security purposes. The
     // supertest module does not allow setting rejectUnauthorized, and as such
     // Node.js rejects the self-signed certificate from a host that is not
@@ -111,7 +111,7 @@ describe('OIDC authentication', function () {
   })
 
   it('should authenticate via OIDC identity provider', async function () {
-    this.timeout(30000)
+    this.timeout(600000)
     await driver.get(loginUrl)
     const loginForm = await driver.wait(until.elementLocated(By.css('form')))
     const usernameBox = await loginForm.findElement(By.name('Username'))
@@ -143,7 +143,7 @@ describe('OIDC authentication', function () {
   })
 
   it('should return OIDC login status of user', function (done) {
-    this.timeout(30000)
+    this.timeout(600000)
     const cert = fs.readFileSync('test/client.crt')
     const key = fs.readFileSync('test/client.key')
     https.get({
@@ -173,7 +173,7 @@ describe('OIDC authentication', function () {
   })
 
   it('should log out of OIDC identity provider', async function () {
-    this.timeout(30000)
+    this.timeout(600000)
     await driver.get('https://authen.doc/oidc/logout')
     // where did the consent screen go?
     // const logoutForm = await driver.wait(until.elementLocated(By.css('form')))

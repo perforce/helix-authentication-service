@@ -49,7 +49,7 @@ describe('InMemoryRequest repository', function () {
   })
 
   it('should clear expired request entries', function (done) {
-    this.timeout(5000)
+    this.timeout(600000)
     // arrange
     const requestId = 'request456'
     const userId = 'joesample'

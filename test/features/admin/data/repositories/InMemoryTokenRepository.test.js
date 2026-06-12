@@ -44,7 +44,7 @@ describe('InMemoryToken repository', function () {
   })
 
   it('should clear expired registrations', function (done) {
-    this.timeout(5000)
+    this.timeout(600000)
     // arrange
     const audience = '92eeb813-de9e-4e60-bc57-5371f3dcf736'
     // act

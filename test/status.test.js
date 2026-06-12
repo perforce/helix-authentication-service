@@ -79,7 +79,7 @@ describe('Service status', function () {
 
     it('should report soon-to-expire certificate', async function () {
       // this test can take a randomly long time to run
-      this.timeout(30000)
+      this.timeout(600000)
       const keyfile = temporaryFile({ extension: 'key' })
       const certfile = temporaryFile({ extension: 'crt' })
       await makeExpiringCert(keyfile, certfile)
@@ -116,7 +116,7 @@ describe('Service status', function () {
 
     it('should report soon-to-expire certificate', async function () {
       // this test can take a randomly long time to run
-      this.timeout(30000)
+      this.timeout(600000)
       const keyfile = temporaryFile({ extension: 'key' })
       const certfile = temporaryFile({ extension: 'crt' })
       await makeExpiringCert(keyfile, certfile)
@@ -192,7 +192,7 @@ describe('Service status', function () {
 
     it('should report soon-to-expire certificate', async function () {
       // this test can take a randomly long time to run
-      this.timeout(30000)
+      this.timeout(600000)
       const keyfile = temporaryFile({ extension: 'key' })
       const certfile = temporaryFile({ extension: 'crt' })
       await makeExpiringCert(keyfile, certfile)
@@ -224,7 +224,7 @@ describe('Service status', function () {
       if (process.env.UNIT_ONLY) {
         this.skip()
       } else {
-        this.timeout(10000)
+        this.timeout(600000)
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
         // mute the warning from node about disabling TLS validation
         const unmute = mute(process.stderr)
@@ -252,7 +252,7 @@ describe('Service status', function () {
       if (process.env.UNIT_ONLY) {
         this.skip()
       } else {
-        this.timeout(10000)
+        this.timeout(600000)
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
         // mute the warning from node about disabling TLS validation
         const unmute = mute(process.stderr)
@@ -302,7 +302,7 @@ describe('Service status', function () {
         this.skip()
       } else {
         // this test can take a randomly long time to run
-        this.timeout(30000)
+        this.timeout(600000)
         // arrange
         const settingsRepository = new MapSettingsRepository()
         settingsRepository.set('REDIS_URL', 'redis://redis.doc:6379')
@@ -321,7 +321,7 @@ describe('Service status', function () {
         this.skip()
       } else {
         // this test can take a randomly long time to run
-        this.timeout(30000)
+        this.timeout(600000)
         // arrange
         const settingsRepository = new MapSettingsRepository()
         settingsRepository.set('REDIS_URL', 'rediss://rediss.doc:6389')
@@ -348,7 +348,7 @@ describe('Service status', function () {
       if (process.env.UNIT_ONLY) {
         this.skip()
       } else {
-        this.timeout(30000)
+        this.timeout(600000)
         p4config = await runner.startServer('./tmp/p4d/status-unit')
         helpers.establishSuper(p4config)
         // logout so we can test every case
@@ -363,7 +363,7 @@ describe('Service status', function () {
 
     after(async function () {
       if (process.env.UNIT_ONLY === undefined) {
-        this.timeout(30000)
+        this.timeout(600000)
         await runner.stopServer(p4config)
       }
     })

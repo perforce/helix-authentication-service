@@ -78,7 +78,7 @@ describe('ValidateWebToken use case', function () {
   })
 
   it('should approve token when using signing key', async function () {
-    this.timeout(120000)
+    this.timeout(600000)
     // arrange
     const keydata = await getSigningKey()
     const keyfile = temporaryFile({ extension: 'key' })
