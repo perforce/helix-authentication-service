@@ -568,11 +568,22 @@ async function readSettings() {
     }
     await readFileToSetting('ADMIN_PASSWD_FILE', 'ADMIN_PASSWD')
   }
+  // The well-known default value shipped in example.env/defaults.env. Treat it
+  // the same as an unset value so that installations whose configuration still
+  // carries the shipped default are upgraded to a unique, random value. Note
+  // that example.env leaves BEARER_TOKEN uncommented (so install.sh copies it
+  // into .env), whereas SESSION_SECRET is commented out, so without this check
+  // BEARER_TOKEN would always retain the default value.
+  const DEFAULT_SECRET = 'keyboard cat'
+  const unsetOrDefault = (name) => {
+    const value = ALL_SETTINGS.get(name)
+    return value === undefined || value === null || value.trim() === DEFAULT_SECRET
+  }
   // Generate a random value for SESSION_SECRET if one has not already been
   // configured, so that each installation has a unique, unguessable secret
   // rather than relying on the well-known default value (HAS-669). Existing
   // installations that have set this value will retain their configured secret.
-  if (!ALL_SETTINGS.has('SESSION_SECRET')) {
+  if (unsetOrDefault('SESSION_SECRET')) {
     ALL_SETTINGS.set('SESSION_SECRET', crypto.randomBytes(16).toString('base64url'))
   }
   // Likewise generate a random value for BEARER_TOKEN if one has not already
@@ -580,7 +591,7 @@ async function readSettings() {
   // than relying on the well-known default value (HAS-670). The token is written
   // to BEARER_TOKEN_FILE by modifyConfig. Existing installations that have set
   // this value will retain their configured token.
-  if (!ALL_SETTINGS.has('BEARER_TOKEN')) {
+  if (unsetOrDefault('BEARER_TOKEN')) {
     ALL_SETTINGS.set('BEARER_TOKEN', crypto.randomBytes(16).toString('base64url'))
   }
 }
