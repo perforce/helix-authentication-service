@@ -1308,7 +1308,7 @@ function validateProtocol(protocol) {
 function validateP4port(p4port) {
   const PROTOS = 'tcp tcp4 tcp6 tcp46 tcp64 ssl ssl4 ssl6 ssl46 ssl64'.split(' ')
   let PROTO = ''
-  let PNUM = ''
+  let PNUM
 
   // extract the port number, if any
   // local BITS=(${PORT//:/ })

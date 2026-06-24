@@ -46,7 +46,7 @@ describe('SAML connector', function () {
         await connector.ping()
         assert.fail('should have raised an error')
       } catch (err) {
-        assert.include(err.toString(), 'missing identityProviderUrl')
+        assert.include(err.toString(), 'not valid SAML')
       }
     }
   })
