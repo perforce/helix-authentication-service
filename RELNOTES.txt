@@ -1,6 +1,6 @@
                             Release Notes for
                         P4 Authentication Service (P4AS)
-                            Version 2025.2
+                            Version 2026.1
 
 
 Introduction
