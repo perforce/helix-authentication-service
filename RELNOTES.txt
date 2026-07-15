@@ -106,7 +106,7 @@ Third Party Licenses
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2026.1 (2026.1/3003337) (2026/07/08)
 
     HAS-667 (Change #2896215)
         Use read/write lock to prevent cloud service providers such as Azure
@@ -117,7 +117,7 @@ Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         SVC_USER supplementary groups were not loaded when dropping privileges.
 
 ----------------------------------------------------------------------
-Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Other changes in 2026.1 (2026.1/3003337) (2026/07/08)
 
     HAS-663 (Change #2876368)
         Upgrade node-forge to 1.3.3 to prevent vulnerable version from being
