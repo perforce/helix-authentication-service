@@ -128,7 +128,15 @@ if ! systemctl list-units >/dev/null 2>&1; then
 fi
 
 if $P4AS_SYSTEMD; then
-    cat >/etc/systemd/system/helix-auth.service <<__SERVICE_UNIT__
+    SERVICE_UNIT_PATH=/etc/systemd/system/helix-auth.service
+    if [ -f "$SERVICE_UNIT_PATH" ]; then
+        # preserve any local customizations rather than silently discarding
+        # them on upgrade (HAS-700)
+        SERVICE_UNIT_BACKUP="${SERVICE_UNIT_PATH}.rpmsave-$(date +%Y%m%d%H%M%S)"
+        cp -p "$SERVICE_UNIT_PATH" "$SERVICE_UNIT_BACKUP"
+        echo "Existing ${SERVICE_UNIT_PATH} backed up to ${SERVICE_UNIT_BACKUP} before regenerating."
+    fi
+    cat >"$SERVICE_UNIT_PATH" <<__SERVICE_UNIT__
 [Unit]
 Description=P4 Authentication Service
 After=network.target

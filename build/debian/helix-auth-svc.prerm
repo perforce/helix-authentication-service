@@ -18,11 +18,20 @@ INSTALLPREFIX=/opt/perforce/helix-auth-svc
 # the debian-policy package
 
 case "$1" in
-    remove|upgrade|deconfigure)
+    remove)
         if [ -f /etc/systemd/system/helix-auth.service ]; then
             systemctl stop helix-auth.service
             rm -f /etc/systemd/system/helix-auth.service
             systemctl daemon-reload
+        fi
+    ;;
+
+    upgrade|deconfigure)
+        # Leave the service unit in place across upgrades so postinst can back
+        # up any local customizations before regenerating it (HAS-700); just
+        # stop the running service here.
+        if [ -f /etc/systemd/system/helix-auth.service ]; then
+            systemctl stop helix-auth.service
         fi
     ;;
 
