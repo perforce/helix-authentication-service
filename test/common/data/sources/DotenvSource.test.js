@@ -79,9 +79,26 @@ name5=\`value5\`
     assert.lengthOf(settings, 5)
     assert.equal(settings.get('NAME1'), 'VALUE1')
     assert.equal(settings.get('NAME2'), '')
-    assert.equal(settings.get('name3'), 'value#3')
+    assert.equal(settings.get('NAME3'), 'value#3')
     assert.equal(settings.get('NAME4'), 'multi\nline\nvalue')
-    assert.equal(settings.get('name5'), 'value5')
+    assert.equal(settings.get('NAME5'), 'value5')
+  })
+
+  it('should normalize lowercase setting names to uppercase', async function () {
+    // arrange: TOML permits lowercase setting names and normalizes them on
+    // read, so .env should behave the same way rather than silently ignoring
+    // them (HAS-690)
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    await fs.writeFile(dotenvFile, `admin_enabled=true
+Admin_Username=scott
+`)
+    const repository = new DotenvSource({ dotenvFile })
+    // act
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 2)
+    assert.equal(settings.get('ADMIN_ENABLED'), 'true')
+    assert.equal(settings.get('ADMIN_USERNAME'), 'scott')
   })
 
   it('should write values to dotenv file', async function () {
@@ -106,7 +123,7 @@ name5=\`value5\`
     assert.equal(settings.get('BOOL8'), 'true')
     assert.equal(settings.get('NULL9'), 'null')
     assert.equal(settings.get('NUM10'), 12345)
-    assert.equal(settings.get('name3'), 'value#3')
+    assert.equal(settings.get('NAME3'), 'value#3')
     assert.equal(settings.get('NAME4'), 'multi\nline\nvalue')
   })
 

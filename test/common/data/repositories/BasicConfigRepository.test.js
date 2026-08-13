@@ -108,9 +108,9 @@ name5=\`value5\`
     assert.lengthOf(settings, 5)
     assert.equal(settings.get('NAME1'), 'VALUE1')
     assert.equal(settings.get('NAME2'), '')
-    assert.equal(settings.get('name3'), 'value#3')
+    assert.equal(settings.get('NAME3'), 'value#3')
     assert.equal(settings.get('NAME4'), 'multi\nline\nvalue')
-    assert.equal(settings.get('name5'), 'value5')
+    assert.equal(settings.get('NAME5'), 'value5')
   })
 
   it('should set LOGGING to "none" (.env)', async function () {
@@ -266,7 +266,7 @@ hashed = 'value#3'
     assert.equal(settings.get('BOOL8'), 'true')
     assert.equal(settings.get('NULL9'), 'null')
     assert.equal(settings.get('NUM10'), 12345)
-    assert.equal(settings.get('name3'), 'value#3')
+    assert.equal(settings.get('NAME3'), 'value#3')
     assert.equal(settings.get('NAME4'), 'multi\nline\nvalue')
   })
 
