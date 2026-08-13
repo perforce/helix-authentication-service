@@ -734,6 +734,43 @@ describe('HelixEntity repository', function () {
       assert.isOk(groups.find((e) => e.displayName === 'zebras'))
     })
 
+    // Regression test for GitHub PR #57 ("fix scim group enumeration"). The
+    // underlying `p4 groups` command emits one row per (group, member) pair
+    // once a group has members, not one row per group, so getGroups() must
+    // dedupe by group name. This is expected to fail until that fix lands.
+    it('should report a group with many members only once in getGroups', async function () {
+      this.timeout(600000)
+      // arrange
+      const addGroup = AddGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
+      })
+      await addGroup(new Group('group-manyfolk', []))
+      const patchGroup = PatchGroup({
+        getDomainLeader: () => null,
+        getDomainMembers: () => [],
+        entityRepository: repository,
+        entityRepositoryLock: new ReadWriteLock()
+      })
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [{
+          op: 'Add',
+          path: 'members',
+          value: [1, 2, 3, 4, 5].map((n) => ({ value: 'user-folk-' + n }))
+        }]
+      }
+      await patchGroup('group-manyfolk', patch)
+      // act
+      const query = new Query()
+      const groups = await repository.getGroups(query)
+      // assert
+      const matches = groups.filter((e) => e.displayName === 'manyfolk')
+      assert.lengthOf(matches, 1)
+    })
+
     it('should add and retrieve a group with members', async function () {
       this.timeout(600000)
       // arrange
