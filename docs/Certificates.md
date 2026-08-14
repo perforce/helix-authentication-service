@@ -29,6 +29,13 @@ compare with the SHA256 fingerprint of the client certificate.
 
 Both the `CLIENT_CERT_CN` and `CLIENT_CERT_FP` values can have multiple entries, separated by commas and wrapped in square brackets (like so: `[value1, value2, ...]`).
 
+By default, the HTTPS server does not reject a client connection outright when
+certificate validation fails (`rejectUnauthorized` is `false`), since the
+`loginhook` extension does not always present a client certificate that chains
+to a trusted authority. Administrators whose clients are all configured with a
+valid, trusted certificate can set `TLS_REJECT_UNAUTHORIZED` to `true` to have
+the HTTPS server strictly reject unauthorized client certificates.
+
 ## Other Applications
 
 ### Helix Core Extension

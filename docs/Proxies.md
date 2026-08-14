@@ -63,7 +63,7 @@ Support for Redis is enabled in the authentication service by setting the `REDIS
 REDIS_URL=redis://192.168.1.1:6389'
 ```
 
-See the [Configuring P4 Authentication Service](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html) chapter of the admin guide for more information on the `REDIS_URL` setting, as well as `REDIS_CERT_FILE` and `REDIS_KEY_FILE` settings for enabling a TLS connection to Redis.
+See the [Configuring P4 Authentication Service](https://www.perforce.com/manuals/helix-auth-svc/Content/HAS/configuring-has.html) chapter of the admin guide for more information on the `REDIS_URL` setting, as well as `REDIS_CERT_FILE` and `REDIS_KEY_FILE` settings for enabling a TLS connection to Redis. By default, a `rediss://` connection does not reject a Redis server certificate that fails validation; set `REDIS_REJECT_UNAUTHORIZED` to `true` if the Redis server presents a valid, trusted certificate and strict validation is desired.
 
 Additionally, if the Redis server is configured to expect a username and password, those can be provided in the `REDIS_URL` value:
 

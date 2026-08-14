@@ -46,6 +46,14 @@
 #
 ca_cert_file = 'certs/ca.crt'
 
+# If set to true, the HTTPS server will reject client connections that do not
+# present a certificate signed by a trusted authority (see ca_cert_file and
+# ca_cert_path). Defaults to false since the Helix Server loginhook extension
+# typically does not present a client certificate; only enable this if all
+# clients are configured with a valid, trusted certificate.
+#
+# tls_reject_unauthorized = false
+
 # HTTP Bearer authentication token for allowing access to the SCIM endpoint.
 #
 bearer_token = 'keyboard cat'
@@ -305,6 +313,14 @@ key_file = 'certs/server.key'
 # The private key that corresponds to redis_cert_file.
 #
 # redis_key_file = undefined
+
+# If set to true, and redis_url starts with "rediss://", the connection will
+# reject a Redis server certificate that is not signed by a trusted authority.
+# Defaults to false since customers frequently use a self-signed certificate
+# for their internal Redis server; only enable this if the Redis server
+# presents a valid, trusted certificate.
+#
+# redis_reject_unauthorized = false
 
 # The authn context defines the method by which the user will authenticate with
 # the IdP.

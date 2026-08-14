@@ -3,6 +3,7 @@
 //
 import { assert } from 'chai'
 import { describe, it } from 'mocha'
+import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import * as sut from 'helix-auth-svc/lib/server.js'
 
 describe('Server basics', function () {
@@ -52,6 +53,27 @@ describe('Server basics', function () {
         ['CORS_ORIGIN', '*']
       ])
       assert.deepEqual(sut.corsConfiguration(settings), { origin: '*' })
+    })
+  })
+
+  describe('buildHttpsOptions', function () {
+    function makeSettings () {
+      const settings = new MapSettingsRepository()
+      settings.set('CERT_FILE', 'test/fixtures/certificate.txt')
+      settings.set('KEY_FILE', 'test/fixtures/privatekey.txt')
+      return settings
+    }
+
+    it('should default rejectUnauthorized to false', function () {
+      const options = sut.buildHttpsOptions(makeSettings())
+      assert.isFalse(options.rejectUnauthorized)
+    })
+
+    it('should honor TLS_REJECT_UNAUTHORIZED when set to true', function () {
+      const settings = makeSettings()
+      settings.set('TLS_REJECT_UNAUTHORIZED', 'true')
+      const options = sut.buildHttpsOptions(settings)
+      assert.isTrue(options.rejectUnauthorized)
     })
   })
 

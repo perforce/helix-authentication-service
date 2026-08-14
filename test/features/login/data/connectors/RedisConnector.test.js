@@ -8,7 +8,7 @@ import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositori
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
 import LoadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
-import { RedisConnector } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
+import { RedisConnector, buildRedisTlsOptions } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
 import RedisSentinel from 'helix-auth-svc/lib/features/login/data/connectors/RedisSentinel.js'
 
 describe('Redis connector', function () {
@@ -69,5 +69,29 @@ describe('Redis connector', function () {
       const actual = await connector.get('RCU-TLS-TEST')
       assert.equal(actual, 'some TLS value')
     }
+  })
+
+  describe('buildRedisTlsOptions', function () {
+    function makeSettings () {
+      const repo = new MapSettingsRepository()
+      repo.set('REDIS_CERT_FILE', 'test/fixtures/certificate.txt')
+      repo.set('REDIS_KEY_FILE', 'test/fixtures/privatekey.txt')
+      return repo
+    }
+
+    it('should default rejectUnauthorized to false', function () {
+      const repo = makeSettings()
+      const certs = LoadAuthorityCerts({ settingsRepository: repo })
+      const options = buildRedisTlsOptions(repo, certs)
+      assert.isFalse(options.rejectUnauthorized)
+    })
+
+    it('should honor REDIS_REJECT_UNAUTHORIZED when set to true', function () {
+      const repo = makeSettings()
+      repo.set('REDIS_REJECT_UNAUTHORIZED', 'true')
+      const certs = LoadAuthorityCerts({ settingsRepository: repo })
+      const options = buildRedisTlsOptions(repo, certs)
+      assert.isTrue(options.rejectUnauthorized)
+    })
   })
 })
