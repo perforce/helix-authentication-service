@@ -308,6 +308,38 @@ describe('PatchGroup use case', function () {
       addStub.restore()
     })
 
+    it('should deduplicate members ignoring case when server is case-insensitive', async function () {
+      // arrange: same account already a member under different case (HAS-674)
+      const caseStub = sinon.stub(EntityRepository.prototype, 'isCaseInsensitive').callsFake(() => {
+        return Promise.resolve(true)
+      })
+      const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake(() => {
+        return Promise.resolve(new Group('staff', [{ value: 'Joe.User', display: 'Joe Plumber' }]))
+      })
+      const addStub = sinon.stub(EntityRepository.prototype, 'updateGroup').callsFake((group) => {
+        return Promise.resolve(group)
+      })
+      // act
+      const patch = {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+        Operations: [{
+          name: 'addMember',
+          op: 'add',
+          path: 'members',
+          value: [{ displayName: 'Joe Plumber', value: 'joe.user' }]
+        }]
+      }
+      const updated = await usecase('staff', patch)
+      // assert: recognized as the same member already present, so a no-op
+      assert.equal(updated.displayName, 'staff')
+      assert.lengthOf(updated.members, 1)
+      assert.isTrue(getStub.calledOnce)
+      assert.isTrue(addStub.notCalled)
+      caseStub.restore()
+      getStub.restore()
+      addStub.restore()
+    })
+
     it('should successfully assign externalId', async function () {
       // arrange
       const getStub = sinon.stub(EntityRepository.prototype, 'getGroup').callsFake(() => {

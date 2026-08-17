@@ -148,6 +148,16 @@ describe('HelixEntity repository', function () {
       assert.isNull(user)
     })
 
+    it('should report case sensitivity of the server (HAS-674)', async function () {
+      this.timeout(600000)
+      // act: the test server is created with default (case-sensitive) handling
+      const first = await repository.isCaseInsensitive()
+      const second = await repository.isCaseInsensitive()
+      // assert: consistent result, served from cache the second time
+      assert.isFalse(first)
+      assert.isFalse(second)
+    })
+
     it('should reject overwriting existing user entity', async function () {
       this.timeout(600000)
       // arrange

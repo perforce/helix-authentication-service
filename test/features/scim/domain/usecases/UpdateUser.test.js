@@ -212,6 +212,37 @@ describe('UpdateUser use case', function () {
     updateStub.restore()
   })
 
+  it('should not treat case-only username change as rename when case-insensitive', async function () {
+    // arrange: same p4 account, only case differs, on a case-insensitive server (HAS-674)
+    settingsRepository.set('ALLOW_USER_RENAME', false)
+    const caseStub = sinon.stub(EntityRepository.prototype, 'isCaseInsensitive').callsFake(() => {
+      return Promise.resolve(true)
+    })
+    const getStub = sinon.stub(EntityRepository.prototype, 'getUser').callsFake((username) => {
+      assert.equal(username, 'joeuser')
+      return Promise.resolve(new User('joeuser', 'joeuser@example.com', 'Joe Q. User'))
+    })
+    const renameStub = sinon.stub(EntityRepository.prototype, 'renameUser').callsFake(() => {
+      return Promise.resolve()
+    })
+    const updateStub = sinon.stub(EntityRepository.prototype, 'updateUser').callsFake((user) => {
+      assert.isNotNull(user)
+      return Promise.resolve(user)
+    })
+    // act
+    const tUser = new User('JoeUser', 'joeuser@example.com', 'Joe Q. User')
+    const updated = await usecase('joeuser', tUser)
+    // assert
+    assert.equal(updated.username, 'JoeUser')
+    assert.isTrue(getStub.calledOnce)
+    assert.isTrue(renameStub.notCalled)
+    assert.isTrue(updateStub.calledOnce)
+    caseStub.restore()
+    getStub.restore()
+    renameStub.restore()
+    updateStub.restore()
+  })
+
   describe('multiple servers', function () {
     let usecase
     const settingsRepository = new MapSettingsRepository()
