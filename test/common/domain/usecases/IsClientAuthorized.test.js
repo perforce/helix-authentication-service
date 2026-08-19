@@ -19,8 +19,8 @@ describe('IsClientAuthorized use case', function () {
   let loadAuthorityCerts
 
   before(function () {
-    usecase = IsClientAuthorized({ settingsRepository })
     loadAuthorityCerts = LoadAuthorityCerts({ settingsRepository })
+    usecase = IsClientAuthorized({ settingsRepository, loadAuthorityCerts })
   })
 
   beforeEach(function () {
@@ -28,7 +28,8 @@ describe('IsClientAuthorized use case', function () {
   })
 
   it('should raise an error for invalid input', function () {
-    assert.throws(() => IsClientAuthorized({ settingsRepository: null }), AssertionError)
+    assert.throws(() => IsClientAuthorized({ settingsRepository: null, loadAuthorityCerts }), AssertionError)
+    assert.throws(() => IsClientAuthorized({ settingsRepository, loadAuthorityCerts: null }), AssertionError)
     try {
       usecase(null)
       assert.fail('should have raised error')
@@ -234,6 +235,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'X-ARR-ClientCert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     agent
       .get('/')
@@ -249,6 +251,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt').toString()
     agent
@@ -263,6 +266,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     settingsRepository.set('CLIENT_CERT_CN', 'WrongCommonName')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt').toString()
@@ -278,6 +282,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     settingsRepository.set('CLIENT_CERT_FP', '63:2F:17:F3:2F:31:40:68:58:D6:38:54:92:7C:F8:95:26:E4:34:95:D4:1D:82:97:3C:2E:68:39:5E:A1:AC:11')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt').toString()
@@ -293,6 +298,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     settingsRepository.set('CLIENT_CERT_CN', 'LoginExtension')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt').toString()
@@ -308,6 +314,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     const cert = fs.readFileSync('test/client.crt').toString()
@@ -323,6 +330,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     // real world example of encoded cert provided by nginx ingress controller in k8s
@@ -339,6 +347,7 @@ describe('IsClientAuthorized use case', function () {
     settingsRepository.set('serviceCert', 'certs/server.crt')
     settingsRepository.set('serviceKey', 'certs/server.key')
     settingsRepository.set('CLIENT_CERT_HEADER', 'X-ARR-ClientCert')
+    settingsRepository.set('CA_CERT_FILE', 'certs/ca.crt')
     settingsRepository.set('CLIENT_CERT_FP', '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E')
     const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
     // strip begin/end armor, merge into one line, do not URI encode
@@ -349,6 +358,43 @@ describe('IsClientAuthorized use case', function () {
       .trustLocalhost(true)
       .set('X-ARR-ClientCert', cert)
       .expect(200, 'success', done)
+  })
+
+  it('should return 500 if no certificate authority is configured', function (done) {
+    // CLIENT_CERT_HEADER cannot be trusted at all without a CA to validate
+    // against (HAS-683) -- no CA_CERT_FILE/CA_CERT_PATH set here
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CLIENT_CERT_CN', 'LoginExtension')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt').toString()
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', encodeURIComponent(cert))
+      .expect(500, /requires CA_CERT_FILE or CA_CERT_PATH/, done)
+  })
+
+  it('should return 403 for a cert that does not chain to the configured authority even if CN matches', function (done) {
+    // regression test for HAS-683: a certificate presented via
+    // CLIENT_CERT_HEADER must chain to a trusted CA, not just match the
+    // configured CN/FP -- test/ca.crt did not sign test/client.crt, so this
+    // must be rejected even though the CN below would otherwise match
+    settingsRepository.set('PROTOCOL', 'https')
+    settingsRepository.set('serviceCert', 'certs/server.crt')
+    settingsRepository.set('serviceKey', 'certs/server.key')
+    settingsRepository.set('CLIENT_CERT_HEADER', 'ssl-client-cert')
+    settingsRepository.set('CA_CERT_FILE', 'test/ca.crt')
+    settingsRepository.set('CLIENT_CERT_CN', 'LoginExtension')
+    const agent = createAgent(usecase, 'https', settingsRepository, loadAuthorityCerts)
+    const cert = fs.readFileSync('test/client.crt').toString()
+    agent
+      .get('/')
+      .trustLocalhost(true)
+      .set('ssl-client-cert', encodeURIComponent(cert))
+      .expect(403, /client certificate is not trusted/, done)
   })
 })
 
