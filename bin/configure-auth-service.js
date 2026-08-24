@@ -13,6 +13,9 @@ import readline from 'node:readline'
 import { parseArgs } from 'node:util'
 import { DotenvSource } from 'helix-auth-svc/lib/common/data/sources/DotenvSource.js'
 import { TomlSource } from 'helix-auth-svc/lib/common/data/sources/TomlSource.js'
+import HashPassword from 'helix-auth-svc/lib/common/domain/usecases/HashPassword.js'
+
+const hashPassword = HashPassword()
 
 let INTERACTIVE = true
 let MONOCHROME = false
@@ -28,6 +31,7 @@ const P4D_MIN_CHANGE = '1797576'
 const P4D_MIN_VERSION = '2019.1'
 let CONFIG_FILE_NAME = '.env'
 let P4_PATH
+let ADMIN_PASSWD_FILE_EXISTS = false
 const ALL_SETTINGS = new Map()
 
 // Print the argument in green text.
@@ -566,7 +570,12 @@ async function readSettings() {
         ALL_SETTINGS.set('ADMIN_ENABLED', 'no')
       }
     }
-    await readFileToSetting('ADMIN_PASSWD_FILE', 'ADMIN_PASSWD')
+    // The file holds a salted hash (or, for older installs, plaintext) --
+    // not something safe to redisplay or silently rewrite as a prompt
+    // default. Just note whether a file already exists; promptForAdminPassword
+    // decides whether to keep it as-is (HAS-686).
+    const adminPasswdFilename = ALL_SETTINGS.get('ADMIN_PASSWD_FILE')
+    ADMIN_PASSWD_FILE_EXISTS = Boolean(adminPasswdFilename) && await fileAccessible(adminPasswdFilename)
   }
   // The well-known default value shipped in example.env/defaults.env. Treat it
   // the same as an unset value so that installations whose configuration still
@@ -791,7 +800,35 @@ strictly for accessing the administrative web interface.
 
 `)
   await promptFor('ADMIN_USERNAME', 'Enter a username for the admin user', ALL_SETTINGS.get('ADMIN_USERNAME'), validateNotEmpty)
-  await promptForSecret('ADMIN_PASSWD', 'Enter a password for the admin user', ALL_SETTINGS.get('ADMIN_PASSWD'))
+  await promptForAdminPassword()
+}
+
+// Prompt for a new admin password, without redisplaying or reusing the
+// existing hashed value as a default (unlike promptForSecret) -- there is no
+// way to recover the original plaintext from a hash to show or resave it.
+// Leaving the response blank when a password is already configured keeps the
+// existing file completely untouched; otherwise a value is required and must
+// be entered twice to confirm (HAS-686).
+async function promptForAdminPassword() {
+  if (ALL_SETTINGS.has('ADMIN_PASSWD')) {
+    // already supplied via --admin-passwd; nothing to prompt for
+    return
+  }
+  if (ADMIN_PASSWD_FILE_EXISTS) {
+    const response = await readlineSecret(
+      'Enter a new password for the admin user [leave blank to keep the current password]')
+    if (response === '') {
+      return
+    }
+    const verify = await readlineSecret('Please enter the value again')
+    if (response !== verify) {
+      errorPrompt('Secret values do not match. Password unchanged.')
+      return
+    }
+    ALL_SETTINGS.set('ADMIN_PASSWD', response)
+  } else {
+    await promptForSecret('ADMIN_PASSWD', 'Enter a password for the admin user')
+  }
 }
 
 // Prompt for which features are to be configured.
@@ -1158,7 +1195,10 @@ function validateAdminCreds() {
     error('An administrative username must be provided.')
     return 1
   }
-  if (!ALL_SETTINGS.has('ADMIN_PASSWD') || ALL_SETTINGS.get('ADMIN_PASSWD') === '') {
+  // A blank response is legitimate when a password file already exists --
+  // that means the admin chose to keep the current password unchanged
+  // (promptForAdminPassword), not that none was ever provided (HAS-686).
+  if (!ADMIN_PASSWD_FILE_EXISTS && (!ALL_SETTINGS.has('ADMIN_PASSWD') || ALL_SETTINGS.get('ADMIN_PASSWD') === '')) {
     error('An administrative password must be provided.')
     return 1
   }
@@ -1481,7 +1521,19 @@ async function modifyConfig() {
       ALL_SETTINGS.delete(fileSetting)
     }
   }
-  await writeSettingToFile('ADMIN_PASSWD', 'ADMIN_PASSWD_FILE')
+  if (ALL_SETTINGS.has('ADMIN_PASSWD')) {
+    // a new password was entered -- hash it before it ever touches disk
+    // (HAS-686)
+    ALL_SETTINGS.set('ADMIN_PASSWD', hashPassword(ALL_SETTINGS.get('ADMIN_PASSWD')))
+    await writeSettingToFile('ADMIN_PASSWD', 'ADMIN_PASSWD_FILE')
+  } else if (!ADMIN_PASSWD_FILE_EXISTS) {
+    // never configured and nothing entered now -- fall through to the same
+    // "not configured" handling as the other file-based secrets, which
+    // clears the ADMIN_PASSWD_FILE setting
+    await writeSettingToFile('ADMIN_PASSWD', 'ADMIN_PASSWD_FILE')
+  }
+  // else: keeping the existing password unchanged -- leave the file and the
+  // ADMIN_PASSWD_FILE setting exactly as they are (HAS-686)
   await writeSettingToFile('BEARER_TOKEN', 'BEARER_TOKEN_FILE')
   await writeSettingToFile('OIDC_CLIENT_SECRET', 'OIDC_CLIENT_SECRET_FILE')
   if (ALL_SETTINGS.has('P4PORT')) {

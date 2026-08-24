@@ -22,12 +22,15 @@ SVC_BASE_URI=https://localhost:3000
 ```
 
 The file named by `ADMIN_PASSWD_FILE` can be any file, the `secrets/passwd.txt`
-value is just one example. The file should contain the unecrypted password of
-the administrative user, named by the `ADMIN_USERNAME` setting. The value for
-the `ADMIN_USERNAME` can be any value of your choosing, with `admin` being one
-example. Regarding `SVC_BASE_URI`, the client server will proxy API requests to
-port 3000, as configured in the `client/package.json` file, hence the service
-must be listening on that port.
+value is just one example. For local development, the file may simply contain
+the plaintext password of the administrative user, named by the
+`ADMIN_USERNAME` setting -- for a real deployment, generate the file with
+`bin/configure-auth-service.js` instead, which stores a salted hash rather
+than the plaintext password (see `example.env` for the format and a
+command-line alternative). The value for the `ADMIN_USERNAME` can be any value
+of your choosing, with `admin` being one example. Regarding `SVC_BASE_URI`, the
+client server will proxy API requests to port 3000, as configured in the
+`client/package.json` file, hence the service must be listening on that port.
 
 Start the service in the usual way:
 
