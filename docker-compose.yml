@@ -22,6 +22,7 @@ services:
       TRUST_PROXY: 'true'
       CLIENT_CERT_HEADER: 'X-SSL-Client-Cert'
       CLIENT_CERT_FP: '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E'
+      CA_CERT_FILE: 'certs/ca.crt'
       REDIS_URL: 'rediss://rediss.doc:6389'
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
@@ -58,6 +59,7 @@ services:
       TRUST_PROXY: 'true'
       CLIENT_CERT_HEADER: 'X-SSL-Client-Cert'
       CLIENT_CERT_FP: '39:65:C1:9A:2F:9A:66:B6:57:54:F5:05:8D:F4:2F:3B:53:BB:7D:3E:C6:C0:36:D4:10:4D:F8:A4:0C:8B:56:9E'
+      CA_CERT_FILE: 'certs/ca.crt'
       REDIS_URL: 'rediss://rediss.doc:6389'
       OIDC_CLIENT_ID: client_id
       OIDC_CLIENT_SECRET: client_secret
