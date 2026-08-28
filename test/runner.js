@@ -77,6 +77,10 @@ function startServerGeneric (config, ssldir) {
       '-J', 'journal',
       '-L', 'log',
       '-p', config.port,
+      // force case-sensitive handling explicitly: p4d's default otherwise
+      // follows the host platform (e.g. insensitive on macOS), which makes
+      // case-handling-dependent tests flaky across dev machines (HAS-674)
+      '-C0',
       '-d'
     ]
     const p4d = spawn('p4d', args, {
