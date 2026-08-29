@@ -39,14 +39,13 @@ async function validateOpenID() {
   const getAuthProviders = container.resolve('getAuthProviders')
   const providers = await getAuthProviders()
   if (providers) {
-    const results = {}
-    for (const elem of providers) {
-      if ('issuerUri' in elem) {
-        const result = await status.validateOpenID(elem.issuerUri)
-        results[elem.id] = result
-      }
-    }
-    if (Object.keys(results).length > 0) {
+    const oidcProviders = providers.filter((elem) => 'issuerUri' in elem)
+    const outcomes = await Promise.all(oidcProviders.map((elem) => status.validateOpenID(elem.issuerUri)))
+    if (outcomes.length > 0) {
+      const results = {}
+      oidcProviders.forEach((elem, idx) => {
+        results[elem.id] = outcomes[idx]
+      })
       return results
     }
   }
@@ -57,14 +56,13 @@ async function validateSaml() {
   const getAuthProviders = container.resolve('getAuthProviders')
   const providers = await getAuthProviders()
   if (providers) {
-    const results = {}
-    for (const elem of providers) {
-      if ('metadataUrl' in elem) {
-        const result = await status.validateSaml(elem.metadataUrl)
-        results[elem.id] = result
-      }
-    }
-    if (Object.keys(results).length > 0) {
+    const samlProviders = providers.filter((elem) => 'metadataUrl' in elem)
+    const outcomes = await Promise.all(samlProviders.map((elem) => status.validateSaml(elem.metadataUrl)))
+    if (outcomes.length > 0) {
+      const results = {}
+      samlProviders.forEach((elem, idx) => {
+        results[elem.id] = outcomes[idx]
+      })
       return results
     }
   }

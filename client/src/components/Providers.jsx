@@ -304,6 +304,12 @@ function makeStatusIcon(provider, status) {
         <CheckCircleIcon fontSize="small" sx={{ color: green['400'] }} />
       </Tooltip>
     )
+  } else if (status === undefined) {
+    return (
+      <Tooltip title="Status: unknown (unable to check right now)">
+        <HelpCenterIcon fontSize="small" sx={{ color: yellow['600'] }} />
+      </Tooltip>
+    )
   } else if (provider.metadataUrl) {
     return (
       <Tooltip title={`Status: ${status}`}>
@@ -360,26 +366,24 @@ export default function Providers({ providers, onDelete }) {
     return (
       <Alert severity='info'>Checking status of providers...</Alert>
     )
-  } else if (error) {
-    if (typeof error === 'string') {
-      throw new Error(error)
-    } else {
-      throw new Error(JSON.stringify(error))
-    }
-  } else {
-    return (
-      <Box>
-        <Typography>
-          Authentication Integrations
-        </Typography>
-        <Grid container spacing={2}>
-          {providers.map((p) => (
-            <Grid item xs={4} key={p.id}>
-              <ProviderCard provider={p} onDelete={onDelete} status={data[p.protocol][p.id]} />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    )
   }
+  return (
+    <Box>
+      <Typography>
+        Authentication Integrations
+      </Typography>
+      {error && (
+        <Alert severity='warning' sx={{ my: 2 }}>
+          Unable to check the status of the configured providers right now.
+        </Alert>
+      )}
+      <Grid container spacing={2}>
+        {providers.map((p) => (
+          <Grid item xs={4} key={p.id}>
+            <ProviderCard provider={p} onDelete={onDelete} status={data?.[p.protocol]?.[p.id]} />
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  )
 }
