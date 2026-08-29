@@ -29,6 +29,8 @@ describe('GenerateFormAction use case', function () {
   const getSamlAuthnContext = GetSamlAuthnContext({ settingsRepository })
   let usecase
 
+  const logger = { warning: () => {} }
+
   before(function () {
     const tidyAuthProviders = TidyAuthProviders({
       getSamlAuthnContext: GetSamlAuthnContext(),
@@ -41,7 +43,7 @@ describe('GenerateFormAction use case', function () {
       getSamlAuthnContext,
       getAuthProviders
     })
-    usecase = GenerateFormAction({ getAuthProviders, getSamlConfiguration })
+    usecase = GenerateFormAction({ getAuthProviders, getSamlConfiguration, logger })
   })
 
   beforeEach(function () {
@@ -159,5 +161,29 @@ o/mqlYGsRE1PiIpwZ6gYLcQGeelJb3HNB4pHde5DHURNjPlEBMZOGhd+w6fLWNSP
     assert.equal(result[1], "https://saml.example.com")
     assert.equal(result[2], 'https://shibboleth.doc:4443')
     assert.equal(result[3], 'https://oidc.example.com')
+  })
+
+  it('should skip a provider whose metadata cannot be fetched', async function () {
+    // arrange
+    const providers = [{
+      id: 'broken',
+      label: 'Broken IdP',
+      protocol: 'saml',
+      // assumes gopher (port 70) is not running on localhost
+      metadataUrl: 'https://localhost:70',
+    }, {
+      label: 'Veritas Solutions',
+      issuerUri: 'https://oidc.example.com',
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      protocol: 'oidc'
+    }]
+    temporaryRepository.set('AUTH_PROVIDERS', providers)
+    // act
+    const result = await usecase()
+    // assert
+    assert.lengthOf(result, 2)
+    assert.equal(result[0], "'self'")
+    assert.equal(result[1], 'https://oidc.example.com')
   })
 })
