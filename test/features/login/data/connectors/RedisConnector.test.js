@@ -91,6 +91,18 @@ describe('Redis connector', function () {
     connector.client().destroy()
   })
 
+  it('should reject ready rather than silently leave client() undefined when the sentinel config fails to resolve (HAS-706)', async function () {
+    const fakeRedisSentinel = () => Promise.reject(new Error('bad SENTINEL_CONFIG'))
+    const connector = new RedisConnector({ redisSentinel: fakeRedisSentinel, settingsRepository, loadAuthorityCerts })
+    try {
+      await connector.ready
+      assert.fail('should have rejected')
+    } catch (err) {
+      assert.equal(err.message, 'bad SENTINEL_CONFIG')
+    }
+    assert.isUndefined(connector.client())
+  })
+
   describe('buildRedisTlsOptions', function () {
     function makeSettings () {
       const repo = new MapSettingsRepository()
