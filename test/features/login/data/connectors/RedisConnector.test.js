@@ -8,7 +8,7 @@ import { DefaultsEnvRepository } from 'helix-auth-svc/lib/common/data/repositori
 import { MapSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MapSettingsRepository.js'
 import { MergedSettingsRepository } from 'helix-auth-svc/lib/common/data/repositories/MergedSettingsRepository.js'
 import LoadAuthorityCerts from 'helix-auth-svc/lib/common/domain/usecases/LoadAuthorityCerts.js'
-import { RedisConnector, buildRedisTlsOptions } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
+import { RedisConnector, buildRedisTlsOptions, buildSentinelOptions } from 'helix-auth-svc/lib/features/login/data/connectors/RedisConnector.js'
 import RedisSentinel from 'helix-auth-svc/lib/features/login/data/connectors/RedisSentinel.js'
 
 describe('Redis connector', function () {
@@ -92,6 +92,71 @@ describe('Redis connector', function () {
       const certs = LoadAuthorityCerts({ settingsRepository: repo })
       const options = buildRedisTlsOptions(repo, certs)
       assert.isTrue(options.rejectUnauthorized)
+    })
+  })
+
+  describe('buildSentinelOptions', function () {
+    it('should translate the minimal ioredis-shaped config', function () {
+      const options = buildSentinelOptions({
+        name: 'mymaster',
+        sentinels: [{ host: '192.168.56.31', port: 26379 }]
+      })
+      assert.equal(options.name, 'mymaster')
+      assert.sameDeepMembers(options.sentinelRootNodes, [{ host: '192.168.56.31', port: 26379 }])
+      assert.isUndefined(options.nodeClientOptions)
+      assert.isUndefined(options.sentinelClientOptions)
+    })
+
+    it('should translate sentinelPassword to sentinelClientOptions.password', function () {
+      const options = buildSentinelOptions({
+        name: 'mymaster',
+        sentinels: [{ host: '192.168.56.31', port: 26379 }],
+        sentinelPassword: 'keyboard cat'
+      })
+      assert.propertyVal(options.sentinelClientOptions, 'password', 'keyboard cat')
+    })
+
+    it('should translate password to nodeClientOptions.password', function () {
+      const options = buildSentinelOptions({
+        name: 'mymaster',
+        sentinels: [{ host: '192.168.56.31', port: 26379 }],
+        password: 'woof woof'
+      })
+      assert.propertyVal(options.nodeClientOptions, 'password', 'woof woof')
+    })
+
+    it('should translate tls to nodeClientOptions.socket', function () {
+      const options = buildSentinelOptions({
+        name: 'mymaster',
+        sentinels: [{ host: '192.168.56.31', port: 26379 }],
+        tls: { cert: 'cert-contents', key: 'key-contents', ca: ['ca-contents'], rejectUnauthorized: false }
+      })
+      assert.isTrue(options.nodeClientOptions.socket.tls)
+      assert.equal(options.nodeClientOptions.socket.cert, 'cert-contents')
+      assert.equal(options.nodeClientOptions.socket.key, 'key-contents')
+      assert.sameMembers(options.nodeClientOptions.socket.ca, ['ca-contents'])
+      assert.isFalse(options.nodeClientOptions.socket.rejectUnauthorized)
+    })
+
+    it('should translate sentinelTLS to sentinelClientOptions.socket only when enabled', function () {
+      const withoutFlag = buildSentinelOptions({
+        name: 'mymaster',
+        sentinels: [{ host: '192.168.56.31', port: 26379 }],
+        sentinelTLS: { cert: 'cert-contents', key: 'key-contents', ca: ['ca-contents'], rejectUnauthorized: false }
+      })
+      assert.isUndefined(withoutFlag.sentinelClientOptions)
+
+      const withFlag = buildSentinelOptions({
+        name: 'mymaster',
+        sentinels: [{ host: '192.168.56.31', port: 26379 }],
+        enableTLSForSentinelMode: true,
+        sentinelTLS: { cert: 'cert-contents', key: 'key-contents', ca: ['ca-contents'], rejectUnauthorized: false }
+      })
+      assert.isTrue(withFlag.sentinelClientOptions.socket.tls)
+      assert.equal(withFlag.sentinelClientOptions.socket.cert, 'cert-contents')
+      assert.equal(withFlag.sentinelClientOptions.socket.key, 'key-contents')
+      assert.sameMembers(withFlag.sentinelClientOptions.socket.ca, ['ca-contents'])
+      assert.isFalse(withFlag.sentinelClientOptions.socket.rejectUnauthorized)
     })
   })
 })
