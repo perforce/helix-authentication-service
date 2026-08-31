@@ -71,6 +71,26 @@ describe('Redis connector', function () {
     }
   })
 
+  it('should await the sentinel config before constructing the client (HAS-706)', async function () {
+    let resolveConfig
+    const configPromise = new Promise((resolve) => { resolveConfig = resolve })
+    const fakeRedisSentinel = () => configPromise
+    const connector = new RedisConnector({ redisSentinel: fakeRedisSentinel, settingsRepository, loadAuthorityCerts })
+    // the client must not exist yet since the sentinel config has not resolved
+    assert.isUndefined(connector.client())
+    resolveConfig({ name: 'mymaster', sentinels: [{ host: '127.0.0.1', port: 1 }] })
+    // Give the config-resolution handler a chance to run (it synchronously
+    // constructs the client before awaiting connect(), which is what this
+    // test cares about -- not waiting for a real Sentinel connection, which
+    // this fake config does not point at).
+    await new Promise((resolve) => setImmediate(resolve))
+    assert.isDefined(connector.client())
+    // stop the client's background reconnect attempts against the
+    // unreachable fake address rather than leaving them running for the
+    // remainder of the test process
+    connector.client().destroy()
+  })
+
   describe('buildRedisTlsOptions', function () {
     function makeSettings () {
       const repo = new MapSettingsRepository()
