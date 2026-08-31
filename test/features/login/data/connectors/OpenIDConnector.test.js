@@ -32,7 +32,9 @@ describe('OpenID connector', function () {
       await connector.ping()
       assert.fail('should have raised an error')
     } catch (err) {
-      assert.equal(err.code, 'ECONNREFUSED')
+      // openid-client v6 uses fetch(), which wraps the actual network error
+      // in `cause` rather than exposing `code` directly on the TypeError
+      assert.equal(err.cause.code, 'ECONNREFUSED')
     }
   })
 
@@ -46,7 +48,8 @@ describe('OpenID connector', function () {
         await connector.ping()
         assert.fail('should have raised an error')
       } catch (err) {
-        assert.include(err.toString(), 'expected 200 OK')
+        // openid-client v6's discovery() error message differs from v5's
+        assert.include(err.toString(), 'unexpected HTTP response')
       }
     }
   })
