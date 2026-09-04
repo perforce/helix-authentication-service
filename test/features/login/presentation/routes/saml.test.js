@@ -2,11 +2,15 @@
 // Copyright 2026 Perforce Software
 //
 import { assert } from 'chai'
-import { describe, it } from 'mocha'
+import { afterEach, describe, it } from 'mocha'
 // Load the test environment before the bulk of our code initializes, otherwise
 // it will be too late due to the `import` early-binding behavior.
 import 'helix-auth-svc/test/env.js'
-import { samlCacheProvider } from 'helix-auth-svc/lib/features/login/presentation/routes/saml.js'
+import container from 'helix-auth-svc/lib/container.js'
+import { resolveForceAuthnOptions, samlCacheProvider } from 'helix-auth-svc/lib/features/login/presentation/routes/saml.js'
+
+const temporaryRepository = container.resolve('temporaryRepository')
+const startRequest = container.resolve('startRequest')
 
 describe('SAML InResponseTo cache provider (HAS-708)', function () {
   it('should return null for a key that was never saved', async function () {
@@ -50,5 +54,62 @@ describe('SAML InResponseTo cache provider (HAS-708)', function () {
     await samlCacheProvider.saveAsync(key, new Date().toISOString())
     const result = await samlCacheProvider.getAsync(key)
     assert.isNotNull(result)
+  })
+})
+
+describe('resolveForceAuthnOptions (HAS-709)', function () {
+  // Registers a minimal, valid SAML provider so loadSamlOptions() (called
+  // internally) succeeds rather than throwing for a missing/unconfigured
+  // provider, letting these tests exercise the real forceAuthn-merging logic
+  // end to end -- this is what actually guards against the original bug
+  // (calling the async loadSamlOptions() without awaiting it, then setting
+  // .forceAuthn on the Promise instead of the resolved options), since that
+  // regression only shows up when the whole async chain is exercised.
+  //
+  // TidyAuthProviders reassigns `id` to `<protocol>-<index>` for any provider
+  // whose configured id isn't identical to its protocol, so with a single
+  // SAML provider registered the effective id is always 'saml-0' regardless
+  // of what's set below.
+  const providerId = 'saml-0'
+
+  afterEach(function () {
+    temporaryRepository.clear()
+  })
+
+  it('should apply forceAuthn from the request, overriding an unset provider default', async function () {
+    temporaryRepository.set('AUTH_PROVIDERS', [{
+      protocol: 'saml',
+      signonUrl: 'https://saml.example.com/saml/sso',
+      idpCertFile: 'certs/server.crt'
+    }])
+    const request = startRequest('testuser', true)
+    const req = { query: { providerId }, session: {} }
+    const options = await resolveForceAuthnOptions(req, request.id)
+    assert.isTrue(options.forceAuthn)
+  })
+
+  it('should leave a provider-level forceAuthn untouched when the request does not request it', async function () {
+    temporaryRepository.set('AUTH_PROVIDERS', [{
+      protocol: 'saml',
+      signonUrl: 'https://saml.example.com/saml/sso',
+      idpCertFile: 'certs/server.crt',
+      forceAuthn: true
+    }])
+    const request = startRequest('testuser', false)
+    const req = { query: { providerId }, session: {} }
+    const options = await resolveForceAuthnOptions(req, request.id)
+    assert.isTrue(options.forceAuthn)
+  })
+
+  it('should not force authentication when neither provider nor request request it', async function () {
+    temporaryRepository.set('AUTH_PROVIDERS', [{
+      protocol: 'saml',
+      signonUrl: 'https://saml.example.com/saml/sso',
+      idpCertFile: 'certs/server.crt'
+    }])
+    const request = startRequest('testuser', false)
+    const req = { query: { providerId }, session: {} }
+    const options = await resolveForceAuthnOptions(req, request.id)
+    assert.isFalse(options.forceAuthn)
   })
 })
