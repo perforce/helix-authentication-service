@@ -365,7 +365,10 @@ key_file = 'certs/server.key'
 #
 # saml_nameid_format = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
 
-# Service provider audience value for AudienceRestriction assertions.
+# Service provider audience value for AudienceRestriction assertions. If left
+# unset, the SP's own entity ID (issuer) is used, which is recommended: it
+# ensures an assertion issued by the IdP for a different service provider
+# cannot be replayed against this one.
 #
 # saml_sp_audience = undefined
 
@@ -373,11 +376,20 @@ key_file = 'certs/server.key'
 # assertion is signed. The library will require that either the assertion or the
 # response is signed regardless of the settings.
 #
+# SECURITY: disabling this weakens protection against a forged or altered
+# assertion (see e.g. XML signature wrapping attacks) unless the enclosing
+# response is signed instead. Only turn this off if the IdP is known to sign
+# the response but not the assertion.
+#
 # saml_want_assertion_signed = true
 
 # If set to 'false', the SAML client library will not require that the SAML
 # response is signed. The library will require that either the assertion or the
 # response is signed regardless of the settings.
+#
+# SECURITY: disabling this weakens protection against a forged or altered
+# response unless the enclosed assertion is signed instead. Only turn this off
+# if the IdP is known to sign assertions but not the response.
 #
 # saml_want_response_signed = true
 
