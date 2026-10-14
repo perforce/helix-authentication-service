@@ -59,14 +59,26 @@ describe('BearerTokenStrategy', function () {
 
   it('should succeed if matching with classic token', function (done) {
     // arrange
-    settingsRepository.set('BEARER_TOKEN', 'keyboard cat')
+    settingsRepository.set('BEARER_TOKEN', 'otter whistle')
     // act
-    strategy._verify('a2V5Ym9hcmQgY2F0', (err, user, extra) => {
+    strategy._verify('b3R0ZXIgd2hpc3RsZQ==', (err, user, extra) => {
       // assert
       assert.isNull(err)
       assert.propertyVal(user, 'userName', 'unused')
       assert.isUndefined(user.domain)
       assert.equal(extra.scope, 'all')
+      done()
+    })
+  })
+
+  it('should return false if classic token is the well-known default (HAS-711)', function (done) {
+    // arrange
+    settingsRepository.set('BEARER_TOKEN', 'keyboard cat')
+    // act
+    strategy._verify('a2V5Ym9hcmQgY2F0', (err, user) => {
+      // assert
+      assert.isNull(err)
+      assert.isFalse(user)
       done()
     })
   })

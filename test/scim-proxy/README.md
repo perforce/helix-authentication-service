@@ -37,9 +37,9 @@ $ docker compose up --build -d
 Then use `curl` to query the provisioned users via the proxy:
 
 ```shell
-$ curl -k --oauth2-bearer a2V5Ym9hcmQgY2F0 https://authen.doc/scim/v2/Users
+$ curl -k --oauth2-bearer dGVzdC1zY2ltLXRva2VuLXh5eg== https://authen.doc/scim/v2/Users
 {"schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],"totalResults":0,"Resources":[]}
 ```
 
-Note that `a2V5Ym9hcmQgY2F0` is the base64 encoded form of the bearer token,
-`keyboard cat`, as defined in the P4AS environment (`BEARER_TOKEN`).
+Note that `dGVzdC1zY2ltLXRva2VuLXh5eg==` is the base64 encoded form of the bearer token,
+`test-scim-token-xyz`, as defined in the P4AS environment (`BEARER_TOKEN`).

@@ -13,6 +13,7 @@ import readline from 'node:readline'
 import { parseArgs } from 'node:util'
 import { DotenvSource } from 'helix-auth-svc/lib/common/data/sources/DotenvSource.js'
 import { TomlSource } from 'helix-auth-svc/lib/common/data/sources/TomlSource.js'
+import { DEFAULT_SECRET } from 'helix-auth-svc/lib/common/domain/entities/DefaultSecret.js'
 import HashPassword from 'helix-auth-svc/lib/common/domain/usecases/HashPassword.js'
 
 const hashPassword = HashPassword()
@@ -577,13 +578,11 @@ async function readSettings() {
     const adminPasswdFilename = ALL_SETTINGS.get('ADMIN_PASSWD_FILE')
     ADMIN_PASSWD_FILE_EXISTS = Boolean(adminPasswdFilename) && await fileAccessible(adminPasswdFilename)
   }
-  // The well-known default value shipped in example.env/defaults.env. Treat it
-  // the same as an unset value so that installations whose configuration still
-  // carries the shipped default are upgraded to a unique, random value. Note
-  // that example.env leaves BEARER_TOKEN uncommented (so install.sh copies it
-  // into .env), whereas SESSION_SECRET is commented out, so without this check
-  // BEARER_TOKEN would always retain the default value.
-  const DEFAULT_SECRET = 'keyboard cat'
+  // The well-known default value formerly shipped live in example.env/toml and
+  // defaults.env (HAS-711 removed it as a trusted default, but older installs
+  // may still carry it in an existing .env/config.toml). Treat it the same as
+  // an unset value so that installations whose configuration still carries the
+  // shipped default are upgraded to a unique, random value.
   const unsetOrDefault = (name) => {
     const value = ALL_SETTINGS.get(name)
     return value === undefined || value === null || value.trim() === DEFAULT_SECRET

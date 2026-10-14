@@ -18,7 +18,7 @@ services:
     container_name: auth-svc1.doc
     environment:
       DEBUG: "1"
-      BEARER_TOKEN: "keyboard cat"
+      BEARER_TOKEN: "test-scim-token-xyz"
       CERT_FILE: "certs/server.crt"
       KEY_FILE: "certs/server.key"
       SVC_BASE_URI: "https://authen.doc"

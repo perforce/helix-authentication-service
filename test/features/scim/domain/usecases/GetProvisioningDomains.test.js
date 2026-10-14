@@ -31,40 +31,61 @@ describe('GetProvisioningDomains use case', function () {
 
   it('should return the one domain via text-based token', async function () {
     // arrange
-    settingsRepository.set('BEARER_TOKEN', 'keyboard cat')
+    settingsRepository.set('BEARER_TOKEN', 'otter whistle')
     // act
     const results = await usecase()
     // assert
     assert.lengthOf(results, 1)
-    assert.equal(results[0].bearerToken, 'keyboard cat')
+    assert.equal(results[0].bearerToken, 'otter whistle')
   })
 
   it('should return the one domain via file-based token', async function () {
     // arrange
     const tokenFile = temporaryFile({ extension: 'txt' })
-    await fs.writeFile(tokenFile, 'keyboard cat')
+    await fs.writeFile(tokenFile, 'otter whistle')
     settingsRepository.set('BEARER_TOKEN_FILE', tokenFile)
     // act
     const results = await usecase()
     // assert
     assert.lengthOf(results, 1)
-    assert.equal(results[0].bearerToken, 'keyboard cat')
+    assert.equal(results[0].bearerToken, 'otter whistle')
   })
 
   it('should read token from file even if using wrong setting', async function () {
     // arrange
     const tokenFile = temporaryFile({ extension: 'txt' })
-    await fs.writeFile(tokenFile, 'keyboard cat')
+    await fs.writeFile(tokenFile, 'otter whistle')
     // should be using BEARER_TOKEN_FILE, not BEARER_TOKEN
     settingsRepository.set('BEARER_TOKEN', tokenFile)
     // act
     const results = await usecase()
     // assert
     assert.lengthOf(results, 1)
-    assert.equal(results[0].bearerToken, 'keyboard cat')
+    assert.equal(results[0].bearerToken, 'otter whistle')
   })
 
   it('should trim bearer token when read from file', async function () {
+    // arrange
+    const tokenFile = temporaryFile({ extension: 'txt' })
+    await fs.writeFile(tokenFile, 'otter whistle\n')
+    settingsRepository.set('BEARER_TOKEN_FILE', tokenFile)
+    // act
+    const results = await usecase()
+    // assert
+    assert.lengthOf(results, 1)
+    assert.equal(results[0].bearerToken, 'otter whistle')
+  })
+
+  it('should return [] when BEARER_TOKEN is the well-known default (HAS-711)', async function () {
+    // arrange
+    settingsRepository.set('BEARER_TOKEN', 'keyboard cat')
+    // act
+    const results = await usecase()
+    // assert
+    assert.isEmpty(results)
+  })
+
+  it('should return [] when the file-based token is the well-known default (HAS-711)', async function () {
     // arrange
     const tokenFile = temporaryFile({ extension: 'txt' })
     await fs.writeFile(tokenFile, 'keyboard cat\n')
@@ -72,8 +93,7 @@ describe('GetProvisioningDomains use case', function () {
     // act
     const results = await usecase()
     // assert
-    assert.lengthOf(results, 1)
-    assert.equal(results[0].bearerToken, 'keyboard cat')
+    assert.isEmpty(results)
   })
 
   it('should raise error if missing providers list', async function () {
