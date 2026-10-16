@@ -13,7 +13,7 @@ import readline from 'node:readline'
 import { parseArgs } from 'node:util'
 import { DotenvSource } from 'helix-auth-svc/lib/common/data/sources/DotenvSource.js'
 import { TomlSource } from 'helix-auth-svc/lib/common/data/sources/TomlSource.js'
-import { DEFAULT_SECRET } from 'helix-auth-svc/lib/common/domain/entities/DefaultSecret.js'
+import { DEFAULT_SECRET } from 'helix-auth-svc/lib/constants.js'
 import HashPassword from 'helix-auth-svc/lib/common/domain/usecases/HashPassword.js'
 
 const hashPassword = HashPassword()
