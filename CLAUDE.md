@@ -41,6 +41,8 @@ features/<name>/
 
 Shared infrastructure lives in `lib/common/` (settings repository, config sources).
 
+**Constants:** shared constants (name mappings, blocked settings, well-known values like `DEFAULT_SECRET`) live in `lib/constants.js`. Don't create per-constant files under `entities/`; entities are domain models.
+
 **Entry points:**
 - `bin/www.js` — bootstraps the DI container, creates the Express app, and starts the HTTP/S server
 - `lib/container.js` — Awilix DI container registering all repositories and use cases
