@@ -34,6 +34,10 @@ fi
 test -f /usr/bin/node
 node --version | grep -Eq '^v24\.'
 
+# ensure the install script generated a unique session secret
+grep -q "^SESSION_SECRET=" helix-auth-svc/.env || { echo '.env missing SESSION_SECRET after install' ; exit 1; }
+grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET after install' ; exit 1; }
+
 # ensure the systemd service is running
 sudo systemctl status helix-auth | grep -q 'Active: active' || { echo 'service not active' ; exit 1; }
 
@@ -63,10 +67,12 @@ sudo -u perforce grep -q 'keyboard cat' helix-auth-svc/bearer-token.txt && { ech
 # run the configure script and set up SAML
 sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
-    --saml-idp-metadata-url https://saml.idp/metadata
+    --saml-idp-metadata-url https://saml.idp/metadata \
+    --session-secret 'shared-test-secret'
 
 test -f helix-auth-svc/.env || { echo 'missing .env configuration file' ; exit 1; }
 grep -q 'https://saml.idp/metadata' helix-auth-svc/.env || { echo '.env missing SAML' ; exit 1; }
+grep -q "SESSION_SECRET='shared-test-secret'" helix-auth-svc/.env || { echo '.env missing given SESSION_SECRET' ; exit 1; }
 
 # run the configure script and set up web interface
 sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \

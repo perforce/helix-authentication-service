@@ -99,6 +99,9 @@ kubectl apply -f namespaces/helix.yaml
 kubectl apply -f secrets/auth-ca-crt.yaml
 kubectl apply -f secrets/auth-svc-tls.yaml
 kubectl apply -f secrets/oidc-client-creds.yaml
+# the session secret must be the same for every replica, so generate it once
+# (there is intentionally no default value)
+kubectl -n helix create secret generic session-secret --from-literal=session_secret="$(openssl rand -base64 32)"
 kubectl apply -f configmaps/auth-svc.yaml
 kubectl apply -f services/redis.yaml
 kubectl apply -f services/auth-svc.yaml

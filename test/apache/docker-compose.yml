@@ -25,6 +25,8 @@ services:
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
       REDIS_URL: 'redis://redis.doc:6379'
+      # all instances sharing Redis must use the same session secret
+      SESSION_SECRET: 'do-not-use-in-production'
       DEFAULT_PROTOCOL: "saml"
       CERT_FILE: "certs/server.crt"
       KEY_FILE: "certs/server.key"
@@ -47,6 +49,8 @@ services:
       PROTOCOL: "http"
       TRUST_PROXY: 'true'
       REDIS_URL: 'redis://redis.doc:6379'
+      # all instances sharing Redis must use the same session secret
+      SESSION_SECRET: 'do-not-use-in-production'
       DEFAULT_PROTOCOL: "saml"
       CERT_FILE: "certs/server.crt"
       KEY_FILE: "certs/server.key"

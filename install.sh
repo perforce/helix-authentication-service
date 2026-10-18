@@ -349,6 +349,9 @@ function create_env_if_missing() {
         # inject LOGGING if not already set; strip comments and blank lines
         awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env | sudo tee .env >/dev/null
         sudo chown --reference=example.env .env
+        # generate a unique session secret
+        SESSION_SECRET=$(head -c 24 /dev/urandom | base64)
+        echo "SESSION_SECRET='${SESSION_SECRET}'" | sudo tee -a .env >/dev/null
     fi
 }
 
@@ -411,6 +414,10 @@ To configure the service, edit the .env file in the directory shown below, and
 then restart the service: sudo systemctl restart helix-auth
 
     ${INSTALLPREFIX}
+
+A unique SESSION_SECRET was generated in the .env file. If running multiple
+instances of the service behind a load balancer, every instance must be
+configured with the same SESSION_SECRET value.
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
 for your identity provider. The configure-auth-service.js script may be

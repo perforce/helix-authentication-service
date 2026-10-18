@@ -69,7 +69,7 @@ ca_cert_file = 'certs/ca.crt'
 # SCIM endpoint is disabled entirely rather than falling back to a shared,
 # publicly documented value.
 #
-# bearer_token = 'keyboard cat'
+# bearer_token = 'do-not-use-in-production'
 
 # Path of a file containing the plain text form of the bearer token. Use this
 # instead of bearer_token to avoid having the shared secret exposed in the
@@ -400,9 +400,21 @@ key_file = 'certs/server.key'
 #
 # saml_force_authn = undefined
 
-# Password used for encrypting the in-memory session data.
+# Secret used to sign the session cookie that correlates login requests across
+# the redirect to and from the identity provider. There is no default value. If
+# not set, a random value unique to the process is used, unless redis_url or
+# sentinel_config is set, in which case the service will not start. When
+# running multiple instances behind a load balancer, every instance must be
+# configured with the same value, otherwise logins will fail intermittently.
+# Generate a value with: openssl rand -base64 32
 #
-# session_secret = 'keyboard cat'
+# session_secret = undefined
+
+# Path of a file containing the plain text form of the session secret. Use this
+# instead of session_secret to avoid having the secret exposed in the
+# configuration, such as when using Docker or Kubernetes secrets.
+#
+# session_secret_file = undefined
 
 # The algorithm used to sign the requests.
 #
@@ -569,7 +581,7 @@ key_file = 'certs/server.key'
 #
 # [sentinel_config]
 # name = 'mymaster'
-# sentinel_password = 'keyboard cat'
+# sentinel_password = 'do-not-use-in-production'
 # sentinels = [
 #   { host = '192.168.56.31', port = 26379 },
 #   { host = '192.168.56.32', port = 26379 },

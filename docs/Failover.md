@@ -63,3 +63,8 @@ Because the session state and request/user mapping is stored in a separate
 key/value store (Redis), the new P4AS instance was able to complete the login
 procedure. Without the external session store, P4AS would only know about those
 login requests that it had handled while the instance was running.
+
+Note that all instances of P4AS sharing a Redis server must also be configured
+with the same `SESSION_SECRET` (or `SESSION_SECRET_FILE`), otherwise one
+instance will not be able to verify the session cookie signed by another. See
+the section on Redis in [Proxies.md](./Proxies.md) for details.

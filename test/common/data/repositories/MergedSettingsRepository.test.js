@@ -34,7 +34,7 @@ describe('MergedSettingsRepository', function () {
       process.env['MSR_FROM_PROC'] = 'proc_value'
       assert.equal(sut.get('MSR_FROM_PROC'), 'proc_value')
       assert.equal(sut.get('FROM_TEMP'), 'temp_value')
-      assert.equal(sut.get('SESSION_SECRET'), 'keyboard cat')
+      assert.isUndefined(sut.get('SESSION_SECRET'))
       assert.isUndefined(sut.get('SETTING_UNDEFINED'))
     })
 

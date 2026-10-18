@@ -31,6 +31,17 @@ Important Notes
     set SAML_WANT_RESPONSE_SIGNED=false. Currently most identity providers do
     not sign both unless configured otherwise.
 
+    P4AS no longer has a default value for SESSION_SECRET, which is used to sign
+    the session cookie. The installation scripts and packages generate a unique
+    value in the new .env file. If SESSION_SECRET is not set, a random value
+    unique to the process is used; however, if REDIS_URL or SENTINEL_CONFIG is
+    set then the service will not start without a SESSION_SECRET, or the new
+    SESSION_SECRET_FILE setting that names a file containing the secret. When
+    running multiple instances behind a load balancer, every instance must have
+    the same value. The configure-auth-service.js script has a new option,
+    --session-secret, for this purpose. The old well-known value is never used.
+    Docker and Kubernetes deployments that use Redis must now provide a value.
+
 
 Supported Platforms
 

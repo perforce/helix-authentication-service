@@ -146,6 +146,12 @@ Description:
     --saml-sp-entityid <entity-id>
         SAML entity identifier for this service.
 
+    --session-secret <secret>
+        Secret used to sign the session cookie. When running multiple
+        instances of the service behind a load balancer, every instance must
+        use the same value. If not given, a random value is generated for a
+        new configuration.
+
     --super <username>
         Helix Core super user's username for user provisioning.
 
@@ -187,6 +193,9 @@ function readArguments() {
       type: 'boolean',
     },
     'p4port': {
+      type: 'string',
+    },
+    'session-secret': {
       type: 'string',
     },
     'super': {
@@ -289,6 +298,9 @@ function readArguments() {
     if (values['saml-sp-entityid']) {
       CONFIGURE_AUTH = true
       ALL_SETTINGS.set('SAML_SP_ENTITY_ID', values['saml-sp-entityid'])
+    }
+    if (values['session-secret']) {
+      ALL_SETTINGS.set('SESSION_SECRET', values['session-secret'])
     }
     if (values['default-protocol']) {
       CONFIGURE_AUTH = true
@@ -591,7 +603,9 @@ async function readSettings() {
   // configured, so that each installation has a unique, unguessable secret
   // rather than relying on the well-known default value (HAS-669). Existing
   // installations that have set this value will retain their configured secret.
-  if (unsetOrDefault('SESSION_SECRET')) {
+  // A secret kept in SESSION_SECRET_FILE takes precedence at runtime, so leave
+  // it be.
+  if (unsetOrDefault('SESSION_SECRET') && !ALL_SETTINGS.has('SESSION_SECRET_FILE')) {
     ALL_SETTINGS.set('SESSION_SECRET', crypto.randomBytes(16).toString('base64url'))
   }
   // Likewise generate a random value for BEARER_TOKEN if one has not already

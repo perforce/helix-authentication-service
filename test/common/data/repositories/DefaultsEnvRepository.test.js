@@ -14,7 +14,7 @@ describe('DefaultsEnvRepository', function () {
 
   it('should return all available entries', function () {
     const result = Object.fromEntries(sut.entries())
-    assert.equal(Object.keys(result).length, 24)
+    assert.equal(Object.keys(result).length, 23)
     assert.property(result, 'ADMIN_USERNAME')
     assert.property(result, 'OIDC_TOKEN_SIGNING_ALGO')
     assert.property(result, 'TOKEN_TTL')
@@ -70,7 +70,7 @@ describe('DefaultsEnvRepository', function () {
     assert.equal(sut.get('SAML_SP_ENTITY_ID'), 'https://has.example.com')
     assert.equal(sut.get('SAML_WANT_ASSERTION_SIGNED'), 'true')
     assert.equal(sut.get('SAML_WANT_RESPONSE_SIGNED'), 'true')
-    assert.equal(sut.get('SESSION_SECRET'), 'keyboard cat')
+    assert.isUndefined(sut.get('SESSION_SECRET'))
     assert.equal(sut.get('SP_KEY_ALGO'), 'sha256')
     assert.equal(sut.get('STATUS_ENABLED'), 'false')
     assert.equal(sut.get('TOKEN_TTL'), '3600')

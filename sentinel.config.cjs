@@ -8,7 +8,7 @@
 module.exports = {
   name: 'mymaster',
   // password for connecting to Sentinel (optional)
-  sentinelPassword: 'keyboard cat',
+  sentinelPassword: 'do-not-use-in-production',
   sentinels: [
     { host: '192.168.56.31', port: 26379 },
     { host: '192.168.56.32', port: 26379 },

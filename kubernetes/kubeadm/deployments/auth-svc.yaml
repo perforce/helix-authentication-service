@@ -36,6 +36,11 @@ spec:
             secretKeyRef:
               name: oidc-client-creds
               key: client_secret
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: session-secret
+              key: session_secret
         readinessProbe:
           httpGet:
             path: /liveness

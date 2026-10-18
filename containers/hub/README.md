@@ -101,6 +101,10 @@ replacement certificates via a volume (for instance, using the `-v` option to
 certificate-related environment variables (`CA_CERT_PATH`, `IDP_CERT_FILE`,
 `CERT_FILE`, and `KEY_FILE`) to reference those files.
 
+### Using Redis
+
+P4AS no longer has a default value for `SESSION_SECRET`, which is used to sign the session cookie. If `SESSION_SECRET` is not set, a random value unique to the process is used; however, if `REDIS_URL` or `SENTINEL_CONFIG` is set then the service will not start without a `SESSION_SECRET`, or the new `SESSION_SECRET_FILE` setting that names a file containing the secret. When running multiple instances behind a load balancer, every instance must have the same value.
+
 ### Swarm support
 
 The service can be configured to act as a SAML 2.0 identity provider to other

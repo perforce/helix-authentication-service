@@ -73,6 +73,14 @@ REDIS_URL=redis://username:authpassword@192.168.1.1:6389
 
 **Note:** When using Redis for storing session state, the proxy should _not_ be routing requests based on session affinity. This allows for failover of the service to be handled by the proxy without concern for user sessions.
 
+**Important:** When using Redis, every service instance must be configured with the _same_ `SESSION_SECRET` value. The secret is used to sign the session cookie, and a cookie signed by one instance will be rejected by an instance that has a different secret, causing logins to fail whenever the proxy directs the identity provider callback to a different instance than the one that started the login. There is no default value for this setting, and the service will refuse to start if `REDIS_URL` (or `SENTINEL_CONFIG`) is set without a `SESSION_SECRET` or `SESSION_SECRET_FILE`. The installation scripts and packages generate a unique value for each new installation, so when adding another instance copy the value from the first instance, or use the `--session-secret` option of the `configure-auth-service.js` script. A suitable value can be generated like so:
+
+```
+openssl rand -base64 32
+```
+
+When running in Docker or Kubernetes, supply the value using an environment variable or a secret, or mount it as a file and set `SESSION_SECRET_FILE` to the path of that file.
+
 ## Timeouts
 
 When using a reverse proxy, bear in mind that the proxy will likely have a set amount of time it will wait for a response from the backend server before it returns a 504 response to the client. If this timeout is shorter than the `LOGIN_TIMEOUT` setting in the authentication service (default is `60` seconds), then the client will get an unexpected result (a 504 vs a 408). If this proves to be an issue, try to adjust the timeout of the proxy to allow more time for the login to complete.

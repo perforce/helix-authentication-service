@@ -114,6 +114,8 @@ if [ ! -f "%{installprefix}/.env" ] && [ ! -f "%{installprefix}/config.toml" ]; 
     # set the user and group for setuid/setgid
     echo 'SVC_USER=perforce' >> %{installprefix}/.env
     echo 'SVC_GROUP=perforce' >> %{installprefix}/.env
+    # generate a unique session secret
+    echo "SESSION_SECRET='$(head -c 24 /dev/urandom | base64)'" >> %{installprefix}/.env
 fi
 
 # ensure perforce user can write to the installation path
@@ -170,6 +172,10 @@ then restart the service: sudo systemctl restart helix-auth
 
     %{installprefix}
 
+If a new .env file was created, it contains a unique SESSION_SECRET. If running
+multiple instances of the service behind a load balancer, every instance must
+be configured with the same SESSION_SECRET value.
+
 In particular, the settings to be changed are the OIDC and/or SAML settings
 for your identity provider. The configure-auth-service.js script may be
 helpful for this purpose.
@@ -192,6 +198,10 @@ edit the .env file in the directory shown below, and then start the service
 by invoking './bin/node ./bin/www.js' from the directory shown below.
 
     %{installprefix}
+
+If a new .env file was created, it contains a unique SESSION_SECRET. If running
+multiple instances of the service behind a load balancer, every instance must
+be configured with the same SESSION_SECRET value.
 
 In particular, the settings to be changed are the OIDC and/or SAML settings
 for your identity provider. The configure-auth-service.js script may be
