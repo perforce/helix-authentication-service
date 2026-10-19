@@ -1,0 +1,4 @@
+---
+distro: resolute
+product-files:
+  - apt/ubuntu/resolute/incoming/helix-auth-svc_<LONGREL>-<CHANGE><*>_amd64.deb

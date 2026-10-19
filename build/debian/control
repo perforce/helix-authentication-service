@@ -1,7 +1,7 @@
 Source: helix-auth-svc
 Section: misc
 Priority: optional
-Maintainer: Perforce Software, Inc. <support+packaging@perforce.com>
+Maintainer: "Perforce Software, Inc." <support+packaging@perforce.com>
 Build-Depends: debhelper (>= 8.0)
 Pre-Depends: adduser
 Standards-Version: 4.1.3
