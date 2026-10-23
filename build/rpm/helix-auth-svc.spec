@@ -134,7 +134,7 @@ if $P4AS_SYSTEMD; then
     if [ -f "$SERVICE_UNIT_PATH" ]; then
         # preserve any local customizations rather than silently discarding
         # them on upgrade (HAS-700)
-        SERVICE_UNIT_BACKUP="${SERVICE_UNIT_PATH}.rpmsave-$(date +%Y%m%d%H%M%S)"
+        SERVICE_UNIT_BACKUP="${SERVICE_UNIT_PATH}.rpmsave-$(date +%%Y%%m%%d%%H%%M%%S)"
         cp -p "$SERVICE_UNIT_PATH" "$SERVICE_UNIT_BACKUP"
         echo "Existing ${SERVICE_UNIT_PATH} backed up to ${SERVICE_UNIT_BACKUP} before regenerating."
     fi
