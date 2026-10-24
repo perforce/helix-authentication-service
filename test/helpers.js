@@ -90,6 +90,11 @@ export function demolishTrust(config) {
 
 export function establishSuper (config) {
   const p4 = makeP4(config)
+  // 'passwd' now requires the user record to already exist, so create a bare
+  // one first; the protections table is still empty at this point, so anyone
+  // can do this.
+  const bareOut = p4.cmdSync('user -o')
+  p4.cmdSync('user -i', bareOut.stat[0])
   // On a secure-by-default server the database starts empty, so the first user
   // to run 'passwd' is automatically added to the protections table with
   // 'super' access. Set the password, then log in to get a valid ticket before
