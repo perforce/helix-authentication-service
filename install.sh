@@ -340,6 +340,10 @@ function create_env_if_missing() {
         # inject LOGGING if not already set; strip comments and blank lines
         awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env | sudo tee .env >/dev/null
         sudo chown --reference=example.env .env
+        if $CREATE_USER; then
+            # set the user and group for setuid/setgid
+            printf 'SVC_USER=p4auth\nSVC_GROUP=p4auth\n' | sudo tee -a .env >/dev/null
+        fi
         # generate a unique session secret
         SESSION_SECRET=$(head -c 24 /dev/urandom | base64)
         echo "SESSION_SECRET='${SESSION_SECRET}'" | sudo tee -a .env >/dev/null

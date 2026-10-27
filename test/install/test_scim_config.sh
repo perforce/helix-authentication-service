@@ -34,6 +34,17 @@ p4dctl start -o '-p 0.0.0.0:1666' despot
 test -f /usr/bin/node
 node --version | grep -Eq '^v24\.'
 
+# ensure the service is configured to, and does, drop privileges to p4auth
+grep -q '^SVC_USER=p4auth$' helix-auth-svc/.env || { echo '.env missing SVC_USER=p4auth' ; exit 1; }
+grep -q '^SVC_GROUP=p4auth$' helix-auth-svc/.env || { echo '.env missing SVC_GROUP=p4auth' ; exit 1; }
+for i in $(seq 1 10); do
+    SVC_PID=$(sudo systemctl show helix-auth -p MainPID --value)
+    SVC_UID=$(sudo awk '/^Uid:/ {print $2}' /proc/${SVC_PID}/status 2>/dev/null)
+    test "$SVC_UID" = "$(id -u p4auth)" && break
+    sleep 1
+done
+test "$SVC_UID" = "$(id -u p4auth)" || { echo "service running as uid ${SVC_UID}, not p4auth" ; exit 1; }
+
 # for convenience in testing, let p4auth have password-less sudo
 sudo tee /etc/sudoers.d/p4auth >/dev/null <<EOT
 p4auth ALL=(ALL) NOPASSWD:ALL
