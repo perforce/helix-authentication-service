@@ -24,9 +24,12 @@ apt install ./apt/ubuntu/resolute/incoming/helix-auth-svc_*.deb
 # ensure the package is fully installed
 dpkg-query -s helix-auth-svc | grep -q 'install ok installed' || { echo 'package install failed' ; exit 1; }
 
-# ensure 'perforce' user and group are created
-getent group perforce
-getent passwd perforce
+# ensure 'p4auth' user and group are created and own the installation
+getent group p4auth
+getent passwd p4auth
+grep -q '^SVC_USER=p4auth$' /opt/perforce/helix-auth-svc/.env || { echo '.env missing SVC_USER=p4auth' ; exit 1; }
+grep -q '^SVC_GROUP=p4auth$' /opt/perforce/helix-auth-svc/.env || { echo '.env missing SVC_GROUP=p4auth' ; exit 1; }
+test "$(stat -c '%U:%G' /opt/perforce/helix-auth-svc/.env)" = 'p4auth:p4auth' || { echo '.env not owned by p4auth' ; exit 1; }
 
 # ensure the package.json has the expected version string
 grep -qE 'P4AS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json || { echo 'package.json missing version' ; exit 1; }

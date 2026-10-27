@@ -8,7 +8,6 @@ INTERACTIVE=true
 MONOCHROME=false
 CREATE_USER=true
 ALLOW_ROOT=false
-HOMEDIR=/opt/perforce
 UPGRADE_NODE=false
 NODE_VERSION=24
 INSTALL_SERVICE=true
@@ -51,7 +50,7 @@ Description:
     create and start a systemd service unit to manage the service.
 
     --no-create-user
-        Do _not_ create the perforce user and group that will own the
+        Do _not_ create the p4auth user and group that will own the
         systemd service.
 
     --no-systemd
@@ -313,30 +312,22 @@ function install_nodejs() {
     npm version >/dev/null 2>&1
 }
 
-# Create the perforce user and group, if permitted, and as needed.
+# Create the p4auth user and group, if permitted, and as needed.
 function create_user_group() {
-    # create perforce group as needed
-    if ! getent group perforce >/dev/null; then
-        sudo groupadd --system perforce
+    if ! getent group p4auth >/dev/null; then
+        sudo groupadd --system p4auth
+    fi
+    if ! getent passwd p4auth >/dev/null; then
+        sudo useradd --system --comment 'P4 Authentication Service' \
+            --shell /usr/sbin/nologin --gid p4auth \
+            --home-dir "$INSTALLPREFIX" --no-create-home p4auth
     fi
 
-    # create perforce user as needed
-    if ! getent passwd perforce >/dev/null; then
-        sudo useradd --system --comment 'Perforce Admin' --shell /bin/bash \
-            --gid perforce --home-dir "$HOMEDIR" perforce
-    fi
+    # ensure p4auth user can write to the installation path
+    sudo chown -R p4auth:p4auth "$INSTALLPREFIX"
 
-    # create home directory and set ownership as needed
-    if [ ! -d "$HOMEDIR" ]; then
-        sudo mkdir -p "$HOMEDIR"
-        sudo chown -R perforce:perforce "$HOMEDIR"
-    fi
-
-    # ensure perforce user can write to the installation path
-    sudo chown -R perforce:perforce "$INSTALLPREFIX"
-
-    if ! sudo su - perforce -c "ls ${INSTALLPREFIX}" >/dev/null 2>&1; then
-        error "\n\nUser perforce cannot access ${INSTALLPREFIX}, please fix permissions.\n"
+    if ! sudo -u p4auth ls "${INSTALLPREFIX}" >/dev/null 2>&1; then
+        error "\n\nUser p4auth cannot access ${INSTALLPREFIX}, please fix permissions.\n"
         echo -e "For example, invoke 'chmod 755 $(dirname ${INSTALLPREFIX})' as the root user.\n"
     fi
 }

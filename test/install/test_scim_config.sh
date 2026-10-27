@@ -34,8 +34,13 @@ p4dctl start -o '-p 0.0.0.0:1666' despot
 test -f /usr/bin/node
 node --version | grep -Eq '^v24\.'
 
+# for convenience in testing, let p4auth have password-less sudo
+sudo tee /etc/sudoers.d/p4auth >/dev/null <<EOT
+p4auth ALL=(ALL) NOPASSWD:ALL
+EOT
+
 # configure _without_ SCIM to ensure P4 settings are _not_ in the .env file
-./helix-auth-svc/bin/configure-auth-service.sh -n \
+sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --saml-idp-metadata-url https://saml.idp/metadata
 
@@ -43,9 +48,9 @@ test -f helix-auth-svc/.env || { echo 'missing .env configuration file' ; exit 1
 grep -q 'https://saml.idp/metadata' helix-auth-svc/.env || { echo '.env missing SAML' ; exit 1; }
 grep -q 'P4PORT' helix-auth-svc/.env && { echo '.env contains forbidden P4PORT' ; exit 1; }
 grep -q 'P4PASSWD' helix-auth-svc/.env && { echo '.env contains forbidden P4PASSWD' ; exit 1; }
-rm helix-auth-svc/.env
+sudo rm helix-auth-svc/.env
 
-./helix-auth-svc/bin/configure-auth-service.sh -n \
+sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --bearer-token 'keyboard cat' \
     --p4port 0.0.0.0:1666 --super super --superpassword Rebar123

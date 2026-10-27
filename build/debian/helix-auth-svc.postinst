@@ -5,7 +5,6 @@
 
 set -e
 INSTALLPREFIX=/opt/perforce/helix-auth-svc
-HOMEDIR=/opt/perforce
 
 # summary of how this script can be called:
 #        * <postinst> `configure' <most-recently-configured-version>
@@ -20,40 +19,54 @@ HOMEDIR=/opt/perforce
 # the debian-policy package
 
 function create_user_group() {
-    # create perforce group as needed
-    if ! getent group perforce >/dev/null; then
-        groupadd --system perforce
+    if ! getent group p4auth >/dev/null; then
+        groupadd --system p4auth
     fi
-
-    # create perforce user as needed
-    if ! getent passwd perforce >/dev/null; then
-        useradd --system --comment 'Perforce Admin' --shell /bin/bash \
-                --gid perforce --home-dir "$HOMEDIR" perforce
+    if ! getent passwd p4auth >/dev/null; then
+        useradd --system --comment 'P4 Authentication Service' \
+                --shell /usr/sbin/nologin --gid p4auth \
+                --home-dir "$INSTALLPREFIX" --no-create-home p4auth
     fi
+}
 
-    # create home directory and set ownership as needed
-    if [ ! -d "$HOMEDIR" ]; then
-        mkdir -p "$HOMEDIR"
-        chown -R perforce:perforce "$HOMEDIR"
+# Print the user:group that owns an existing installation, or nothing if there
+# is no prior configuration to go by. Upgrades keep that owner rather than
+# switching to p4auth, which would also require migrating SVC_USER/SVC_GROUP.
+function existing_owner() {
+    for config in "${INSTALLPREFIX}/.env" "${INSTALLPREFIX}/config.toml"; do
+        if [ -f "$config" ]; then
+            stat -c '%u:%g' "$config"
+            return
+        fi
+    done
+    # releases prior to 2026.2 always used the perforce account
+    if getent passwd perforce >/dev/null && getent group perforce >/dev/null; then
+        echo 'perforce:perforce'
     fi
-
-    # ensure perforce user can write to the installation path
-    chown -R perforce:perforce "$INSTALLPREFIX"
 }
 
 case "$1" in
     configure)
+        SVC_OWNER=''
+        if [ -n "$2" ]; then
+            SVC_OWNER=$(existing_owner)
+        fi
+        if [ -z "$SVC_OWNER" ]; then
+            create_user_group
+            SVC_OWNER='p4auth:p4auth'
+        fi
         if [ ! -f "${INSTALLPREFIX}/.env" ] && [ ! -f "${INSTALLPREFIX}/config.toml" ]; then
             PRINT="print \"LOGGING=${INSTALLPREFIX}/logging.config.cjs\""
             # inject LOGGING if not already set; strip comments and blank lines
             awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" ${INSTALLPREFIX}/example.env > ${INSTALLPREFIX}/.env
             # set the user and group for setuid/setgid
-            echo 'SVC_USER=perforce' >> ${INSTALLPREFIX}/.env
-            echo 'SVC_GROUP=perforce' >> ${INSTALLPREFIX}/.env
+            echo "SVC_USER=${SVC_OWNER%%:*}" >> ${INSTALLPREFIX}/.env
+            echo "SVC_GROUP=${SVC_OWNER##*:}" >> ${INSTALLPREFIX}/.env
             # generate a unique session secret
             echo "SESSION_SECRET='$(head -c 24 /dev/urandom | base64)'" >> ${INSTALLPREFIX}/.env
         fi
-        create_user_group
+        # ensure the service account can write to the installation path
+        chown -R "$SVC_OWNER" "$INSTALLPREFIX"
 
         # If this fails, it means either systemd is not installed or it does not
         # have privileged access (to the container), in which case we will skip

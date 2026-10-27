@@ -41,13 +41,18 @@ grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has 
 # ensure the systemd service is running
 sudo systemctl status helix-auth | grep -q 'Active: active' || { echo 'service not active' ; exit 1; }
 
-# for convenience in testing, let perforce have password-less sudo
-sudo tee /etc/sudoers.d/perforce >/dev/null <<EOT
-perforce ALL=(ALL) NOPASSWD:ALL
+# ensure the p4auth service account was created and owns the installation
+getent group p4auth || { echo 'p4auth group missing' ; exit 1; }
+getent passwd p4auth | grep -q ':/usr/sbin/nologin$' || { echo 'p4auth user missing or has a login shell' ; exit 1; }
+test "$(stat -c '%U:%G' helix-auth-svc)" = 'p4auth:p4auth' || { echo 'installation not owned by p4auth' ; exit 1; }
+
+# for convenience in testing, let p4auth have password-less sudo
+sudo tee /etc/sudoers.d/p4auth >/dev/null <<EOT
+p4auth ALL=(ALL) NOPASSWD:ALL
 EOT
 
 # run the configure script and set up OIDC
-sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
+sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --oidc-issuer-uri https://oidc.issuer \
     --oidc-client-id client_id \
@@ -56,16 +61,16 @@ sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
 # ensure configure script created the OIDC client secret file
 test -f helix-auth-svc/.env || { echo 'missing .env configuration file' ; exit 1; }
 test -f helix-auth-svc/client-secret.txt || { echo 'missing client secret file' ; exit 1; }
-sudo -u perforce grep -q 'client_secret' helix-auth-svc/client-secret.txt || { echo 'client secret missing' ; exit 1; }
+sudo -u p4auth grep -q 'client_secret' helix-auth-svc/client-secret.txt || { echo 'client secret missing' ; exit 1; }
 grep -q 'https://localhost:3000' helix-auth-svc/.env || { echo '.env missing URL' ; exit 1; }
 grep -q 'https://oidc.issuer' helix-auth-svc/.env || { echo '.env missing OIDC' ; exit 1; }
 grep -q 'SESSION_SECRET' helix-auth-svc/.env || { echo '.env missing SESSION_SECRET' ; exit 1; }
 grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET' ; exit 1; }
 test -f helix-auth-svc/bearer-token.txt || { echo 'missing bearer token file' ; exit 1; }
-sudo -u perforce grep -q 'keyboard cat' helix-auth-svc/bearer-token.txt && { echo 'bearer token is default' ; exit 1; }
+sudo -u p4auth grep -q 'keyboard cat' helix-auth-svc/bearer-token.txt && { echo 'bearer token is default' ; exit 1; }
 
 # run the configure script and set up SAML
-sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
+sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 \
     --saml-idp-metadata-url https://saml.idp/metadata \
     --session-secret 'shared-test-secret'
@@ -75,7 +80,7 @@ grep -q 'https://saml.idp/metadata' helix-auth-svc/.env || { echo '.env missing 
 grep -q "SESSION_SECRET='shared-test-secret'" helix-auth-svc/.env || { echo '.env missing given SESSION_SECRET' ; exit 1; }
 
 # run the configure script and set up web interface
-sudo -u perforce ./helix-auth-svc/bin/configure-auth-service.sh -n \
+sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --base-url https://localhost:3000 --enable-admin \
     --admin-user=scott --admin-passwd='keyboard cat'
 

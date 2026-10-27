@@ -88,23 +88,33 @@ cp RELNOTES.txt %{buildroot}%{installprefix}/RELNOTES.txt
 %{installprefix}
 
 %post
-HOMEDIR=/opt/perforce
-
-# create perforce group as needed
-if ! getent group perforce >/dev/null; then
-    groupadd --system perforce
+# On upgrade ($1 >= 2) keep the user:group that owns the existing installation
+# rather than switching to p4auth, which would also require migrating the
+# SVC_USER/SVC_GROUP settings.
+SVC_OWNER=''
+if [ "$1" -ge 2 ]; then
+    for config in "%{installprefix}/.env" "%{installprefix}/config.toml"; do
+        if [ -f "$config" ]; then
+            SVC_OWNER=$(stat -c '%%u:%%g' "$config")
+            break
+        fi
+    done
+    # releases prior to 2026.2 always used the perforce account
+    if [ -z "$SVC_OWNER" ] && getent passwd perforce >/dev/null && getent group perforce >/dev/null; then
+        SVC_OWNER='perforce:perforce'
+    fi
 fi
 
-# create perforce user as needed
-if ! getent passwd perforce >/dev/null; then
-    useradd --system --comment 'Perforce Admin' --shell /bin/bash \
-            --gid perforce --home-dir "$HOMEDIR" perforce
-fi
-
-# create home directory and set ownership as needed
-if [ ! -d "$HOMEDIR" ]; then
-    mkdir -p "$HOMEDIR"
-    chown -R perforce:perforce "$HOMEDIR"
+if [ -z "$SVC_OWNER" ]; then
+    if ! getent group p4auth >/dev/null; then
+        groupadd --system p4auth
+    fi
+    if ! getent passwd p4auth >/dev/null; then
+        useradd --system --comment 'P4 Authentication Service' \
+                --shell /usr/sbin/nologin --gid p4auth \
+                --home-dir "%{installprefix}" --no-create-home p4auth
+    fi
+    SVC_OWNER='p4auth:p4auth'
 fi
 
 if [ ! -f "%{installprefix}/.env" ] && [ ! -f "%{installprefix}/config.toml" ]; then
@@ -112,14 +122,14 @@ if [ ! -f "%{installprefix}/.env" ] && [ ! -f "%{installprefix}/config.toml" ]; 
     # inject LOGGING if not already set; strip comments and blank lines
     awk "BEGIN {flg=0} /^$/{next} /^#/{next} /^LOGGING=/{flg=1; ${PRINT}; next} {print} END {if(flg==0) ${PRINT}}" %{installprefix}/example.env > %{installprefix}/.env
     # set the user and group for setuid/setgid
-    echo 'SVC_USER=perforce' >> %{installprefix}/.env
-    echo 'SVC_GROUP=perforce' >> %{installprefix}/.env
+    echo "SVC_USER=${SVC_OWNER%%%%:*}" >> %{installprefix}/.env
+    echo "SVC_GROUP=${SVC_OWNER##*:}" >> %{installprefix}/.env
     # generate a unique session secret
     echo "SESSION_SECRET='$(head -c 24 /dev/urandom | base64)'" >> %{installprefix}/.env
 fi
 
-# ensure perforce user can write to the installation path
-chown -R perforce:perforce "%{installprefix}"
+# ensure the service account can write to the installation path
+chown -R "$SVC_OWNER" "%{installprefix}"
 
 # If this fails, it means either systemd is not installed or it does not have
 # privileged access (to the container), in which case we will skip setting up
