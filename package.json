@@ -92,5 +92,10 @@
     "supertest": "^7.0.0",
     "tempy": "^3.2.0",
     "xid-js": "^1.0.1"
+  },
+  "overrides": {
+    "samlp": {
+      "@xmldom/xmldom": "^0.8.15"
+    }
   }
 }
