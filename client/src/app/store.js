@@ -8,8 +8,6 @@ import settingsReducer from './reducers/settingsSlice'
 
 const persistMiddleware = createListenerMiddleware()
 
-/* global sessionStorage */
-
 persistMiddleware.startListening({
   predicate: (action, currentState, originalState) => {
     if (currentState && originalState) {
