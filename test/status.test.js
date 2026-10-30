@@ -154,7 +154,7 @@ describe('Service status', function () {
         resultStr.includes('Could not find private key from') ||
         resultStr.includes('Could not read, private key, from') ||
         resultStr.includes('unable to load Private Key') ||
-        resultStr.includes('Could not find private key from')
+        resultStr.includes('Could not find or decode private key from')
       assert.isTrue(failedLoad, 'key should have failed to load')
     })
 
