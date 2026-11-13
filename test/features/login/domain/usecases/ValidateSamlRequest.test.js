@@ -163,6 +163,45 @@ describe('ValidateSamlRequest use case', function () {
     assert.isFalse(result)
   })
 
+  it('should require regex to match the entire recipient', async function () {
+    // arrange
+    const config = {
+      'urn:swarm-example:sp': {
+        acsUrlRe: 'https://swarm\\.example\\.com/[^/]+/api/v10/session'
+      }
+    }
+    const usecase = ValidateSamlRequest({ getIdPConfiguration: () => config })
+    // act
+    const prefixed = await usecase(
+      'urn:swarm-example:sp',
+      'https://attacker.example/?https://swarm.example.com/serverA/api/v10/session'
+    )
+    const suffixed = await usecase(
+      'urn:swarm-example:sp',
+      'https://swarm.example.com/serverA/api/v10/session.attacker.example/'
+    )
+    // assert
+    assert.isFalse(prefixed)
+    assert.isFalse(suffixed)
+  })
+
+  it('should accept regex that is already anchored', async function () {
+    // arrange
+    const config = {
+      'urn:swarm-example:sp': {
+        acsUrlRe: '^https://swarm\\.example\\.com/[^/]+/api/v10/session$'
+      }
+    }
+    const usecase = ValidateSamlRequest({ getIdPConfiguration: () => config })
+    // act
+    const result = await usecase(
+      'urn:swarm-example:sp',
+      'https://swarm.example.com/serverA/api/v10/session'
+    )
+    // assert
+    assert.isTrue(result)
+  })
+
   it('should return true for regex matching recipient', async function () {
     // arrange
     const config = {

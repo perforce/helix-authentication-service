@@ -52,6 +52,9 @@ module.exports = {
     acsUrlRe: 'https://swarm\\.example\\.com/[^/]+/api/v10/session'
   }
   //
+  // The acsUrlRe regular expression must match the entire URL, as if it
+  // began with ^ and ended with $.
+  //
   // The format for the acsUrlRe regular expression is documented here:
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
   //
