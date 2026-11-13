@@ -45,6 +45,60 @@ describe('Redis connector', function () {
     }), AssertionError)
   })
 
+  describe('take()', function () {
+    // build a connector around a fake client without connecting anywhere
+    function connectorWith (client) {
+      const connector = Object.create(RedisConnector.prototype)
+      connector._client = client
+      return connector
+    }
+
+    it('should get and delete atomically using GETDEL (HAS-736)', async function () {
+      const calls = []
+      const connector = connectorWith({
+        getDel: async (key) => { calls.push(['getDel', key]); return 'value' },
+        get: async () => assert.fail('should not use GET'),
+        del: async () => assert.fail('should not use DEL')
+      })
+      assert.equal(await connector.take('mykey'), 'value')
+      assert.deepEqual(calls, [['getDel', 'mykey']])
+    })
+
+    it('should fall back to MULTI when GETDEL is not supported (HAS-736)', async function () {
+      const calls = []
+      let getDelCalls = 0
+      const multi = {
+        get (key) { calls.push(['get', key]); return multi },
+        del (key) { calls.push(['del', key]); return multi },
+        exec: async () => { calls.push(['exec']); return ['value', 1] }
+      }
+      const connector = connectorWith({
+        getDel: async () => {
+          getDelCalls++
+          throw new Error("ERR unknown command 'GETDEL', with args beginning with: 'mykey'")
+        },
+        multi: () => multi
+      })
+      assert.equal(await connector.take('mykey'), 'value')
+      assert.deepEqual(calls, [['get', 'mykey'], ['del', 'mykey'], ['exec']])
+      // the unsupported command is not attempted again
+      assert.equal(await connector.take('mykey'), 'value')
+      assert.equal(getDelCalls, 1)
+    })
+
+    it('should propagate other errors from GETDEL', async function () {
+      const connector = connectorWith({
+        getDel: async () => { throw new Error('connection lost') }
+      })
+      try {
+        await connector.take('mykey')
+        assert.fail('should have raised error')
+      } catch (err) {
+        assert.include(err.message, 'connection lost')
+      }
+    })
+  })
+
   it('should return a non-TLS redis client', async function () {
     if (process.env.UNIT_ONLY) {
       this.skip()
