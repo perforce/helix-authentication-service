@@ -64,6 +64,8 @@ case "$1" in
             echo "SVC_GROUP=${SVC_OWNER##*:}" >> ${INSTALLPREFIX}/.env
             # generate a unique session secret
             echo "SESSION_SECRET='$(head -c 24 /dev/urandom | base64)'" >> ${INSTALLPREFIX}/.env
+            # the file contains secrets, restrict it to the owner (HAS-735)
+            chmod 600 ${INSTALLPREFIX}/.env
         fi
         # ensure the service account can write to the installation path
         chown -R "$SVC_OWNER" "$INSTALLPREFIX"

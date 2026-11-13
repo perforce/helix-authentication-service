@@ -40,6 +40,7 @@ getent passwd p4auth
 grep -q '^SVC_USER=p4auth$' /opt/perforce/helix-auth-svc/.env || { echo '.env missing SVC_USER=p4auth' ; exit 1; }
 grep -q '^SVC_GROUP=p4auth$' /opt/perforce/helix-auth-svc/.env || { echo '.env missing SVC_GROUP=p4auth' ; exit 1; }
 test "$(stat -c '%U:%G' /opt/perforce/helix-auth-svc/.env)" = 'p4auth:p4auth' || { echo '.env not owned by p4auth' ; exit 1; }
+test "$(stat -c '%a' /opt/perforce/helix-auth-svc/.env)" = '600' || { echo '.env is not mode 600' ; exit 1; }
 
 # ensure the package.json has the expected version string
 grep -qE 'P4AS/noarch/20..\..+?/.+' /opt/perforce/helix-auth-svc/package.json || { echo 'package.json missing version' ; exit 1; }

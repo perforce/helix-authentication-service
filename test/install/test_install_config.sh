@@ -34,9 +34,12 @@ fi
 test -f /usr/bin/node
 node --version | grep -Eq '^v24\.'
 
+# ensure the .env file holding secrets is readable only by its owner (HAS-735)
+test "$(sudo stat -c '%a' helix-auth-svc/.env)" = '600' || { echo '.env is not mode 600 after install' ; exit 1; }
+
 # ensure the install script generated a unique session secret
-grep -q "^SESSION_SECRET=" helix-auth-svc/.env || { echo '.env missing SESSION_SECRET after install' ; exit 1; }
-grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET after install' ; exit 1; }
+sudo grep -q "^SESSION_SECRET=" helix-auth-svc/.env || { echo '.env missing SESSION_SECRET after install' ; exit 1; }
+sudo grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET after install' ; exit 1; }
 
 # ensure the systemd service is running
 sudo systemctl status helix-auth | grep -q 'Active: active' || { echo 'service not active' ; exit 1; }
@@ -47,8 +50,8 @@ getent passwd p4auth | grep -q ':/usr/sbin/nologin$' || { echo 'p4auth user miss
 test "$(stat -c '%U:%G' helix-auth-svc)" = 'p4auth:p4auth' || { echo 'installation not owned by p4auth' ; exit 1; }
 
 # ensure the service is configured to, and does, drop privileges to p4auth
-grep -q '^SVC_USER=p4auth$' helix-auth-svc/.env || { echo '.env missing SVC_USER=p4auth' ; exit 1; }
-grep -q '^SVC_GROUP=p4auth$' helix-auth-svc/.env || { echo '.env missing SVC_GROUP=p4auth' ; exit 1; }
+sudo grep -q '^SVC_USER=p4auth$' helix-auth-svc/.env || { echo '.env missing SVC_USER=p4auth' ; exit 1; }
+sudo grep -q '^SVC_GROUP=p4auth$' helix-auth-svc/.env || { echo '.env missing SVC_GROUP=p4auth' ; exit 1; }
 for i in $(seq 1 10); do
     SVC_PID=$(sudo systemctl show helix-auth -p MainPID --value)
     SVC_UID=$(sudo awk '/^Uid:/ {print $2}' /proc/${SVC_PID}/status 2>/dev/null)
@@ -73,10 +76,11 @@ sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
 test -f helix-auth-svc/.env || { echo 'missing .env configuration file' ; exit 1; }
 test -f helix-auth-svc/client-secret.txt || { echo 'missing client secret file' ; exit 1; }
 sudo -u p4auth grep -q 'client_secret' helix-auth-svc/client-secret.txt || { echo 'client secret missing' ; exit 1; }
-grep -q 'https://localhost:3000' helix-auth-svc/.env || { echo '.env missing URL' ; exit 1; }
-grep -q 'https://oidc.issuer' helix-auth-svc/.env || { echo '.env missing OIDC' ; exit 1; }
-grep -q 'SESSION_SECRET' helix-auth-svc/.env || { echo '.env missing SESSION_SECRET' ; exit 1; }
-grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET' ; exit 1; }
+sudo grep -q 'https://localhost:3000' helix-auth-svc/.env || { echo '.env missing URL' ; exit 1; }
+sudo grep -q 'https://oidc.issuer' helix-auth-svc/.env || { echo '.env missing OIDC' ; exit 1; }
+sudo grep -q 'SESSION_SECRET' helix-auth-svc/.env || { echo '.env missing SESSION_SECRET' ; exit 1; }
+sudo grep -q "SESSION_SECRET='keyboard cat'" helix-auth-svc/.env && { echo '.env has default SESSION_SECRET' ; exit 1; }
+test "$(sudo stat -c '%a' helix-auth-svc/.env)" = '600' || { echo '.env is not mode 600 after configure' ; exit 1; }
 test -f helix-auth-svc/bearer-token.txt || { echo 'missing bearer token file' ; exit 1; }
 sudo -u p4auth grep -q 'keyboard cat' helix-auth-svc/bearer-token.txt && { echo 'bearer token is default' ; exit 1; }
 
@@ -87,8 +91,8 @@ sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --session-secret 'shared-test-secret'
 
 test -f helix-auth-svc/.env || { echo 'missing .env configuration file' ; exit 1; }
-grep -q 'https://saml.idp/metadata' helix-auth-svc/.env || { echo '.env missing SAML' ; exit 1; }
-grep -q "SESSION_SECRET='shared-test-secret'" helix-auth-svc/.env || { echo '.env missing given SESSION_SECRET' ; exit 1; }
+sudo grep -q 'https://saml.idp/metadata' helix-auth-svc/.env || { echo '.env missing SAML' ; exit 1; }
+sudo grep -q "SESSION_SECRET='shared-test-secret'" helix-auth-svc/.env || { echo '.env missing given SESSION_SECRET' ; exit 1; }
 
 # run the configure script and set up web interface
 sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
@@ -96,9 +100,9 @@ sudo -u p4auth ./helix-auth-svc/bin/configure-auth-service.sh -n \
     --admin-user=scott --admin-passwd='keyboard cat'
 
 test -f helix-auth-svc/.env || { echo 'missing .env configuration file' ; exit 1; }
-grep -q "ADMIN_ENABLED='true'" helix-auth-svc/.env || { echo '.env missing ADMIN_ENABLED' ; exit 1; }
-grep -q "ADMIN_USERNAME='scott'" helix-auth-svc/.env || { echo '.env missing ADMIN_USERNAME' ; exit 1; }
-grep -q 'ADMIN_PASSWD_FILE' helix-auth-svc/.env || { echo '.env missing ADMIN_PASSWD_FILE' ; exit 1; }
+sudo grep -q "ADMIN_ENABLED='true'" helix-auth-svc/.env || { echo '.env missing ADMIN_ENABLED' ; exit 1; }
+sudo grep -q "ADMIN_USERNAME='scott'" helix-auth-svc/.env || { echo '.env missing ADMIN_USERNAME' ; exit 1; }
+sudo grep -q 'ADMIN_PASSWD_FILE' helix-auth-svc/.env || { echo '.env missing ADMIN_PASSWD_FILE' ; exit 1; }
 
 cat <<EOT
 

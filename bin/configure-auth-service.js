@@ -1573,6 +1573,12 @@ async function modifyConfig() {
     const repository = new DotenvSource({ dotenvFile: '.env' })
     await repository.write(ALL_SETTINGS)
   }
+  // The configuration contains secrets (e.g. SESSION_SECRET, P4PASSWD), so
+  // restrict it to the service owner, which also tightens the permissions of
+  // files created by earlier releases (HAS-735).
+  await fs.chmod(CONFIG_FILE_NAME, '0600')
+  const configStats = await fs.stat('example.env')
+  await fs.chown(CONFIG_FILE_NAME, configStats.uid, configStats.gid)
 
   // Ensure the logging.config.cjs file is readable by all users to avoid
   // difficult to debug situations where the logging is not working and no

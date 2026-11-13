@@ -126,6 +126,8 @@ if [ ! -f "%{installprefix}/.env" ] && [ ! -f "%{installprefix}/config.toml" ]; 
     echo "SVC_GROUP=${SVC_OWNER##*:}" >> %{installprefix}/.env
     # generate a unique session secret
     echo "SESSION_SECRET='$(head -c 24 /dev/urandom | base64)'" >> %{installprefix}/.env
+    # the file contains secrets, restrict it to the owner (HAS-735)
+    chmod 600 %{installprefix}/.env
 fi
 
 # ensure the service account can write to the installation path
