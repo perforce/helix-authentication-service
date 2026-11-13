@@ -55,6 +55,24 @@ describe('VerifyWebToken use case', function () {
     }
   })
 
+  it('should reject JWT with a non-string audience', async function () {
+    // arrange
+    await getToken()
+    const header = base64json({ alg: 'HS256', typ: 'JWT' })
+    // a catastrophic pattern would hang the event loop (HAS-732), so use a
+    // harmless one that would still match any stored token if not rejected
+    const payload = base64json({ aud: { $regex: '.' } })
+    const token = header + '.' + payload + '.c2lnbmF0dXJl'
+    try {
+      // act
+      await usecase(token)
+      assert.fail('should have raised error')
+    } catch (err) {
+      // assert
+      assert.include(err.message, 'invalid aud property')
+    }
+  })
+
   it('should reject JWT with algorithm "none"', async function () {
     // arrange
     const header = base64json({ alg: 'none' })

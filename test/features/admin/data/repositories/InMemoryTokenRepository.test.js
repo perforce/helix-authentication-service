@@ -21,6 +21,8 @@ describe('InMemoryToken repository', function () {
     assert.throws(() => repository.set(null), AssertionError)
     assert.throws(() => repository.set('foobar', null), AssertionError)
     assert.throws(() => repository.get(null), AssertionError)
+    assert.throws(() => repository.get({ $regex: '.' }), AssertionError)
+    assert.throws(() => repository.delete({ $regex: '.' }), AssertionError)
   })
 
   it('should return null for missing audience', async function () {
