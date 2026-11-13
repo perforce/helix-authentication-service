@@ -633,6 +633,61 @@ setTimeout(function () {
         })
       })
 
+      it('should reject a *_FILE setting via settings POST (HAS-728)', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ IDP_CONFIG_FILE: '/nonexistent/evil.js', IDP_CONFIG: 'evil' })
+            .expect(400, /file path setting not permitted: IDP_CONFIG_FILE/, done)
+        })
+      })
+
+      it('should reject a lowercase *_FILE setting via settings POST (HAS-728)', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ idp_config_file: '/nonexistent/evil.js' })
+            .expect(400, /file path setting not permitted: idp_config_file/, done)
+        })
+      })
+
+      it('should reject LOGGING_FILE via settings POST (HAS-728)', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ LOGGING_FILE: '/nonexistent/evil.js', LOGGING: '{}' })
+            .expect(400, /file path setting not permitted: LOGGING_FILE/, done)
+        })
+      })
+
+      it('should reject LOGGING naming a file via settings POST (HAS-728)', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ LOGGING: '/etc/passwd' })
+            .expect(400, /file path setting not permitted: LOGGING/, done)
+        })
+      })
+
+      it('should accept inline LOGGING via settings POST', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ LOGGING: 'none' })
+            .expect(200, { status: 'ok' }, done)
+        })
+      })
+
       it('should reject PUT of a new auth provider', function (done) {
         getToken('scott', 'tiger').then((webToken) => {
           agent
