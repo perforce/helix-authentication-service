@@ -120,4 +120,15 @@ module.exports = {
     assert.equal(logger.level, 'info')
     assert.isFalse(logger.exitOnError)
   })
+
+  it('should not evaluate LOGGING as JavaScript (HAS-731)', async function () {
+    delete globalThis.has731logging
+    settingsRepository.set('LOGGING', `module.exports = (() => { globalThis.has731logging = true; return { level: 'warn', transport: 'console' } })()`)
+    const sut = ConstructLogger({ settingsRepository })
+    const logger = await sut()
+    // the invalid configuration falls back to the default logger
+    assert.isDefined(logger)
+    assert.equal(logger.level, 'info')
+    assert.isUndefined(globalThis.has731logging)
+  })
 })

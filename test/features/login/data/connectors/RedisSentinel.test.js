@@ -105,4 +105,18 @@ module.exports = {
     assert.isFalse(result.sentinelTLS.rejectUnauthorized)
     assert.isTrue(result.enableTLSForSentinelMode)
   })
+
+  it('should not evaluate SENTINEL_CONFIG as JavaScript (HAS-731)', async function () {
+    delete globalThis.has731sentinel
+    const settings = new Map()
+    settings.set('SENTINEL_CONFIG', `module.exports = (() => { globalThis.has731sentinel = true; return { name: 'mymaster', sentinels: [] } })()`)
+    const connector = RedisSentinel({ settingsRepository: settings })
+    try {
+      await connector()
+      assert.fail('should have raised error')
+    } catch (err) {
+      assert.instanceOf(err, SyntaxError)
+    }
+    assert.isUndefined(globalThis.has731sentinel)
+  })
 })
