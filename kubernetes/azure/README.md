@@ -83,7 +83,7 @@ docker push p4hastest.azurecr.io/helix-auth-svc
 
 ## Deploy
 
-The manifests defined here include a _configmap_ that configures the auth service for OIDC and SAML authentication, using a specific account with a hosted identity provider. You will need to modify that configuration before deploying, otherwise testing will be difficult.
+The manifests defined here include a _configmap_ that configures the auth service for OIDC and SAML authentication with a hosted identity provider. The identity provider settings in `configmaps/auth-svc.yaml`, the client credentials in `secrets/oidc-client-creds.yaml`, and the `CLIENT_CERT_FP` client certificate fingerprint are all example placeholders; replace them with the values for your own identity provider and P4 Server client certificate before deploying.
 
 **Note:** You will need to edit the `deployments/helix-p4d.yaml` file to use the correct registry address for the `helix-p4d-basic` image before proceeding.
 
