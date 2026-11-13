@@ -98,6 +98,28 @@ describe('WriteConfiguration use case', function () {
     writeStub.restore()
   })
 
+  it('should remove blocked settings regardless of case (HAS-729)', async function () {
+    // arrange
+    const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {
+      return new Map()
+    })
+    const writeStub = sinon.stub(ConfigurationRepository.prototype, 'write').callsFake((settings) => {
+      assert.isDefined(settings)
+      assert.lengthOf(settings, 1)
+      assert.equal(settings.get('NAME1'), 'VALUE1')
+    })
+    // act
+    const settings = new Map()
+    settings.set('NAME1', 'VALUE1')
+    settings.set('admin_username', 'mallory')
+    settings.set('Admin_Passwd_File', '/tmp/passwd')
+    await usecase(settings)
+    // assert
+    assert.isTrue(writeStub.calledOnce)
+    readStub.restore()
+    writeStub.restore()
+  })
+
   it('should completely remove empty values', async function () {
     // arrange
     const readStub = sinon.stub(ConfigurationRepository.prototype, 'read').callsFake(() => {

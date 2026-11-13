@@ -143,6 +143,45 @@ Admin_Username=scott
     assert.isUndefined(settings.get('INJECTED'))
   })
 
+  it('should not allow non-string values to inject additional keys', async function () {
+    // arrange: an array value is stringified, and was previously written
+    // without being encoded (HAS-729)
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    const repository = new DotenvSource({ dotenvFile })
+    // act
+    const incoming = new Map()
+    incoming.set('NAME1', ["x'\nADMIN_USERNAME='evil"])
+    await repository.write(incoming)
+    const settings = await repository.read()
+    // assert
+    assert.lengthOf(settings, 1)
+    assert.equal(settings.get('NAME1'), "x'\nADMIN_USERNAME='evil")
+    assert.isUndefined(settings.get('ADMIN_USERNAME'))
+  })
+
+  it('should reject setting names that could inject additional keys', async function () {
+    // arrange (HAS-729)
+    const dotenvFile = temporaryFile({ extension: 'env' })
+    await fs.writeFile(dotenvFile, "NAME1='original'\n")
+    const repository = new DotenvSource({ dotenvFile })
+    for (const key of ["NAME2='x'\nADMIN_USERNAME", 'NAME 2', 'NAME=2', '']) {
+      const incoming = new Map()
+      incoming.set(key, 'value')
+      try {
+        // act
+        await repository.write(incoming)
+        assert.fail('should have raised error')
+      } catch (err) {
+        // assert
+        assert.include(err.message, 'invalid setting name')
+      }
+    }
+    // the file is left untouched
+    const settings = await repository.read()
+    assert.lengthOf(settings, 1)
+    assert.equal(settings.get('NAME1'), 'original')
+  })
+
   it('should read and write PEM encoded certificates', async function () {
     // arrange
     const dotenvFile = temporaryFile({ extension: 'env' })

@@ -651,7 +651,8 @@ setTimeout(function () {
             .trustLocalhost(true)
             .set('Authorization', 'Bearer ' + webToken)
             .send({ idp_config_file: '/nonexistent/evil.js' })
-            .expect(400, /file path setting not permitted: idp_config_file/, done)
+            // rejected by the setting name check (HAS-729) before the file check
+            .expect(400, /invalid setting name: \\"idp_config_file\\"|file path setting not permitted: idp_config_file/, done)
         })
       })
 
@@ -674,6 +675,28 @@ setTimeout(function () {
             .set('Authorization', 'Bearer ' + webToken)
             .send({ LOGGING: '/etc/passwd' })
             .expect(400, /file path setting not permitted: LOGGING/, done)
+        })
+      })
+
+      it('should reject setting names with a newline via settings POST (HAS-729)', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ 'NAME1=\'x\'\nADMIN_USERNAME': 'evil' })
+            .expect(400, /invalid setting name/, done)
+        })
+      })
+
+      it('should reject setting names in lowercase via settings POST (HAS-729)', function (done) {
+        getToken('scott', 'tiger').then((webToken) => {
+          agent
+            .post('/settings')
+            .trustLocalhost(true)
+            .set('Authorization', 'Bearer ' + webToken)
+            .send({ admin_username: 'mallory' })
+            .expect(400, /invalid setting name/, done)
         })
       })
 
