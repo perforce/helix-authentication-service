@@ -41,6 +41,7 @@ install -d %{buildroot}%{installprefix}/views
 cp -p bin/configure-auth-service.js %{buildroot}%{installprefix}/bin/configure-auth-service.js
 install -m 0755 bin/configure-auth-service.sh %{buildroot}%{installprefix}/bin/configure-auth-service.sh
 install -m 0755 bin/node %{buildroot}%{installprefix}/bin/node
+cp -p bin/upgrade_node.js %{buildroot}%{installprefix}/bin/upgrade_node.js
 install -m 0755 bin/www.js %{buildroot}%{installprefix}/bin/www.js
 cp -pr certs/* %{buildroot}%{installprefix}/certs
 cp -p docs/Administrator-Guide.md %{buildroot}%{installprefix}/docs/Administrator-Guide.md
