@@ -747,7 +747,7 @@ describe('HelixEntity repository', function () {
     // Regression test for GitHub PR #57 ("fix scim group enumeration"). The
     // underlying `p4 groups` command emits one row per (group, member) pair
     // once a group has members, not one row per group, so getGroups() must
-    // dedupe by group name. This is expected to fail until that fix lands.
+    // dedupe by group name.
     it('should report a group with many members only once in getGroups', async function () {
       this.timeout(600000)
       // arrange
@@ -1144,11 +1144,13 @@ describe('HelixEntity repository', function () {
       const query = new Query()
       try {
         await repository.getUsers(query)
+        assert.fail('should have raised Error')
       } catch (err) {
         // having auto-established trust, the connection proceeds far enough to
         // fail authentication; a secure-by-default server reports an invalid
-        // password rather than revealing whether the user exists
-        assert.match(err.message, /User bruno doesn't exist|Password invalid/)
+        // password rather than revealing whether the user exists, while p4d
+        // 2026.1 and later report that a password must be set
+        assert.match(err.message, /User bruno doesn't exist|Password invalid|Password must be set/)
       }
     })
   })
