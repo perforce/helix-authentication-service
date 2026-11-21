@@ -17,7 +17,9 @@ router.get('/', async (req, res, next) => {
     const oidc = await validateOpenID()
     const entityRepository = container.resolve('entityRepository')
     const perforce = await status.validatePerforce(entityRepository)
-    const redisConnector = container.resolve('redisConnector')
+    // redisConnector is registered as an async factory (HAS-706), so it
+    // resolves to a Promise that must be awaited (HAS-739)
+    const redisConnector = await container.resolve('redisConnector')
     const redis = await status.validateRedis(redisConnector)
     const saml = await validateSaml()
     const version = await status.getVersion()
