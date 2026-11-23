@@ -103,6 +103,20 @@ Upgrade
     problem, it is necessary to remove the old package and then install the
     new package. After the 2022.1 release, this will not be necessary.
 
+    On Linux systems, upgrading from any release prior to 2026.2 replaces
+    /etc/systemd/system/helix-auth.service, and any changes made directly to
+    that file (such as Environment= lines for proxy settings) are lost without a
+    backup. This happens because the package being replaced deletes the file
+    before the new package can save it. Before upgrading, back up the file, for
+    example:
+
+        sudo cp -p /etc/systemd/system/helix-auth.service /root/helix-auth.service.bak
+
+    After upgrading, move any customizations into a systemd drop-in by running
+    `sudo systemctl edit helix-auth`, which creates the file
+    /etc/systemd/system/helix-auth.service.d/override.conf. Drop-in files are
+    kept across upgrades.
+
 
 Known Limitations
 
@@ -115,6 +129,16 @@ Third Party Licenses
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+Bugs fixed in 2026.2 (2026.2/${ID_PATCH}) (${DATE})
+
+    HAS-700 (Change #3037511)
+        Package upgrades now back up an existing helix-auth.service file to
+        helix-auth.service.dpkg-backup-<timestamp> (Ubuntu/Debian) or
+        helix-auth.service.rpmsave-<timestamp> (RHEL/Rocky) before regenerating
+        it. Use a systemd drop-in for local changes; see the Upgrade section for
+        upgrades from releases prior to 2026.2.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2026.1 (2026.1/3003337) (2026/07/08)
