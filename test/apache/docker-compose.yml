@@ -74,10 +74,10 @@ services:
       - auth-svc1.doc
       - auth-svc2.doc
   redis.doc:
-    image: redis:6.0
+    image: valkey/valkey:latest
     container_name: redis.doc
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "valkey-cli", "ping"]
       interval: 30s
       timeout: 30s
       retries: 3

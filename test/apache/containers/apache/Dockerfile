@@ -7,7 +7,10 @@
 # verification logic in /requests/status will be bypassed, allowing any client
 # to request the user profile data.
 #
-FROM httpd:2.4
+# Last tested with httpd 2.4 (2.4.71); if a newer release breaks this build or
+# the proxy configuration, change the tag below to httpd:2.4 to get it working.
+#
+FROM httpd:latest
 
 COPY mysite.crt /usr/local/apache2/conf/server.crt
 COPY mysite.key /usr/local/apache2/conf/server.key

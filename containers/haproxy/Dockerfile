@@ -6,7 +6,7 @@
 # https. HAProxy is configured to pass the client certificate to P4AS via a
 # header and P4AS is configured to validate that cert by its fingerprint.
 #
-FROM haproxy:3.1
+FROM haproxy:lts
 
 # Note that since version 2.4 the haproxy image has `USER haproxy` which makes
 # it difficult to configure the server.

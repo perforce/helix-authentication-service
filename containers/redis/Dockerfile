@@ -3,7 +3,7 @@
 #
 # (valkey is a fork of redis sponsored by the Linux Foundation)
 #
-FROM valkey/valkey:unstable
+FROM valkey/valkey:latest
 COPY valkey.conf /usr/local/etc/valkey/valkey.conf
 COPY valkey.crt /usr/local/etc/valkey/valkey.crt
 COPY valkey.key /usr/local/etc/valkey/valkey.key

@@ -186,7 +186,7 @@ services:
       - "8843:8843"
   # p4d.doc is in the extension repository
   redis.doc:
-    image: valkey/valkey:unstable
+    image: valkey/valkey:latest
     container_name: redis.doc
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]

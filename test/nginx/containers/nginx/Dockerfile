@@ -7,7 +7,7 @@
 # verification logic in /requests/status will be bypassed, allowing any client
 # to request the user profile data.
 #
-FROM nginx:1.20
+FROM nginx:stable
 
 COPY mysite.crt /etc/nginx/ssl/mysite.crt
 COPY mysite.key /etc/nginx/ssl/mysite.key
